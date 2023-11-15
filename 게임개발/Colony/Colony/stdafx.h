@@ -1,24 +1,25 @@
-#pragma once
+ï»¿#pragma once
 
 #define FRAME_BUFFER_WIDTH 1000
 #define FRAME_BUFFER_HEIGHT	700
 
-//ÀÚÁÖ »ç¿ëÇÏÁö ¾Ê´Â APIÀÇ ÀÏºÎ¸¦ Á¦¿ÜÇÏ´Â ¸í·É¾î
-#ifndef WIN32_LEAN_AND_MEAN //È°¼ºÈ­ »óÅÂ
+//ìì£¼ ì‚¬ìš©í•˜ì§€ ì•ŠëŠ” APIì˜ ì¼ë¶€ë¥¼ ì œì™¸í•˜ëŠ” ëª…ë ¹ì–´
+#ifndef WIN32_LEAN_AND_MEAN //í™œì„±í™” ìƒíƒœ
 # define WIN32_LEAN_AND_MEAN
 #endif
 
 
+#include "targetver.h"
 
-//´ÙÀÌ·ºÆ® µğ¹ö±× ¿É¼Ç
+//ë‹¤ì´ë ‰íŠ¸ ë””ë²„ê·¸ ì˜µì…˜
 #ifdef _DEBUG  
 #include <dxgidebug.h>
 #endif
 
-//À©µµ¿ì
+//ìœˆë„ìš°
 #include <Windows.h>
 
-//c ¶óÀÌºê·¯¸®
+//c ë¼ì´ë¸ŒëŸ¬ë¦¬
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>
@@ -27,10 +28,10 @@
 #include <wrl.h>
 #include <shellapi.h>
 
-//c++ ¶óÀÌºê·¯¸®
+//c++ ë¼ì´ë¸ŒëŸ¬ë¦¬
 #include <fstream>
 #include <string>
-// STL °ü·Ã Çì´õÆÄÀÏµé
+// STL ê´€ë ¨ í—¤ë”íŒŒì¼ë“¤
 #include <string>
 #include <deque>
 #include <list>
@@ -39,7 +40,7 @@
 #include <vector>
 ////////////////////////////////
 
-//Direct x °ü·Ã ¶óÀÌºê·¯¸®
+//Direct x ê´€ë ¨ ë¼ì´ë¸ŒëŸ¬ë¦¬
 #include <d3d12.h> 
 #include <dxgi1_4.h>
 #include <D3Dcompiler.h> //shader compiler
@@ -47,15 +48,16 @@
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
-#include <wrl/client.h>
+//#include <wrl/client.h>
 #include <Mmsystem.h>
-//Textrue°ü·Ã
-#include "d3dx12.h"
-#include "DDSTextureLoader.h"
+////Textrueê´€ë ¨
+//#include "d3dx12.h"
+//#include "DDSTextureLoader.h"
 
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
+
 #pragma comment(lib, "dxguid.lib")
 
 using namespace std;
@@ -63,7 +65,7 @@ using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
 
-//GPU ¸Ş¸ğ¸® ÇÒ´ç ÇÔ¼ö
+//GPU ë©”ëª¨ë¦¬ í• ë‹¹ í•¨ìˆ˜
 extern ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType = D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, ID3D12Resource** ppd3dUploadBuffer = NULL);
 
 #define EPSILON					1.0e-10f
@@ -84,7 +86,7 @@ inline int ReadUnityBinaryString(FILE* pFile, char* pstrToken, BYTE* pnStrLength
 	return(nReads);
 }
 
-//Direct °ü·Ã ÇÔ¼öµé
+//Direct ê´€ë ¨ í•¨ìˆ˜ë“¤
 namespace Vector3
 {
 

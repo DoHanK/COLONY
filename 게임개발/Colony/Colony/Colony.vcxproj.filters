@@ -13,14 +13,17 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="GameCpps">
-      <UniqueIdentifier>{cb07b7e4-7c03-4411-9046-ba907e637cc8}</UniqueIdentifier>
+    <Filter Include="GameCpp">
+      <UniqueIdentifier>{ac477bcf-40af-4c05-9c81-46ed68dd2ea0}</UniqueIdentifier>
     </Filter>
     <Filter Include="GameHeader">
-      <UniqueIdentifier>{9d6f8cbb-47ff-460b-b440-9b894a81e72a}</UniqueIdentifier>
+      <UniqueIdentifier>{79c47a10-f48a-46c1-b2f7-d6b39892d976}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -30,7 +33,10 @@
     <ClInclude Include="Colony.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
+    <ClInclude Include="ColonyTimer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="D3Device.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="d3dx12.h">
@@ -39,22 +45,25 @@
     <ClInclude Include="DDSTextureLoader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="D3Device.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="ColonyFramework.h">
+      <Filter>GameHeader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="ColonyTimer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="D3Device.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="DDSTextureLoader.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="D3Device.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="ColonyFramework.cpp">
+      <Filter>GameCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
