@@ -7,6 +7,10 @@ private:
 
 	HINSTANCE					m_hInstance;
 	HWND						m_hWnd;
+	//윈도우크기
+	int m_nWndClientWidth;
+	int m_nWndClientHeight;
+
 
 	//D3Ddevice객체
 	D3Device* m_pDevice;
@@ -29,6 +33,7 @@ public:
 	void DestroyGameObjects();
 	void AnimationGameObjects();
 	void ColonyGameLoop();
-
+	//키입력
+	LRESULT CALLBACK CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 };
 

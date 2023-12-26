@@ -19,6 +19,9 @@
     <Filter Include="GameHeader">
       <UniqueIdentifier>{79c47a10-f48a-46c1-b2f7-d6b39892d976}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TextureLoad">
+      <UniqueIdentifier>{7a2a142c-3beb-4d3a-a2a3-c2e15c6ce7a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -30,40 +33,79 @@
     <ClInclude Include="Resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Colony.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ColonyTimer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="D3Device.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="d3dx12.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="DDSTextureLoader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="ColonyFramework.h">
       <Filter>GameHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyMesh.h">
+      <Filter>GameHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="Colony.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTextureLoader.h">
+      <Filter>TextureLoad</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyGameObject.h">
+      <Filter>GameHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyCamera.h">
+      <Filter>GameHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyTimer.h">
+      <Filter>GameHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTextureLoader12.h">
+      <Filter>TextureLoad</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader12.h">
+      <Filter>TextureLoad</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyShader.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ColonyTimer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="D3Device.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="DDSTextureLoader.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="ColonyFramework.cpp">
       <Filter>GameCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyMesh.cpp">
+      <Filter>GameCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader.cpp">
+      <Filter>TextureLoad</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyGameObject.cpp">
+      <Filter>GameCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyCamera.cpp">
+      <Filter>GameCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyTimer.cpp">
+      <Filter>GameCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader12.cpp">
+      <Filter>TextureLoad</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader12.cpp">
+      <Filter>TextureLoad</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyShader.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -70,8 +70,6 @@ void ColonyFramework::AnimationGameObjects()
 {
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
-
-
 }
 
 void ColonyFramework::ColonyGameLoop()
@@ -100,5 +98,28 @@ void ColonyFramework::ColonyGameLoop()
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 7, 42);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 
+}
+
+LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID) {
+	case WM_SIZE: {
+		m_nWndClientWidth = LOWORD(lParam);
+		m_nWndClientHeight = HIWORD(lParam);
+		break;
+	}
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
+	case WM_MOUSEMOVE:
+		//마우스 키입력
+		break;
+	case WM_KEYDOWN:
+	case WM_KEYUP:
+		//키보드키입력
+		break;
+	}
+	return (0);
 }
 

@@ -136,21 +136,34 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Colony.h" />
+    <ClInclude Include="ColonyCamera.h" />
     <ClInclude Include="ColonyFramework.h" />
+    <ClInclude Include="ColonyGameObject.h" />
+    <ClInclude Include="ColonyMesh.h" />
+    <ClInclude Include="ColonyShader.h" />
     <ClInclude Include="ColonyTimer.h" />
     <ClInclude Include="D3Device.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DDSTextureLoader.h" />
+    <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp" />
+    <ClCompile Include="ColonyCamera.cpp" />
     <ClCompile Include="ColonyFramework.cpp" />
+    <ClCompile Include="ColonyGameObject.cpp" />
+    <ClCompile Include="ColonyMesh.cpp" />
+    <ClCompile Include="ColonyShader.cpp" />
     <ClCompile Include="ColonyTimer.cpp" />
     <ClCompile Include="D3Device.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
+    <ClCompile Include="DDSTextureLoader12.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="WICTextureLoader12.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Colony.rc" />
