@@ -243,9 +243,65 @@ public:
 	GameObject*** m_pppAnimatedBoneFrameCaches = NULL; //[SkinnedMeshes][Bones]
 };
 
+class AnimationTrack
+{
+public:
+	AnimationTrack() { }
+	~AnimationTrack() { }
+
+public:
+	BOOL 							m_bEnable = true;
+	float 							m_fSpeed = 1.0f;
+	float 							m_fPosition = 0.0f;
+	float 							m_fWeight = 1.0f;
+
+	int 							m_nAnimationSet = 0;
+
+public:
+	void SetAnimationSet(int nAnimationSet) { m_nAnimationSet = nAnimationSet; }
+
+	void SetEnable(bool bEnable) { m_bEnable = bEnable; }
+	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
+	void SetWeight(float fWeight) { m_fWeight = fWeight; }
+	void SetPosition(float fPosition) { m_fPosition = fPosition; }
+};
+
 class AnimationController {
+public:
+	AnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	~AnimationController();
 
+public:
+	float 							m_fTime = 0.0f;
 
+	int 							m_nAnimationTracks = 0;
+	AnimationTrack* m_pAnimationTracks = NULL;
+
+	int 							m_nSkinnedMeshes = 0;
+
+	AnimationSets** m_ppAnimationSets = NULL;
+	SkinnedMesh** m_ppSkinnedMeshes = NULL; //[SkinnedMeshes], Skinned Mesh Cache
+
+	int* m_pnAnimatedBoneFrames = NULL;
+	GameObject*** m_pppAnimatedBoneFrameCaches = NULL; //[SkinnedMeshes][Bones]
+
+	ID3D12Resource** m_ppd3dcbSkinningBoneTransforms = NULL; //[SkinnedMeshes]
+	XMFLOAT4X4** m_ppcbxmf4x4MappedSkinningBoneTransforms = NULL;
+
+public:
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet);
+	void SetTrackEnable(int nAnimationTrack, bool bEnable);
+	void SetTrackPosition(int nAnimationTrack, float fPosition);
+	void SetTrackSpeed(int nAnimationTrack, float fSpeed);
+	void SetTrackWeight(int nAnimationTrack, float fWeight);
+
+	void SetCallbackKeys(int nSkinnedMesh, int nAnimationSet, int nCallbackKeys);
+	void SetCallbackKey(int nSkinnedMesh, int nAnimationSet, int nKeyIndex, float fTime, void* pData);
+	void SetAnimationCallbackHandler(int nSkinnedMesh, int nAnimationSet, CAnimationCallbackHandler* pCallbackHandler);
+
+	void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

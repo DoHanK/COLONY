@@ -140,6 +140,7 @@
     <ClInclude Include="ColonyFramework.h" />
     <ClInclude Include="ColonyGameObject.h" />
     <ClInclude Include="ColonyMesh.h" />
+    <ClInclude Include="ColonyScene.h" />
     <ClInclude Include="ColonyShader.h" />
     <ClInclude Include="ColonyTimer.h" />
     <ClInclude Include="D3Device.h" />
@@ -157,6 +158,7 @@
     <ClCompile Include="ColonyFramework.cpp" />
     <ClCompile Include="ColonyGameObject.cpp" />
     <ClCompile Include="ColonyMesh.cpp" />
+    <ClCompile Include="ColonyScene.cpp" />
     <ClCompile Include="ColonyShader.cpp" />
     <ClCompile Include="ColonyTimer.cpp" />
     <ClCompile Include="D3Device.cpp" />

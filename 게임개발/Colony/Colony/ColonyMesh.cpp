@@ -322,7 +322,7 @@ void SkinnedMesh::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLi
 		D3D12_GPU_VIRTUAL_ADDRESS d3dcbBoneTransformsGpuVirtualAddress = m_pd3dcbSkinningBoneTransforms->GetGPUVirtualAddress();
 		pd3dCommandList->SetGraphicsRootConstantBufferView(12, d3dcbBoneTransformsGpuVirtualAddress); //Skinned Bone Transforms
 
-
+		this;
 		//프레임 단위라서
 		for (int j = 0; j < m_nSkinningBones; j++)
 		{
@@ -376,7 +376,6 @@ void SkinnedMesh::PrepareSkinning(GameObject* pModelRootObject)
 	}
 
 }
-
 
 void SkinnedMesh::LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)
 {

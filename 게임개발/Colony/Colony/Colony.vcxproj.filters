@@ -67,7 +67,10 @@
       <Filter>TextureLoad</Filter>
     </ClInclude>
     <ClInclude Include="ColonyShader.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>GameHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyScene.h">
+      <Filter>GameHeader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -105,7 +108,10 @@
       <Filter>TextureLoad</Filter>
     </ClCompile>
     <ClCompile Include="ColonyShader.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>GameCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyScene.cpp">
+      <Filter>GameCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

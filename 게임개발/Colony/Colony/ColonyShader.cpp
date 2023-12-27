@@ -214,15 +214,15 @@ void BasicShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCa
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CSkinnedAnimationStandardShader::CSkinnedAnimationStandardShader()
+SkinnedAnimationStandardShader::SkinnedAnimationStandardShader()
 {
 }
 
-CSkinnedAnimationStandardShader::~CSkinnedAnimationStandardShader()
+SkinnedAnimationStandardShader::~SkinnedAnimationStandardShader()
 {
 }
 
-D3D12_INPUT_LAYOUT_DESC CSkinnedAnimationStandardShader::CreateInputLayout()
+D3D12_INPUT_LAYOUT_DESC SkinnedAnimationStandardShader::CreateInputLayout()
 {
 	UINT nInputElementDescs = 7;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -242,9 +242,14 @@ D3D12_INPUT_LAYOUT_DESC CSkinnedAnimationStandardShader::CreateInputLayout()
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_SHADER_BYTECODE CSkinnedAnimationStandardShader::CreateVertexShader()
+D3D12_SHADER_BYTECODE SkinnedAnimationStandardShader::CreateVertexShader()
 {
 	return(BasicShader::CompileShaderFromFile(L"Shaders.hlsl", "VSSkinnedAnimationStandard", "vs_5_1", &m_pd3dVertexShaderBlob));
+}
+
+D3D12_SHADER_BYTECODE SkinnedAnimationStandardShader::CreatePixelShader()
+{
+	return (BasicShader::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
 

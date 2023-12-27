@@ -40,8 +40,16 @@ bool ColonyFramework::MakeGameObjects()
 
 
 	//씬 빌드 및 플레이어 및 객체들 생성 리소스들 로드
-
-
+	
+	//씬로드
+	m_pScene = new Scene;
+	m_pScene->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList());
+	//카메라
+	m_pCamera = new Camera();
+	m_pCamera->SetPosition(XMFLOAT3(0, 0,-1));
+	m_pCamera->CreateShaderVariables(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList());
+	m_pCamera->GenerateProjectionMatrix(1.01, 1000.f, ASPECT_RATIO, 60.f);
+	m_pCamera->RegenerateViewMatrix();
 
 
 	m_pDevice->CloseCommandAndPushQueue();
@@ -69,20 +77,24 @@ void ColonyFramework::DestroyGameObjects()
 void ColonyFramework::AnimationGameObjects()
 {
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
-
+	m_pScene->AnimateObjects(fTimeElapsed);
 }
 
 void ColonyFramework::ColonyGameLoop()
 {
 	m_GameTimer.Tick(0.0f);
+	//애니메이션
 	AnimationGameObjects();
 
 	m_pDevice->CommandAllocatorReset();
 	m_pDevice->CommandListReset();
 	m_pDevice->MakeResourceBarrier();
 	m_pDevice->RtAndDepthReset();
-	// 코드 부분 생성
 
+
+	//랜더링 작성
+
+	m_pScene->Render(GetDevice()->GetCommandList(),m_pCamera);
 
 
 

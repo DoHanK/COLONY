@@ -46,6 +46,7 @@ public:
 
 	//D3Device 생성
 	bool CreateDevice(HINSTANCE hInstance, HWND hMainWnd);
+
 	//D3Devcie 파괴
 	void DestroyDevice();
 	//다이렉트디바이스 초기화
@@ -72,7 +73,7 @@ public:
 	void CommandAllocatorReset() { m_pd3dCommandAllocator->Reset(); };
 	void CloseCommandAndPushQueue();
 	ID3D12GraphicsCommandList* GetCommandList() { return m_pd3dCommandList; }
-
+	ID3D12Device* GetID3DDevice() { return m_pd3dDevice; }
 
 	void MakeResourceBarrier();
 	void CloseResourceBarrier();
