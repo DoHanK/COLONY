@@ -72,6 +72,9 @@
     <ClInclude Include="ColonyScene.h">
       <Filter>GameHeader</Filter>
     </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>GameHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -111,6 +114,9 @@
       <Filter>GameCpp</Filter>
     </ClCompile>
     <ClCompile Include="ColonyScene.cpp">
+      <Filter>GameCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
       <Filter>GameCpp</Filter>
     </ClCompile>
   </ItemGroup>

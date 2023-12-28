@@ -2,6 +2,7 @@
 #include "ColonyMesh.h"
 #include "ColonyGameObject.h"
 #include "ColonyShader.h"
+#include "ResourceManager.h"
 class BasicShader;
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // ÅØ½ºÃÄ
@@ -9,7 +10,7 @@ class BasicShader;
 Texture::Texture(int nTextrueResoureces, UINT nResoureceType, int nSameplers)
 {
 	m_nTextureType = nResoureceType;
-	m_nTextures = nResoureceType;
+	m_nTextures = nTextrueResoureces;
 
 	if (m_nTextures > 0)
 	{
@@ -65,7 +66,8 @@ void Texture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void Texture::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, int nIndex)
 {
-	//pd3dCommandList->SetGraphicsRootDescriptorTable(m_pRootArgumentInfos[nIndex].m_nRootParameterIndex, m_pRootArgumentInfos[nIndex].m_d3dSrvGpuDescriptorHandle);
+	
+	pd3dCommandList->SetGraphicsRootDescriptorTable(m_pRootArgumentInfos[nIndex].m_nRootParameterIndex, m_pRootArgumentInfos[nIndex].m_d3dSrvGpuDescriptorHandle);
 }
 
 void Texture::ReleaseUploadBuffers()
@@ -137,7 +139,6 @@ void Material::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4AlbedoColor, 20);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4SpecularColor, 24);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4EmissiveColor, 28);
-
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nType, 32);
 
 	for (int i = 0; i < m_nTextures; i++)
@@ -145,7 +146,7 @@ void Material::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 		if (m_ppTextures[i]) m_ppTextures[i]->UpdateShaderVariable(pd3dCommandList, 0);
 	}
 }
-
+//#define _WITH_DISPLAY_TEXTURE_NAME
 void Material::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, Texture** ppTexture, GameObject* pParent, FILE* pInFile)
 {
 	char pstrTextureName[64] = { '\0' };
@@ -167,7 +168,7 @@ void Material::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		size_t nConverted = 0;
 		mbstowcs_s(&nConverted, pwstrTextureName, 64, pstrFilePath, _TRUNCATE);
 
-		//#define _WITH_DISPLAY_TEXTURE_NAME
+		
 
 #ifdef _WITH_DISPLAY_TEXTURE_NAME
 		static int nTextures = 0, nRepeatedTextures = 0;
@@ -181,7 +182,7 @@ void Material::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 			(*ppTexture)->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pwstrTextureName, 0, true);
 			if (*ppTexture) (*ppTexture)->AddRef();
 
-			//CScene::CreateShaderResourceViews(pd3dDevice, *ppTexture, nRootParameter, false);
+			ResourceManager::CreateShaderResourceViews(pd3dDevice, *ppTexture, nRootParameter, false);
 		}
 		else
 		{
@@ -1030,7 +1031,7 @@ void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedM
 	}
 }
 
-CLoadedModelInfo* GameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, BasicShader* pShader)
+CLoadedModelInfo* GameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,const char* pstrFileName, BasicShader* pShader)
 {
 	FILE* pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");

@@ -3,7 +3,7 @@
 #include "D3Device.h"
 #include "ColonyScene.h"
 #include "ColonyCamera.h"
-
+#include "ResourceManager.h"
 class ColonyFramework {
 private:
 
@@ -25,6 +25,8 @@ private:
 	//윈도우캡션 프레임레이트 표시
 	_TCHAR m_pszFrameRate[50];
 
+	//Manager
+	ResourceManager* m_pResourceManager;
 
 
 public:

@@ -79,10 +79,10 @@ void Scene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	CLoadedModelInfo* pAngrybotModel = GameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/JU_Mannequin.bin", NULL);
 	m_ppHierarchicalGameObjects[0] = new GameObject();
-	m_ppHierarchicalGameObjects[0]->m_xmf4x4World._11 = 0;
-	m_ppHierarchicalGameObjects[0]->m_xmf4x4World._12 = 1;
-	m_ppHierarchicalGameObjects[0]->m_xmf4x4World._13 = 0;
-	m_ppHierarchicalGameObjects[0]->SetPosition(XMFLOAT3(0, 0, 10));
+	XMFLOAT3 temp = XMFLOAT3(0, 1, 0);
+	m_ppHierarchicalGameObjects[0]->Rotate(&temp, 180.f);
+
+	m_ppHierarchicalGameObjects[0]->SetPosition(XMFLOAT3(0, 0, 2));
 	m_ppHierarchicalGameObjects[0]->SetChild(pAngrybotModel->m_pModelRootObject, true);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController = new AnimationController(pd3dDevice, pd3dCommandList, 1, pAngrybotModel);
 
@@ -348,46 +348,7 @@ void Scene::ReleaseUploadBuffers()
 }
 
 
-D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3dResourceDesc, UINT nTextureType)
-{
-	D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc;
-	d3dShaderResourceViewDesc.Format = d3dResourceDesc.Format;
-	d3dShaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	switch (nTextureType)
-	{
-	case RESOURCE_TEXTURE2D: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 1)
-	case RESOURCE_TEXTURE2D_ARRAY:
-		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		d3dShaderResourceViewDesc.Texture2D.MipLevels = -1;
-		d3dShaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-		d3dShaderResourceViewDesc.Texture2D.PlaneSlice = 0;
-		d3dShaderResourceViewDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-		break;
-	case RESOURCE_TEXTURE2DARRAY: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize != 1)
-		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-		d3dShaderResourceViewDesc.Texture2DArray.MipLevels = -1;
-		d3dShaderResourceViewDesc.Texture2DArray.MostDetailedMip = 0;
-		d3dShaderResourceViewDesc.Texture2DArray.PlaneSlice = 0;
-		d3dShaderResourceViewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
-		d3dShaderResourceViewDesc.Texture2DArray.FirstArraySlice = 0;
-		d3dShaderResourceViewDesc.Texture2DArray.ArraySize = d3dResourceDesc.DepthOrArraySize;
-		break;
-	case RESOURCE_TEXTURE_CUBE: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 6)
-		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-		d3dShaderResourceViewDesc.TextureCube.MipLevels = -1;
-		d3dShaderResourceViewDesc.TextureCube.MostDetailedMip = 0;
-		d3dShaderResourceViewDesc.TextureCube.ResourceMinLODClamp = 0.0f;
-		break;
-	case RESOURCE_BUFFER: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER)
-		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-		d3dShaderResourceViewDesc.Buffer.FirstElement = 0;
-		d3dShaderResourceViewDesc.Buffer.NumElements = 0;
-		d3dShaderResourceViewDesc.Buffer.StructureByteStride = 0;
-		d3dShaderResourceViewDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-		break;
-	}
-	return(d3dShaderResourceViewDesc);
-}
+
 
 bool Scene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
@@ -418,7 +379,8 @@ bool Scene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPara
 void Scene::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
-
+	XMFLOAT3 temp = XMFLOAT3(0, 1, 0);
+	m_ppHierarchicalGameObjects[0]->Rotate(&temp, fTimeElapsed*100);
 	//for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);
 

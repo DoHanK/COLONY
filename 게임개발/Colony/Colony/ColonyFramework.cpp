@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ColonyFramework.h"
-
+#include "ResourceManager.h"
 ColonyFramework::ColonyFramework()
 {
 	_tcscpy_s(m_pszFrameRate, _T("Colony("));
@@ -40,10 +40,12 @@ bool ColonyFramework::MakeGameObjects()
 
 
 	//씬 빌드 및 플레이어 및 객체들 생성 리소스들 로드
-	
+	m_pResourceManager = new ResourceManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), NULL);
+
 	//씬로드
 	m_pScene = new Scene;
 	m_pScene->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList());
+	
 	//카메라
 	m_pCamera = new Camera();
 	m_pCamera->SetPosition(XMFLOAT3(0, 0,-1));
@@ -93,7 +95,8 @@ void ColonyFramework::ColonyGameLoop()
 
 
 	//랜더링 작성
-
+	GetDevice()->GetCommandList()->SetDescriptorHeaps(1, &m_pResourceManager->pSrvDescriptorHeap);
+	m_pResourceManager->TextureCounting;
 	m_pScene->Render(GetDevice()->GetCommandList(),m_pCamera);
 
 

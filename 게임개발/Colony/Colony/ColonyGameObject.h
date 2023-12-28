@@ -400,7 +400,7 @@ public:
 	static void LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedModel);
 	static GameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, GameObject* pParent, FILE* pInFile, BasicShader* pShader, int* pnSkinnedMeshes);
 
-	static CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, BasicShader* pShader);
+	static CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,const char* pstrFileName, BasicShader* pShader);
 
 	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);
 
