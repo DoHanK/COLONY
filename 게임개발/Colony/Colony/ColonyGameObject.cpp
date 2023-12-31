@@ -295,6 +295,10 @@ XMFLOAT4X4 AnimationSet::GetSRT(int nBone)
 
 	XMStoreFloat4x4(&xmf4x4Transform, XMMatrixAffineTransformation(S, XMVectorZero(), R, T));
 #else   
+	if (m_nKeyFrames ==  1) {
+
+		return(m_ppxmf4x4KeyFrameTransforms[0][nBone]);
+	}
 	for (int i = 0; i < (m_nKeyFrames - 1); i++)
 	{
 		if ((m_pfKeyFrameTimes[i] <= m_fPosition) && (m_fPosition <= m_pfKeyFrameTimes[i + 1]))
@@ -1214,7 +1218,18 @@ void AnimationController::AdvanceTime(float fTimeElapsed, GameObject* pRootGameO
 						xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
 					}
 				}
-				m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
+				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "Hips") {
+					xmf4x4Transform._41 = 0;
+					xmf4x4Transform._42 = 0;
+					xmf4x4Transform._43 = 0;
+
+					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
+				}
+				else {
+					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
+
+				}
+
 			
 			}
 		}

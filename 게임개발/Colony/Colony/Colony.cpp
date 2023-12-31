@@ -139,6 +139,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+            GameEngine.CatchInputMessaging(hWnd, message, wParam, lParam);
     switch (message)
     {
     case WM_COMMAND:
@@ -155,7 +156,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case WM_MOUSEMOVE:
         case WM_KEYDOWN:
         case WM_KEYUP:
-            GameEngine.CatchInputMessaging(hWnd, message, wParam, lParam);
             break;
         case IDM_ABOUT:
             DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);

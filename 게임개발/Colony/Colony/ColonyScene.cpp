@@ -82,10 +82,12 @@ void Scene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	XMFLOAT3 temp = XMFLOAT3(0, 1, 0);
 	m_ppHierarchicalGameObjects[0]->Rotate(&temp, 180.f);
 
-	m_ppHierarchicalGameObjects[0]->SetPosition(XMFLOAT3(0, 0, 2));
+	m_ppHierarchicalGameObjects[0]->SetPosition(XMFLOAT3(0, 0, 8));
 	m_ppHierarchicalGameObjects[0]->SetChild(pAngrybotModel->m_pModelRootObject, true);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController = new AnimationController(pd3dDevice, pd3dCommandList, 1, pAngrybotModel);
-
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 3);
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetCallbackKeys(0, 0, 0);
 	m_nShaders = 1;
 	m_ppShaders = new BasicShader*[m_nShaders];
 	m_ppShaders[0] = new SkinnedAnimationStandardShader();
@@ -364,7 +366,16 @@ bool Scene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPara
 		{
 		case '1':
 		case '2':
+		case '3':
+		case '4':
+		case '5':
 			if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->SetTrackAnimationSet(0, int(wParam) - '1');
+			break;
+		case 'A':
+			if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveForward(0.5f);
+			break;
+		case 'S':
+			if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveForward(-0.5f);
 			break;
 		}
 		break;
@@ -380,7 +391,7 @@ void Scene::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 	XMFLOAT3 temp = XMFLOAT3(0, 1, 0);
-	m_ppHierarchicalGameObjects[0]->Rotate(&temp, fTimeElapsed*100);
+	//m_ppHierarchicalGameObjects[0]->Rotate(&temp, fTimeElapsed*100);
 	//for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);
 

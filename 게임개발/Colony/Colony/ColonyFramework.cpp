@@ -132,6 +132,7 @@ LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM 
 		break;
 	case WM_KEYDOWN:
 	case WM_KEYUP:
+		m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 		//키보드키입력
 		break;
 	}
