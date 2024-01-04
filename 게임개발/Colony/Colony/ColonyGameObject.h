@@ -326,10 +326,10 @@ public:
 public:
 	char							m_pstrFrameName[64];
 
-	BasicMesh* m_pMesh = NULL;
+	BasicMesh*						m_pMesh = NULL;
 
 	int								m_nMaterials = 0;
-	Material** m_ppMaterials = NULL;
+	Material**						m_ppMaterials = NULL;
 
 	XMFLOAT4X4						m_xmf4x4ToParent;
 	XMFLOAT4X4						m_xmf4x4World;

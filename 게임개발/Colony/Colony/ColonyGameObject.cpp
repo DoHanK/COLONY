@@ -1218,12 +1218,21 @@ void AnimationController::AdvanceTime(float fTimeElapsed, GameObject* pRootGameO
 						xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
 					}
 				}
-				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "Hips") {
+
+				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "JU_Mannequin") {
+
 					xmf4x4Transform._41 = 0;
 					xmf4x4Transform._42 = 0;
 					xmf4x4Transform._43 = 0;
 
 					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
+				}
+				else if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "RootBone") {
+	/*				xmf4x4Transform._41 = 0;
+					xmf4x4Transform._42 = 0;
+					xmf4x4Transform._43 = 0;
+
+					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;*/
 				}
 				else {
 					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;

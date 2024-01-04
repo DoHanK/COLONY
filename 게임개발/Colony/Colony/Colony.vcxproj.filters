@@ -22,6 +22,12 @@
     <Filter Include="TextureLoad">
       <UniqueIdentifier>{7a2a142c-3beb-4d3a-a2a3-c2e15c6ce7a2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameManagerCpp">
+      <UniqueIdentifier>{e929e6e4-9085-4b9d-9f6a-f40ca11f3be2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameManagerHeader">
+      <UniqueIdentifier>{946bcad3-6b7b-42fc-ada6-27955cfe7d08}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -72,8 +78,14 @@
     <ClInclude Include="ColonyScene.h">
       <Filter>GameHeader</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceManager.h">
+    <ClInclude Include="ColonyPlayer.h">
       <Filter>GameHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>GameManagerHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="UserDefineType.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -116,8 +128,11 @@
     <ClCompile Include="ColonyScene.cpp">
       <Filter>GameCpp</Filter>
     </ClCompile>
-    <ClCompile Include="ResourceManager.cpp">
+    <ClCompile Include="ColonyPlayer.cpp">
       <Filter>GameCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>GameManagerCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

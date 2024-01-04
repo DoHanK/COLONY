@@ -11,6 +11,7 @@
 
 #include "targetver.h"
 
+
 //다이렉트 디버그 옵션
 #ifdef _DEBUG  
 #include <dxgidebug.h>
@@ -63,6 +64,7 @@ using namespace std;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
+
 
 //파일 입출력
 extern BYTE ReadStringFromFile(FILE* pInFile, char* pstrToken);

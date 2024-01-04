@@ -4,6 +4,10 @@
 #include "ColonyScene.h"
 #include "ColonyCamera.h"
 #include "ResourceManager.h"
+#include "ColonyPlayer.h"
+
+
+
 class ColonyFramework {
 private:
 
@@ -22,6 +26,8 @@ private:
 	Scene* m_pScene;
 	//Camera
 	Camera* m_pCamera;
+	//Player
+	Player* m_pPlayer;
 	//윈도우캡션 프레임레이트 표시
 	_TCHAR m_pszFrameRate[50];
 
@@ -41,7 +47,7 @@ public:
 	void DestroyGameObjects();
 	void AnimationGameObjects();
 	void ColonyGameLoop();
-
+	void PlayerControlInput();
 	//키입력
 	LRESULT CALLBACK CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 };

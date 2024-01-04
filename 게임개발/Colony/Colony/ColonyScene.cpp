@@ -1,6 +1,5 @@
 #include "ColonyScene.h"
 #include "ColonyShader.h"
-
 Scene::Scene()
 {
 }
@@ -77,17 +76,9 @@ void Scene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_nHierarchicalGameObjects = 1;
 	m_ppHierarchicalGameObjects = new GameObject * [m_nHierarchicalGameObjects];
 
-	CLoadedModelInfo* pAngrybotModel = GameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/JU_Mannequin.bin", NULL);
-	m_ppHierarchicalGameObjects[0] = new GameObject();
-	XMFLOAT3 temp = XMFLOAT3(0, 1, 0);
-	m_ppHierarchicalGameObjects[0]->Rotate(&temp, 180.f);
+	//m_ppHierarchicalGameObjects[0]->Rotate(&temp, 180.f);
 
-	m_ppHierarchicalGameObjects[0]->SetPosition(XMFLOAT3(0, 0, 8));
-	m_ppHierarchicalGameObjects[0]->SetChild(pAngrybotModel->m_pModelRootObject, true);
-	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController = new AnimationController(pd3dDevice, pd3dCommandList, 1, pAngrybotModel);
-	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
-	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 3);
-	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetCallbackKeys(0, 0, 0);
+
 	m_nShaders = 1;
 	m_ppShaders = new BasicShader*[m_nShaders];
 	m_ppShaders[0] = new SkinnedAnimationStandardShader();
@@ -359,24 +350,33 @@ bool Scene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, 
 
 bool Scene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	static int count = 0;
+
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-			if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->SetTrackAnimationSet(0, int(wParam) - '1');
-			break;
-		case 'A':
-			if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveForward(0.5f);
-			break;
-		case 'S':
-			if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveForward(-0.5f);
-			break;
+		//case '1':
+		//	++count;
+		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->SetTrackAnimationSet(0, count);
+		//	break;
+		//case '2':
+		//	--count;
+		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->SetTrackAnimationSet(0, count);
+		//	break;
+		//case 'W':
+		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveForward(0.5f);
+		//	break;
+		//case 'S':
+		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveForward(-0.5f);
+		//	break;
+		//case 'A':
+		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveStrafe(-0.5f);
+		//	break;
+		//case 'D':
+		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveStrafe(0.5f);
+		//	break;
 		}
 		break;
 	default:
@@ -390,16 +390,7 @@ bool Scene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPara
 void Scene::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
-	XMFLOAT3 temp = XMFLOAT3(0, 1, 0);
-	//m_ppHierarchicalGameObjects[0]->Rotate(&temp, fTimeElapsed*100);
-	//for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
-	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);
 
-	//if (m_pLights)
-	//{
-	//	m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
-	//	m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
-	//}
 }
 
 void Scene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
@@ -420,13 +411,13 @@ void Scene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 
 	m_ppShaders[0]->OnPrepareRender(pd3dCommandList, 0);
-	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
-	{
-		if (m_ppHierarchicalGameObjects[i])
-		{
-			m_ppHierarchicalGameObjects[i]->Animate(m_fElapsedTime);
-			if (!m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController) m_ppHierarchicalGameObjects[i]->UpdateTransform(NULL);
-			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
-		}
-	}
+	//for (int i = 0; i < m_nHierarchicalGameObjects; i++)
+	//{
+	//	if (m_ppHierarchicalGameObjects[i])
+	//	{
+	//		m_ppHierarchicalGameObjects[i]->Animate(m_fElapsedTime);
+	//		if (!m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController) m_ppHierarchicalGameObjects[i]->UpdateTransform(NULL);
+	//		m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
+	//	}
+	//}
 }

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "ColonyFramework.h"
 #include "ResourceManager.h"
+#include "ColonyPlayer.h"
+
 ColonyFramework::ColonyFramework()
 {
 	_tcscpy_s(m_pszFrameRate, _T("Colony("));
@@ -46,6 +48,7 @@ bool ColonyFramework::MakeGameObjects()
 	m_pScene = new Scene;
 	m_pScene->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList());
 	
+
 	//카메라
 	m_pCamera = new Camera();
 	m_pCamera->SetPosition(XMFLOAT3(0, 0,-1));
@@ -53,7 +56,16 @@ bool ColonyFramework::MakeGameObjects()
 	m_pCamera->GenerateProjectionMatrix(1.01, 1000.f, ASPECT_RATIO, 60.f);
 	m_pCamera->RegenerateViewMatrix();
 
+	m_pPlayer = new Player();
 
+	CLoadedModelInfo* pAngrybotModel = GameObject::LoadGeometryAndAnimationFromFile(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pScene->GetGraphicsRootSignature(), "Model/JU_Mannequin.bin", NULL);
+
+	XMFLOAT3 temp = XMFLOAT3(0, 1, 0);
+	m_pPlayer->SetPosition(XMFLOAT3(0, -1, 6));
+	m_pPlayer->SetChild(pAngrybotModel->m_pModelRootObject, true);
+	m_pPlayer->m_pSkinnedAnimationController = new AnimationController(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), 1, pAngrybotModel);
+	m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_pPlayer->m_pSkinnedAnimationController->SetCallbackKeys(0, 0, 0);
 	m_pDevice->CloseCommandAndPushQueue();
 	m_pDevice->WaitForGpuComplete();
 
@@ -79,12 +91,16 @@ void ColonyFramework::DestroyGameObjects()
 void ColonyFramework::AnimationGameObjects()
 {
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
+	m_pPlayer->Animate(fTimeElapsed);
 	m_pScene->AnimateObjects(fTimeElapsed);
 }
 
 void ColonyFramework::ColonyGameLoop()
 {
 	m_GameTimer.Tick(0.0f);
+	//PlayerKeyInput
+	PlayerControlInput();
+
 	//애니메이션
 	AnimationGameObjects();
 
@@ -93,12 +109,11 @@ void ColonyFramework::ColonyGameLoop()
 	m_pDevice->MakeResourceBarrier();
 	m_pDevice->RtAndDepthReset();
 
-
 	//랜더링 작성
 	GetDevice()->GetCommandList()->SetDescriptorHeaps(1, &m_pResourceManager->pSrvDescriptorHeap);
-	m_pResourceManager->TextureCounting;
 	m_pScene->Render(GetDevice()->GetCommandList(),m_pCamera);
 
+	m_pPlayer->Render(GetDevice()->GetCommandList(), m_pCamera);
 
 
 
@@ -113,6 +128,82 @@ void ColonyFramework::ColonyGameLoop()
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 7, 42);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 
+}
+
+void ColonyFramework::PlayerControlInput()
+{
+
+
+	// 17 Lcontrol
+	// 16 Shift
+	// 25 Rcontrol
+	// 32 Space Bar
+	//   마우스  VK_LBUTTON
+	static UCHAR pKeysBuffer[256];
+	//플레이어 씬일때만 작동하도록 설정하기.
+	if (GetKeyboardState(pKeysBuffer)) {
+		//애니메이션 상태정의를 위한 플레이어 상태 정의
+		DWORD dwDirection = 0;
+		DWORD dwPlayerState = STATE_IDLE;
+		
+		//Move
+		if (pKeysBuffer[W] & 0xF0)
+			dwDirection |= DIR_FORWARD;
+		if (pKeysBuffer[S] & 0xF0) 
+			dwDirection |= DIR_BACKWARD;
+		if (pKeysBuffer[A] & 0xF0) 
+			dwDirection |= DIR_LEFT;
+		if (pKeysBuffer[D] & 0xF0) 
+			dwDirection |= DIR_RIGHT;
+		 
+		//W S A D 키입력 검사
+		//RUN
+		if((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) || (dwDirection & DIR_LEFT) || (dwDirection & DIR_RIGHT))
+			if (pKeysBuffer[L_SHIFT] & 0xF0) dwPlayerState = STATE_RUN;
+			else dwPlayerState = STATE_WALK;
+	
+
+		//JUMP
+		if (pKeysBuffer[SPACE_BAR] & 0xF0) {
+			//방향
+			dwDirection |= DIR_JUMP_UP;
+			// 플레이어 상태
+			dwPlayerState |= STATE_JUMP;
+		}
+		// 총알 리로드
+		if (pKeysBuffer[R] & 0xF0) {
+			// 총알 스테이트 변경
+			
+			// 플레이어 상태
+			dwPlayerState |= STATE_RELOAD;
+		}
+		//줍기
+		if (pKeysBuffer[F] & 0xF0) {
+			// 총알 스테이트 변경
+
+			// 플레이어 상태
+			dwPlayerState |= STATE_PICK_UP;
+		}
+		//총 쏘기
+		if (pKeysBuffer[L_MOUSE] & 0xF0) {
+
+			dwPlayerState |= STATE_SHOOT;
+		}
+	
+
+		m_pPlayer->SetAnimationFromInput(dwDirection, dwPlayerState);
+		float cxDelta = 0.0f, cyDelta = 0.0f;
+		POINT ptCursorPos;
+		static POINT m_ptOldCursorPos;
+		if (GetCapture() == m_hWnd)
+		{
+			SetCursor(NULL);
+			GetCursorPos(&ptCursorPos);
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		}
+	}
 }
 
 LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)

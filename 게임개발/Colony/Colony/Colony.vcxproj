@@ -140,6 +140,7 @@
     <ClInclude Include="ColonyFramework.h" />
     <ClInclude Include="ColonyGameObject.h" />
     <ClInclude Include="ColonyMesh.h" />
+    <ClInclude Include="ColonyPlayer.h" />
     <ClInclude Include="ColonyScene.h" />
     <ClInclude Include="ColonyShader.h" />
     <ClInclude Include="ColonyTimer.h" />
@@ -151,6 +152,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="UserDefineType.h" />
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
@@ -159,6 +161,7 @@
     <ClCompile Include="ColonyFramework.cpp" />
     <ClCompile Include="ColonyGameObject.cpp" />
     <ClCompile Include="ColonyMesh.cpp" />
+    <ClCompile Include="ColonyPlayer.cpp" />
     <ClCompile Include="ColonyScene.cpp" />
     <ClCompile Include="ColonyShader.cpp" />
     <ClCompile Include="ColonyTimer.cpp" />
