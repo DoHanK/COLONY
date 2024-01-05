@@ -147,7 +147,7 @@ void Material::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 //#define _WITH_DISPLAY_TEXTURE_NAME
-void Material::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, Texture** ppTexture, GameObject* pParent, FILE* pInFile)
+void Material::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, Texture** ppTexture, GameObject* pParent, FILE* pInFile,const char* TexFileName)
 {
 	char pstrTextureName[64] = { '\0' };
 
@@ -159,11 +159,12 @@ void Material::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		SetMaterialType(nType);
 
 		char pstrFilePath[64] = { '\0' };
-		strcpy_s(pstrFilePath, 64, "Model/Textures/");
+		strcpy_s(pstrFilePath, 64, TexFileName);
+		//strcpy_s(pstrFilePath, 64, "Model/Textures/");
 
 		bDuplicated = (pstrTextureName[0] == '@');
-		strcpy_s(pstrFilePath + 15, 64 - 15, (bDuplicated) ? (pstrTextureName + 1) : pstrTextureName);
-		strcpy_s(pstrFilePath + 15 + ((bDuplicated) ? (nStrLength - 1) : nStrLength), 64 - 15 - ((bDuplicated) ? (nStrLength - 1) : nStrLength), ".dds");
+		strcpy_s(pstrFilePath + strlen(TexFileName), 64 - strlen(TexFileName), (bDuplicated) ? (pstrTextureName + 1) : pstrTextureName);
+		strcpy_s(pstrFilePath + strlen(TexFileName) + ((bDuplicated) ? (nStrLength - 1) : nStrLength), 64 - strlen(TexFileName) - ((bDuplicated) ? (nStrLength - 1) : nStrLength), ".dds");
 
 		size_t nConverted = 0;
 		mbstowcs_s(&nConverted, pwstrTextureName, 64, pstrFilePath, _TRUNCATE);
@@ -381,6 +382,7 @@ CLoadedModelInfo::~CLoadedModelInfo()
 //
 GameObject::GameObject()
 {
+	m_pShader = NULL;
 	m_xmf4x4ToParent = Matrix4x4::Identity();
 	m_xmf4x4World = Matrix4x4::Identity();
 }
@@ -532,6 +534,8 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCam
 {
 	//프레임으로 이뤄진 것이기에 필요가 없음
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pShader)m_pShader->OnPrepareRender(pd3dCommandList, 0);
 
 	if (m_pMesh)
 	{
@@ -709,7 +713,7 @@ Texture* GameObject::FindReplicatedTexture(_TCHAR* pstrTextureName)
 }
 
 
-void GameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, GameObject* pParent, FILE* pInFile, BasicShader* pShader)
+void GameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, GameObject* pParent, FILE* pInFile, BasicShader* pShader , const char* TexFileName)
 {
 	char pstrToken[64] = { '\0' };
 	int nMaterial = 0;
@@ -783,31 +787,31 @@ void GameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		}
 		else if (!strcmp(pstrToken, "<AlbedoMap>:"))
 		{
-			pMaterial->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_ALBEDO_MAP, 3, pMaterial->m_ppstrTextureNames[0], &(pMaterial->m_ppTextures[0]), pParent, pInFile);
+			pMaterial->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_ALBEDO_MAP, 3, pMaterial->m_ppstrTextureNames[0], &(pMaterial->m_ppTextures[0]), pParent, pInFile , TexFileName);
 		}
 		else if (!strcmp(pstrToken, "<SpecularMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_SPECULAR_MAP, 4, pMaterial->m_ppstrTextureNames[1], &(pMaterial->m_ppTextures[1]), pParent, pInFile);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_SPECULAR_MAP, 4, pMaterial->m_ppstrTextureNames[1], &(pMaterial->m_ppTextures[1]), pParent, pInFile, TexFileName);
 		}
 		else if (!strcmp(pstrToken, "<NormalMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_NORMAL_MAP, 5, pMaterial->m_ppstrTextureNames[2], &(pMaterial->m_ppTextures[2]), pParent, pInFile);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_NORMAL_MAP, 5, pMaterial->m_ppstrTextureNames[2], &(pMaterial->m_ppTextures[2]), pParent, pInFile, TexFileName);
 		}
 		else if (!strcmp(pstrToken, "<MetallicMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_METALLIC_MAP, 6, pMaterial->m_ppstrTextureNames[3], &(pMaterial->m_ppTextures[3]), pParent, pInFile);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_METALLIC_MAP, 6, pMaterial->m_ppstrTextureNames[3], &(pMaterial->m_ppTextures[3]), pParent, pInFile, TexFileName);
 		}
 		else if (!strcmp(pstrToken, "<EmissionMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_EMISSION_MAP, 7, pMaterial->m_ppstrTextureNames[4], &(pMaterial->m_ppTextures[4]), pParent, pInFile);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_EMISSION_MAP, 7, pMaterial->m_ppstrTextureNames[4], &(pMaterial->m_ppTextures[4]), pParent, pInFile, TexFileName);
 		}
 		else if (!strcmp(pstrToken, "<DetailAlbedoMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_ALBEDO_MAP, 8, pMaterial->m_ppstrTextureNames[5], &(pMaterial->m_ppTextures[5]), pParent, pInFile);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_ALBEDO_MAP, 8, pMaterial->m_ppstrTextureNames[5], &(pMaterial->m_ppTextures[5]), pParent, pInFile, TexFileName);
 		}
 		else if (!strcmp(pstrToken, "<DetailNormalMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_NORMAL_MAP, 9, pMaterial->m_ppstrTextureNames[6], &(pMaterial->m_ppTextures[6]), pParent, pInFile);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_NORMAL_MAP, 9, pMaterial->m_ppstrTextureNames[6], &(pMaterial->m_ppTextures[6]), pParent, pInFile, TexFileName);
 		}
 		else if (!strcmp(pstrToken, "</Materials>"))
 		{
@@ -816,7 +820,7 @@ void GameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	}
 }
 
-GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, GameObject* pParent, FILE* pInFile, BasicShader* pShader, int* pnSkinnedMeshes)
+GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, GameObject* pParent, FILE* pInFile, BasicShader* pShader, int* pnSkinnedMeshes, const char* TexFileName)
 {
 	char pstrToken[64] = { '\0' };
 	UINT nReads = 0;
@@ -869,7 +873,7 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
-			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, pShader);
+			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, pShader, TexFileName);
 		}
 		else if (!strcmp(pstrToken, "<Children>:"))
 		{
@@ -878,7 +882,7 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3
 			{
 				for (int i = 0; i < nChilds; i++)
 				{
-					GameObject* pChild = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pGameObject, pInFile, pShader, pnSkinnedMeshes);
+					GameObject* pChild = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pGameObject, pInFile, pShader, pnSkinnedMeshes ,TexFileName);
 					if (pChild) pGameObject->SetChild(pChild);
 #ifdef _WITH_DEBUG_FRAME_HIERARCHY
 					TCHAR pstrDebug[256] = { 0 };
@@ -991,40 +995,7 @@ void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedM
 						pAnimationSet->m_pfKeyFrameTimes[i] = fKeyTime;
 						nReads = (UINT)::fread(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i], sizeof(XMFLOAT4X4), pLoadedModel->m_pnAnimatedBoneFrames[j], pInFile);
 
-						/*					std::string debuging = "행렬 값";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_11);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_12);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_13);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_14);
-											debuging += "				";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_21);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_22);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_23);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_24);
-											debuging += "				";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_31);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_32);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_33);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_34);
-											debuging += "				";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_41);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_42);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_43);
-											debuging += " ";
-											debuging+=std::to_string(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_44);
-											debuging += " \n";
-											OutputDebugStringA(debuging.c_str());*/
+					
 					}
 				}
 			}
@@ -1036,7 +1007,7 @@ void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedM
 	}
 }
 
-CLoadedModelInfo* GameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,const char* pstrFileName, BasicShader* pShader)
+CLoadedModelInfo* GameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,const char* pstrFileName, BasicShader* pShader, const char* TexFileName)
 {
 	FILE* pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");
@@ -1052,7 +1023,7 @@ CLoadedModelInfo* GameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd3
 		{
 			if (!strcmp(pstrToken, "<Hierarchy>:"))
 			{
-				pLoadedModel->m_pModelRootObject = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, pShader, &pLoadedModel->m_nSkinnedMeshes);
+				pLoadedModel->m_pModelRootObject = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, pShader, &pLoadedModel->m_nSkinnedMeshes , TexFileName);
 				::ReadStringFromFile(pInFile, pstrToken); //"</Hierarchy>"
 			}
 			else if (!strcmp(pstrToken, "<Animation>:"))

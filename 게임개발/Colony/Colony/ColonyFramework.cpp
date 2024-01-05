@@ -58,14 +58,33 @@ bool ColonyFramework::MakeGameObjects()
 
 	m_pPlayer = new Player();
 
-	CLoadedModelInfo* pAngrybotModel = GameObject::LoadGeometryAndAnimationFromFile(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pScene->GetGraphicsRootSignature(), "Model/JU_Mannequin.bin", NULL);
+	CLoadedModelInfo* pAngrybotModel = GameObject::LoadGeometryAndAnimationFromFile(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pScene->GetGraphicsRootSignature(), "Model/JU_Mannequin.bin", NULL , "Model/Textures/PlayerTexture/");
+
 	XMFLOAT3 temp = XMFLOAT3(0, 1, 0);
 	m_pPlayer->Rotate(&temp ,0.f);
-	m_pPlayer->SetPosition(XMFLOAT3(0, -3.0, 5));
+	m_pPlayer->SetPosition(XMFLOAT3(0, -2.0, 2));
 	m_pPlayer->SetChild(pAngrybotModel->m_pModelRootObject, true);
+	pAngrybotModel->m_pModelRootObject->m_pShader = new SkinnedAnimationStandardShader();
+	pAngrybotModel->m_pModelRootObject->m_pShader->CreateShader(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pScene->GetGraphicsRootSignature());
 	m_pPlayer->m_pSkinnedAnimationController = new PlayerAnimationController(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), 4, pAngrybotModel);
 	m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pPlayer->m_pSkinnedAnimationController->SetCallbackKeys(0, 0, 0);
+
+	GameObject* bin = new GameObject();
+	pAngrybotModel = GameObject::LoadGeometryAndAnimationFromFile(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pScene->GetGraphicsRootSignature(), "Model/UMP5.bin", NULL, "Model/Textures/UMP5Texture/");
+	pAngrybotModel->m_pModelRootObject->m_pShader = new StandardShader();
+	pAngrybotModel->m_pModelRootObject->m_pShader->CreateShader(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(),m_pScene->GetGraphicsRootSignature());
+	bin->SetChild(pAngrybotModel->m_pModelRootObject);
+
+	temp = XMFLOAT3(0, 0, 1);
+	bin->Rotate(&temp, 95.f);
+	temp = XMFLOAT3(0, 1, 0);
+	bin->Rotate(&temp, -18.f);
+	m_pPlayer->FindFrame("RightHand")->SetChild(bin);
+
+
+
+
 	m_pDevice->CloseCommandAndPushQueue();
 	m_pDevice->WaitForGpuComplete();
 

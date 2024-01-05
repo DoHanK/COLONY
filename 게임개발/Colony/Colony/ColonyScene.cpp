@@ -405,19 +405,4 @@ void Scene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
-
-
-
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-
-	m_ppShaders[0]->OnPrepareRender(pd3dCommandList, 0);
-	//for (int i = 0; i < m_nHierarchicalGameObjects; i++)
-	//{
-	//	if (m_ppHierarchicalGameObjects[i])
-	//	{
-	//		m_ppHierarchicalGameObjects[i]->Animate(m_fElapsedTime);
-	//		if (!m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController) m_ppHierarchicalGameObjects[i]->UpdateTransform(NULL);
-	//		m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
-	//	}
-	//}
 }
