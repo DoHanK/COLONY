@@ -30,6 +30,7 @@
 #define STATE_IDLE					0x01	//NONE
 #define STATE_WALK					0x02	//W A S D 
 #define STATE_RUN					0x04	//L_SHIFT
+//#define 
 
 // Addtional State
 #define STATE_RELOAD				0x08	//R
@@ -37,23 +38,36 @@
 #define STATE_PICK_UP				0x20	//F
 #define STATE_JUMP					0x40	//SPCAE_BAR
 
-enum PlayerStateName {
+
+
+enum PlayerAnimationName {
 	IDLE_RIFLE,
 	IDLE_GUNPLAY,
 	IDLE_RELOAD,
 	IDLE_PICK_UP,
-	//IDLE_JUMP,
-	//IDLE_LANDING,
-	WALK_FORWARD,
-	WALK_BACKWORD,
+	IDLE_JUMP,
+	IDLE_JUMPING,
+	IDLE_LANDING,
+	WALK_FORWORD,
+	WALK_FORWORD_LEFT,
+	WALK_FORWORD_RIGHT,
 	WALK_LEFT,
-	WALK_RIGHTWORD,
+	WALK_RIGHT,
+	WALK_BACKWORD,
+	WALK_BACKWORD_LEFT,
+	WALK_BACKWORD_RIGHT,
 	WALK_GUNPLAY,
 	WALK_RELOAD,
 	WALK_PICK_UP,
 	WALK_JUMP
 };
 
+enum PlayerAnimationTrack {
+	NOW_UPPERTRACK,
+	NOW_LOWERTRACK,
+	PRE_UPPERTRACK,
+	PRE_LOWERTRACK
+};
 
 class Player :public GameObject
 {
@@ -78,7 +92,7 @@ protected:
 
 	Camera* m_pCamera = NULL;
 
-	DWORD  m_AnimationState = IDLE_RIFLE;
+
 
 public:
 	Player();
@@ -88,6 +102,40 @@ public:
 	void CalVelocityFromInput(DWORD dwDirection, float fDistance);
 	void AddAccel(const XMFLOAT3& xmf3Shift);
 	void AddPosition(const XMFLOAT3& xmf3Shift);
-	void SetAnimationFromInput(DWORD dwir , DWORD dwState);
+	virtual void Animate(float fTimeElapsed);
 };
 
+
+//0: 상체 , 1: 하체 , 2:상체 전 애니메이션 , 3:하체 전 애니메이션
+class PlayerAnimationController :public AnimationController {
+public:
+	PlayerAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+public:
+	DWORD m_AnimationUpperState = IDLE_RIFLE;
+	DWORD m_AnimationLowerState = IDLE_RIFLE;
+
+
+
+	float m_nowAnimationUpperWeight = 1.0f;
+	float m_PreAnimationUpperWeight = 0.0f;
+
+	float m_nowAnimationLowerWeight = 1.0f;
+	float m_PreAnimationLowerWeight = 0.0f;
+
+public:
+	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
+	void SetAnimationFromInput(DWORD dwDir, DWORD dwState);
+	//애니메이션 상하체 동시 제어
+	void ChangeAnimation(DWORD ChangeState);
+	//각각 제어
+	void ChangeUpperAnimation(DWORD ChangeState);
+	void ChangeLowerAnimation(DWORD ChangeState);
+
+	bool CheckLowerBody(std::string FrameName);
+
+	bool isSameState(DWORD dwState);
+	bool isSameUpperState(DWORD dwState);
+	bool isSameLowerState(DWORD dwState);
+
+	bool isAnimationPlayProgress(bool top,DWORD dwState, float progress);
+};

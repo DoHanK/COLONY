@@ -59,11 +59,11 @@ bool ColonyFramework::MakeGameObjects()
 	m_pPlayer = new Player();
 
 	CLoadedModelInfo* pAngrybotModel = GameObject::LoadGeometryAndAnimationFromFile(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pScene->GetGraphicsRootSignature(), "Model/JU_Mannequin.bin", NULL);
-
 	XMFLOAT3 temp = XMFLOAT3(0, 1, 0);
-	m_pPlayer->SetPosition(XMFLOAT3(0, -1, 6));
+	m_pPlayer->Rotate(&temp ,180.f);
+	m_pPlayer->SetPosition(XMFLOAT3(0, -2.0, 2.5));
 	m_pPlayer->SetChild(pAngrybotModel->m_pModelRootObject, true);
-	m_pPlayer->m_pSkinnedAnimationController = new AnimationController(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), 1, pAngrybotModel);
+	m_pPlayer->m_pSkinnedAnimationController = new PlayerAnimationController(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), 4, pAngrybotModel);
 	m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pPlayer->m_pSkinnedAnimationController->SetCallbackKeys(0, 0, 0);
 	m_pDevice->CloseCommandAndPushQueue();
@@ -158,11 +158,16 @@ void ColonyFramework::PlayerControlInput()
 		 
 		//W S A D 키입력 검사
 		//RUN
-		if((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) || (dwDirection & DIR_LEFT) || (dwDirection & DIR_RIGHT))
-			if (pKeysBuffer[L_SHIFT] & 0xF0) dwPlayerState = STATE_RUN;
-			else dwPlayerState = STATE_WALK;
-	
-
+		if ((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) || (dwDirection & DIR_LEFT) || (dwDirection & DIR_RIGHT)) {
+			if (pKeysBuffer[L_SHIFT] & 0xF0)
+			{
+				dwPlayerState = STATE_RUN;
+			}
+			else {
+				dwPlayerState = STATE_WALK;
+			}
+		}
+		 
 		//JUMP
 		if (pKeysBuffer[SPACE_BAR] & 0xF0) {
 			//방향
@@ -191,7 +196,7 @@ void ColonyFramework::PlayerControlInput()
 		}
 	
 
-		m_pPlayer->SetAnimationFromInput(dwDirection, dwPlayerState);
+		((PlayerAnimationController*)(m_pPlayer->m_pSkinnedAnimationController))->SetAnimationFromInput(dwDirection, dwPlayerState);
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
 		static POINT m_ptOldCursorPos;

@@ -242,7 +242,8 @@ void AnimationSet::SetPosition(float fTrackPosition)
 	{
 	case ANIMATION_TYPE_LOOP:
 	{
-		m_fPosition = fmod(fTrackPosition, m_pfKeyFrameTimes[m_nKeyFrames - 1]); // m_fPosition = fTrackPosition - int(fTrackPosition / m_pfKeyFrameTimes[m_nKeyFrames-1]) * m_pfKeyFrameTimes[m_nKeyFrames-1];
+		m_fPosition = fmod(fTrackPosition, m_pfKeyFrameTimes[m_nKeyFrames - 1]); 
+		// m_fPosition = fTrackPosition - int(fTrackPosition / m_pfKeyFrameTimes[m_nKeyFrames-1]) * m_pfKeyFrameTimes[m_nKeyFrames-1];
 		//			m_fPosition = fmod(fTrackPosition, m_fLength); //if (m_fPosition < 0) m_fPosition += m_fLength;
 		//			m_fPosition = fTrackPosition - int(fTrackPosition / m_fLength) * m_fLength;
 		break;
@@ -1161,7 +1162,9 @@ void AnimationController::SetAnimationCallbackHandler(int nSkinnedMesh, int nAni
 
 void AnimationController::SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet)
 {
-	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].m_nAnimationSet = nAnimationSet;
+	if (m_pAnimationTracks) {
+		m_pAnimationTracks[nAnimationTrack].m_nAnimationSet = nAnimationSet;
+	}
 }
 
 void AnimationController::SetTrackEnable(int nAnimationTrack, bool bEnable)
@@ -1219,6 +1222,8 @@ void AnimationController::AdvanceTime(float fTimeElapsed, GameObject* pRootGameO
 					}
 				}
 
+				
+
 				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "JU_Mannequin") {
 
 					xmf4x4Transform._41 = 0;
@@ -1226,13 +1231,6 @@ void AnimationController::AdvanceTime(float fTimeElapsed, GameObject* pRootGameO
 					xmf4x4Transform._43 = 0;
 
 					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
-				}
-				else if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "RootBone") {
-	/*				xmf4x4Transform._41 = 0;
-					xmf4x4Transform._42 = 0;
-					xmf4x4Transform._43 = 0;
-
-					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;*/
 				}
 				else {
 					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
