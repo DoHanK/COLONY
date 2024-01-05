@@ -220,164 +220,202 @@ void PlayerAnimationController::AdvanceTime(float fElapsedTime, GameObject* pRoo
 void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState)
 {
 
-
-
-	//점프일땐 무력화
-	if ((!isSameLowerState(IDLE_JUMP)) && (!isSameLowerState(IDLE_JUMPING)) &&(!isSameLowerState(IDLE_LANDING))) {
-
-		if (dwState & STATE_IDLE) {
-
-			if ((dwState == (STATE_PICK_UP | STATE_IDLE)) && (!isSameState(IDLE_PICK_UP))) {
-				ChangeAnimation(IDLE_PICK_UP);
-
-			}
-			else if ((dwState == (STATE_IDLE | STATE_JUMP)) && (!isSameLowerState(IDLE_JUMP))) {
-
-				ChangeLowerAnimation(IDLE_JUMP);
-
-			}
-			else if (dwState == STATE_IDLE && (!isSameState(IDLE_RIFLE))) {
-				ChangeAnimation(IDLE_RIFLE);
-			}
-
+	/////////
+	//상체
+	////////
+	//애니메이션을 바꿀수 있는 상태인지 체크
+	if (IsUnChangeableUpperState()) {
+		
+		//총알 갈기, 총쏘기 , 줍기 ,
+		if (dwState & STATE_RELOAD) {
+			SetTrackSpeed(NOW_UPPERTRACK, 1.6f);
+				ChangeUpperAnimation(IDLE_RELOAD);
 		}
-		else if (dwState & STATE_WALK) {
+		else if (dwState & STATE_SHOOT) {
+			SetTrackSpeed(NOW_UPPERTRACK, 2.0f);
+			ChangeUpperAnimation(WALK_GUNPLAY);
+		}
+		else if (dwState & STATE_PICK_UP) {
+			SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
+			ChangeUpperAnimation(WALK_PICK_UP);
+		}
+		else {
+	
+			if (dwState & STATE_IDLE || dwState & STATE_WALK) {
 
-
-			if (STATE_PICK_UP == (dwState & STATE_PICK_UP)) {
-				if ((!isSameUpperState(IDLE_PICK_UP))) {
-					ChangeUpperAnimation(IDLE_PICK_UP);
+				if (!isSameUpperState(IDLE_RIFLE)) {
+					ChangeUpperAnimation(IDLE_RIFLE);
 				}
-			}
-			else if (!isSameUpperState(IDLE_RIFLE)) {
-				ChangeUpperAnimation(IDLE_RIFLE);
-			}
-
-			//이중키 체크후 검사
-			if ((dwDir == (DIR_FORWARD | DIR_LEFT)) && (!isSameLowerState(WALK_FORWORD_LEFT))) {
-				ChangeLowerAnimation(WALK_FORWORD_LEFT);
-			}
-			else if ((dwDir == (DIR_FORWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_FORWORD_RIGHT))) {
-				ChangeLowerAnimation(WALK_FORWORD_RIGHT);
-			}
-			else if ((dwDir == (DIR_BACKWARD | DIR_LEFT)) && (!isSameLowerState(WALK_BACKWORD_LEFT))) {
-				ChangeLowerAnimation(WALK_BACKWORD_LEFT);
-			}
-			else if ((dwDir == (DIR_BACKWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_BACKWORD_RIGHT))) {
-				ChangeLowerAnimation(WALK_BACKWORD_RIGHT);
-			}
-			else if ((dwDir == DIR_LEFT) && (!isSameLowerState(WALK_LEFT))) {
-				ChangeLowerAnimation(WALK_LEFT);
-			}
-			else if ((dwDir == DIR_RIGHT) && (!isSameLowerState(WALK_RIGHT))) {
-				ChangeLowerAnimation(WALK_RIGHT);
-			}
-			else if ((dwDir == DIR_FORWARD) && (!isSameLowerState(WALK_FORWORD))) {
-				ChangeLowerAnimation(WALK_FORWORD);
-			}
-			else if ((dwDir == DIR_BACKWARD) && (!isSameLowerState(WALK_BACKWORD))) {
-				ChangeLowerAnimation(WALK_BACKWORD);
-			}
-
-		}
-		else if (dwState & STATE_RUN) {
-
-
-			if (STATE_PICK_UP == (dwState & STATE_PICK_UP)) {
-				if ((!isSameState(WALK_PICK_UP)))
-					ChangeAnimation(WALK_PICK_UP);
 			}
 			else {
 
+				//상체
+				if ((dwDir == (DIR_FORWARD | DIR_LEFT)) && (!isSameUpperState(WALK_FORWORD_LEFT))) {
+					ChangeUpperAnimation(WALK_FORWORD_LEFT);
+				}
+				else if ((dwDir == (DIR_FORWARD | DIR_RIGHT)) && (!isSameUpperState(WALK_FORWORD_RIGHT))) {
+					ChangeUpperAnimation(WALK_FORWORD_RIGHT);
+				}
+				else if ((dwDir == (DIR_BACKWARD | DIR_LEFT)) && (!isSameUpperState(WALK_BACKWORD_LEFT))) {
+					ChangeUpperAnimation(WALK_BACKWORD_LEFT);
+				}
+				else if ((dwDir == (DIR_BACKWARD | DIR_RIGHT)) && (!isSameUpperState(WALK_BACKWORD_RIGHT))) {
+					ChangeUpperAnimation(WALK_BACKWORD_RIGHT);
+				}
+				else if ((dwDir == DIR_LEFT) && (!isSameUpperState(WALK_LEFT))) {
+					ChangeUpperAnimation(WALK_LEFT);
+				}
+				else if ((dwDir == DIR_RIGHT) && (!isSameUpperState(WALK_RIGHT))) {
+					ChangeUpperAnimation(WALK_RIGHT);
+				}
+				else if ((dwDir == DIR_FORWARD) && (!isSameUpperState(WALK_FORWORD))) {
+					ChangeUpperAnimation(WALK_FORWORD);
+				}
+				else if ((dwDir == DIR_BACKWARD) && (!isSameUpperState(WALK_BACKWORD))) {
+					ChangeUpperAnimation(WALK_BACKWORD);
+				}
+			}
+		}
+	}
+	else {
+
+		if (isSameUpperState(IDLE_RELOAD)) {
+			//아랫면과 충돌시 실행되도록 조건문 추가
+			if (isAnimationPlayProgress(TRUE, IDLE_RELOAD, 0.9)) {
+				SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
+				ChangeUpperAnimation(IDLE_RIFLE);
+			}
+		}
+		else if (isSameUpperState(WALK_PICK_UP)) {
+			//아랫면과 충돌시 실행되도록 조건문 추가
+			if (isAnimationPlayProgress(TRUE, WALK_PICK_UP, 0.9)) {
+				SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
+				ChangeUpperAnimation(IDLE_RIFLE);
+			}
+		}
+		else if (isSameUpperState(WALK_GUNPLAY)) {
+			//아랫면과 충돌시 실행되도록 조건문 추가
+			if (isAnimationPlayProgress(TRUE, WALK_GUNPLAY, 0.8)) {
+				SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
+				ChangeUpperAnimation(IDLE_RIFLE);
+			}
+		}
+
+	}
 
 
-				//이중키
-				if ((dwDir == (DIR_FORWARD | DIR_LEFT)) && (!isSameState(WALK_FORWORD_LEFT))) {
-					ChangeAnimation(WALK_FORWORD_LEFT);
+	/////////
+	//하체
+	////////
+	//애니메이션을 바꿀수 있는 상태인지 체크
+	if (IsUnChangeableLowerState()) {
+		//가만히 서있을때
+		if (dwState & STATE_IDLE) {
+
+			if (dwState == STATE_IDLE && (!isSameLowerState(IDLE_RIFLE))) {
+				ChangeLowerAnimation(IDLE_RIFLE);
+			}
+			else if ((dwState & STATE_JUMP) && (!isSameLowerState(IDLE_JUMP))) {
+				SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
+				ChangeLowerAnimation(IDLE_JUMP);
+			}
+
+		}
+		//걷거나 움직일때
+		if (dwState & STATE_RUN || dwState & STATE_WALK) {
+			if ((dwState & STATE_JUMP) && (!isSameLowerState(WALK_JUMP))) {
+				
+				ChangeLowerAnimation(WALK_JUMP);
+			}
+			else {
+				if ((dwDir == (DIR_FORWARD | DIR_LEFT)) && (!isSameLowerState(WALK_FORWORD_LEFT))) {
+					ChangeLowerAnimation(WALK_FORWORD_LEFT);
 				}
-				else if ((dwDir == (DIR_FORWARD | DIR_RIGHT)) && (!isSameState(WALK_FORWORD_RIGHT))) {
-					ChangeAnimation(WALK_FORWORD_RIGHT);
+				else if ((dwDir == (DIR_FORWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_FORWORD_RIGHT))) {
+					ChangeLowerAnimation(WALK_FORWORD_RIGHT);
 				}
-				else if ((dwDir == (DIR_BACKWARD | DIR_LEFT)) && (!isSameState(WALK_BACKWORD_LEFT))) {
-					ChangeAnimation(WALK_BACKWORD_LEFT);
+				else if ((dwDir == (DIR_BACKWARD | DIR_LEFT)) && (!isSameLowerState(WALK_BACKWORD_LEFT))) {
+					ChangeLowerAnimation(WALK_BACKWORD_LEFT);
 				}
-				else if ((dwDir == (DIR_BACKWARD | DIR_RIGHT)) && (!isSameState(WALK_BACKWORD_RIGHT))) {
-					ChangeAnimation(WALK_BACKWORD_RIGHT);
+				else if ((dwDir == (DIR_BACKWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_BACKWORD_RIGHT))) {
+					ChangeLowerAnimation(WALK_BACKWORD_RIGHT);
 				}
-				//단일키
-				else if ((dwDir == DIR_LEFT) && (!isSameState(WALK_LEFT))) {
-					ChangeAnimation(WALK_LEFT);
+				else if ((dwDir == DIR_LEFT) && (!isSameLowerState(WALK_LEFT))) {
+					ChangeLowerAnimation(WALK_LEFT);
 				}
-				else if ((dwDir == DIR_RIGHT) && (!isSameState(WALK_RIGHT))) {
-					ChangeAnimation(WALK_RIGHT);
+				else if ((dwDir == DIR_RIGHT) && (!isSameLowerState(WALK_RIGHT))) {
+					ChangeLowerAnimation(WALK_RIGHT);
 				}
-				else if ((dwDir == DIR_FORWARD) && (!isSameState(WALK_FORWORD))) {
-					ChangeAnimation(WALK_FORWORD);
+				else if ((dwDir == DIR_FORWARD) && (!isSameLowerState(WALK_FORWORD))) {
+					ChangeLowerAnimation(WALK_FORWORD);
 				}
-				else if ((dwDir == DIR_BACKWARD) && (!isSameState(WALK_BACKWORD))) {
-					ChangeAnimation(WALK_BACKWORD);
+				else if ((dwDir == DIR_BACKWARD) && (!isSameLowerState(WALK_BACKWORD))) {
+					ChangeLowerAnimation(WALK_BACKWORD);
 				}
 			}
 		}
 
 	}
 	else {
-		if (isSameLowerState(IDLE_JUMP)) {
-			
 
-			if (isAnimationPlayProgress(false, IDLE_JUMP, 0.9)) {
+		//애니메이션 종료 체크
+		if (isSameLowerState(WALK_JUMP)) {
+			//아랫면과 충돌시 실행되도록 조건문 추가
+			if (isAnimationPlayProgress(false, WALK_JUMP, 1.0)) {
+				ChangeLowerAnimation(m_AnimationUpperState);
+			}
+		}
+		else if (isSameLowerState(IDLE_JUMP)) {
+			
+			if (isAnimationPlayProgress(false, IDLE_JUMP, 1.0f)) {
+				SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
 				ChangeLowerAnimation(IDLE_JUMPING);
 			}
 
 		}
-		if (isSameLowerState(IDLE_JUMPING)) {
+		else if (isSameLowerState(IDLE_JUMPING)) {
 
 			//아랫면과 충돌시 실행되도록 조건문 추가
-			if (isAnimationPlayProgress(false, IDLE_JUMPING, 0.9)) {
+			if (isAnimationPlayProgress(false, IDLE_JUMPING, 0.6)) {
+				SetTrackSpeed(NOW_LOWERTRACK, 1.5f);
 				ChangeLowerAnimation(IDLE_LANDING);
 			}
 		}
-		if (isSameLowerState(IDLE_LANDING)) {
+		else if (isSameLowerState(IDLE_LANDING)) {
 			//아랫면과 충돌시 실행되도록 조건문 추가
-			if (isAnimationPlayProgress(false, IDLE_LANDING, 0.9)) {
-				ChangeAnimation(IDLE_RIFLE);
+			if (isAnimationPlayProgress(false, IDLE_LANDING, 0.5)) {
+				ChangeLowerAnimation(m_AnimationUpperState);
 			}
 		}
 
 	}
+	
 
 
 
-	//PICK_UP 상체 속도 조절
-	if (isSameUpperState(IDLE_PICK_UP)|| isSameUpperState(WALK_PICK_UP)) {
-
-		if(isSameUpperState(IDLE_PICK_UP))
-			SetTrackSpeed(NOW_UPPERTRACK, 12.0f);
-		else
-			SetTrackSpeed(NOW_UPPERTRACK, 1.3f);
-	}
-	//점프 이동 하체 속도
-	else if (isSameLowerState(IDLE_JUMP)) {
-		SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
-	}
-	else if (isSameLowerState(IDLE_JUMPING)) {
-		SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
-	}
-	else if (isSameLowerState(IDLE_LANDING)) {
-		SetTrackSpeed(NOW_LOWERTRACK, 1.5f);
-	}
-	//걷기와 이동속도 조절
-	else if (STATE_RUN == (dwState & STATE_RUN)) {
+	//하체 걷기와 이동속도 조절
+	if (STATE_RUN == (dwState & STATE_RUN)) {
 		
-			SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
+		if (isSameLowerState(WALK_JUMP)) {
+			SetTrackSpeed(NOW_LOWERTRACK, 1.4f);
+		}
+		else {
 			SetTrackSpeed(NOW_LOWERTRACK, 1.0f);
-		
+		}
 	}
 	else if (STATE_WALK == (dwState & STATE_WALK)) {
-			SetTrackSpeed(NOW_UPPERTRACK, 0.5f);
+
+		if (isSameLowerState(WALK_JUMP)) {
+			SetTrackSpeed(NOW_LOWERTRACK, 1.0f);
+			//ChangeLowerAnimation(IDLE_JUMP);
+
+		}
+		else {
 			SetTrackSpeed(NOW_LOWERTRACK, 0.5f);
+		}
 	}
 
+	
 
 }
 //상체 하체 애니메이션 변경
@@ -460,19 +498,39 @@ bool PlayerAnimationController::isSameLowerState(DWORD dwState)
 	return false;
 }
 
+bool PlayerAnimationController::IsUnChangeableUpperState()
+{
+	if ((!isSameUpperState(IDLE_PICK_UP)) && (!isSameUpperState(IDLE_RELOAD)) && (!isSameUpperState(IDLE_GUNPLAY)) &&
+		(!isSameUpperState(WALK_GUNPLAY)) && (!isSameUpperState(WALK_RELOAD)) && (!isSameUpperState(WALK_PICK_UP))
+		) {
+		return true;
+	}
+	return false;
+}
+
+bool PlayerAnimationController::IsUnChangeableLowerState()
+{
+	if ((!isSameLowerState(IDLE_JUMP)) && (!isSameLowerState(IDLE_JUMPING)) && (!isSameLowerState(IDLE_LANDING)) && (!isSameLowerState(WALK_JUMP))) {
+		return true;
+	}
+	return false;
+}
+
 bool PlayerAnimationController::isAnimationPlayProgress(bool top, DWORD dwState, float progress)
 {
 	if (top) {
-		if (m_pAnimationTracks[NOW_UPPERTRACK].m_fPosition / m_ppAnimationSets[0]->m_ppAnimationSets[dwState]->m_fLength > progress) {
+		if (m_pAnimationTracks[NOW_UPPERTRACK].m_fPosition / m_ppAnimationSets[0]->m_ppAnimationSets[dwState]->m_fLength >= progress) {
 			return true;
 		}
 	}
 	else {
-		if (m_pAnimationTracks[NOW_LOWERTRACK].m_fPosition / m_ppAnimationSets[0]->m_ppAnimationSets[dwState]->m_fLength > progress) {
+		if (m_pAnimationTracks[NOW_LOWERTRACK].m_fPosition / m_ppAnimationSets[0]->m_ppAnimationSets[dwState]->m_fLength >= progress) {
 			return true;
 		}
 	}
 	return false;
 }
+
+
 
 

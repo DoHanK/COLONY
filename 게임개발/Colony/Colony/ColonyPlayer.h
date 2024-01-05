@@ -137,5 +137,8 @@ public:
 	bool isSameUpperState(DWORD dwState);
 	bool isSameLowerState(DWORD dwState);
 
+	bool IsUnChangeableUpperState();
+	bool IsUnChangeableLowerState();
+
 	bool isAnimationPlayProgress(bool top,DWORD dwState, float progress);
 };

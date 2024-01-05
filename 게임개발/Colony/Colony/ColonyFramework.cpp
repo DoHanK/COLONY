@@ -60,8 +60,8 @@ bool ColonyFramework::MakeGameObjects()
 
 	CLoadedModelInfo* pAngrybotModel = GameObject::LoadGeometryAndAnimationFromFile(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pScene->GetGraphicsRootSignature(), "Model/JU_Mannequin.bin", NULL);
 	XMFLOAT3 temp = XMFLOAT3(0, 1, 0);
-	m_pPlayer->Rotate(&temp ,180.f);
-	m_pPlayer->SetPosition(XMFLOAT3(0, -2.0, 2.5));
+	m_pPlayer->Rotate(&temp ,0.f);
+	m_pPlayer->SetPosition(XMFLOAT3(0, -3.0, 5));
 	m_pPlayer->SetChild(pAngrybotModel->m_pModelRootObject, true);
 	m_pPlayer->m_pSkinnedAnimationController = new PlayerAnimationController(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), 4, pAngrybotModel);
 	m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
