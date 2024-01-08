@@ -1,4 +1,33 @@
 #include "ColonyPlayer.h"
+#include "ColonyGameObject.h"
+
+Player::Player(CLoadedModelInfo* ModelInfo) 
+{
+	m_pCamera = NULL;
+
+	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
+	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_fMaxVelocityXZ = 0.0f;
+	m_fMaxVelocityY = 0.0f;
+	m_fFriction = 0.0f;
+
+	m_fPitch = 0.0f;
+	m_fRoll = 0.0f;
+	m_fYaw = 0.0f;
+
+	if (ModelInfo) {
+		SetChild(ModelInfo->m_pModelRootObject);
+		ModelInfo->m_pModelRootObject;
+
+		m_RightHand = ModelInfo->m_pModelRootObject->FindFrame("RightHand");
+		m_Spine = ModelInfo->m_pModelRootObject->FindFrame("Spine1");
+	}
+}
 
 Player::Player()
 {
@@ -27,6 +56,33 @@ Player::~Player()
 		m_pCamera->ReleaseShaderVariables();
 		delete m_pCamera;
 	}
+}
+
+void Player::SetAnimator(PlayerAnimationController* animator)
+{
+	GameObject::SetAnimator(animator);
+
+	animator->m_player = this;
+}
+
+void Player::SetWeapon(GameObject* Weapon)
+{
+	m_SelectWeapon.m_pChild = Weapon;
+	m_SelectWeapon.m_pChild->m_xmf4x4World = Matrix4x4::Identity();
+	m_SelectWeapon.m_pChild->m_xmf4x4ToParent = Matrix4x4::Identity();
+	//오른쪽 손
+	XMFLOAT3 temp;
+	temp = XMFLOAT3(0, 0, 1);
+	m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
+	temp = XMFLOAT3(0, 1, 0);
+	m_SelectWeapon.m_pChild->Rotate(&temp, -8.f);
+	temp = XMFLOAT3(1, 0, 0);
+	
+	m_SelectWeapon.m_pChild->MoveStrafe(0.35f);
+	m_SelectWeapon.m_pChild->MoveUp(0.07f); // 0.1f
+	m_WeaponState = RIGHT_HAND;
+	((PlayerAnimationController*)m_pSkinnedAnimationController)->m_WeaponState = RIGHT_HAND;
+
 }
 
 // 현재 속력= 속도 + 가속도 * 시간 
@@ -66,6 +122,43 @@ void Player::Animate(float fTimeElapsed)
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);
+
+	if (m_WeaponState == RIGHT_HAND && m_RightHand) m_SelectWeapon.m_xmf4x4ToParent = m_RightHand->m_xmf4x4World;
+	else if(m_WeaponState == SPINE_BACK && m_Spine) m_SelectWeapon.m_xmf4x4ToParent = m_Spine->m_xmf4x4World;
+}
+
+void Player::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+{
+	//프레임으로 이뤄진 것이기에 필요가 없음
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pShader)m_pShader->OnPrepareRender(pd3dCommandList, 0);
+
+	if (m_pMesh)
+	{
+		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+
+		if (m_nMaterials > 0)
+		{
+			for (int i = 0; i < m_nMaterials; i++)
+			{
+				if (m_ppMaterials[i])
+				{
+					//if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+				}
+
+				m_pMesh->Render(pd3dCommandList, i);
+
+			}
+		}
+	}
+
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+
+	m_SelectWeapon.UpdateTransform();
+	m_SelectWeapon.Render(pd3dCommandList, pCamera);
 }
 
 
@@ -74,6 +167,7 @@ void Player::Animate(float fTimeElapsed)
 PlayerAnimationController::PlayerAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel):
 AnimationController(pd3dDevice, pd3dCommandList,  nAnimationTracks, pModel)
 {
+
 	m_nAnimationTracks = nAnimationTracks;
 	m_pAnimationTracks = new AnimationTrack[nAnimationTracks];
 
@@ -190,7 +284,7 @@ void PlayerAnimationController::AdvanceTime(float fElapsedTime, GameObject* pRoo
 				}
 
 				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "Hips" ) {
-					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = Matrix4x4::Add(Matrix4x4::Scale(xmf4x4LowerTransform, 0.8f), Matrix4x4::Scale(xmf4x4UpperTransform, 0.2f));
+					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = Matrix4x4::Add(Matrix4x4::Scale(xmf4x4LowerTransform, 0.6f), Matrix4x4::Scale(xmf4x4UpperTransform, 0.4f));
 				}
 				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "Spine") {
 					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = Matrix4x4::Add(Matrix4x4::Scale(xmf4x4LowerTransform, 0.1f), Matrix4x4::Scale(xmf4x4UpperTransform, 0.9f));
@@ -224,7 +318,7 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 	//상체
 	////////
 	//애니메이션을 바꿀수 있는 상태인지 체크
-	if (IsUnChangeableUpperState()) {
+	if (IsUnChangeableUpperState() && IsUnChangeableLowerState()) {
 		
 		//총알 갈기, 총쏘기 , 줍기 ,
 		if (dwState & STATE_RELOAD) {
@@ -239,40 +333,44 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 			SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
 			ChangeUpperAnimation(WALK_PICK_UP);
 		}
-		else {
-	
-			if (dwState & STATE_IDLE || dwState & STATE_WALK) {
+		else if (dwState & STATE_SWITCH_WEAPON) {
 
-				if (!isSameUpperState(IDLE_RIFLE)) {
-					ChangeUpperAnimation(IDLE_RIFLE);
+			SetTrackSpeed(NOW_UPPERTRACK, 4.0f);
+			ChangeUpperAnimation(WEAPON_SWITCH_BACK);
+			if (m_WeaponState == RIGHT_HAND) m_WeaponState = SPINE_BACK;
+			else m_WeaponState = RIGHT_HAND;
+		}
+		else {
+				
+			if (dwState & STATE_IDLE) {
+
+				if (m_WeaponState != SPINE_BACK) {
+
+					if (!isSameUpperState(IDLE_RIFLE)) {
+						ChangeUpperAnimation(IDLE_RIFLE);
+					}
+				}
+				else {
+					////상체
+					if (!isSameUpperState(IDLE_NORMAL)) {
+						ChangeUpperAnimation(IDLE_NORMAL);
+					}
 				}
 			}
 			else {
+				//등에 총이 없을때
+				if (m_WeaponState != SPINE_BACK) {
 
-				//상체
-				if ((dwDir == (DIR_FORWARD | DIR_LEFT)) && (!isSameUpperState(WALK_FORWORD_LEFT))) {
-					ChangeUpperAnimation(WALK_FORWORD_LEFT);
+					if (!isSameUpperState(IDLE_RIFLE)) {
+						ChangeUpperAnimation(IDLE_RIFLE);
+					}
+		
 				}
-				else if ((dwDir == (DIR_FORWARD | DIR_RIGHT)) && (!isSameUpperState(WALK_FORWORD_RIGHT))) {
-					ChangeUpperAnimation(WALK_FORWORD_RIGHT);
-				}
-				else if ((dwDir == (DIR_BACKWARD | DIR_LEFT)) && (!isSameUpperState(WALK_BACKWORD_LEFT))) {
-					ChangeUpperAnimation(WALK_BACKWORD_LEFT);
-				}
-				else if ((dwDir == (DIR_BACKWARD | DIR_RIGHT)) && (!isSameUpperState(WALK_BACKWORD_RIGHT))) {
-					ChangeUpperAnimation(WALK_BACKWORD_RIGHT);
-				}
-				else if ((dwDir == DIR_LEFT) && (!isSameUpperState(WALK_LEFT))) {
-					ChangeUpperAnimation(WALK_LEFT);
-				}
-				else if ((dwDir == DIR_RIGHT) && (!isSameUpperState(WALK_RIGHT))) {
-					ChangeUpperAnimation(WALK_RIGHT);
-				}
-				else if ((dwDir == DIR_FORWARD) && (!isSameUpperState(WALK_FORWORD))) {
-					ChangeUpperAnimation(WALK_FORWORD);
-				}
-				else if ((dwDir == DIR_BACKWARD) && (!isSameUpperState(WALK_BACKWORD))) {
-					ChangeUpperAnimation(WALK_BACKWORD);
+				else {
+					if (!isSameUpperState(RUNNING)) {
+						ChangeUpperAnimation(RUNNING);
+					}
+
 				}
 			}
 		}
@@ -280,27 +378,93 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 	else {
 
 		if (isSameUpperState(IDLE_RELOAD)) {
-			//아랫면과 충돌시 실행되도록 조건문 추가
 			if (isAnimationPlayProgress(TRUE, IDLE_RELOAD, 0.9)) {
 				SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
-				ChangeUpperAnimation(IDLE_RIFLE);
+				if (m_WeaponState == RIGHT_HAND) {
+					ChangeUpperAnimation(IDLE_RIFLE);
+
+				}
+				else {
+					ChangeUpperAnimation(IDLE_NORMAL);
+				}
 			}
 		}
 		else if (isSameUpperState(WALK_PICK_UP)) {
-			//아랫면과 충돌시 실행되도록 조건문 추가
 			if (isAnimationPlayProgress(TRUE, WALK_PICK_UP, 0.9)) {
 				SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
-				ChangeUpperAnimation(IDLE_RIFLE);
+				if (m_WeaponState == RIGHT_HAND) {
+					ChangeUpperAnimation(IDLE_RIFLE);
+
+				}
+				else {
+					ChangeUpperAnimation(IDLE_NORMAL);
+				}
 			}
 		}
 		else if (isSameUpperState(WALK_GUNPLAY)) {
-			//아랫면과 충돌시 실행되도록 조건문 추가
 			if (isAnimationPlayProgress(TRUE, WALK_GUNPLAY, 0.8)) {
 				SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
-				ChangeUpperAnimation(IDLE_RIFLE);
+				if (m_WeaponState == RIGHT_HAND) {
+					ChangeUpperAnimation(IDLE_RIFLE);
+
+				}
+				else {
+					ChangeUpperAnimation(IDLE_NORMAL);
+				}
 			}
 		}
+		else if (isSameUpperState(WEAPON_SWITCH_BACK)) {
 
+			if (isAnimationPlayProgress(TRUE, WEAPON_SWITCH_BACK, 0.3) && m_player->m_WeaponState != m_WeaponState) {
+				//총의 계층을 바꿔주기
+				if (m_player->m_WeaponState == RIGHT_HAND) {
+					if (m_player->m_SelectWeapon.m_pChild) {
+						m_player->m_SelectWeapon.m_pChild->m_xmf4x4World = Matrix4x4::Identity();
+						m_player->m_SelectWeapon.m_pChild->m_xmf4x4ToParent = Matrix4x4::Identity();
+
+						XMFLOAT3 temp;
+						temp = XMFLOAT3(0, 0, 1);
+						m_player->m_SelectWeapon.m_pChild->Rotate(&temp, -110.f);
+
+						m_player->m_SelectWeapon.m_pChild->MoveStrafe(-0.3f);
+						m_player->m_SelectWeapon.m_pChild->MoveForward(-0.3f);
+					}
+					m_player->m_WeaponState = SPINE_BACK;
+				}
+				else if (m_player->m_WeaponState == SPINE_BACK) {
+
+
+					if (m_player->m_SelectWeapon.m_pChild) {
+						m_player->m_SelectWeapon.m_pChild->m_xmf4x4World = Matrix4x4::Identity();
+						m_player->m_SelectWeapon.m_pChild->m_xmf4x4ToParent = Matrix4x4::Identity();
+
+						XMFLOAT3 temp;
+						temp = XMFLOAT3(0, 0, 1);
+						m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
+						temp = XMFLOAT3(0, 1, 0);
+						m_player->m_SelectWeapon.m_pChild->Rotate(&temp, -8.f);
+
+						m_player->m_SelectWeapon.m_pChild->MoveStrafe(0.35f);
+						m_player->m_SelectWeapon.m_pChild->MoveUp(-0.07f); 
+			
+
+					}
+					m_player->m_WeaponState = RIGHT_HAND;
+				}
+			}
+
+			if (isAnimationPlayProgress(TRUE, WEAPON_SWITCH_BACK, 0.9)) {
+				SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
+
+				if (m_WeaponState == RIGHT_HAND) {
+					ChangeUpperAnimation(IDLE_RIFLE);
+
+				}
+				else {
+					ChangeUpperAnimation(IDLE_NORMAL);
+				}
+			}
+		}
 	}
 
 
@@ -317,40 +481,54 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 			}
 			else if ((dwState & STATE_JUMP) && (!isSameLowerState(IDLE_JUMP))) {
 				SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
-				ChangeLowerAnimation(IDLE_JUMP);
+				ChangeAnimation(IDLE_JUMP);
 			}
 
 		}
-		//걷거나 움직일때
-		if (dwState & STATE_RUN || dwState & STATE_WALK) {
+		//걸을때
+		if ( dwState & STATE_WALK || dwState & STATE_RUN) {
+
+			//점프
 			if ((dwState & STATE_JUMP) && (!isSameLowerState(WALK_JUMP))) {
-				
-				ChangeLowerAnimation(WALK_JUMP);
+				ChangeAnimation(WALK_JUMP);
 			}
 			else {
-				if ((dwDir == (DIR_FORWARD | DIR_LEFT)) && (!isSameLowerState(WALK_FORWORD_LEFT))) {
-					ChangeLowerAnimation(WALK_FORWORD_LEFT);
+
+				//총이 있을때
+				if (m_WeaponState != SPINE_BACK) {
+
+
+					if ((dwDir == (DIR_FORWARD | DIR_LEFT)) && (!isSameLowerState(WALK_FORWORD_LEFT))) {
+						ChangeLowerAnimation(WALK_FORWORD_LEFT);
+					}
+					else if ((dwDir == (DIR_FORWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_FORWORD_RIGHT))) {
+						ChangeLowerAnimation(WALK_FORWORD_RIGHT);
+					}
+					else if ((dwDir == (DIR_BACKWARD | DIR_LEFT)) && (!isSameLowerState(WALK_BACKWORD_LEFT))) {
+						ChangeLowerAnimation(WALK_BACKWORD_LEFT);
+					}
+					else if ((dwDir == (DIR_BACKWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_BACKWORD_RIGHT))) {
+						ChangeLowerAnimation(WALK_BACKWORD_RIGHT);
+					}
+					else if ((dwDir == DIR_LEFT) && (!isSameLowerState(WALK_LEFT))) {
+						ChangeLowerAnimation(WALK_LEFT);
+					}
+					else if ((dwDir == DIR_RIGHT) && (!isSameLowerState(WALK_RIGHT))) {
+						ChangeLowerAnimation(WALK_RIGHT);
+					}
+					else if ((dwDir == DIR_FORWARD) && (!isSameLowerState(WALK_FORWORD))) {
+						ChangeLowerAnimation(WALK_FORWORD);
+					}
+					else if ((dwDir == DIR_BACKWARD) && (!isSameLowerState(WALK_BACKWORD))) {
+						ChangeLowerAnimation(WALK_BACKWORD);
+					}
 				}
-				else if ((dwDir == (DIR_FORWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_FORWORD_RIGHT))) {
-					ChangeLowerAnimation(WALK_FORWORD_RIGHT);
-				}
-				else if ((dwDir == (DIR_BACKWARD | DIR_LEFT)) && (!isSameLowerState(WALK_BACKWORD_LEFT))) {
-					ChangeLowerAnimation(WALK_BACKWORD_LEFT);
-				}
-				else if ((dwDir == (DIR_BACKWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_BACKWORD_RIGHT))) {
-					ChangeLowerAnimation(WALK_BACKWORD_RIGHT);
-				}
-				else if ((dwDir == DIR_LEFT) && (!isSameLowerState(WALK_LEFT))) {
-					ChangeLowerAnimation(WALK_LEFT);
-				}
-				else if ((dwDir == DIR_RIGHT) && (!isSameLowerState(WALK_RIGHT))) {
-					ChangeLowerAnimation(WALK_RIGHT);
-				}
-				else if ((dwDir == DIR_FORWARD) && (!isSameLowerState(WALK_FORWORD))) {
-					ChangeLowerAnimation(WALK_FORWORD);
-				}
-				else if ((dwDir == DIR_BACKWARD) && (!isSameLowerState(WALK_BACKWORD))) {
-					ChangeLowerAnimation(WALK_BACKWORD);
+				//총이 없을때 전력 질주
+				else {
+
+					if ((!isSameLowerState(RUNNING))&& (dwDir&DIR_BACKWARD)) {
+						ChangeLowerAnimation(RUNNING);
+					}
 				}
 			}
 		}
@@ -362,14 +540,14 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 		if (isSameLowerState(WALK_JUMP)) {
 			//아랫면과 충돌시 실행되도록 조건문 추가
 			if (isAnimationPlayProgress(false, WALK_JUMP, 1.0)) {
-				ChangeLowerAnimation(m_AnimationUpperState);
+				ChangeLowerAnimation(WALK_FORWORD);
 			}
 		}
 		else if (isSameLowerState(IDLE_JUMP)) {
 			
 			if (isAnimationPlayProgress(false, IDLE_JUMP, 1.0f)) {
 				SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
-				ChangeLowerAnimation(IDLE_JUMPING);
+				ChangeAnimation(IDLE_JUMPING);
 			}
 
 		}
@@ -378,13 +556,13 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 			//아랫면과 충돌시 실행되도록 조건문 추가
 			if (isAnimationPlayProgress(false, IDLE_JUMPING, 0.6)) {
 				SetTrackSpeed(NOW_LOWERTRACK, 1.5f);
-				ChangeLowerAnimation(IDLE_LANDING);
+				ChangeAnimation(IDLE_LANDING);
 			}
 		}
 		else if (isSameLowerState(IDLE_LANDING)) {
 			//아랫면과 충돌시 실행되도록 조건문 추가
 			if (isAnimationPlayProgress(false, IDLE_LANDING, 0.5)) {
-				ChangeLowerAnimation(m_AnimationUpperState);
+				ChangeLowerAnimation(IDLE_RIFLE);
 			}
 		}
 
@@ -400,18 +578,35 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 			SetTrackSpeed(NOW_LOWERTRACK, 1.4f);
 		}
 		else {
-			SetTrackSpeed(NOW_LOWERTRACK, 1.0f);
+
+			SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
+
+			if (m_WeaponState != RIGHT_HAND && IsUnChangeableUpperState()) {
+				SetTrackSpeed(NOW_UPPERTRACK, 1.5f);
+				SetTrackSpeed(NOW_LOWERTRACK, 1.5f);
+			}
+	
 		}
 	}
 	else if (STATE_WALK == (dwState & STATE_WALK)) {
 
 		if (isSameLowerState(WALK_JUMP)) {
 			SetTrackSpeed(NOW_LOWERTRACK, 1.0f);
-			//ChangeLowerAnimation(IDLE_JUMP);
-
 		}
 		else {
-			SetTrackSpeed(NOW_LOWERTRACK, 0.5f);
+
+			SetTrackSpeed(NOW_LOWERTRACK, 1.0f);
+			if (m_WeaponState != RIGHT_HAND && IsUnChangeableUpperState()) {
+				SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
+				SetTrackSpeed(NOW_LOWERTRACK, 1.0f);
+			}
+		
+		}
+	}
+	else {
+		if (!isSameState(IDLE_RIFLE)&& IsUnChangeableUpperState()) {
+			SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
+			SetTrackSpeed(NOW_LOWERTRACK, 1.0f);
 		}
 	}
 
@@ -483,7 +678,7 @@ bool PlayerAnimationController::isSameState(DWORD dwState)
 		return true;
 	return false;
 }
-//상태 검사
+//상체 검사
 bool PlayerAnimationController::isSameUpperState(DWORD dwState)
 {
 	if (m_AnimationUpperState == dwState) return true;
@@ -501,7 +696,8 @@ bool PlayerAnimationController::isSameLowerState(DWORD dwState)
 bool PlayerAnimationController::IsUnChangeableUpperState()
 {
 	if ((!isSameUpperState(IDLE_PICK_UP)) && (!isSameUpperState(IDLE_RELOAD)) && (!isSameUpperState(IDLE_GUNPLAY)) &&
-		(!isSameUpperState(WALK_GUNPLAY)) && (!isSameUpperState(WALK_RELOAD)) && (!isSameUpperState(WALK_PICK_UP))
+		(!isSameUpperState(WALK_GUNPLAY)) && (!isSameUpperState(WALK_RELOAD)) && (!isSameUpperState(WALK_PICK_UP)) && 
+		(!isSameUpperState(WEAPON_SWITCH_BACK))
 		) {
 		return true;
 	}

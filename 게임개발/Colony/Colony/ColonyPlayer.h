@@ -3,6 +3,7 @@
 #include "ColonyGameObject.h"
 #include "ColonyCamera.h"
 
+class PlayerAnimationController;
 //조작키
 #define W 'W'
 #define S 'S'
@@ -10,6 +11,7 @@
 #define D 'D'
 #define R 'R'
 #define F 'F'
+#define T 'T'
 
 #define L_MOUSE		 0x01
 #define L_SHIFT	     0x10
@@ -37,7 +39,7 @@
 #define STATE_SHOOT					0x10	//L_Mouse
 #define STATE_PICK_UP				0x20	//F
 #define STATE_JUMP					0x40	//SPCAE_BAR
-
+#define STATE_SWITCH_WEAPON			0x80
 
 
 enum PlayerAnimationName {
@@ -59,7 +61,10 @@ enum PlayerAnimationName {
 	WALK_GUNPLAY,
 	WALK_RELOAD,
 	WALK_PICK_UP,
-	WALK_JUMP
+	WALK_JUMP,
+	WEAPON_SWITCH_BACK,
+	RUNNING,
+	IDLE_NORMAL
 };
 
 enum PlayerAnimationTrack {
@@ -67,6 +72,11 @@ enum PlayerAnimationTrack {
 	NOW_LOWERTRACK,
 	PRE_UPPERTRACK,
 	PRE_LOWERTRACK
+};
+
+enum WeaponPosition {
+	RIGHT_HAND,
+	SPINE_BACK
 };
 
 class Player :public GameObject
@@ -95,14 +105,25 @@ protected:
 
 
 public:
+	Player(CLoadedModelInfo* ModelInfo);
 	Player();
 	~Player();
 
+	//Body
+	GameObject* m_RightHand;
+	GameObject* m_Spine;
+
+
+	GameObject m_SelectWeapon;
+	char m_WeaponState = RIGHT_HAND;
+	virtual void SetAnimator(PlayerAnimationController* animator);
+	void SetWeapon(GameObject* Weapon);
 	//입력 받은 방향키로부터 가속도 계산
 	void CalVelocityFromInput(DWORD dwDirection, float fDistance);
 	void AddAccel(const XMFLOAT3& xmf3Shift);
 	void AddPosition(const XMFLOAT3& xmf3Shift);
 	virtual void Animate(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 };
 
 
@@ -122,6 +143,8 @@ public:
 	float m_nowAnimationLowerWeight = 1.0f;
 	float m_PreAnimationLowerWeight = 0.0f;
 
+	Player* m_player = NULL;
+	char m_WeaponState = RIGHT_HAND;
 public:
 	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
 	void SetAnimationFromInput(DWORD dwDir, DWORD dwState);

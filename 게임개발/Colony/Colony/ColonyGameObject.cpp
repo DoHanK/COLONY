@@ -474,6 +474,16 @@ void GameObject::SetMaterial(int nMaterial, Material* pMaterial)
 	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
 }
 
+void GameObject::SetAnimator(AnimationController* animator){
+	if (animator) {
+		if (m_pSkinnedAnimationController) {
+			delete m_pSkinnedAnimationController;
+		}
+
+		m_pSkinnedAnimationController = animator;
+	}
+}
+
 SkinnedMesh* GameObject::FindSkinnedMesh(char* pstrSkinnedMeshName)
 {
 	SkinnedMesh* pSkinnedMesh = NULL;

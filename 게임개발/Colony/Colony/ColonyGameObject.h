@@ -390,6 +390,7 @@ public:
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
 
 public:
+	virtual void SetAnimator(AnimationController* animator);
 	AnimationController* m_pSkinnedAnimationController = NULL;
 
 	SkinnedMesh* FindSkinnedMesh(char* pstrSkinnedMeshName);
