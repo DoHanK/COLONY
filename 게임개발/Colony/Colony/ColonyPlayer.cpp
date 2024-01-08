@@ -367,7 +367,7 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 		
 				}
 				else {
-					if (!isSameUpperState(RUNNING)) {
+					if (!isSameUpperState(RUNNING)&&(dwDir& DIR_FORWARD)) {
 						ChangeUpperAnimation(RUNNING);
 					}
 
@@ -526,7 +526,7 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 				//총이 없을때 전력 질주
 				else {
 
-					if ((!isSameLowerState(RUNNING))&& (dwDir&DIR_BACKWARD)) {
+					if ((!isSameLowerState(RUNNING))&&(dwDir&DIR_FORWARD)) {
 						ChangeLowerAnimation(RUNNING);
 					}
 				}

@@ -212,8 +212,9 @@ void ColonyFramework::PlayerControlInput()
 			dwPlayerState |= STATE_SHOOT;
 		}
 	
-
+		//플레이어 애니메이션 적용
 		((PlayerAnimationController*)(m_pPlayer->m_pSkinnedAnimationController))->SetAnimationFromInput(dwDirection, dwPlayerState);
+
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
 		static POINT m_ptOldCursorPos;
