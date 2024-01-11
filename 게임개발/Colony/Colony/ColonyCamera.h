@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "ColonyGameObject.h"
 
 #define ASPECT_RATIO				(float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 class Player;
@@ -22,8 +23,6 @@ protected:
 	float           				m_fPitch;
 	float           				m_fRoll;
 	float           				m_fYaw;
-
-	DWORD							m_nMode;
 
 	XMFLOAT3						m_xmf3LookAtWorld;
 	XMFLOAT3						m_xmf3Offset;
@@ -63,8 +62,7 @@ public:
 	void SetPlayer(Player* pPlayer) { m_pPlayer = pPlayer; }
 	Player* GetPlayer() { return(m_pPlayer); }
 
-	void SetMode(DWORD nMode) { m_nMode = nMode; }
-	DWORD GetMode() { return(m_nMode); }
+
 
 	void SetPosition(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
 	XMFLOAT3& GetPosition() { return(m_xmf3Position); }
@@ -98,3 +96,13 @@ public:
 
 };
 
+class ThirdPersonCamera :public Camera{
+public:
+	ThirdPersonCamera();
+	ThirdPersonCamera(Camera* pCamera);
+	~ThirdPersonCamera();
+	 
+	virtual void Rotate(float fPitch, float fYaw, float fRoll);
+	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
+	virtual void SetLookAt(XMFLOAT3& xmf3LookAt);
+};

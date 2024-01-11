@@ -12,9 +12,9 @@ Player::Player(CLoadedModelInfo* ModelInfo)
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_fMaxVelocityXZ = 0.0f;
+	m_fMaxVelocityXZ = 4.0f;
 	m_fMaxVelocityY = 0.0f;
-	m_fFriction = 0.0f;
+	m_fFriction = 30.0f;
 
 	m_fPitch = 0.0f;
 	m_fRoll = 0.0f;
@@ -40,7 +40,7 @@ Player::Player()
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_fMaxVelocityXZ = 0.0f;
+	m_fMaxVelocityXZ = 40.0f;
 	m_fMaxVelocityY = 0.0f;
 	m_fFriction = 0.0f;
 
@@ -85,16 +85,28 @@ void Player::SetWeapon(GameObject* Weapon)
 
 }
 
+void Player::SetPosition(const XMFLOAT3& Position)
+{
+	m_xmf3Position = Position;
+	GameObject::SetPosition(Position);
+}
+
 // 현재 속력= 속도 + 가속도 * 시간 
 void Player::CalVelocityFromInput(DWORD dwDirection, float Velocity)
 {
 	if (dwDirection)
 	{
 		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, Velocity);
-		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -Velocity);
-		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, Velocity);
-		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -Velocity);
+		float Dir = 1.0f;
+		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, Dir);
+		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -Dir);
+		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, Dir);
+		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -Dir);
+
+
+		xmf3Shift = Vector3::Normalize(xmf3Shift);
+		xmf3Shift = Vector3::ScalarProduct(xmf3Shift, Velocity, false);
+
 		//if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, Velocity);
 		//if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -Velocity);
 
@@ -110,13 +122,108 @@ void Player::AddAccel(const XMFLOAT3& xmf3Shift)
 //해당 벡터만큼 이동
 void Player::AddPosition(const XMFLOAT3& xmf3Shift)
 {
+
 	m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
-	m_pCamera->Move(xmf3Shift);
+
+
+	//if(m_pCamera)	m_pCamera->Move(xmf3Shift);
+}
+//플레이어 위치 업데이트
+void Player::UpdatePosition(float fTimeElapsed)
+{
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
+
+	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ = m_fMaxVelocityXZ;
+	if (fLength > m_fMaxVelocityXZ)
+	{
+		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+
+		//OutputDebugStringA(std::to_string(m_xmf3Velocity.x).c_str());
+		//OutputDebugStringA("       ");
+		//OutputDebugStringA(std::to_string(m_xmf3Velocity.z).c_str());
+		//OutputDebugStringA("     \n  ");
+	}
+	float fMaxVelocityY = m_fMaxVelocityY;
+	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
+
+	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+	AddPosition(xmf3Velocity);
+
+	//if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
+
+	//DWORD nCurrentCameraMode = m_pCamera->GetMode();
+	m_pCamera->Update(m_xmf3Position, fTimeElapsed);
+	//if (m_pCameraUpdatedContext) 		OnCameraUpdateCallback(fTimeElapsed);
+	//if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
+	m_pCamera->RegenerateViewMatrix();
+
+	//마찰계수
+	fLength = Vector3::Length(m_xmf3Velocity);
+	float fDeceleration = (m_fFriction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+}
+
+void Player::Rotate(float x, float y , float z)
+{
+
+
+		if (x != 0.0f)
+		{
+			m_fPitch += x;
+			if (m_fPitch > +35.0f) { x -= (m_fPitch - 35.0f); m_fPitch = +35.0f; }
+			if (m_fPitch < -35.0f) { x -= (m_fPitch + 35.0f); m_fPitch = -35.0f; }
+			XMFLOAT3 DistanceByAngle = m_pCamera->GetOffset();
+			if (m_fPitch > 0) {
+				DistanceByAngle.y = DistanceByAngle.y + x / 40;
+				DistanceByAngle.z = DistanceByAngle.z - x / 500;
+			}
+			else {
+				DistanceByAngle.y = DistanceByAngle.y + x / 40;
+				DistanceByAngle.z = DistanceByAngle.z - x / 150;
+			}
+		
+			m_pCamera->SetOffset(DistanceByAngle);
+		}
+		if (y != 0.0f)
+		{
+			m_fYaw += y;
+			if (m_fYaw > 360.0f) m_fYaw -= 360.0f;
+			if (m_fYaw < 0.0f) m_fYaw += 360.0f;
+		}
+		if (z != 0.0f)
+		{
+			m_fRoll += z;
+			if (m_fRoll > +20.0f) { z -= (m_fRoll - 20.0f); m_fRoll = +20.0f; }
+			if (m_fRoll < -20.0f) { z -= (m_fRoll + 20.0f); m_fRoll = -20.0f; }
+		}
+		m_pCamera->Rotate(x, y, z);
+		if (y != 0.0f)
+		{
+			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
+			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+		}
+	
+
+}
+
+void Player::UpdateMatrix()
+{
+	m_xmf4x4ToParent._11 = m_xmf3Right.x; m_xmf4x4ToParent._12 = m_xmf3Right.y; m_xmf4x4ToParent._13 = m_xmf3Right.z;
+	m_xmf4x4ToParent._21 = m_xmf3Up.x; m_xmf4x4ToParent._22 = m_xmf3Up.y; m_xmf4x4ToParent._23 = m_xmf3Up.z;
+	m_xmf4x4ToParent._31 = m_xmf3Look.x; m_xmf4x4ToParent._32 = m_xmf3Look.y; m_xmf4x4ToParent._33 = m_xmf3Look.z;
+	m_xmf4x4ToParent._41 = m_xmf3Position.x; m_xmf4x4ToParent._42 = m_xmf3Position.y; m_xmf4x4ToParent._43 = m_xmf3Position.z;
+
+	m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4ToParent);
 }
 
 void Player::Animate(float fTimeElapsed)
 {
-	OnPrepareRender();
+	UpdateMatrix();
 
 	if (m_pSkinnedAnimationController) ((PlayerAnimationController*)m_pSkinnedAnimationController)->AdvanceTime(fTimeElapsed, this);
 

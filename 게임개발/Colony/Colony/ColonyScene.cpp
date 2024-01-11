@@ -357,33 +357,14 @@ bool Scene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPara
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		//case '1':
-		//	++count;
-		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->SetTrackAnimationSet(0, count);
-		//	break;
-		//case '2':
-		//	--count;
-		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->SetTrackAnimationSet(0, count);
-		//	break;
-		//case 'W':
-		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveForward(0.5f);
-		//	break;
-		//case 'S':
-		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveForward(-0.5f);
-		//	break;
-		//case 'A':
-		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveStrafe(-0.5f);
-		//	break;
-		//case 'D':
-		//	if (m_ppHierarchicalGameObjects[0]) m_ppHierarchicalGameObjects[0]->MoveStrafe(0.5f);
-		//	break;
+		case VK_ESCAPE:
+			exit(0);
+			break;
+		default:
+			break;
 		}
-		break;
-	default:
-		break;
+		return(false);
 	}
-	return(false);
-
 }
 
 

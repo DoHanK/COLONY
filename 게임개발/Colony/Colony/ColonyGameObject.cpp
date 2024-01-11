@@ -532,7 +532,7 @@ void GameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition)
 
 void GameObject::Animate(float fTimeElapsed)
 {
-	OnPrepareRender();
+	UpdateMatrix();
 
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
 

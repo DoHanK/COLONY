@@ -1,8 +1,9 @@
 #pragma once
 #include "stdafx.h"
-#include "ColonyGameObject.h"
 #include "ColonyCamera.h"
+#include "ColonyGameObject.h"
 
+class Camera;
 
 class BasicShader
 {

@@ -2,9 +2,9 @@
 #include "stdafx.h"
 #include "ColonyShader.h"
 #include "ColonyMesh.h"
-#include "ColonyCamera.h"
 
 class BasicShader;
+class Camera;
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////// 모델의 표면을 정의 ///////////////////////////////////////
@@ -352,7 +352,7 @@ public:
 	virtual void OnPrepareAnimate() { }
 	virtual void Animate(float fTimeElapsed);
 
-	virtual void OnPrepareRender() { }
+	virtual void UpdateMatrix() { }
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

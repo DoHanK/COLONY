@@ -1,8 +1,8 @@
 #pragma once
 #include "stdafx.h" 
 #include "ColonyGameObject.h"
-#include "ColonyCamera.h"
 
+class ThirdPersonCamera;
 class PlayerAnimationController;
 //조작키
 #define W 'W'
@@ -100,7 +100,7 @@ protected:
 	float           			m_fFriction = 0.0f;
 
 
-	Camera* m_pCamera = NULL;
+	ThirdPersonCamera* m_pCamera = NULL;
 
 
 
@@ -108,6 +108,7 @@ public:
 	Player(CLoadedModelInfo* ModelInfo);
 	Player();
 	~Player();
+
 
 	//Body
 	GameObject* m_RightHand;
@@ -118,10 +119,28 @@ public:
 	char m_WeaponState = RIGHT_HAND;
 	virtual void SetAnimator(PlayerAnimationController* animator);
 	void SetWeapon(GameObject* Weapon);
+
+
 	//입력 받은 방향키로부터 가속도 계산
+	void SetPosition(const XMFLOAT3& Position);
 	void CalVelocityFromInput(DWORD dwDirection, float fDistance);
 	void AddAccel(const XMFLOAT3& xmf3Shift);
 	void AddPosition(const XMFLOAT3& xmf3Shift);
+	void UpdatePosition(float fTimeElapsed);
+	//입력받은 회전 처리
+	void Rotate(float x, float y, float z);
+	virtual void UpdateMatrix();
+
+	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
+	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
+	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
+	XMFLOAT3 GetRightVector() { return(m_xmf3Right); }
+	void SetLookVector(const XMFLOAT3& LookVector) { m_xmf3Look = LookVector; }
+	void SetUpVector(const XMFLOAT3& UpVector) { m_xmf3Up = UpVector; }
+	void SetRightVector(const XMFLOAT3& RightVector) { m_xmf3Right = RightVector; }
+	void SetCamera(ThirdPersonCamera* pCamera) { m_pCamera = pCamera; }
+	ThirdPersonCamera* GetCamera() { return m_pCamera; }
+
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 };

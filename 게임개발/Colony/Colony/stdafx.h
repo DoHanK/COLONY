@@ -2,7 +2,8 @@
 
 #define FRAME_BUFFER_WIDTH 1000
 #define FRAME_BUFFER_HEIGHT	700
-
+#define WINDOWS_POS_X	 250
+#define WINDOWS_POS_Y	 50
 //자주 사용하지 않는 API의 일부를 제외하는 명령어
 #ifndef WIN32_LEAN_AND_MEAN //활성화 상태
 # define WIN32_LEAN_AND_MEAN

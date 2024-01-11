@@ -111,7 +111,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     RECT rc = { 0,0,FRAME_BUFFER_WIDTH , FRAME_BUFFER_HEIGHT };
     DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
     AdjustWindowRect(&rc, dwStyle, FALSE);
-    HWND hMainWnd = CreateWindowW(szWindowClass, szTitle, dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
+    HWND hMainWnd = CreateWindowW(szWindowClass, szTitle, dwStyle, WINDOWS_POS_X, WINDOWS_POS_Y, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
 
     if (!hMainWnd) return FALSE;
 
@@ -139,7 +139,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-            GameEngine.CatchInputMessaging(hWnd, message, wParam, lParam);
+     GameEngine.CatchInputMessaging(hWnd, message, wParam, lParam);
     switch (message)
     {
     case WM_COMMAND:
