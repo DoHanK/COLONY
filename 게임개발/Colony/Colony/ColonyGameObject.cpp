@@ -3,10 +3,26 @@
 #include "ColonyGameObject.h"
 #include "ColonyShader.h"
 #include "ResourceManager.h"
-class BasicShader;
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-// 텍스쳐
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+#include "ColonyPlayer.h"
+class PlayerAnimationController;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//												Desc											    //
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//							Texture Class ,Matiral Class -> Matrial									//
+// 												   													//
+//		CAnimationCallbackHandler , AnimationSet , AnimationSets ,AnimationController  -> Animation	//  
+//  																								//
+//						CLoadedModelInfo , GameObject -> Model & Object in Game						//				  		 
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BasicShader* Material::m_pStandardShader;
+BasicShader* Material::m_pSkinnedAnimationShader;
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//										Texture Class												//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 Texture::Texture(int nTextrueResoureces, UINT nResoureceType, int nSameplers)
 {
 	m_nTextureType = nResoureceType;
@@ -22,6 +38,7 @@ Texture::Texture(int nTextrueResoureces, UINT nResoureceType, int nSameplers)
 	m_nSamplers = nSameplers;
 	if (m_nSamplers > 0) m_pd3dSamplerGpuDescriptorHandles = new D3D12_GPU_DESCRIPTOR_HANDLE[m_nSamplers];
 }
+
 Texture::~Texture()
 {
 	if (m_ppd3dTextures)
@@ -92,9 +109,10 @@ void Texture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromWICFile(pd3dDevice, pd3dCommandList, pszFileName, &(m_ppd3dTextureUploadBuffers[nIndex]), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-// 재질
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//										Material Class												//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 Material::Material(int nTextures)
 {
 	m_nTextures = nTextures;
@@ -107,7 +125,7 @@ Material::Material(int nTextures)
 
 Material::~Material()
 {
-	//if (m_pShader) m_pShader->Release();
+	if (m_pShader) m_pShader->Release();
 
 	if (m_nTextures > 0)
 	{
@@ -116,6 +134,16 @@ Material::~Material()
 
 		if (m_ppstrTextureNames) delete[] m_ppstrTextureNames;
 	}
+}
+
+void Material::SetShader(BasicShader* pShader)
+{
+	 if (m_pShader) m_pShader->Release(); 
+
+	 if (pShader) {
+		 m_pShader = pShader;
+		 m_pShader->AddRef();
+	 }
 }
 
 void Material::SetTexture(Texture* pTexture, UINT nTexture)
@@ -202,8 +230,21 @@ void Material::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+void Material::MakeShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_pStandardShader = new StandardShader();
+	m_pStandardShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pStandardShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	m_pSkinnedAnimationShader = new SkinnedAnimationStandardShader();
+	m_pSkinnedAnimationShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pSkinnedAnimationShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//										AnimationSet Class											//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 AnimationSet::AnimationSet(float fLength, int nFramesPerSecond, int nKeyFrames, int nSkinningBones, char* pstrName)
 {
 	m_fLength = fLength;
@@ -224,7 +265,7 @@ AnimationSet::~AnimationSet()
 	if (m_ppxmf4x4KeyFrameTransforms) delete[] m_ppxmf4x4KeyFrameTransforms;
 
 	if (m_pCallbackKeys) delete[] m_pCallbackKeys;
-	//if (m_pAnimationCallbackHandler) delete m_pAnimationCallbackHandler;
+	if (m_pAnimationCallbackHandler) delete m_pAnimationCallbackHandler;
 }
 
 void* AnimationSet::GetCallbackData()
@@ -332,8 +373,10 @@ void AnimationSet::SetAnimationCallbackHandler(CAnimationCallbackHandler* pCallb
 	m_pAnimationCallbackHandler = pCallbackHandler;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										AnimationSetS Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 AnimationSets::AnimationSets(int nAnimationSets)
 {
 	m_nAnimationSets = nAnimationSets;
@@ -363,11 +406,13 @@ void AnimationSets::SetAnimationCallbackHandler(int nAnimationSet, CAnimationCal
 	m_ppAnimationSets[nAnimationSet]->SetAnimationCallbackHandler(pCallbackHandler);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										LoadModelInfo Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 CLoadedModelInfo::~CLoadedModelInfo()
 {
-	//if (m_ppAnimationSets) delete[] m_ppAnimationSets;
+	if (m_ppAnimationSets) delete[] m_ppAnimationSets;
 	if (m_pnAnimatedBoneFrames) delete[] m_pnAnimatedBoneFrames;
 	if (m_ppSkinnedMeshes) delete[] m_ppSkinnedMeshes;
 
@@ -378,11 +423,13 @@ CLoadedModelInfo::~CLoadedModelInfo()
 	if (m_pppAnimatedBoneFrameCaches) delete[] m_pppAnimatedBoneFrameCaches;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										GameObject Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 GameObject::GameObject()
 {
-	m_pShader = NULL;
+	
 	m_xmf4x4ToParent = Matrix4x4::Identity();
 	m_xmf4x4World = Matrix4x4::Identity();
 }
@@ -410,7 +457,7 @@ GameObject::~GameObject()
 	}
 	if (m_ppMaterials) delete[] m_ppMaterials;
 
-	//if (m_pSkinnedAnimationController) delete m_pSkinnedAnimationController;
+	if (m_pSkinnedAnimationController) delete m_pSkinnedAnimationController;
 }
 
 void GameObject::AddRef()
@@ -453,19 +500,6 @@ void GameObject::SetMesh(BasicMesh* pMesh)
 	m_pMesh = pMesh;
 	if (m_pMesh) m_pMesh->AddRef();
 }
-
-//void GameObject::SetShader(CShader* pShader)
-//{
-//	m_nMaterials = 1;
-//	m_ppMaterials = new CMaterial * [m_nMaterials];
-//	m_ppMaterials[0] = new CMaterial(0);
-//	m_ppMaterials[0]->SetShader(pShader);
-//}
-
-//void CGameObject::SetShader(int nMaterial, CShader* pShader)
-//{
-//	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->SetShader(pShader);
-//}
 
 void GameObject::SetMaterial(int nMaterial, Material* pMaterial)
 {
@@ -527,7 +561,7 @@ void GameObject::SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet)
 
 void GameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition)
 {
-	//if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->SetTrackPosition(nAnimationTrack, fPosition);
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->SetTrackPosition(nAnimationTrack, fPosition);
 }
 
 void GameObject::Animate(float fTimeElapsed)
@@ -545,7 +579,6 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCam
 	//프레임으로 이뤄진 것이기에 필요가 없음
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
-	if (m_pShader)m_pShader->OnPrepareRender(pd3dCommandList, 0);
 
 	if (m_pMesh)
 	{
@@ -557,8 +590,8 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCam
 			{
 				if (m_ppMaterials[i])
 				{
-					//if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
-					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+					if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+						m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 				}
 
 				m_pMesh->Render(pd3dCommandList, i);
@@ -751,14 +784,14 @@ void GameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 				UINT nMeshType = GetMeshType();
 				if (nMeshType & VERTEXT_NORMAL_TANGENT_TEXTURE)
 				{
-					//if (nMeshType & VERTEXT_BONE_INDEX_WEIGHT)
-					//{
-					//	pMaterial->SetSkinnedAnimationShader();
-					//}
-					//else
-					//{
-					//	pMaterial->SetStandardShader();
-					//}
+					if (nMeshType & VERTEXT_BONE_INDEX_WEIGHT)
+					{
+						pMaterial->SetSkinnedAnimationShader();
+					}
+					else
+					{
+						pMaterial->SetStandardShader();
+					}
 				}
 			}
 			SetMaterial(nMaterial, pMaterial);
@@ -1062,6 +1095,10 @@ CLoadedModelInfo* GameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd3
 	return(pLoadedModel);
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//									AnimationController Class									   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 AnimationController::AnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel)
 {
 	m_nAnimationTracks = nAnimationTracks;
@@ -1202,22 +1239,6 @@ void AnimationController::AdvanceTime(float fTimeElapsed, GameObject* pRootGameO
 						xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
 					}
 				}
-
-				
-
-				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "JU_Mannequin") {
-
-					xmf4x4Transform._41 = 0;
-					xmf4x4Transform._42 = 0;
-					xmf4x4Transform._43 = 0;
-
-					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
-				}
-				else {
-					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
-
-				}
-
 			
 			}
 		}

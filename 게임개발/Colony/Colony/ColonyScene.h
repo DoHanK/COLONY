@@ -33,6 +33,10 @@ struct LIGHTS
 	int									m_nLights;
 };
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										Scene Class				  								   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 class Scene
 {
 public:
@@ -50,16 +54,12 @@ public:
 	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseObjects();
 
-	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
-	ID3D12RootSignature* GetGraphicsRootSignature() { return m_pd3dGraphicsRootSignature; }
-
 	void AnimateObjects(float fTimeElapsed);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 
 	void ReleaseUploadBuffers();
 
 protected:
-	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 
 	float								m_fElapsedTime = 0.0f;
 

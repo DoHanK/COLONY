@@ -4,6 +4,12 @@
 
 class ThirdPersonCamera;
 class PlayerAnimationController;
+
+
+//Player Acceleration Speed Control
+#define PlayerRunAcel  0.02;
+#define NoGrapAcel 0.3;
+
 //조작키
 #define W 'W'
 #define S 'S'
@@ -79,6 +85,10 @@ enum WeaponPosition {
 	SPINE_BACK
 };
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										Player Class											   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 class Player :public GameObject
 {
 protected:
@@ -105,8 +115,7 @@ protected:
 
 
 public:
-	Player(CLoadedModelInfo* ModelInfo);
-	Player();
+	Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CLoadedModelInfo* PlayerModelInfo, CLoadedModelInfo* WeaponModelInfo);
 	~Player();
 
 
@@ -138,18 +147,23 @@ public:
 	void SetLookVector(const XMFLOAT3& LookVector) { m_xmf3Look = LookVector; }
 	void SetUpVector(const XMFLOAT3& UpVector) { m_xmf3Up = UpVector; }
 	void SetRightVector(const XMFLOAT3& RightVector) { m_xmf3Right = RightVector; }
-	void SetCamera(ThirdPersonCamera* pCamera) { m_pCamera = pCamera; }
+	void SetCamera(ThirdPersonCamera* pCamera);
 	ThirdPersonCamera* GetCamera() { return m_pCamera; }
 
+	virtual void ReleaseUploadBuffers();
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 };
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//								PlayerAnimationController Class									   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 //0: 상체 , 1: 하체 , 2:상체 전 애니메이션 , 3:하체 전 애니메이션
 class PlayerAnimationController :public AnimationController {
 public:
 	PlayerAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	virtual ~PlayerAnimationController(){}
 public:
 	DWORD m_AnimationUpperState = IDLE_RIFLE;
 	DWORD m_AnimationLowerState = IDLE_RIFLE;

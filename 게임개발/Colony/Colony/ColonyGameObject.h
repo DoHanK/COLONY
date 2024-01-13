@@ -4,6 +4,7 @@
 #include "ColonyMesh.h"
 
 class BasicShader;
+
 class Camera;
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,9 +26,10 @@ struct SRVROOTARGUMENTINFO
 	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dSrvGpuDescriptorHandle;
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-// 텍스쳐
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//										Texture Class												//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 class Texture {
 public:
 	Texture(int nTextrueResoureces = 1, UINT nResoureceType = RESOURCE_TEXTURE2D, int nSameplers = 0);
@@ -76,9 +78,11 @@ public:
 #define MATERIAL_EMISSION_MAP		0x10
 #define MATERIAL_DETAIL_ALBEDO_MAP	0x20
 #define MATERIAL_DETAIL_NORMAL_MAP	0x40
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-// 재질
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//										Material Class												//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 class Material
 {
 public:
@@ -89,18 +93,19 @@ private:
 	int								m_nReferences = 0;
 
 public:
+
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 public:
-	//CShader* m_pShader = NULL;
+	BasicShader* m_pShader = NULL;
 
 	XMFLOAT4						m_xmf4AlbedoColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	XMFLOAT4						m_xmf4EmissiveColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4						m_xmf4SpecularColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4						m_xmf4AmbientColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	//void SetShader(CShader* pShader);
+	void SetShader(BasicShader* pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
 	void SetTexture(Texture* pTexture, UINT nTexture = 0);
 
@@ -125,13 +130,13 @@ public:
 	void LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, Texture** ppTexture, GameObject* pParent, FILE* pInFile,const char* TexFileName);
 
 public:
-	//static BasicShader* m_pStandardShader;
-	//static BasicShader* m_pSkinnedAnimationShader;
+	static BasicShader* m_pStandardShader;
+	static BasicShader* m_pSkinnedAnimationShader;
 
-	static void Material::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	static void Material::MakeShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
-	//void SetStandardShader() { Material::SetShader(m_pStandardShader); }
-	//void SetSkinnedAnimationShader() { Material::SetShader(m_pSkinnedAnimationShader); }
+	void SetStandardShader() { Material::SetShader(m_pStandardShader); }
+	void SetSkinnedAnimationShader() { Material::SetShader(m_pSkinnedAnimationShader); }
 };
 
 
@@ -157,6 +162,10 @@ struct CALLBACKKEY
 
 #define _WITH_ANIMATION_INTERPOLATION
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//									CAnimationCallbackHandler Class								    //
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 class CAnimationCallbackHandler
 {
 public:
@@ -167,6 +176,10 @@ public:
 	virtual void HandleCallback(void* pCallbackData) { }
 };
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//										AnimationSet Class											//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 class AnimationSet
 {
 public:
@@ -203,6 +216,10 @@ public:
 	void* GetCallbackData();
 };
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										AnimationSetS Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 class AnimationSets
 {
 private:
@@ -226,6 +243,10 @@ public:
 	void SetAnimationCallbackHandler(int nAnimationSet, CAnimationCallbackHandler* pCallbackHandler);
 };
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										LoadModelInfo Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 class CLoadedModelInfo
 {
 public:
@@ -243,6 +264,10 @@ public:
 	GameObject*** m_pppAnimatedBoneFrameCaches = NULL; //[SkinnedMeshes][Bones]
 };
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										AnimationTrack Class									   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 class AnimationTrack
 {
 public:
@@ -266,10 +291,14 @@ public:
 	void SetPosition(float fPosition) { m_fPosition = fPosition; }
 };
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//									AnimationController Class									   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 class AnimationController {
 public:
 	AnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
-	~AnimationController();
+	virtual ~AnimationController();
 
 public:
 	float 							m_fTime = 0.0f;
@@ -304,14 +333,13 @@ public:
 	void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
 };
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////// 게임 오브젝트를 정의 /////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										GameObject Class										   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 class GameObject
 {
-private:
+protected:
 	int								m_nReferences = 0;
 
 public:
@@ -338,11 +366,8 @@ public:
 	GameObject* m_pChild = NULL;
 	GameObject* m_pSibling = NULL;
 
-	BasicShader* m_pShader;
-
 	void SetMesh(BasicMesh* pMesh);
-	//void SetShader(CShader* pShader);
-	//void SetShader(int nMaterial, CShader* pShader);
+
 	void SetMaterial(int nMaterial, Material* pMaterial);
 
 	void SetChild(GameObject* pChild, bool bReferenceUpdate = false);

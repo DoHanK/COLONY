@@ -12,9 +12,15 @@ struct VS_CB_CAMERA_INFO
 	XMFLOAT3						m_xmf3Position;
 };
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//												Camera											    //
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 class Camera
 {
 protected:
+	int								m_nReferences = 0;
+
 	XMFLOAT3						m_xmf3Position;
 	XMFLOAT3						m_xmf3Right;
 	XMFLOAT3						m_xmf3Up;
@@ -44,6 +50,10 @@ public:
 	Camera(Camera* pCamera);
 	virtual ~Camera();
 
+	void AddRef();
+	void Release();
+
+
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -61,8 +71,6 @@ public:
 
 	void SetPlayer(Player* pPlayer) { m_pPlayer = pPlayer; }
 	Player* GetPlayer() { return(m_pPlayer); }
-
-
 
 	void SetPosition(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
 	XMFLOAT3& GetPosition() { return(m_xmf3Position); }
@@ -96,6 +104,10 @@ public:
 
 };
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//										ThirdPersonCamera											//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 class ThirdPersonCamera :public Camera{
 public:
 	ThirdPersonCamera();

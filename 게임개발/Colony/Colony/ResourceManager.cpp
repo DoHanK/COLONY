@@ -6,6 +6,7 @@
  D3D12_CPU_DESCRIPTOR_HANDLE  ResourceManager::hCDescriptor;
  UINT ResourceManager::TextureCounting;
  UINT ResourceManager::SRVHeapsize;
+
  D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3dResourceDesc, UINT nTextureType)
  {
 	 D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc;
@@ -56,6 +57,29 @@ ResourceManager::ResourceManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	hCDescriptor = pSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	SRVHeapsize = pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	TextureCounting = 0;
+
+	m_pDevice = pd3dDevice;
+	m_pRootSignature = m_pRootSignature;
+	m_pGCommandList = pCommandList;
+	
+}
+
+ResourceManager::~ResourceManager()
+{
+	//모델 삭제
+	for (pair<string, CLoadedModelInfo*>& Model : ModelnfoList) {
+		delete Model.second;
+	}
+	for (pair<string, Texture*>& TextureInfo : TextureList) {
+		TextureInfo.second->Release();
+	}
+
+
+	if (pSrvDescriptorHeap) {
+		pSrvDescriptorHeap->Release();
+		pSrvDescriptorHeap = nullptr;
+	}
+
 }
 
 void ResourceManager::CreateSrvDescriptorHeap(ID3D12Device* pd3dDevice, int numDesc)
@@ -94,7 +118,7 @@ string ResourceManager::ObjectNameFromFile(const char* filename)
 	return MeshTag;
 }
 
-CLoadedModelInfo* ResourceManager::BringModelInfo(const char* filename)
+CLoadedModelInfo* ResourceManager::BringModelInfo(const char* filename,const char* FileTextureRoute)
 {
 
 	string CheckTag = ObjectNameFromFile(filename);
@@ -110,7 +134,7 @@ CLoadedModelInfo* ResourceManager::BringModelInfo(const char* filename)
 	else {
 
 		//파일을 읽어 들이고 정보를 받아옴.
-		CLoadedModelInfo* LoadObjectModelInfo = GameObject::LoadGeometryAndAnimationFromFile(m_pDevice, m_pGCommandList, m_pRootSignature, filename, NULL, "Model/Textures/");
+		CLoadedModelInfo* LoadObjectModelInfo = GameObject::LoadGeometryAndAnimationFromFile(m_pDevice, m_pGCommandList, NULL, filename, NULL, FileTextureRoute);
 		ModelnfoList.push_back({ CheckTag,LoadObjectModelInfo });
 		return LoadObjectModelInfo;
 	}
@@ -121,7 +145,6 @@ CLoadedModelInfo* ResourceManager::BringModelInfo(const char* filename)
 
 Texture* ResourceManager::BringTexture(const char* filename, UINT RootParameter, bool bIsDDSFile)
 {
-
 
 	string TargetName = ObjectNameFromFile(filename);
 

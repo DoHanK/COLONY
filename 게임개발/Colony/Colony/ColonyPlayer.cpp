@@ -1,52 +1,32 @@
 #include "ColonyPlayer.h"
 #include "ColonyGameObject.h"
 
-Player::Player(CLoadedModelInfo* ModelInfo) 
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//												Desc											    //
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//								Player class -> (Parrent is GameObject)								//
+//																									//		
+//PlayerAnimationController class -> Control Animation by UserInput (Parrent is AnimationController)//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										Player Class											   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,CLoadedModelInfo* PlayerModelInfo , CLoadedModelInfo* WeaponModelInfo)
 {
-	m_pCamera = NULL;
 
-	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
-	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_fMaxVelocityXZ = 4.0f;
-	m_fMaxVelocityY = 0.0f;
-	m_fFriction = 30.0f;
-
-	m_fPitch = 0.0f;
-	m_fRoll = 0.0f;
-	m_fYaw = 0.0f;
-
-	if (ModelInfo) {
-		SetChild(ModelInfo->m_pModelRootObject);
-		ModelInfo->m_pModelRootObject;
-
-		m_RightHand = ModelInfo->m_pModelRootObject->FindFrame("RightHand");
-		m_Spine = ModelInfo->m_pModelRootObject->FindFrame("Spine1");
+	if (PlayerModelInfo) {
+		SetChild(PlayerModelInfo->m_pModelRootObject,true);
+		PlayerModelInfo->m_pModelRootObject;
+		m_RightHand = PlayerModelInfo->m_pModelRootObject->FindFrame("RightHand");
+		m_Spine = PlayerModelInfo->m_pModelRootObject->FindFrame("Spine1");
 	}
-}
+	SetAnimator(new PlayerAnimationController(pd3dDevice, pd3dCommandList, 4, PlayerModelInfo));
 
-Player::Player()
-{
-	m_pCamera = NULL;
-
-	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
-	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_fMaxVelocityXZ = 40.0f;
-	m_fMaxVelocityY = 0.0f;
-	m_fFriction = 0.0f;
-
-	m_fPitch = 0.0f;
-	m_fRoll = 0.0f;
-	m_fYaw = 0.0f;
+	GameObject* Weapon = new GameObject();
+	Weapon->SetChild(WeaponModelInfo->m_pModelRootObject);
+	SetWeapon(Weapon);
 
 }
 
@@ -56,6 +36,8 @@ Player::~Player()
 		m_pCamera->ReleaseShaderVariables();
 		delete m_pCamera;
 	}
+
+	m_SelectWeapon.m_pChild->Release();
 }
 
 void Player::SetAnimator(PlayerAnimationController* animator)
@@ -67,7 +49,7 @@ void Player::SetAnimator(PlayerAnimationController* animator)
 
 void Player::SetWeapon(GameObject* Weapon)
 {
-	m_SelectWeapon.m_pChild = Weapon;
+	m_SelectWeapon.SetChild(Weapon, true);
 	m_SelectWeapon.m_pChild->m_xmf4x4World = Matrix4x4::Identity();
 	m_SelectWeapon.m_pChild->m_xmf4x4ToParent = Matrix4x4::Identity();
 	//오른쪽 손
@@ -90,7 +72,6 @@ void Player::SetPosition(const XMFLOAT3& Position)
 	m_xmf3Position = Position;
 	GameObject::SetPosition(Position);
 }
-
 // 현재 속력= 속도 + 가속도 * 시간 
 void Player::CalVelocityFromInput(DWORD dwDirection, float Velocity)
 {
@@ -113,7 +94,6 @@ void Player::CalVelocityFromInput(DWORD dwDirection, float Velocity)
 		AddAccel(xmf3Shift);
 	}
 }
-
 //가속도 증가
 void Player::AddAccel(const XMFLOAT3& xmf3Shift)
 {
@@ -122,11 +102,7 @@ void Player::AddAccel(const XMFLOAT3& xmf3Shift)
 //해당 벡터만큼 이동
 void Player::AddPosition(const XMFLOAT3& xmf3Shift)
 {
-
 	m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
-
-
-	//if(m_pCamera)	m_pCamera->Move(xmf3Shift);
 }
 //플레이어 위치 업데이트
 void Player::UpdatePosition(float fTimeElapsed)
@@ -140,10 +116,6 @@ void Player::UpdatePosition(float fTimeElapsed)
 		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
 		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
 
-		//OutputDebugStringA(std::to_string(m_xmf3Velocity.x).c_str());
-		//OutputDebugStringA("       ");
-		//OutputDebugStringA(std::to_string(m_xmf3Velocity.z).c_str());
-		//OutputDebugStringA("     \n  ");
 	}
 	float fMaxVelocityY = m_fMaxVelocityY;
 	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
@@ -152,12 +124,8 @@ void Player::UpdatePosition(float fTimeElapsed)
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
 	AddPosition(xmf3Velocity);
 
-	//if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 
-	//DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	m_pCamera->Update(m_xmf3Position, fTimeElapsed);
-	//if (m_pCameraUpdatedContext) 		OnCameraUpdateCallback(fTimeElapsed);
-	//if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
 	m_pCamera->RegenerateViewMatrix();
 
 	//마찰계수
@@ -221,6 +189,26 @@ void Player::UpdateMatrix()
 	m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4ToParent);
 }
 
+void Player::SetCamera(ThirdPersonCamera* pCamera)
+{
+	if (m_pCamera) {
+		m_pCamera->Release();
+		m_pCamera = NULL;	
+	}
+
+	if (pCamera) {
+		m_pCamera = pCamera;
+		m_pCamera->AddRef();
+	}
+}
+
+void Player::ReleaseUploadBuffers()
+{
+	GameObject::ReleaseUploadBuffers();
+	m_SelectWeapon.ReleaseUploadBuffers();
+
+}
+
 void Player::Animate(float fTimeElapsed)
 {
 	UpdateMatrix();
@@ -239,8 +227,6 @@ void Player::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 	//프레임으로 이뤄진 것이기에 필요가 없음
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
-	if (m_pShader)m_pShader->OnPrepareRender(pd3dCommandList, 0);
-
 	if (m_pMesh)
 	{
 		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
@@ -251,7 +237,7 @@ void Player::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 			{
 				if (m_ppMaterials[i])
 				{
-					//if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+					if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 				}
 
@@ -269,49 +255,12 @@ void Player::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 }
 
 
-
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//								PlayerAnimationController Class									   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 PlayerAnimationController::PlayerAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel):
 AnimationController(pd3dDevice, pd3dCommandList,  nAnimationTracks, pModel)
 {
-
-	m_nAnimationTracks = nAnimationTracks;
-	m_pAnimationTracks = new AnimationTrack[nAnimationTracks];
-
-	m_nSkinnedMeshes = pModel->m_nSkinnedMeshes;
-
-	m_ppAnimationSets = new AnimationSets * [m_nSkinnedMeshes];
-	m_pnAnimatedBoneFrames = new int[m_nSkinnedMeshes];
-	m_ppSkinnedMeshes = new SkinnedMesh * [m_nSkinnedMeshes];
-	m_pppAnimatedBoneFrameCaches = new GameObject * *[m_nSkinnedMeshes];
-
-	for (int i = 0; i < m_nSkinnedMeshes; i++)
-	{
-		m_ppSkinnedMeshes[i] = pModel->m_ppSkinnedMeshes[i];
-
-		m_ppAnimationSets[i] = pModel->m_ppAnimationSets[i];
-		m_ppAnimationSets[i]->AddRef();
-
-		m_pnAnimatedBoneFrames[i] = pModel->m_pnAnimatedBoneFrames[i];
-
-		m_pppAnimatedBoneFrameCaches[i] = new GameObject * [m_pnAnimatedBoneFrames[i]];
-		for (int j = 0; j < m_pnAnimatedBoneFrames[i]; j++)
-		{
-			m_pppAnimatedBoneFrameCaches[i][j] = pModel->m_pppAnimatedBoneFrameCaches[i][j];
-		}
-	}
-
-	m_ppd3dcbSkinningBoneTransforms = new ID3D12Resource * [m_nSkinnedMeshes];
-	m_ppcbxmf4x4MappedSkinningBoneTransforms = new XMFLOAT4X4 * [m_nSkinnedMeshes];
-
-	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256의 배수
-	for (int i = 0; i < m_nSkinnedMeshes; i++)
-	{
-		m_ppd3dcbSkinningBoneTransforms[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-		m_ppd3dcbSkinningBoneTransforms[i]->Map(0, NULL, (void**)&m_ppcbxmf4x4MappedSkinningBoneTransforms[i]);
-	}
-
-
 
 }
 
@@ -675,9 +624,6 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 
 	}
 	
-
-
-
 	//하체 걷기와 이동속도 조절
 	if (STATE_RUN == (dwState & STATE_RUN)) {
 		
@@ -720,6 +666,7 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 	
 
 }
+
 //상체 하체 애니메이션 변경
 void PlayerAnimationController::ChangeAnimation(DWORD ChangeState)
 {

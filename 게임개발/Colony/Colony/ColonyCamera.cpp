@@ -1,7 +1,18 @@
 #include "ColonyCamera.h"
 #include "ColonyGameObject.h"
 #include "ColonyPlayer.h"
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//												Desc											   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										Camera -> (Basic Class)									   //
+//																								   //	
+//			ThirdPersonCamera -> Player Look TPS (Parent is BasicCamera class)					   //			 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//												Camera											    //
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 Camera::Camera()
 {
 	m_xmf4x4View = Matrix4x4::Identity();
@@ -19,16 +30,16 @@ Camera::Camera()
 	m_fTimeLag = 0.0f;
 	m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pPlayer = NULL;
+
 }
 
 Camera::Camera(Camera* pCamera)
 {
-	if (pCamera)
-	{
+	if (pCamera){
 		*this = *pCamera;
 	}
-	else
-	{
+	else{
+
 		m_xmf4x4View = Matrix4x4::Identity();
 		m_xmf4x4Projection = Matrix4x4::Identity();
 		m_d3dViewport = { 0, 0, FRAME_BUFFER_WIDTH , FRAME_BUFFER_HEIGHT, 0.0f, 1.0f };
@@ -44,11 +55,22 @@ Camera::Camera(Camera* pCamera)
 		m_fTimeLag = 0.0f;
 		m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		m_pPlayer = NULL;
+
 	}
 }
 
 Camera::~Camera()
 {
+}
+
+void Camera::AddRef()
+{
+	m_nReferences++;
+}
+
+void Camera::Release()
+{
+	if (--m_nReferences <= 0) delete this;
 }
 
 void Camera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom)
@@ -131,10 +153,11 @@ void Camera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandL
 	pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
 	pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
 }
-//////////////////////////////////////////////////////////////////////////////
-//
-//////////////////////////////////////////////////////////////////////////////
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//										ThirdPersonCamera											//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 ThirdPersonCamera::ThirdPersonCamera()
 {
 	m_xmf4x4View = Matrix4x4::Identity();
@@ -154,24 +177,10 @@ ThirdPersonCamera::ThirdPersonCamera()
 	m_pPlayer = NULL;
 }
 
-ThirdPersonCamera::ThirdPersonCamera(Camera* pCamera)
-{
-	if (pCamera)
-	{
-	
-			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-			m_xmf3Right.y = 0.0f;
-			m_xmf3Look.y = 0.0f;
-			m_xmf3Right = Vector3::Normalize(m_xmf3Right);
-			m_xmf3Look = Vector3::Normalize(m_xmf3Look);
-		
-	}
-}
-
 ThirdPersonCamera::~ThirdPersonCamera()
 {
+	
 }
-
 
 void ThirdPersonCamera::Rotate(float x, float y, float z)
 {
@@ -229,10 +238,7 @@ void ThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		if (fDistance > 0)
 		{
 			m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
-		
-
 			m_xmf3Position.x = xmf3Position.x;
-			//SetLookAt(xmf3LookAt);
 		}
 	}
 }

@@ -1,7 +1,27 @@
 #include "stdafx.h"
 #include "ColonyShader.h"
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//												Desc											   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//								BasicShader Class -> None (BasicShader)							   //
+//																								   //
+//	   StadardShader Class -> StandardShader is Rendering for StaticModel (parrent is BasicShader) //
+//																								   //
+//	  SkinnedShader Class -> SkinnedShader is Rendering for SkinnedModel(Parrent is BasicShader)   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+#define _WITH_WFOPEN
+//#define _WITH_STD_STREAM
 
+#ifdef _WITH_STD_STREAM
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <sstream>
+#endif
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										BasicShader Class				  						   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 BasicShader::BasicShader()
 {
 }
@@ -9,7 +29,7 @@ BasicShader::BasicShader()
 BasicShader::~BasicShader()
 {
 	ReleaseShaderVariables();
-
+	
 	if (m_pd3dPipelineState) m_pd3dPipelineState->Release();
 }
 
@@ -49,16 +69,6 @@ D3D12_SHADER_BYTECODE BasicShader::CompileShaderFromFile(WCHAR* pszFileName, LPC
 
 	return(d3dShaderByteCode);
 }
-
-#define _WITH_WFOPEN
-//#define _WITH_STD_STREAM
-
-#ifdef _WITH_STD_STREAM
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <sstream>
-#endif
 
 D3D12_SHADER_BYTECODE BasicShader::ReadCompiledShaderFromFile(WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob)
 {
@@ -209,17 +219,16 @@ void BasicShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCa
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//							SkinnedAnimationStandardShader Class				  				   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 SkinnedAnimationStandardShader::SkinnedAnimationStandardShader()
 {
 }
 
 SkinnedAnimationStandardShader::~SkinnedAnimationStandardShader()
 {
+
 }
 
 D3D12_INPUT_LAYOUT_DESC SkinnedAnimationStandardShader::CreateInputLayout()
@@ -252,12 +261,17 @@ D3D12_SHADER_BYTECODE SkinnedAnimationStandardShader::CreatePixelShader()
 	return (BasicShader::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										StandardShader Class				  					   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 StandardShader::StandardShader()
 {
 }
 
 StandardShader::~StandardShader()
 {
+
 }
 
 D3D12_INPUT_LAYOUT_DESC StandardShader::CreateInputLayout()

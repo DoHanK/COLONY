@@ -2,13 +2,14 @@
 #include "stdafx.h"
 #include "ColonyGameObject.h"
 ///////////////////////////////////////////////////////////////////////////////////////
-//리소스를 업로드하려면, 제일먼저 생성되어야함 GameFrameWork에 제일 먼저 생성되어야함//
+// 리소스를 업로드하려면, 제일먼저 생성되어야함 GameFrameWork에 제일 먼저 생성되어야함
+// LoadModel Info를 관리하며, 프로그램 종료시 리소스매니저가 삭제.
 ///////////////////////////////////////////////////////////////////////////////////////
 
 class ResourceManager {
 public:
 	ResourceManager(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* pCommandList, ID3D12RootSignature* m_pRootSignature);
-	~ResourceManager() {};
+	~ResourceManager();
 
 private:
 	ID3D12Device*				m_pDevice;
@@ -40,7 +41,7 @@ public:
 	//파일 경로로부터 파일 이름만 저장
 	string ObjectNameFromFile(const char* filename);
 	//모델 불러오기
-	CLoadedModelInfo* BringModelInfo(const char* filename);
+	CLoadedModelInfo* BringModelInfo(const char* filename, const char* FileTextureRoute);
 	//텍스쳐 불러오기
 	Texture* BringTexture(const char* filename,UINT rootparameter,bool bIsDDSFile);
 
