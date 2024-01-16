@@ -87,6 +87,9 @@
     <ClInclude Include="UserDefineType.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="UiManager.h">
+      <Filter>GameManagerHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -132,6 +135,9 @@
       <Filter>GameCpp</Filter>
     </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
+      <Filter>GameManagerCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="UiManager.cpp">
       <Filter>GameManagerCpp</Filter>
     </ClCompile>
   </ItemGroup>

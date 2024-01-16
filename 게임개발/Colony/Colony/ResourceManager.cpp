@@ -68,8 +68,10 @@ ResourceManager::~ResourceManager()
 {
 	//모델 삭제
 	for (pair<string, CLoadedModelInfo*>& Model : ModelnfoList) {
+		Model.second->m_pModelRootObject->Release();
 		delete Model.second;
 	}
+
 	for (pair<string, Texture*>& TextureInfo : TextureList) {
 		TextureInfo.second->Release();
 	}
@@ -136,11 +138,19 @@ CLoadedModelInfo* ResourceManager::BringModelInfo(const char* filename,const cha
 		//파일을 읽어 들이고 정보를 받아옴.
 		CLoadedModelInfo* LoadObjectModelInfo = GameObject::LoadGeometryAndAnimationFromFile(m_pDevice, m_pGCommandList, NULL, filename, NULL, FileTextureRoute);
 		ModelnfoList.push_back({ CheckTag,LoadObjectModelInfo });
+		LoadObjectModelInfo->m_pModelRootObject->AddRef();
 		return LoadObjectModelInfo;
 	}
 
 
 	return nullptr;
+}
+
+void ResourceManager::ReleaseUploadBuffers()
+{
+	for (auto& Texture : TextureList) {
+		Texture.second->ReleaseUploadBuffers();
+	}
 }
 
 Texture* ResourceManager::BringTexture(const char* filename, UINT RootParameter, bool bIsDDSFile)
@@ -161,11 +171,11 @@ Texture* ResourceManager::BringTexture(const char* filename, UINT RootParameter,
 		// 멀티바이트에서 와이드 문자열로 변환
 		mbstowcs(wideStringFile, filename, bufferSize + 1);
 
-		TempTexture->LoadTextureFromFile(m_pDevice, m_pGCommandList, wideStringFile, true);
+		TempTexture->LoadTextureFromFile(m_pDevice, m_pGCommandList, wideStringFile, 0 , true);
 		//정보가 없을때
 		ResourceManager::CreateShaderResourceViews(m_pDevice,TempTexture, RootParameter, false);
-
 		TextureList.push_back({ TargetName, TempTexture });
+		TempTexture->AddRef();
 
 		return TempTexture;
 	}

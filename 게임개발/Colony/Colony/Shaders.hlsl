@@ -160,8 +160,60 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // UI 텍스쳐 & 텍스쳐마스크
-Texture2D gtxtTerrainBaseTexture : register(t1);
-Texture2D gtxtTerrainDetailTexture : register(t2);
+Texture2D gtxtUiTexture : register(t1);
+Texture2D gtxtUiMaskTexture : register(t2);
+
+struct VS_UIRECT_INPUT
+{
+    float3 position : POSITION;
+    float2 TexC : TEXCOORD;
+    float Mask :MASK;
+};
+
+
+struct VS_UIRECT_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float2 TexC : TEXCOORD;
+    float Mask : MASK;
+};
+
+VS_UIRECT_OUTPUT VSUiRect(VS_UIRECT_INPUT input)
+{
+    VS_UIRECT_OUTPUT output;
+    
+    output.position = float4(input.position, 1.0f);
+    output.Mask = input.Mask;
+    output.TexC.x = input.TexC.x;
+    output.TexC.y = input.TexC.y;
+	
+    return (output);
+}
+
+float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
+{
+    float4 texColor;
+ 
+    if (input.Mask > 0.5)
+    {
+        if (gtxtUiMaskTexture.Sample(gssWrap, input.TexC).r > 0.5)
+        {
+			texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);	
+        }
+        else
+        {
+            texColor = float4(0, 0, 0, 0.0f);
+        }
+    }
+    else
+    {
+        texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);
+    }
+	
+    return texColor;
+}
+
+
 
 
 struct VS_SKYBOX_CUBEMAP_INPUT

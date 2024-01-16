@@ -44,6 +44,7 @@ public:
 	CLoadedModelInfo* BringModelInfo(const char* filename, const char* FileTextureRoute);
 	//텍스쳐 불러오기
 	Texture* BringTexture(const char* filename,UINT rootparameter,bool bIsDDSFile);
-
+	
+	void ReleaseUploadBuffers();
 	static D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceViews(ID3D12Device* m_pd3Device , Texture* pTexture, UINT nRootParameter , bool bAutoIncrement);
 };

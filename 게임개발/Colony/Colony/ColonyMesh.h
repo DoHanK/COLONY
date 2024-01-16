@@ -178,3 +178,79 @@ public:
 
 
 };
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										DynamicMesh Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+class DynamicMesh {
+public:
+	DynamicMesh() {};
+	virtual ~DynamicMesh() { };
+protected:
+
+	int								m_nReferences = 0;
+
+public:
+	void AddRef() { m_nReferences++; }
+	void Release() { if (--m_nReferences <= 0) delete this; }
+
+protected:
+	D3D12_PRIMITIVE_TOPOLOGY		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	UINT							m_nSlot = 0;
+	UINT							m_nVertices = 0;
+	UINT							m_nOffset = 0;
+	UINT							m_nType = 0;
+	UINT							m_nStride = 0;
+
+public:
+	XMFLOAT3*						m_pVertices = NULL;
+	UINT*							m_pnIndices = NULL;
+	int								m_nIndices = 0;
+
+
+
+	ID3D12Resource*					m_pd3dPositionBuffer;
+	UINT							m_nVertexBufferViews = 0;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dVertexBufferViews;
+
+	XMFLOAT3*						m_pcbMappedPositions = NULL;
+
+};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										UIRectMesh Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+struct UIRect {
+	// -1 ~ 1 nomalize value
+	float top;
+	float bottom;
+	float left;
+	float right;
+	int purpose;
+};
+
+class UIRectMesh :public DynamicMesh{
+public:
+	UIRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	~UIRectMesh();
+
+	//텍스쳐 매핑을 위한 UV좌표
+	ID3D12Resource*					m_pd3dUvBuffer;
+	UINT							m_nUvBufferViews = 0;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dUvBufferViews;
+	XMFLOAT2*						m_pcbMappedUvs;
+
+	//MaskValue
+	ID3D12Resource*					m_pd3dMaskBuffer;
+	UINT							m_nMaskBufferViews = 0;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dMaskBufferViews;
+	float*							m_pcbMappedMasks;
+
+	//위치 지정해주기
+	void UpdateVertexPosition(const UIRect& Rect);
+	//Mask Setting
+	void UpdateMaskValue(const float& lefttop, const float& righttop, const float& leftbottom, const float& rightbottom);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+};

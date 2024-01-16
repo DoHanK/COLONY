@@ -55,6 +55,11 @@ Texture::~Texture()
 	if (m_pd3dSamplerGpuDescriptorHandles) delete[] m_pd3dSamplerGpuDescriptorHandles;
 }
 
+void Texture::SetRootSignatureIndex(int nIndex, UINT nRootParameterIndex)
+{
+	m_pRootArgumentInfos[nIndex].m_nRootParameterIndex = nRootParameterIndex;
+}
+
 void Texture::SetRootArgument(int nIndex, UINT nRootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGpuDescriptorHandle)
 {
 	m_pRootArgumentInfos[nIndex].m_nRootParameterIndex = nRootParameterIndex;

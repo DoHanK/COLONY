@@ -487,3 +487,121 @@ void SkinnedMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* 
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 7, pVertexBufferViews);
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//									UIRectMesh Class											   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+UIRectMesh::UIRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_nVertices = 6;
+	m_nStride = sizeof(XMFLOAT3);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, m_nStride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dPositionBuffer->Map(0, NULL, (void**)&m_pcbMappedPositions);
+	m_nVertexBufferViews = 1;
+	m_d3dVertexBufferViews.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferViews.StrideInBytes = sizeof(XMFLOAT3);
+	m_d3dVertexBufferViews.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+
+
+	//Uv Coord
+	XMFLOAT2 BasicUvPosition[6];
+	// left top
+	BasicUvPosition[0].x = 0.0f; BasicUvPosition[0].y = 0.0f;
+	//right top
+	BasicUvPosition[1].x = 1.0f; BasicUvPosition[1].y = 0.0f;
+	//left bottom
+	BasicUvPosition[2].x = 0.0f;	BasicUvPosition[2].y = 1.0f;
+
+	//left bottom
+	BasicUvPosition[3].x = 0.0f;	BasicUvPosition[3].y = 1.0f;
+	//right top
+	BasicUvPosition[4].x = 1.0f;	BasicUvPosition[4].y = 0.0f;
+	//right bottom 
+	BasicUvPosition[5].x = 1.0f;	BasicUvPosition[5].y = 1.0f;
+
+
+	m_pd3dUvBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, BasicUvPosition, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dUvBuffer->Map(0, NULL, (void**)&m_pcbMappedUvs);
+	m_d3dUvBufferViews.BufferLocation = m_pd3dUvBuffer->GetGPUVirtualAddress();
+	m_d3dUvBufferViews.StrideInBytes = sizeof(XMFLOAT2);
+	m_d3dUvBufferViews.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+
+	//MaskCoord
+	float BasicMaskPosition[6];
+	BasicMaskPosition[0] = 0.0f;
+	BasicMaskPosition[1] = 0.0f;
+	BasicMaskPosition[2] = 0.0f;
+
+	BasicMaskPosition[3] = 0.0f;
+	BasicMaskPosition[4] = 0.0f;
+	BasicMaskPosition[5] = 0.0f;
+
+	m_pd3dMaskBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, BasicMaskPosition, sizeof(float) * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dMaskBuffer->Map(0, NULL,(void**)&m_pcbMappedMasks);
+	m_d3dMaskBufferViews.BufferLocation = m_pd3dMaskBuffer->GetGPUVirtualAddress();
+	m_d3dMaskBufferViews.StrideInBytes = sizeof(float);
+	m_d3dMaskBufferViews.SizeInBytes = sizeof(float) * m_nVertices;
+}
+
+UIRectMesh::~UIRectMesh()
+{
+	if (m_pd3dPositionBuffer) {
+		m_pd3dPositionBuffer->Unmap(0, NULL);
+		m_pd3dPositionBuffer->Release();
+	}
+
+	if (m_pd3dUvBuffer) {
+		m_pd3dUvBuffer->Unmap(0, NULL);
+		m_pd3dUvBuffer->Release();
+	}
+
+	if (m_pd3dMaskBuffer) {
+		m_pd3dMaskBuffer->Unmap(0, NULL);
+		m_pd3dMaskBuffer->Release();
+	}
+}
+
+void UIRectMesh::UpdateVertexPosition(const UIRect& Rect)
+{
+	int i = 0;
+
+	//LEFT TOP 
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.left, Rect.top, 0.5f);
+	// RIGHT TOP
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.right, Rect.top, 0.5f);
+	// LEFT BOTTOM
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.left, Rect.bottom, 0.5f);
+
+	// LEFT BOTTOM
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.left, Rect.bottom, 0.5f);
+	// RIGHT TOP
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.right, Rect.top, 0.5f);
+	// RIGHT BOTTOM
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.right, Rect.bottom, 0.5f);
+
+}
+
+void UIRectMesh::UpdateMaskValue(const float& lefttop, const float& righttop, const float& leftbottom, const float& rightbottom)
+{
+	
+	m_pcbMappedMasks[0] = lefttop;
+	m_pcbMappedMasks[1] = righttop;
+	m_pcbMappedMasks[2] = leftbottom;
+
+	m_pcbMappedMasks[3] = leftbottom;
+	m_pcbMappedMasks[4] = righttop;
+	m_pcbMappedMasks[5] = rightbottom;
+}
+
+void UIRectMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[3] = { m_d3dVertexBufferViews,m_d3dUvBufferViews ,m_d3dMaskBufferViews };
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 3, pVertexBufferViews);
+	pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+}

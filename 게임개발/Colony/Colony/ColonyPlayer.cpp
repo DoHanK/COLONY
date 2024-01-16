@@ -206,7 +206,6 @@ void Player::ReleaseUploadBuffers()
 {
 	GameObject::ReleaseUploadBuffers();
 	m_SelectWeapon.ReleaseUploadBuffers();
-
 }
 
 void Player::Animate(float fTimeElapsed)
@@ -666,7 +665,6 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 	
 
 }
-
 //상체 하체 애니메이션 변경
 void PlayerAnimationController::ChangeAnimation(DWORD ChangeState)
 {

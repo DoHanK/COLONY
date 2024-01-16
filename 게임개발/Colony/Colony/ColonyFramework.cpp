@@ -78,13 +78,13 @@ void ColonyFramework::CreateGraphicsRootSignature()
 
 	pd3dDescriptorRanges[5].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[5].NumDescriptors = 1;
-	pd3dDescriptorRanges[5].BaseShaderRegister = 11; //t11: gtxtEmissionTexture
+	pd3dDescriptorRanges[5].BaseShaderRegister = 11; //t11: gtxtDetailAlbedoTexture
 	pd3dDescriptorRanges[5].RegisterSpace = 0;
 	pd3dDescriptorRanges[5].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[6].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[6].NumDescriptors = 1;
-	pd3dDescriptorRanges[6].BaseShaderRegister = 12; //t12: gtxtEmissionTexture
+	pd3dDescriptorRanges[6].BaseShaderRegister = 12; //t12: gtxtDetailNormalTexture
 	pd3dDescriptorRanges[6].RegisterSpace = 0;
 	pd3dDescriptorRanges[6].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
@@ -242,8 +242,17 @@ bool ColonyFramework::MakeGameObjects()
 
 	////씬 빌드 및 플레이어 및 객체들 생성 리소스들 로드
 	m_pResourceManager = new ResourceManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), NULL);
+	m_pUIManager = new UIManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pd3dGraphicsRootSignature);
 
 
+	m_pUIManager->CreateUINonNormalRect(0, 400, 0, 400, m_pResourceManager->BringTexture("Model/Textures/TestTexture.dds",UI_TEXTURE,true),
+	m_pResourceManager->BringTexture("Model/Textures/MaskTex.dds",UI_MASK_TEXTURE,true), NULL, 0);
+
+	//	m_pUIManager->CreateUINonNormalRect(0, 400, 0, 400, m_pResourceManager->BringTexture("Model/Textures/TestTexture.dds",UI_TEXTURE,true),
+	//NULL, NULL, 0);
+
+	//m_pUIManager->CreateUINonNormalRect(0, 300, 100, 400, m_pResourceManager->BringTexture("Model/Textures/TestTex.dds", UI_TEXTURE, true),
+	//	m_pResourceManager->BringTexture("Model/Textures/Dot.dds", UI_MASK_TEXTURE, true), NULL, 1);
 	////씬로드
 	m_pScene = new Scene;
 	m_pScene->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList());
@@ -272,6 +281,7 @@ bool ColonyFramework::MakeGameObjects()
 
 	if (m_pScene) m_pScene->ReleaseUploadBuffers();
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+	if (m_pResourceManager) m_pResourceManager->ReleaseUploadBuffers();
 
 	return true;
 }
@@ -281,6 +291,10 @@ void ColonyFramework::DestroyGameObjects()
 	//카메라, 플레이어... 객체들 삭제
 	if (m_pResourceManager) {
 		delete m_pResourceManager;
+	}
+	
+	if (m_pUIManager) {
+		delete m_pUIManager;
 	}
 
 	//플레이어 삭제
@@ -344,7 +358,8 @@ void ColonyFramework::ColonyGameLoop()
 	if(m_pPlayer)
 	m_pPlayer->Render(GetDevice()->GetCommandList(), m_pCamera);
 	
-
+	if (m_pUIManager)
+		m_pUIManager->AllLayerDrawRect(GetDevice()->GetCommandList());
 
 
 
@@ -441,13 +456,13 @@ void ColonyFramework::PlayerControlInput()
 		POINT ptCursorPos;
 		static POINT m_ptOldCursorPos = {WINDOWS_POS_X + FRAME_BUFFER_WIDTH/2 , WINDOWS_POS_Y + FRAME_BUFFER_WIDTH/2 };
 			
-			//SetCursor(NULL);
-			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
-			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-			if (m_pPlayer)
-			m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+			////SetCursor(NULL);
+			//GetCursorPos(&ptCursorPos);
+			//cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
+			//cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
+			//SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+			//if (m_pPlayer)
+			//m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			
 		if (dwDirection) if (m_pPlayer)
 			m_pPlayer->CalVelocityFromInput(dwDirection, AddAcel);

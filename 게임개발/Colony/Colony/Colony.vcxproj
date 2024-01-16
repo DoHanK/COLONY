@@ -152,6 +152,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="UiManager.h" />
     <ClInclude Include="UserDefineType.h" />
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
@@ -170,6 +171,7 @@
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="UiManager.cpp" />
     <ClCompile Include="WICTextureLoader12.cpp" />
   </ItemGroup>
   <ItemGroup>

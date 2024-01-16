@@ -95,6 +95,26 @@ inline int ReadUnityBinaryString(FILE* pFile, char* pstrToken, BYTE* pnStrLength
 	return(nReads);
 }
 
+enum RootSignatureNum{
+	CAMERA_INFO,
+	GAMEOBJECT_INFO,
+	LIGHT_INFO,
+	ALBEDO_TEXTURE,
+	SPECULAR_TEXTURE,
+	NORMAL_TEXTURE,
+	METALLIC_TEXTURE,
+	EMISSION_TEXTURE,
+	DETAIL_ALBEDO_TEXTURE,
+	DETAIL_NORMAL_TEXTURE,
+	NONE,
+	SKINNED_BONE_OFFSET,
+	SKINNED_BONE_TRANSFORM,
+	UI_TEXTURE,
+	UI_MASK_TEXTURE
+
+
+};
+
 //Direct 관련 함수들
 namespace Vector3
 {

@@ -4,6 +4,7 @@
 #include "ColonyScene.h"
 #include "ColonyCamera.h"
 #include "ResourceManager.h"
+#include "UiManager.h"
 #include "ColonyPlayer.h"
 
 
@@ -43,7 +44,7 @@ private:
 	 
 	//Manager
 	ResourceManager*				 m_pResourceManager;
-
+	UIManager*						 m_pUIManager;
 
 public:
 	ColonyFramework();
