@@ -171,7 +171,7 @@ Texture* ResourceManager::BringTexture(const char* filename, UINT RootParameter,
 		// 멀티바이트에서 와이드 문자열로 변환
 		mbstowcs(wideStringFile, filename, bufferSize + 1);
 
-		TempTexture->LoadTextureFromFile(m_pDevice, m_pGCommandList, wideStringFile, 0 , true);
+		TempTexture->LoadTextureFromFile(m_pDevice, m_pGCommandList, wideStringFile, 0 , bIsDDSFile);
 		//정보가 없을때
 		ResourceManager::CreateShaderResourceViews(m_pDevice,TempTexture, RootParameter, false);
 		TextureList.push_back({ TargetName, TempTexture });

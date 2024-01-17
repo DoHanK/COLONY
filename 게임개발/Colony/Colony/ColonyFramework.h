@@ -5,8 +5,8 @@
 #include "ColonyCamera.h"
 #include "ResourceManager.h"
 #include "UiManager.h"
+#include "SceneManager.h"
 #include "ColonyPlayer.h"
-
 
 
 class ColonyFramework {
@@ -28,11 +28,7 @@ private:
 	//타이머
 	ColonyTimer m_GameTimer;
 	//GameScene
-	Scene* m_pScene;
-	//Camera
-	Camera* m_pCamera;
-	//Player
-	Player* m_pPlayer;
+
 	//윈도우캡션 프레임레이트 표시
 	_TCHAR m_pszFrameRate[50];
 	//시간
@@ -45,6 +41,7 @@ private:
 	//Manager
 	ResourceManager*				 m_pResourceManager;
 	UIManager*						 m_pUIManager;
+	SceneManager*					 m_pSceneManager;
 
 public:
 	ColonyFramework();
@@ -60,7 +57,7 @@ public:
 	void DestroyGameObjects();
 	void AnimationGameObjects();
 	void ColonyGameLoop();
-	void PlayerControlInput();
+	//void PlayerControlInput();
 
 	//키입력
 	LRESULT CALLBACK CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);

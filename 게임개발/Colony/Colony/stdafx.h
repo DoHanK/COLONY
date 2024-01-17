@@ -39,6 +39,7 @@
 #include <list>
 #include <algorithm>
 #include <vector>
+#include <stack>
 ////////////////////////////////
 
 //Direct x 관련 라이브러리
@@ -95,6 +96,7 @@ inline int ReadUnityBinaryString(FILE* pFile, char* pstrToken, BYTE* pnStrLength
 	return(nReads);
 }
 
+//루트시그너쳐 등록 숫자
 enum RootSignatureNum{
 	CAMERA_INFO,
 	GAMEOBJECT_INFO,
@@ -111,8 +113,6 @@ enum RootSignatureNum{
 	SKINNED_BONE_TRANSFORM,
 	UI_TEXTURE,
 	UI_MASK_TEXTURE
-
-
 };
 
 //Direct 관련 함수들

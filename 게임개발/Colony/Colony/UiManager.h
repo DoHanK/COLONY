@@ -5,12 +5,13 @@
 
 struct UIInfo {
 	UIRect* Rect;
-	Texture* RenderTexture=NULL;
-	Texture* MaskTexture=NULL;
+	Texture* RenderTexture = NULL;
+	Texture* MaskTexture = NULL;
 };
 
 #define	TEXTURE_LAYER 3
 #define TEXTRUE_MASH 20
+
 class UIManager{
 public:
 	UIManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,ID3D12RootSignature* pd3dGraphicsRootSignature);

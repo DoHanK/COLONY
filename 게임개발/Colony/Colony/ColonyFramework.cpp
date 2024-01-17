@@ -12,7 +12,7 @@
 ColonyFramework::ColonyFramework()
 {
 	_tcscpy_s(m_pszFrameRate, _T("Colony("));
-	ShowCursor(false);
+
 }
 
 ColonyFramework::~ColonyFramework(){
@@ -244,51 +244,27 @@ bool ColonyFramework::MakeGameObjects()
 	m_pResourceManager = new ResourceManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), NULL);
 	m_pUIManager = new UIManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pd3dGraphicsRootSignature);
 
-
-	m_pUIManager->CreateUINonNormalRect(0, 400, 0, 400, m_pResourceManager->BringTexture("Model/Textures/TestTexture.dds",UI_TEXTURE,true),
-	m_pResourceManager->BringTexture("Model/Textures/MaskTex.dds",UI_MASK_TEXTURE,true), NULL, 0);
-
-	//	m_pUIManager->CreateUINonNormalRect(0, 400, 0, 400, m_pResourceManager->BringTexture("Model/Textures/TestTexture.dds",UI_TEXTURE,true),
-	//NULL, NULL, 0);
-
-	//m_pUIManager->CreateUINonNormalRect(0, 300, 100, 400, m_pResourceManager->BringTexture("Model/Textures/TestTex.dds", UI_TEXTURE, true),
-	//	m_pResourceManager->BringTexture("Model/Textures/Dot.dds", UI_MASK_TEXTURE, true), NULL, 1);
-	////씬로드
-	m_pScene = new Scene;
-	m_pScene->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList());
+	//씬을 구성하는 매니져들
+	m_pSceneManager = new SceneManager(m_pResourceManager, m_pUIManager);
+	m_pSceneManager->PushScene(new GamePlayScene, GetDevice(), false);
+	m_pSceneManager->m_SceneStack.top()->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pResourceManager, m_pUIManager);
 	
-
-	////카메라
-	m_pCamera = new ThirdPersonCamera();
-	m_pCamera->CreateShaderVariables(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList());
-	m_pCamera->GenerateProjectionMatrix(1.01, 1000.f, ASPECT_RATIO, 60.f);
-	m_pCamera->RegenerateViewMatrix();
-
-	
-
-	CLoadedModelInfo* pAngrybotModel = m_pResourceManager->BringModelInfo("Model/JU_Mannequin.bin", "Model/Textures/PlayerTexture/");
-	CLoadedModelInfo*  pAngrybotModel1 = m_pResourceManager->BringModelInfo("Model/UMP5.bin", "Model/Textures/UMP5Texture/");
-	m_pPlayer = new Player(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), pAngrybotModel, pAngrybotModel1);
-	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
-	m_pCamera->SetPlayer(m_pPlayer);
-
-
-
-
-
 	m_pDevice->CloseCommandAndPushQueue();
 	m_pDevice->WaitForGpuComplete();
 
-	if (m_pScene) m_pScene->ReleaseUploadBuffers();
-	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+	if (m_pSceneManager) m_pSceneManager->m_SceneStack.top()->ReleaseUploadBuffers();
 	if (m_pResourceManager) m_pResourceManager->ReleaseUploadBuffers();
+
+
+	m_pSceneManager->PushScene(new GameLobyScene, GetDevice(), true);
+
 
 	return true;
 }
 
 void ColonyFramework::DestroyGameObjects()
 {
-	//카메라, 플레이어... 객체들 삭제
+	//매니져 삭제
 	if (m_pResourceManager) {
 		delete m_pResourceManager;
 	}
@@ -297,14 +273,10 @@ void ColonyFramework::DestroyGameObjects()
 		delete m_pUIManager;
 	}
 
-	//플레이어 삭제
-	if (m_pPlayer) {
-		m_pPlayer->Release();
+	if (m_pSceneManager) {
+		delete m_pSceneManager;
 	}
-	if (m_pScene) {
-		m_pScene->ReleaseObjects();
-		delete m_pScene;
-	}
+
 
 	//루트 시그너쳐 릴리즈
 	if (m_pd3dGraphicsRootSignature) {
@@ -323,21 +295,28 @@ void ColonyFramework::DestroyGameObjects()
 
 void ColonyFramework::AnimationGameObjects()
 {
+	int static  a = 1;
+	static float atime = 0;
+	if (atime > 2 && a) {
+		m_pSceneManager->PopScene();
+		a = 0;
+	}
+
 	m_ElapsedTime = m_GameTimer.GetTimeElapsed();
-	if(m_pPlayer)
-	m_pPlayer->Animate(m_ElapsedTime);
-	if(m_pScene)
-	m_pScene->AnimateObjects(m_ElapsedTime);
+	atime += m_ElapsedTime;
+
+	if(m_pSceneManager)
+		m_pSceneManager->AnimationGameObjects(m_ElapsedTime);
 }
 
 void ColonyFramework::ColonyGameLoop()
 {
 	m_GameTimer.Tick(0.0f);
-	//PlayerKeyInput
+	
+
 
 	//애니메이션
 	AnimationGameObjects();
-	PlayerControlInput();
 
 	m_pDevice->CommandAllocatorReset();
 	m_pDevice->CommandListReset();
@@ -350,13 +329,10 @@ void ColonyFramework::ColonyGameLoop()
 	//랜더링 작성
 	// 리로스 업로드힙에 세팅 (씬으로 편입 예정)
 	if(m_pResourceManager)
-	GetDevice()->GetCommandList()->SetDescriptorHeaps(1, &m_pResourceManager->pSrvDescriptorHeap);
+		GetDevice()->GetCommandList()->SetDescriptorHeaps(1, &m_pResourceManager->pSrvDescriptorHeap);
 
-	if(m_pScene)
-	m_pScene->Render(GetDevice()->GetCommandList(), m_pCamera);
-	
-	if(m_pPlayer)
-	m_pPlayer->Render(GetDevice()->GetCommandList(), m_pCamera);
+	if(m_pSceneManager)
+		m_pSceneManager->RenderScene(GetDevice()->GetCommandList());
 	
 	if (m_pUIManager)
 		m_pUIManager->AllLayerDrawRect(GetDevice()->GetCommandList());
@@ -377,101 +353,101 @@ void ColonyFramework::ColonyGameLoop()
 }
 
 
-void ColonyFramework::PlayerControlInput()
-{
-
-	static UCHAR pKeysBuffer[256];
-	float AddAcel = 0.19;
-	//플레이어 씬일때만 작동하도록 설정하기.
-	if (GetKeyboardState(pKeysBuffer)) {
-		//애니메이션 상태정의를 위한 플레이어 상태 정의
-		DWORD dwDirection = 0;
-		DWORD dwPlayerState = STATE_IDLE;
-		
-		//Move
-		if (pKeysBuffer[W] & 0xF0)
-			dwDirection |= DIR_FORWARD;
-		if (pKeysBuffer[S] & 0xF0) 
-			dwDirection |= DIR_BACKWARD;
-		if (pKeysBuffer[A] & 0xF0) 
-			dwDirection |= DIR_LEFT;
-		if (pKeysBuffer[D] & 0xF0) 
-			dwDirection |= DIR_RIGHT;
-		 
-		//W S A D 키입력 검사
-		//RUN
-		if ((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) || (dwDirection & DIR_LEFT) || (dwDirection & DIR_RIGHT)) {
-			if (pKeysBuffer[L_SHIFT] & 0xF0)
-			{
-				AddAcel += PlayerRunAcel;
-				dwPlayerState = STATE_RUN;
-			}
-			else {
-				dwPlayerState = STATE_WALK;
-			}
-		}
-		 
-		//JUMP
-		if (pKeysBuffer[SPACE_BAR] & 0xF0) {
-			//방향
-			dwDirection |= DIR_JUMP_UP;
-			// 플레이어 상태
-			dwPlayerState |= STATE_JUMP;
-		}
-		// 총알 리로드
-		if (pKeysBuffer[R] & 0xF0) {
-			// 총알 스테이트 변경
-			
-			// 플레이어 상태
-			dwPlayerState |= STATE_RELOAD;
-		}
-		//줍기
-		if (pKeysBuffer[F] & 0xF0) {
-			// 총알 스테이트 변경
-
-			// 플레이어 상태
-			dwPlayerState |= STATE_PICK_UP;
-		}
-		//무기 바꾸기
-		if (pKeysBuffer[T] & 0xF0) {
-			// 총알 스테이트 변경
-
-			// 플레이어 상태
-			dwPlayerState |= STATE_SWITCH_WEAPON;
-		}
-		//총 쏘기
-		if (pKeysBuffer[L_MOUSE] & 0xF0) {
-
-			dwPlayerState |= STATE_SHOOT;
-		}
-	
-		//플레이어 애니메이션 적용
-		if(m_pPlayer)
-		((PlayerAnimationController*)(m_pPlayer->m_pSkinnedAnimationController))->SetAnimationFromInput(dwDirection, dwPlayerState);
-
-		if (m_pPlayer)
-		if (m_pPlayer->m_WeaponState == SPINE_BACK) AddAcel += NoGrapAcel;
-
-		float cxDelta = 0.0f, cyDelta = 0.0f;
-		POINT ptCursorPos;
-		static POINT m_ptOldCursorPos = {WINDOWS_POS_X + FRAME_BUFFER_WIDTH/2 , WINDOWS_POS_Y + FRAME_BUFFER_WIDTH/2 };
-			
-			////SetCursor(NULL);
-			//GetCursorPos(&ptCursorPos);
-			//cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
-			//cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
-			//SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-			//if (m_pPlayer)
-			//m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-			
-		if (dwDirection) if (m_pPlayer)
-			m_pPlayer->CalVelocityFromInput(dwDirection, AddAcel);
-	}
-
-
-	if (m_pPlayer)
-	m_pPlayer->UpdatePosition(m_ElapsedTime);
-}
+//void ColonyFramework::PlayerControlInput()
+//{
+//
+//	static UCHAR pKeysBuffer[256];
+//	float AddAcel = 0.19;
+//	//플레이어 씬일때만 작동하도록 설정하기.
+//	if (GetKeyboardState(pKeysBuffer)) {
+//		//애니메이션 상태정의를 위한 플레이어 상태 정의
+//		DWORD dwDirection = 0;
+//		DWORD dwPlayerState = STATE_IDLE;
+//		
+//		//Move
+//		if (pKeysBuffer[W] & 0xF0)
+//			dwDirection |= DIR_FORWARD;
+//		if (pKeysBuffer[S] & 0xF0) 
+//			dwDirection |= DIR_BACKWARD;
+//		if (pKeysBuffer[A] & 0xF0) 
+//			dwDirection |= DIR_LEFT;
+//		if (pKeysBuffer[D] & 0xF0) 
+//			dwDirection |= DIR_RIGHT;
+//		 
+//		//W S A D 키입력 검사
+//		//RUN
+//		if ((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) || (dwDirection & DIR_LEFT) || (dwDirection & DIR_RIGHT)) {
+//			if (pKeysBuffer[L_SHIFT] & 0xF0)
+//			{
+//				AddAcel += PlayerRunAcel;
+//				dwPlayerState = STATE_RUN;
+//			}
+//			else {
+//				dwPlayerState = STATE_WALK;
+//			}
+//		}
+//		 
+//		//JUMP
+//		if (pKeysBuffer[SPACE_BAR] & 0xF0) {
+//			//방향
+//			dwDirection |= DIR_JUMP_UP;
+//			// 플레이어 상태
+//			dwPlayerState |= STATE_JUMP;
+//		}
+//		// 총알 리로드
+//		if (pKeysBuffer[R] & 0xF0) {
+//			// 총알 스테이트 변경
+//			
+//			// 플레이어 상태
+//			dwPlayerState |= STATE_RELOAD;
+//		}
+//		//줍기
+//		if (pKeysBuffer[F] & 0xF0) {
+//			// 총알 스테이트 변경
+//
+//			// 플레이어 상태
+//			dwPlayerState |= STATE_PICK_UP;
+//		}
+//		//무기 바꾸기
+//		if (pKeysBuffer[T] & 0xF0) {
+//			// 총알 스테이트 변경
+//
+//			// 플레이어 상태
+//			dwPlayerState |= STATE_SWITCH_WEAPON;
+//		}
+//		//총 쏘기
+//		if (pKeysBuffer[L_MOUSE] & 0xF0) {
+//
+//			dwPlayerState |= STATE_SHOOT;
+//		}
+//	
+//		//플레이어 애니메이션 적용
+//		if(m_pPlayer)
+//		((PlayerAnimationController*)(m_pPlayer->m_pSkinnedAnimationController))->SetAnimationFromInput(dwDirection, dwPlayerState);
+//
+//		if (m_pPlayer)
+//		if (m_pPlayer->m_WeaponState == SPINE_BACK) AddAcel += NoGrapAcel;
+//
+//		float cxDelta = 0.0f, cyDelta = 0.0f;
+//		POINT ptCursorPos;
+//		static POINT m_ptOldCursorPos = {WINDOWS_POS_X + FRAME_BUFFER_WIDTH/2 , WINDOWS_POS_Y + FRAME_BUFFER_WIDTH/2 };
+//			
+//			////SetCursor(NULL);
+//			//GetCursorPos(&ptCursorPos);
+//			//cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
+//			//cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
+//			//SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+//			//if (m_pPlayer)
+//			//m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+//			
+//		if (dwDirection) if (m_pPlayer)
+//			m_pPlayer->CalVelocityFromInput(dwDirection, AddAcel);
+//	}
+//
+//
+//	if (m_pPlayer)
+//	m_pPlayer->UpdatePosition(m_ElapsedTime);
+//}
 
 LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
@@ -485,12 +461,13 @@ LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM 
 	case WM_RBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
+		break;
 	case WM_MOUSEMOVE:
 		//마우스 키입력
 		break;
 	case WM_KEYDOWN:
 	case WM_KEYUP:
-		m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+	
 		//키보드키입력
 		break;
 	}

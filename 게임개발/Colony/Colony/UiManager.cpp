@@ -70,10 +70,10 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList)
 			
 			for (const pair<UIInfo, bool(*)(void*)>& info : m_RenderUIList[i]) {
 
+			
 				if (info.first.RenderTexture) {
 					info.first.RenderTexture->UpdateShaderVariable(pd3d12CommandList,0);
 				}
-
 				if (info.first.MaskTexture) {
 					m_pMesh[count]->UpdateMaskValue(1.0f, 1.0f, 1.0f, 1.0f);
 					info.first.MaskTexture->UpdateShaderVariable(pd3d12CommandList, 0);

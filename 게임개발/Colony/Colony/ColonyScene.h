@@ -2,7 +2,11 @@
 #include "stdafx.h"
 #include "ColonyCamera.h"
 #include "ColonyGameObject.h"
+#include "ColonyPlayer.h"
 #include "ColonyShader.h"
+#include "ResourceManager.h"
+#include "UiManager.h"
+
 #define MAX_LIGHTS						16 
 
 #define POINT_LIGHT						1
@@ -35,13 +39,54 @@ struct LIGHTS
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-//										Scene Class				  								   //
+//										BasicScene Class				  						   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-class Scene
+class BasicScene
 {
 public:
-	Scene();
-	~Scene();
+	BasicScene() {};
+	virtual ~BasicScene() {};
+
+	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) { return false; };
+	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) { return false; };
+
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {};
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) {};
+	virtual void ReleaseShaderVariables() {};
+
+	virtual void BuildDefaultLightsAndMaterials() {};
+
+	//necessary Function
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager ,UIManager* pUImanager) {};
+	virtual void ReleaseObjects() {};
+	virtual void ReleaseUploadBuffers() {};
+	virtual void AnimateObjects(float fTimeElapsed) {};
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL) {};
+
+
+
+
+
+
+};
+
+class GameLobyScene :public BasicScene {
+public:
+	GameLobyScene() {};
+	virtual~GameLobyScene() {};
+
+	virtual void  BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, UIManager* pUImanager);
+};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										GamePlayScene Class				  						   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class GamePlayScene :public BasicScene {
+public:
+	GamePlayScene();
+	virtual ~GamePlayScene();
 
 	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -51,37 +96,28 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	void BuildDefaultLightsAndMaterials();
-	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, UIManager* pUImanager);
 	void ReleaseObjects();
-
+	
+	void PlayerControlInput();
 	void AnimateObjects(float fTimeElapsed);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 
-	void ReleaseUploadBuffers();
+	virtual void ReleaseUploadBuffers();
 
 protected:
 
 	float								m_fElapsedTime = 0.0f;
 
-	int									m_nGameObjects = 0;
-	GameObject**						m_ppGameObjects = NULL;
-
-
-	int									m_nShaders = 0;
-	BasicShader**						m_ppShaders = NULL;
-
-
-	int									m_nHierarchicalGameObjects = 0;
-	GameObject**						m_ppHierarchicalGameObjects = NULL;
-
-	LIGHT*								m_pLights = NULL;
+	LIGHT* m_pLights = NULL;
 	int									m_nLights = 0;
 
 	XMFLOAT4							m_xmf4GlobalAmbient;
 
-	ID3D12Resource*						m_pd3dcbLights = NULL;
-	LIGHTS*								m_pcbMappedLights = NULL;
+	ID3D12Resource* m_pd3dcbLights = NULL;
+	LIGHTS* m_pcbMappedLights = NULL;
 
+	Player* m_pPlayer;
+	ThirdPersonCamera* m_pCamera;
 
 };
-

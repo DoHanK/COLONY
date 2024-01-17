@@ -90,6 +90,9 @@
     <ClInclude Include="UiManager.h">
       <Filter>GameManagerHeader</Filter>
     </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>GameManagerHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -138,6 +141,9 @@
       <Filter>GameManagerCpp</Filter>
     </ClCompile>
     <ClCompile Include="UiManager.cpp">
+      <Filter>GameManagerCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
       <Filter>GameManagerCpp</Filter>
     </ClCompile>
   </ItemGroup>

@@ -228,7 +228,6 @@ struct UIRect {
 	float bottom;
 	float left;
 	float right;
-	int purpose;
 };
 
 class UIRectMesh :public DynamicMesh{
@@ -250,6 +249,7 @@ public:
 
 	//위치 지정해주기
 	void UpdateVertexPosition(const UIRect& Rect);
+
 	//Mask Setting
 	void UpdateMaskValue(const float& lefttop, const float& righttop, const float& leftbottom, const float& rightbottom);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);

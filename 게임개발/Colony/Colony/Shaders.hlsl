@@ -209,7 +209,7 @@ float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
     {
         texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);
     }
-	
+
     return texColor;
 }
 
