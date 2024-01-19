@@ -380,7 +380,7 @@ void PlayerAnimationController::AdvanceTime(float fElapsedTime, GameObject* pRoo
 			}
 		}
 
-		pRootGameObject->m_pChild->UpdateTransform(NULL);
+		pRootGameObject->UpdateTransform(NULL);
 
 	}
 
