@@ -237,8 +237,9 @@ bool ColonyFramework::MakeGameObjects()
 	CreateGraphicsRootSignature();
 	GetDevice()->GetCommandList()->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
-
+	//리소스 매니져가 소멸될때 같이 소멸됨
 	Material::MakeShaders(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pd3dGraphicsRootSignature);
+
 
 	////씬 빌드 및 플레이어 및 객체들 생성 리소스들 로드
 	m_pResourceManager = new ResourceManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), NULL);
@@ -249,15 +250,16 @@ bool ColonyFramework::MakeGameObjects()
 	m_pSceneManager->PushScene(new GamePlayScene, GetDevice(), false);
 	m_pSceneManager->m_SceneStack.top()->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pResourceManager, m_pUIManager);
 	
+
+
+
 	m_pDevice->CloseCommandAndPushQueue();
 	m_pDevice->WaitForGpuComplete();
 
 	if (m_pSceneManager) m_pSceneManager->m_SceneStack.top()->ReleaseUploadBuffers();
 	if (m_pResourceManager) m_pResourceManager->ReleaseUploadBuffers();
-
-
-	m_pSceneManager->PushScene(new GameLobyScene, GetDevice(), true);
-
+	
+	//m_pSceneManager->PushScene(new GameLobbyScene, GetDevice(), true);
 
 	return true;
 }
@@ -265,6 +267,11 @@ bool ColonyFramework::MakeGameObjects()
 void ColonyFramework::DestroyGameObjects()
 {
 	//매니져 삭제
+
+	if (m_pSceneManager) {
+		delete m_pSceneManager;
+	}
+
 	if (m_pResourceManager) {
 		delete m_pResourceManager;
 	}
@@ -273,9 +280,7 @@ void ColonyFramework::DestroyGameObjects()
 		delete m_pUIManager;
 	}
 
-	if (m_pSceneManager) {
-		delete m_pSceneManager;
-	}
+
 
 
 	//루트 시그너쳐 릴리즈
@@ -295,18 +300,15 @@ void ColonyFramework::DestroyGameObjects()
 
 void ColonyFramework::AnimationGameObjects()
 {
-	int static  a = 1;
-	static float atime = 0;
-	if (atime > 2 && a) {
-		m_pSceneManager->PopScene();
-		a = 0;
-	}
+
 
 	m_ElapsedTime = m_GameTimer.GetTimeElapsed();
-	atime += m_ElapsedTime;
+
 
 	if(m_pSceneManager)
 		m_pSceneManager->AnimationGameObjects(m_ElapsedTime);
+	if (m_pUIManager)
+		m_pUIManager->AnimateUI(m_ElapsedTime);
 }
 
 void ColonyFramework::ColonyGameLoop()
@@ -459,7 +461,16 @@ LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM 
 	}
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
+		break;
 	case WM_LBUTTONUP:
+		if (m_pSceneManager->m_SceneStack.top()->GetType() == GameLobby) {
+			m_pSceneManager->ChangeScene(new GamePlayScene, GetDevice());
+		}
+		else {
+			m_pSceneManager->ChangeScene(new GameLobbyScene, GetDevice());
+		}
+
+		break;
 	case WM_RBUTTONUP:
 		break;
 	case WM_MOUSEMOVE:

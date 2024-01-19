@@ -141,11 +141,13 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 {
 	VS_STANDARD_OUTPUT output;
 
-	float4x4 mtxVertexToBoneWorld = (float4x4)0.0f;
+	float4x4 mtxVertexToBoneWorld = (float4x4)0.0f;	
+	
     for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
     {
         mtxVertexToBoneWorld += input.weights[i] * mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
     }
+
     output.positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
     output.normalW = mul(input.normal, (float3x3) mtxVertexToBoneWorld).xyz;
     output.tangentW = mul(input.tangent, (float3x3) mtxVertexToBoneWorld).xyz;
@@ -167,7 +169,8 @@ struct VS_UIRECT_INPUT
 {
     float3 position : POSITION;
     float2 TexC : TEXCOORD;
-    float Mask :MASK;
+    float2 TexM : MASKTEXCOORD;
+    uint Mask : MASK;
 };
 
 
@@ -175,7 +178,8 @@ struct VS_UIRECT_OUTPUT
 {
     float4 position : SV_POSITION;
     float2 TexC : TEXCOORD;
-    float Mask : MASK;
+    float2 TexM : MASKTEXCOORD;
+    uint Mask : MASK;
 };
 
 VS_UIRECT_OUTPUT VSUiRect(VS_UIRECT_INPUT input)
@@ -183,27 +187,42 @@ VS_UIRECT_OUTPUT VSUiRect(VS_UIRECT_INPUT input)
     VS_UIRECT_OUTPUT output;
     
     output.position = float4(input.position, 1.0f);
+    output.TexC = input.TexC;
+    output.TexM = input.TexM;
     output.Mask = input.Mask;
-    output.TexC.x = input.TexC.x;
-    output.TexC.y = input.TexC.y;
+ 
 	
     return (output);
 }
+#define MASKUSE 0x01 //마스크 텍스쳐 사용 여부
+#define TEXTUREUSE 0x02 // 텍스쳐 사용 여부
+#define AMPLIFIER 0x04
 
 float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
 {
     float4 texColor;
- 
-    if (input.Mask > 0.5)
+    
+    if (input.Mask & MASKUSE)
     {
-        if (gtxtUiMaskTexture.Sample(gssWrap, input.TexC).r > 0.5)
+			
+        if (input.Mask & TEXTUREUSE)
         {
-			texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);	
+            if (gtxtUiMaskTexture.Sample(gssWrap, input.TexM).r > 0.01)
+            {
+                texColor = float4(0, 0.1, 0.1, 1);
+                texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);
+                texColor.r += 0.6f;
+               
+            }
+            else
+            {
+                texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);
+
+            }
+			
         }
-        else
-        {
-            texColor = float4(0, 0, 0, 0.0f);
-        }
+		
+
     }
     else
     {

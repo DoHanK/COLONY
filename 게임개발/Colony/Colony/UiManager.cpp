@@ -24,6 +24,14 @@ UIManager::~UIManager()
 	}
 	if (m_Shader)
 		m_Shader->Release();
+	for (int i = 0; i < TEXTURE_LAYER; i++) {
+
+		for (auto& UI : m_RenderUIList[i]) {
+			if (UI.first.EffectInfo) delete UI.first.EffectInfo;
+
+		}
+	}
+
 
 	m_RenderUIList->clear();
 }
@@ -40,7 +48,7 @@ UIRect UIManager::CreateNormalizePixel(float top, float bottom, float left, floa
 	return { NormalTop, NormalBottom, NormalLeft, NormalRight };
 }
 
-bool UIManager::CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, bool(*f)(void* argu),int Layer)
+bool UIManager::CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, bool(*f)(void* argu),int Layer,UINT option ,UINT SceneType)
 {
 	// is not invalid 
 	if (!(top < bottom && right > left))
@@ -51,11 +59,64 @@ bool UIManager::CreateUINonNormalRect(float top, float bottom, float left, float
 	if(tex) tex->SetRootSignatureIndex(0, UI_TEXTURE);
 	if(Masktex) Masktex->SetRootSignatureIndex(0, UI_MASK_TEXTURE);
 
-
-	m_RenderUIList[Layer].push_back({UIInfo{PRect,tex,Masktex}, f});
+	//Nosprite
+	m_RenderUIList[Layer].push_back({UIInfo{SceneType,PRect,option,NULL,tex,Masktex}, f});
 
 
 	return true;
+}
+
+bool UIManager::CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, bool(*f)(void* argu), int Layer, UINT option, UINT SceneType)
+{
+	// is not invalid 
+	if (!(top < bottom && right > left))
+		return false;
+
+	UIRect* PRect = new UIRect{ CreateNormalizePixel(top, bottom, left, right) };
+	UIEffectInfo* pEffectInfo = new UIEffectInfo(Uieffect);
+	//Init RootSignature for UIShader
+	if (tex) tex->SetRootSignatureIndex(0, UI_TEXTURE);
+	if (Masktex) Masktex->SetRootSignatureIndex(0, UI_MASK_TEXTURE);
+
+	//Nosprite
+	m_RenderUIList[Layer].push_back({ UIInfo{SceneType,PRect,option,pEffectInfo,tex,Masktex}, f });
+
+	return true;
+}
+
+void UIManager::AnimateUI(float ElapsedTime)
+{
+	for (int i = 0; i < TEXTURE_LAYER; ++i) {
+
+		for (pair<UIInfo, bool(*)(void*)>& info : m_RenderUIList[i]) {
+
+			if (info.first.EffectInfo) {
+		
+				info.first.EffectInfo->Timer += ElapsedTime;
+
+				if (info.first.EffectInfo->Timer > info.first.EffectInfo->SetTime) {
+					info.first.EffectInfo->Timer = 0;
+				}
+
+			if (info.first.EffectInfo->Timer == 0) {
+				info.first.EffectInfo->NowCol++;
+
+				if (info.first.EffectInfo->NowCol == info.first.EffectInfo->ColNum) {
+					info.first.EffectInfo->NowRow++;
+					info.first.EffectInfo->NowCol = 0;
+				}
+
+				if (info.first.EffectInfo->NowRow == info.first.EffectInfo->RowNum) {
+					info.first.EffectInfo->NowRow = 0;
+					info.first.EffectInfo->NowCol = 0;
+				}
+			}
+			}
+
+		
+		}
+	}
+
 }
 
 void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList)
@@ -71,17 +132,33 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList)
 			for (const pair<UIInfo, bool(*)(void*)>& info : m_RenderUIList[i]) {
 
 			
+
+
+				//텍스쳐 있는지 없는지 확인
 				if (info.first.RenderTexture) {
 					info.first.RenderTexture->UpdateShaderVariable(pd3d12CommandList,0);
 				}
 				if (info.first.MaskTexture) {
-					m_pMesh[count]->UpdateMaskValue(1.0f, 1.0f, 1.0f, 1.0f);
+	
 					info.first.MaskTexture->UpdateShaderVariable(pd3d12CommandList, 0);
 				}
+
+				//옵션
+				m_pMesh[count]->UpdateMaskValue(info.first.Option);
+
+				//SPRITEANIMATION에 따른 UV 설정
+				if (info.first.EffectInfo) {
+					float m_row = info.first.EffectInfo->NowRow;
+					float m_rows = info.first.EffectInfo->RowNum;
+					float m_col = info.first.EffectInfo->NowCol;
+					float m_cols = info.first.EffectInfo->ColNum;;
+					m_pMesh[count]->UpdateMaskUvCoord(UIRect{ m_row * (1.0f / m_rows) , (m_row + 1.0f) * (1.0f / m_rows) , m_col * (1.0f / m_cols), (m_col + 1.f) * (1.0f / m_cols) });
+				}
 				else {
-					m_pMesh[count]->UpdateMaskValue(0.0f, 0.0f, 0.0f, 0.0f);
+					m_pMesh[count]->UpdateMaskUvCoord(UIRect(0.0f, 1.0f, 0.0f, 1.0f));
 				}
 
+				//랜더링 텍스쳐 설정
 				m_pMesh[count]->UpdateVertexPosition((*info.first.Rect));
 				m_pMesh[count++]->Render(pd3d12CommandList);
 			}

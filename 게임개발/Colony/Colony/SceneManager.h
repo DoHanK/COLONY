@@ -15,7 +15,7 @@ public:
 	ResourceManager*	 m_pResourceManager;
 	UIManager*			 m_pUIManager;
 
-	Camera* m_pCamera;
+	Camera* m_pCamera =NULL;
 public:
 	//æ¿ √ﬂ∞° , æ¿ ªË¡¶ , æ¿ πŸ≤Ÿ±‚
 	void PushScene(BasicScene* Scene , D3Device* Device,bool bBuild);

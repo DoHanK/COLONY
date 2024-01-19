@@ -28,6 +28,24 @@ Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	Weapon->SetChild(WeaponModelInfo->m_pModelRootObject);
 	SetWeapon(Weapon);
 
+	m_pCamera = NULL;
+
+	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
+	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_fMaxVelocityXZ = 1.33f;
+	m_fMaxVelocityY = 0.0f;
+	m_fFriction = 8.0f;
+
+	m_fPitch = 0.0f;
+	m_fRoll = 0.0f;
+	m_fYaw = 0.0f;
+
+
 }
 
 Player::~Player()
@@ -133,6 +151,7 @@ void Player::UpdatePosition(float fTimeElapsed)
 	float fDeceleration = (m_fFriction * fTimeElapsed);
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+
 }
 
 void Player::Rotate(float x, float y , float z)
@@ -361,7 +380,8 @@ void PlayerAnimationController::AdvanceTime(float fElapsedTime, GameObject* pRoo
 			}
 		}
 
-		pRootGameObject->UpdateTransform(NULL);
+		pRootGameObject->m_pChild->UpdateTransform(NULL);
+
 	}
 
 }

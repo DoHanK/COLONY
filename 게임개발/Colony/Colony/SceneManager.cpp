@@ -26,6 +26,14 @@ void SceneManager::PushScene(BasicScene* Scene, D3Device* Device,bool bBuild = t
 {
 	m_SceneStack.push(Scene);
 
+	if (Scene->GetType()== GamePlay) {
+		ShowCursor(false);
+	}
+	else {
+		ShowCursor(true);
+	}
+
+
 	//Watchout! UploadBuffer 
 	if (bBuild) {
 		Device->CommandAllocatorReset();
@@ -33,6 +41,7 @@ void SceneManager::PushScene(BasicScene* Scene, D3Device* Device,bool bBuild = t
 		m_SceneStack.top()->BuildObjects(Device->GetID3DDevice(), Device->GetCommandList(), m_pResourceManager, m_pUIManager);
 		Device->CloseCommandAndPushQueue();
 		Device->WaitForGpuComplete();
+
 		m_SceneStack.top()->ReleaseUploadBuffers();
 		if (m_pResourceManager) m_pResourceManager->ReleaseUploadBuffers();
 	}
@@ -45,6 +54,13 @@ void SceneManager::PopScene()
 	m_SceneStack.pop();
 	pScene->ReleaseObjects();
 	delete pScene;
+
+	if (m_SceneStack.top()->GetType() == GamePlay) {
+		ShowCursor(false);
+	}
+	else {
+		ShowCursor(true);
+	}
 }
 
 void SceneManager::ChangeScene(BasicScene* Scene, D3Device* Device)
@@ -60,7 +76,17 @@ void SceneManager::ChangeScene(BasicScene* Scene, D3Device* Device)
 	m_pUIManager->m_RenderUIList->clear();
 	//다음 씬 로딩 및
 
+
+
+
 	m_SceneStack.push(Scene);
+	if (m_SceneStack.top()->GetType() == GamePlay) {
+		ShowCursor(false);
+	}
+	else {
+		ShowCursor(true);
+	}
+
 	m_SceneStack.top()->BuildObjects(Device->GetID3DDevice(), Device->GetCommandList(), m_pResourceManager, m_pUIManager);
 	Device->CloseCommandAndPushQueue();
 	Device->WaitForGpuComplete();
@@ -82,5 +108,5 @@ void SceneManager::RenderScene(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	m_SceneStack.top()->Render(pd3dCommandList);
 
-	m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	if(m_pCamera) m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 }

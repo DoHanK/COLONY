@@ -13,9 +13,16 @@
 //										LobbyScene Class				  						   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void GameLobyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, UIManager* pUImanager)
+void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, UIManager* pUImanager)
 {
-	pUImanager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true), NULL, NULL, 0);
+	//pUImanager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true), NULL, NULL, 0,  TEXTUREUSE , GetType());
+
+	UIEffectInfo EffectInfo;
+	EffectInfo.ColNum = 6;
+	EffectInfo.RowNum = 6;
+	EffectInfo.SetTime = 0.1;
+	pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
+	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, NULL, 0, (MASKUSE | TEXTUREUSE), GetType());
 
 }
 
@@ -170,6 +177,13 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
 	m_pCamera->SetPlayer(m_pPlayer);
 
+	CLoadedModelInfo* pSpider = pResourceManager->BringModelInfo("Model/AlienSpider.bin", "Model/");
+	AnimationController* pAnimationSpider = new AnimationController(pd3dDevice, pd3dCommandList, 1, pSpider);
+	m_pGameObject = new GameObject;
+	m_pGameObject->SetPosition(XMFLOAT3(0, 0, 0));
+	m_pGameObject->SetChild(pSpider->m_pModelRootObject,true);
+	m_pGameObject->SetAnimator(pAnimationSpider);
+
 
 	BuildDefaultLightsAndMaterials();
 
@@ -184,6 +198,8 @@ void GamePlayScene::ReleaseObjects()
 	if (m_pPlayer) m_pPlayer->Release();
 
 	if (m_pLights) delete[] m_pLights;
+
+	if (m_pGameObject)m_pGameObject->Release();
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -289,7 +305,10 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	PlayerControlInput();
 
+	if (m_pGameObject) m_pGameObject->Animate(fTimeElapsed);
+
 	m_pPlayer->Animate(fTimeElapsed);
+	
 
 }
 
@@ -308,13 +327,20 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
+	if (m_pGameObject) {
+		
+		m_pGameObject->Render(pd3dCommandList);
 
+	}
 	m_pPlayer->Render(pd3dCommandList);
+
+
 }
 
 void GamePlayScene::ReleaseUploadBuffers()
 {
 	//Camera Player...µîµî.
+	if (m_pGameObject)m_pGameObject->ReleaseUploadBuffers();
 
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 }

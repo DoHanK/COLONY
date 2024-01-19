@@ -37,6 +37,11 @@ struct LIGHTS
 	int									m_nLights;
 };
 
+enum SceneType{
+	Basic,
+	GameLobby,
+	GamePlay
+};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //										BasicScene Class				  						   //
@@ -64,18 +69,20 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL) {};
 
 
+	virtual UINT GetType() { return Basic; };
 
 
 
 
 };
 
-class GameLobyScene :public BasicScene {
+class GameLobbyScene :public BasicScene {
 public:
-	GameLobyScene() {};
-	virtual~GameLobyScene() {};
+	GameLobbyScene() {};
+	virtual~GameLobbyScene() {};
 
 	virtual void  BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, UIManager* pUImanager);
+	virtual UINT GetType() { return GameLobby; };
 };
 
 
@@ -104,6 +111,7 @@ public:
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 
 	virtual void ReleaseUploadBuffers();
+	virtual UINT GetType() { return GamePlay; };
 
 protected:
 
@@ -119,5 +127,5 @@ protected:
 
 	Player* m_pPlayer;
 	ThirdPersonCamera* m_pCamera;
-
+	GameObject* m_pGameObject =NULL;
 };

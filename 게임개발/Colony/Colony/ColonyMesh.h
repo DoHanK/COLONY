@@ -241,16 +241,24 @@ public:
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dUvBufferViews;
 	XMFLOAT2*						m_pcbMappedUvs;
 
+	//텍스쳐 매핑을 위한 MASK UV좌표
+	ID3D12Resource*					m_pd3dMaskUvBuffer;
+	UINT							m_nMaskUvBufferViews = 0;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dMaskUvBufferViews;
+	XMFLOAT2*						m_pcbMappedMaskUvs;
+
 	//MaskValue
 	ID3D12Resource*					m_pd3dMaskBuffer;
 	UINT							m_nMaskBufferViews = 0;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dMaskBufferViews;
-	float*							m_pcbMappedMasks;
+	UINT*							m_pcbMappedMasks;
 
 	//위치 지정해주기
 	void UpdateVertexPosition(const UIRect& Rect);
-
+	void UpdateUvCoord(const UIRect& Rect);
+	void UpdateMaskUvCoord(const UIRect& Rect);
 	//Mask Setting
-	void UpdateMaskValue(const float& lefttop, const float& righttop, const float& leftbottom, const float& rightbottom);
+	void UpdateMaskValue(const UINT& lefttop, const UINT& righttop, const UINT& leftbottom, const UINT& rightbottom);
+	void UpdateMaskValue(const UINT& AllRectMask);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 };

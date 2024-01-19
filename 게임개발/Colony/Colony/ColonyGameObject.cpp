@@ -1244,7 +1244,7 @@ void AnimationController::AdvanceTime(float fTimeElapsed, GameObject* pRootGameO
 						xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
 					}
 				}
-			
+				m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
 			}
 		}
 

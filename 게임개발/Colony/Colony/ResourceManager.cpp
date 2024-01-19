@@ -68,7 +68,14 @@ ResourceManager::~ResourceManager()
 {
 	//모델 삭제
 	for (pair<string, CLoadedModelInfo*>& Model : ModelnfoList) {
+		//애니메이션데이터도 삭제
+		for (int i = 0; i < Model.second->m_nSkinnedMeshes; i++)
+		{
+			Model.second->m_ppAnimationSets[i]->Release();
+		}
+		
 		Model.second->m_pModelRootObject->Release();
+
 		delete Model.second;
 	}
 
@@ -139,6 +146,16 @@ CLoadedModelInfo* ResourceManager::BringModelInfo(const char* filename,const cha
 		CLoadedModelInfo* LoadObjectModelInfo = GameObject::LoadGeometryAndAnimationFromFile(m_pDevice, m_pGCommandList, NULL, filename, NULL, FileTextureRoute);
 		ModelnfoList.push_back({ CheckTag,LoadObjectModelInfo });
 		LoadObjectModelInfo->m_pModelRootObject->AddRef();
+
+		//스키니모델이 있으면
+		for (int i = 0; i < LoadObjectModelInfo->m_nSkinnedMeshes; i++)
+		{
+	
+			LoadObjectModelInfo->m_ppAnimationSets[i]->AddRef();
+
+		}
+		
+
 		return LoadObjectModelInfo;
 	}
 
