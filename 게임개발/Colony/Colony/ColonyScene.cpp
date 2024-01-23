@@ -160,6 +160,106 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 }
 
+
+#define LOD 0
+void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName, const char* TexFileName)
+{
+	FILE* pFile = NULL;
+	::fopen_s(&pFile, pstrFileName, "rb");
+	::rewind(pFile);
+
+	char pstrToken[256] = { '\0' };
+	char pstrGameObjectName[256] = { '\0' };
+
+	string str = "LOD";
+	str += to_string(LOD);
+
+	UINT nReads = 0;
+	BYTE nStrLength = 0, nObjectNameLength = 0;
+
+	::ReadUnityBinaryString(pFile, pstrToken, &nStrLength); //"<GameObjects>:"
+	nReads = (UINT)::fread(&m_nGameObjects, sizeof(int), 1, pFile); //루트 게임 오브젝트 수 
+
+	m_pSceneObject.resize(m_nGameObjects);
+	for (int i = 0; i < m_nGameObjects; ++i) {
+		m_pSceneObject[i] = new GameObject();  // 또는 다른 방법으로 메모리 할당
+	}
+
+	GameObject* pGameObject = NULL;
+
+	int cur_object = 0;
+	while (cur_object < m_nGameObjects)
+	{
+		pGameObject = new GameObject(7);
+
+		::ReadUnityBinaryString(pFile, pstrToken, &nStrLength); //"<GameObject>:"
+		::ReadUnityBinaryString(pFile, pstrGameObjectName, &nObjectNameLength);
+		pstrGameObjectName[nObjectNameLength] = '\0';
+
+
+		strcpy_s(pGameObject->m_pstrFrameName, 64, pstrGameObjectName);
+		::ReadUnityBinaryString(pFile, pstrToken, &nStrLength); //"<Transform>:"
+		XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
+		XMFLOAT4 xmf4Rotation;
+		nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pFile);
+		nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, pFile); //Euler Angle
+		nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pFile);
+		nReads = (UINT)::fread(&xmf4Rotation, sizeof(float), 4, pFile); //Quaternion
+
+
+		::ReadUnityBinaryString(pFile, pstrToken, &nStrLength); //"<TransformMatrix>:"
+		nReads = (UINT)::fread(&pGameObject->m_xmf4x4World, sizeof(float), 16, pFile);
+
+		if (strstr(pstrGameObjectName, str.c_str()) != nullptr) {
+
+			StandardMesh* pMesh = NULL;
+			for (int j = 0; j < cur_object; j++)
+			{
+				if (!strcmp(pstrGameObjectName, m_pSceneObject[j]->m_pstrFrameName))
+				{
+					pMesh = (StandardMesh*)m_pSceneObject[j]->m_pMesh;
+
+					pGameObject->SetMesh(pMesh);
+					for (int k = 0; k < m_pSceneObject[j]->m_nMaterials; k++) {
+						pGameObject->SetMaterial(k, m_pSceneObject[j]->m_ppMaterials[k]);
+					}
+					break;
+				}
+			}
+
+			if (!pMesh)
+			{
+
+				FILE* pInFile = NULL;
+				char modelFilePath[256];
+				strcpy_s(modelFilePath, sizeof(modelFilePath), "Model/Meshes/");
+				strcpy_s(modelFilePath + 13, sizeof(modelFilePath) - 13 - 1, pstrGameObjectName);
+				strcat_s(modelFilePath, sizeof(modelFilePath), ".bin");
+
+				::fopen_s(&pInFile, modelFilePath, "rb");
+				::rewind(pInFile);
+				::ReadUnityBinaryString(pInFile, pstrToken, &nStrLength); //"<Mesh>:"
+
+				pMesh = new StandardMesh(pd3dDevice, pd3dCommandList);
+				pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
+
+				pGameObject->SetMesh(pMesh);
+
+				::ReadUnityBinaryString(pInFile, pstrToken, &nStrLength); //"<Materials>:"
+				pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, pGameObject->GetParent(), pInFile,NULL,TexFileName);
+
+				::fclose(pInFile);
+			}
+			m_pSceneObject[cur_object] = pGameObject;
+			cur_object += 1;
+		}
+	}
+
+	::fclose(pFile);
+}
+
+
+
 void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature , ResourceManager* pResourceManager, UIManager* pUImanager)
 {
 
@@ -181,7 +281,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pAngrybotModel, pAngrybotModel1);
 	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
 	m_pCamera->SetPlayer(m_pPlayer);
-	m_pGameObejct.reserve(400);
+	m_pGameObject.reserve(400);
 	for (int j = 0; j < 1; ++j) {
 		for (int i = 0; i < 1; i++) {
 
@@ -189,13 +289,14 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			p->SetPosition(0, 0, j);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 20);
 			p->SetGhostShader(m_GhostTrailler);
-			m_pGameObejct.push_back(p);
+			m_pGameObject.push_back(p);
 			
 		}
 	}
 
 	BuildDefaultLightsAndMaterials();
 
+	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/Scene.bin","Model/Textures/scene/");
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -210,7 +311,7 @@ void GamePlayScene::ReleaseObjects()
 
 	if (m_GhostTrailler) m_GhostTrailler->Release();
 
-	for (auto& GO : m_pGameObejct) {
+	for (auto& GO : m_pGameObject) {
 		GO->Release();
 	}
 }
@@ -320,7 +421,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	static float time = 0;
 	time += m_fElapsedTime;
 
-	for (auto& GO : m_pGameObejct) {
+	for (auto& GO : m_pGameObject) {
 		GO->Animate(fTimeElapsed);
 		GO->SetPosition(GO->GetPosition().x + fTimeElapsed * (rand() % 4) , GO->GetPosition().y, GO->GetPosition().z + fTimeElapsed * (rand() % 4));
 		//if (time > 1.7f) {
@@ -350,12 +451,14 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
-	for (auto& GO : m_pGameObejct) {
+	for (auto& GO : m_pGameObject) {
 		GO->Render(pd3dCommandList);
 	}
 	m_pPlayer->Render(pd3dCommandList);
 
-
+	for (auto& GO : m_pSceneObject) {
+		GO->Render(pd3dCommandList);
+	}
 }
 
 void GamePlayScene::ReleaseUploadBuffers()
@@ -363,7 +466,7 @@ void GamePlayScene::ReleaseUploadBuffers()
 	//Camera Player...등등.
 
 	for (int i = 0; i <1; i++) {
-		m_pGameObejct[i]->ReleaseUploadBuffers();
+		m_pGameObject[i]->ReleaseUploadBuffers();
 	}
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 
