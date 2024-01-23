@@ -103,6 +103,7 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	void BuildDefaultLightsAndMaterials();
+	void LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName, const char* TexFileName);
 	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager);
 	void ReleaseObjects();
 	
@@ -117,17 +118,19 @@ protected:
 
 	float								m_fElapsedTime = 0.0f;
 
-	LIGHT* m_pLights = NULL;
+	LIGHT*								m_pLights = NULL;
 	int									m_nLights = 0;
 
 	XMFLOAT4							m_xmf4GlobalAmbient;
 
-	ID3D12Resource* m_pd3dcbLights = NULL;
-	LIGHTS* m_pcbMappedLights = NULL;
+	ID3D12Resource*						m_pd3dcbLights = NULL;
+	LIGHTS*								m_pcbMappedLights = NULL;
 
-	Player* m_pPlayer;
-	ThirdPersonCamera* m_pCamera;
-	vector<GameObject*> m_pGameObejct;
+	Player*								m_pPlayer;
+	ThirdPersonCamera*					m_pCamera;
+	int									m_nGameObjects = 0;
+	vector<GameObject*>					m_pGameObject;
+	vector<GameObject*>					m_pSceneObject;
 
-	GhostTraillerShader* m_GhostTrailler;
+	GhostTraillerShader*				m_GhostTrailler;
 };
