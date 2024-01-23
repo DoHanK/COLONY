@@ -11,13 +11,16 @@ cbuffer cbCameraInfo : register(b1)
 	matrix					gmtxView : packoffset(c0);
 	matrix					gmtxProjection : packoffset(c4);
 	float3					gvCameraPosition : packoffset(c8);
+    
 };
 
 cbuffer cbGameObjectInfo : register(b2)
 {
 	matrix					gmtxGameObject : packoffset(c0);
 	MATERIAL				gMaterial : packoffset(c4);
-	uint					gnTexturesMask : packoffset(c8);
+	uint					gnTexturesMask : packoffset(c8.x);
+    float                   gfGhostNum : packoffset(c8.y);
+    
 };
 
 #include "Light.hlsl"
@@ -158,6 +161,50 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	output.uv = input.uv;
 
 	return(output);
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+float4 PSGhostTrailler(VS_STANDARD_OUTPUT input) : SV_TARGET
+{
+    float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_ALBEDO_MAP)
+        cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+    float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_SPECULAR_MAP)
+        cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
+    float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+        cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
+    float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_METALLIC_MAP)
+        cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
+    float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_EMISSION_MAP)
+        cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
+
+    float3 normalW;
+    float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
+    if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+    {
+        float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
+        float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+        normalW = normalize(mul(vNormal, TBN));
+    }
+    else
+    {
+        normalW = normalize(input.normalW);
+    }
+    //return cColor;
+	
+    float4 cIllumination = Lighting(input.positionW, normalW);
+	//cColor = (lerp(cColor, cIllumination, 0.2f));
+    //cColor.rgb *= 1;
+    // cColor.r = 1-GhostTime;
+    cColor.a = 0.7f - (gfGhostNum/100);
+    cColor.rgb *= 0.7;
+    cColor.rgb *= (1.0f - (gfGhostNum / 5));
+    return cColor;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -332,6 +332,7 @@ public:
 	void SetAnimationCallbackHandler(int nSkinnedMesh, int nAnimationSet, CAnimationCallbackHandler* pCallbackHandler);
 
 	void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
+	void DirectUpdateMatrix();
 };
 
 

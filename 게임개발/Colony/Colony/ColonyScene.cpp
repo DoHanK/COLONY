@@ -1,6 +1,7 @@
 #include "ColonyScene.h"
 #include "ColonyShader.h"
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //												Desc											   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -13,7 +14,7 @@
 //										LobbyScene Class				  						   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, UIManager* pUImanager)
+void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature , ResourceManager* pResourceManager, UIManager* pUImanager)
 {
 	//pUImanager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true), NULL, NULL, 0,  TEXTUREUSE , GetType());
 
@@ -43,7 +44,6 @@ GamePlayScene::~GamePlayScene()
 }
 bool GamePlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	static int count = 0;
 
 	switch (nMessageID)
 	{
@@ -160,7 +160,7 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 }
 
-void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList ,ResourceManager* pResourceManager, UIManager* pUImanager)
+void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature , ResourceManager* pResourceManager, UIManager* pUImanager)
 {
 
 	////카메라
@@ -169,21 +169,30 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pCamera->GenerateProjectionMatrix(1.01, 1000.f, ASPECT_RATIO, 60.f);
 	m_pCamera->RegenerateViewMatrix();
 
+	m_GhostTrailler = new GhostTraillerShader();
+	
 
-
+	m_GhostTrailler->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_GhostTrailler->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_GhostTrailler->AddRef();
 	CLoadedModelInfo* pAngrybotModel = pResourceManager->BringModelInfo("Model/JU_Mannequin.bin", "Model/Textures/PlayerTexture/");
 	CLoadedModelInfo* pAngrybotModel1 = pResourceManager->BringModelInfo("Model/UMP5.bin", "Model/Textures/UMP5Texture/");
+
 	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pAngrybotModel, pAngrybotModel1);
 	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
 	m_pCamera->SetPlayer(m_pPlayer);
+	m_pGameObejct.reserve(400);
+	for (int j = 0; j < 1; ++j) {
+		for (int i = 0; i < 1; i++) {
 
-	CLoadedModelInfo* pSpider = pResourceManager->BringModelInfo("Model/AlienSpider.bin", "Model/");
-	AnimationController* pAnimationSpider = new AnimationController(pd3dDevice, pd3dCommandList, 1, pSpider);
-	m_pGameObject = new GameObject;
-	m_pGameObject->SetPosition(XMFLOAT3(0, 0, 0));
-	m_pGameObject->SetChild(pSpider->m_pModelRootObject,true);
-	m_pGameObject->SetAnimator(pAnimationSpider);
-
+			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager);
+			p->SetPosition(0, 0, j);
+			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 20);
+			p->SetGhostShader(m_GhostTrailler);
+			m_pGameObejct.push_back(p);
+			
+		}
+	}
 
 	BuildDefaultLightsAndMaterials();
 
@@ -199,7 +208,11 @@ void GamePlayScene::ReleaseObjects()
 
 	if (m_pLights) delete[] m_pLights;
 
-	if (m_pGameObject)m_pGameObject->Release();
+	if (m_GhostTrailler) m_GhostTrailler->Release();
+
+	for (auto& GO : m_pGameObejct) {
+		GO->Release();
+	}
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -304,8 +317,18 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	m_fElapsedTime = fTimeElapsed;
 
 	PlayerControlInput();
+	static float time = 0;
+	time += m_fElapsedTime;
 
-	if (m_pGameObject) m_pGameObject->Animate(fTimeElapsed);
+	for (auto& GO : m_pGameObejct) {
+		GO->Animate(fTimeElapsed);
+		GO->SetPosition(GO->GetPosition().x + fTimeElapsed * (rand() % 4) , GO->GetPosition().y, GO->GetPosition().z + fTimeElapsed * (rand() % 4));
+		//if (time > 1.7f) {
+		//	time = 0;
+		//	GO->m_pSkinnedAnimationController->SetTrackAnimationSet(0, rand() % 19);
+		//}
+	}
+
 
 	m_pPlayer->Animate(fTimeElapsed);
 	
@@ -327,10 +350,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
-	if (m_pGameObject) {
-		
-		m_pGameObject->Render(pd3dCommandList);
-
+	for (auto& GO : m_pGameObejct) {
+		GO->Render(pd3dCommandList);
 	}
 	m_pPlayer->Render(pd3dCommandList);
 
@@ -340,8 +361,11 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 void GamePlayScene::ReleaseUploadBuffers()
 {
 	//Camera Player...등등.
-	if (m_pGameObject)m_pGameObject->ReleaseUploadBuffers();
 
+	for (int i = 0; i <1; i++) {
+		m_pGameObejct[i]->ReleaseUploadBuffers();
+	}
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+
 }
 

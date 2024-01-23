@@ -28,6 +28,12 @@
     <Filter Include="GameManagerHeader">
       <UniqueIdentifier>{946bcad3-6b7b-42fc-ada6-27955cfe7d08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameBasicCpp">
+      <UniqueIdentifier>{1d4425f4-50c4-4a41-ba07-368a4fa78bbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameBasicHeader">
+      <UniqueIdentifier>{27a90f9d-876a-4769-8f80-fffdda0aba9a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -48,35 +54,17 @@
     <ClInclude Include="ColonyFramework.h">
       <Filter>GameHeader</Filter>
     </ClInclude>
-    <ClInclude Include="ColonyMesh.h">
-      <Filter>GameHeader</Filter>
-    </ClInclude>
     <ClInclude Include="Colony.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="DDSTextureLoader.h">
       <Filter>TextureLoad</Filter>
     </ClInclude>
-    <ClInclude Include="ColonyGameObject.h">
-      <Filter>GameHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="ColonyCamera.h">
-      <Filter>GameHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="ColonyTimer.h">
-      <Filter>GameHeader</Filter>
-    </ClInclude>
     <ClInclude Include="DDSTextureLoader12.h">
       <Filter>TextureLoad</Filter>
     </ClInclude>
     <ClInclude Include="WICTextureLoader12.h">
       <Filter>TextureLoad</Filter>
-    </ClInclude>
-    <ClInclude Include="ColonyShader.h">
-      <Filter>GameHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="ColonyScene.h">
-      <Filter>GameHeader</Filter>
     </ClInclude>
     <ClInclude Include="ColonyPlayer.h">
       <Filter>GameHeader</Filter>
@@ -93,6 +81,27 @@
     <ClInclude Include="SceneManager.h">
       <Filter>GameManagerHeader</Filter>
     </ClInclude>
+    <ClInclude Include="AlienSpider.h">
+      <Filter>GameHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyTimer.h">
+      <Filter>GameBasicHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyShader.h">
+      <Filter>GameBasicHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyMesh.h">
+      <Filter>GameBasicHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyGameObject.h">
+      <Filter>GameBasicHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyScene.h">
+      <Filter>GameHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyCamera.h">
+      <Filter>GameBasicHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -104,20 +113,8 @@
     <ClCompile Include="ColonyFramework.cpp">
       <Filter>GameCpp</Filter>
     </ClCompile>
-    <ClCompile Include="ColonyMesh.cpp">
-      <Filter>GameCpp</Filter>
-    </ClCompile>
     <ClCompile Include="DDSTextureLoader.cpp">
       <Filter>TextureLoad</Filter>
-    </ClCompile>
-    <ClCompile Include="ColonyGameObject.cpp">
-      <Filter>GameCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="ColonyCamera.cpp">
-      <Filter>GameCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="ColonyTimer.cpp">
-      <Filter>GameCpp</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>소스 파일</Filter>
@@ -127,9 +124,6 @@
     </ClCompile>
     <ClCompile Include="DDSTextureLoader12.cpp">
       <Filter>TextureLoad</Filter>
-    </ClCompile>
-    <ClCompile Include="ColonyShader.cpp">
-      <Filter>GameCpp</Filter>
     </ClCompile>
     <ClCompile Include="ColonyScene.cpp">
       <Filter>GameCpp</Filter>
@@ -145,6 +139,24 @@
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
       <Filter>GameManagerCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="AlienSpider.cpp">
+      <Filter>GameCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyTimer.cpp">
+      <Filter>GameBasicCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyShader.cpp">
+      <Filter>GameBasicCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyMesh.cpp">
+      <Filter>GameBasicCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyGameObject.cpp">
+      <Filter>GameBasicCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyCamera.cpp">
+      <Filter>GameBasicCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

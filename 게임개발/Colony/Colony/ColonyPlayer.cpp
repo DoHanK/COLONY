@@ -37,9 +37,9 @@ Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_fMaxVelocityXZ = 1.33f;
+	m_fMaxVelocityXZ = 4.5f;
 	m_fMaxVelocityY = 0.0f;
-	m_fFriction = 8.0f;
+	m_fFriction = 19.0f;
 
 	m_fPitch = 0.0f;
 	m_fRoll = 0.0f;
@@ -232,6 +232,7 @@ void Player::Animate(float fTimeElapsed)
 	UpdateMatrix();
 
 	if (m_pSkinnedAnimationController) ((PlayerAnimationController*)m_pSkinnedAnimationController)->AdvanceTime(fTimeElapsed, this);
+	if (m_pSkinnedAnimationController) ((PlayerAnimationController*)m_pSkinnedAnimationController)->DirectUpdateMatrix();
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);

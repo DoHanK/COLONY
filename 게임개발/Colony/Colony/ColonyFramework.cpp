@@ -114,7 +114,7 @@ void ColonyFramework::CreateGraphicsRootSignature()
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[1].Constants.Num32BitValues = 33;
+	pd3dRootParameters[1].Constants.Num32BitValues = 37;
 	pd3dRootParameters[1].Constants.ShaderRegister = 2; //GameObject
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -248,8 +248,8 @@ bool ColonyFramework::MakeGameObjects()
 	//씬을 구성하는 매니져들
 	m_pSceneManager = new SceneManager(m_pResourceManager, m_pUIManager);
 	m_pSceneManager->PushScene(new GamePlayScene, GetDevice(), false);
-	m_pSceneManager->m_SceneStack.top()->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pResourceManager, m_pUIManager);
-	
+	m_pSceneManager->m_SceneStack.top()->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(),m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
+	m_pSceneManager->SetRootSignature(m_pd3dGraphicsRootSignature);
 
 
 

@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AlienSpider.h" />
     <ClInclude Include="Colony.h" />
     <ClInclude Include="ColonyCamera.h" />
     <ClInclude Include="ColonyFramework.h" />
@@ -158,6 +159,7 @@
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AlienSpider.cpp" />
     <ClCompile Include="Colony.cpp" />
     <ClCompile Include="ColonyCamera.cpp" />
     <ClCompile Include="ColonyFramework.cpp" />

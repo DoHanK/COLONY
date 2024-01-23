@@ -1,5 +1,14 @@
 #include "SceneManager.h"
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//												Desc											   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//								SceneManager Effectvie Manage Scene								   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										SceneManager Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 SceneManager::SceneManager(ResourceManager* pResourceManager, UIManager* pUIManager)
 {
 	m_pResourceManager = pResourceManager;
@@ -33,12 +42,11 @@ void SceneManager::PushScene(BasicScene* Scene, D3Device* Device,bool bBuild = t
 		ShowCursor(true);
 	}
 
-
 	//Watchout! UploadBuffer 
 	if (bBuild) {
 		Device->CommandAllocatorReset();
 		Device->CommandListReset();
-		m_SceneStack.top()->BuildObjects(Device->GetID3DDevice(), Device->GetCommandList(), m_pResourceManager, m_pUIManager);
+		m_SceneStack.top()->BuildObjects(Device->GetID3DDevice(), Device->GetCommandList(), m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
 		Device->CloseCommandAndPushQueue();
 		Device->WaitForGpuComplete();
 
@@ -87,7 +95,7 @@ void SceneManager::ChangeScene(BasicScene* Scene, D3Device* Device)
 		ShowCursor(true);
 	}
 
-	m_SceneStack.top()->BuildObjects(Device->GetID3DDevice(), Device->GetCommandList(), m_pResourceManager, m_pUIManager);
+	m_SceneStack.top()->BuildObjects(Device->GetID3DDevice(), Device->GetCommandList(), m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
 	Device->CloseCommandAndPushQueue();
 	Device->WaitForGpuComplete();
 
@@ -102,6 +110,7 @@ void SceneManager::AnimationGameObjects(const float& m_ElapsedTime)
 	m_SceneStack.top()->AnimateObjects(m_ElapsedTime);
 
 }
+
 //랜더링 장면
 void SceneManager::RenderScene(ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -109,4 +118,9 @@ void SceneManager::RenderScene(ID3D12GraphicsCommandList* pd3dCommandList)
 	m_SceneStack.top()->Render(pd3dCommandList);
 
 	if(m_pCamera) m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+}
+
+void SceneManager::SetRootSignature(ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_pd3dGraphicsRootSignature = pd3dGraphicsRootSignature;
 }

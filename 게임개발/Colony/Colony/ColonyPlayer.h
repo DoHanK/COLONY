@@ -7,7 +7,7 @@ class PlayerAnimationController;
 
 
 //Player Acceleration Speed Control
-#define PlayerRunAcel  0.02;
+#define PlayerRunAcel  0.04;
 #define NoGrapAcel 0.3;
 
 //¡∂¿€≈∞

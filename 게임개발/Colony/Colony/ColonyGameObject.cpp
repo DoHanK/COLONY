@@ -574,9 +574,13 @@ void GameObject::Animate(float fTimeElapsed)
 	UpdateMatrix();
 
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->DirectUpdateMatrix();
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);
+
+
+
 }
 
 void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
@@ -623,6 +627,7 @@ void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
 }
 
 void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, Material* pMaterial)
@@ -1138,8 +1143,11 @@ AnimationController::AnimationController(ID3D12Device* pd3dDevice, ID3D12Graphic
 	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256ÀÇ ¹è¼ö
 	for (int i = 0; i < m_nSkinnedMeshes; i++)
 	{
-		m_ppd3dcbSkinningBoneTransforms[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-		m_ppd3dcbSkinningBoneTransforms[i]->Map(0, NULL, (void**)&m_ppcbxmf4x4MappedSkinningBoneTransforms[i]);
+		if (m_ppSkinnedMeshes[i]) {
+				m_ppd3dcbSkinningBoneTransforms[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+				m_ppd3dcbSkinningBoneTransforms[i]->Map(0, NULL, (void**)&m_ppcbxmf4x4MappedSkinningBoneTransforms[i]);		
+		}
+
 	}
 
 
@@ -1154,9 +1162,10 @@ AnimationController::~AnimationController()
 	{
 		if (m_ppAnimationSets[i]) m_ppAnimationSets[i]->Release();
 		if (m_pppAnimatedBoneFrameCaches[i]) delete[] m_pppAnimatedBoneFrameCaches[i];
-
-		m_ppd3dcbSkinningBoneTransforms[i]->Unmap(0, NULL);
-		m_ppd3dcbSkinningBoneTransforms[i]->Release();
+		if (m_ppSkinnedMeshes[i]) {
+			m_ppd3dcbSkinningBoneTransforms[i]->Unmap(0, NULL);
+			m_ppd3dcbSkinningBoneTransforms[i]->Release();
+		}
 	}
 
 	if (m_pppAnimatedBoneFrameCaches) delete[] m_pppAnimatedBoneFrameCaches;
@@ -1250,4 +1259,20 @@ void AnimationController::AdvanceTime(float fTimeElapsed, GameObject* pRootGameO
 
 		pRootGameObject->UpdateTransform(NULL);
 	}
+}
+
+void AnimationController::DirectUpdateMatrix()
+{
+
+	for (int i = 0; i < m_nSkinnedMeshes; i++)
+	{
+		if (m_ppSkinnedMeshes[i]) {
+			
+			for (int j = 0; j < m_ppSkinnedMeshes[i]->m_nSkinningBones; j++) {
+			XMStoreFloat4x4(&m_ppcbxmf4x4MappedSkinningBoneTransforms[i][j], XMMatrixTranspose(XMLoadFloat4x4(&m_ppSkinnedMeshes[i]->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4World)));
+
+			}
+		}
+	}
+
 }

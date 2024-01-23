@@ -6,7 +6,7 @@
 #include "ColonyShader.h"
 #include "ResourceManager.h"
 #include "UiManager.h"
-
+#include "AlienSpider.h"
 #define MAX_LIGHTS						16 
 
 #define POINT_LIGHT						1
@@ -62,7 +62,7 @@ public:
 	virtual void BuildDefaultLightsAndMaterials() {};
 
 	//necessary Function
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager ,UIManager* pUImanager) {};
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager ,UIManager* pUImanager) {};
 	virtual void ReleaseObjects() {};
 	virtual void ReleaseUploadBuffers() {};
 	virtual void AnimateObjects(float fTimeElapsed) {};
@@ -81,7 +81,7 @@ public:
 	GameLobbyScene() {};
 	virtual~GameLobbyScene() {};
 
-	virtual void  BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, UIManager* pUImanager);
+	virtual void  BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager);
 	virtual UINT GetType() { return GameLobby; };
 };
 
@@ -103,7 +103,7 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	void BuildDefaultLightsAndMaterials();
-	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, UIManager* pUImanager);
+	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager);
 	void ReleaseObjects();
 	
 	void PlayerControlInput();
@@ -127,5 +127,7 @@ protected:
 
 	Player* m_pPlayer;
 	ThirdPersonCamera* m_pCamera;
-	GameObject* m_pGameObject =NULL;
+	vector<GameObject*> m_pGameObejct;
+
+	GhostTraillerShader* m_GhostTrailler;
 };
