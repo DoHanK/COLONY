@@ -153,7 +153,7 @@ CLoadedModelInfo* ResourceManager::BringModelInfo(const char* filename,const cha
 	else {
 
 		//파일을 읽어 들이고 정보를 받아옴.
-		CLoadedModelInfo* LoadObjectModelInfo = GameObject::LoadGeometryAndAnimationFromFile(m_pDevice, m_pGCommandList, NULL, filename, NULL, FileTextureRoute);
+		CLoadedModelInfo* LoadObjectModelInfo = GameObject::LoadGeometryAndAnimationFromFile(m_pDevice, m_pGCommandList, NULL, filename, NULL, FileTextureRoute,this);
 		ModelnfoList.push_back({ CheckTag,LoadObjectModelInfo });
 		LoadObjectModelInfo->m_pModelRootObject->AddRef();
 

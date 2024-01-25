@@ -1,5 +1,6 @@
 #include "SceneManager.h"
 #include "stdafx.h"
+#include "ResourceManager.h"
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //												Desc											   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -10,11 +11,16 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //										SceneManager Class										   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-SceneManager::SceneManager(ResourceManager* pResourceManager, UIManager* pUIManager)
+SceneManager::SceneManager(D3Device* pDevice,ResourceManager* pResourceManager, UIManager* pUIManager)
 {
 	m_pResourceManager = pResourceManager;
 	m_pUIManager = pUIManager;
+	m_pD3Device = pDevice;
 	m_pCamera = new Camera();
+	for (int i = 0; i < TEXTURE_SCENE_NUM; ++i) {
+		m_TextureScene[i] = new Texture();
+	}
+	CreateSceneTexture(pDevice->GetID3DDevice(), pDevice->GetCommandList());
 }
 
 SceneManager::~SceneManager()
@@ -26,13 +32,20 @@ SceneManager::~SceneManager()
 		m_SceneStack.pop();
 		delete pScene;
 	}
+	
+	//텍스쳐 삭제
+	for (int i = 0; i < TEXTURE_SCENE_NUM; ++i) {
+		m_TextureScene[i]->Release();
 
+	}
+
+	if(m_ShaderRtvDescriptor) m_ShaderRtvDescriptor->Release();
 	//뷰포트 정의를 위한 카메라 삭제
 	if (m_pCamera) delete m_pCamera;
 
 }
 
-void SceneManager::PushScene(BasicScene* Scene, D3Device* Device,bool bBuild = true)
+void SceneManager::PushScene(BasicScene* Scene,bool bBuild = true)
 {
 	m_SceneStack.push(Scene);
 
@@ -45,11 +58,11 @@ void SceneManager::PushScene(BasicScene* Scene, D3Device* Device,bool bBuild = t
 
 	//Watchout! UploadBuffer 
 	if (bBuild) {
-		Device->CommandAllocatorReset();
-		Device->CommandListReset();
-		m_SceneStack.top()->BuildObjects(Device->GetID3DDevice(), Device->GetCommandList(), m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
-		Device->CloseCommandAndPushQueue();
-		Device->WaitForGpuComplete();
+		m_pD3Device->CommandAllocatorReset();
+		m_pD3Device->CommandListReset();
+		m_SceneStack.top()->BuildObjects(m_pD3Device->GetID3DDevice(), m_pD3Device->GetCommandList(), m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
+		m_pD3Device->CloseCommandAndPushQueue();
+		m_pD3Device->WaitForGpuComplete();
 
 		m_SceneStack.top()->ReleaseUploadBuffers();
 		if (m_pResourceManager) m_pResourceManager->ReleaseUploadBuffers();
@@ -72,10 +85,10 @@ void SceneManager::PopScene()
 	}
 }
 
-void SceneManager::ChangeScene(BasicScene* Scene, D3Device* Device)
+void SceneManager::ChangeScene(BasicScene* Scene)
 {
-	Device->CommandAllocatorReset();
-	Device->CommandListReset();
+	m_pD3Device->CommandAllocatorReset();
+	m_pD3Device->CommandListReset();
 	//기존 씬 정리
 	BasicScene* pScene = m_SceneStack.top();
 	m_SceneStack.pop();
@@ -96,9 +109,9 @@ void SceneManager::ChangeScene(BasicScene* Scene, D3Device* Device)
 		ShowCursor(true);
 	}
 
-	m_SceneStack.top()->BuildObjects(Device->GetID3DDevice(), Device->GetCommandList(), m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
-	Device->CloseCommandAndPushQueue();
-	Device->WaitForGpuComplete();
+	m_SceneStack.top()->BuildObjects(m_pD3Device->GetID3DDevice(), m_pD3Device->GetCommandList(), m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
+	m_pD3Device->CloseCommandAndPushQueue();
+	m_pD3Device->WaitForGpuComplete();
 
 	m_SceneStack.top()->ReleaseUploadBuffers();
 	if (m_pResourceManager) m_pResourceManager->ReleaseUploadBuffers();
@@ -108,15 +121,14 @@ void SceneManager::ChangeScene(BasicScene* Scene, D3Device* Device)
 //애니메이션
 void SceneManager::AnimationGameObjects(const float& m_ElapsedTime)
 {
-	m_SceneStack.top()->AnimateObjects(m_ElapsedTime);
+	if(!m_SceneStack.empty()) m_SceneStack.top()->AnimateObjects(m_ElapsedTime);
 
 }
 
 //랜더링 장면
 void SceneManager::RenderScene(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-
-	m_SceneStack.top()->Render(pd3dCommandList);
+	if(!m_SceneStack.empty()) m_SceneStack.top()->Render(pd3dCommandList);
 
 	if(m_pCamera) m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 }
@@ -129,38 +141,18 @@ void SceneManager::SetRootSignature(ID3D12RootSignature* pd3dGraphicsRootSignatu
 void SceneManager::CreateSceneTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 1.0f, 1.0f, 1.0f, 1.0f } };
-
+	 
 	//Create Memory in Gpu
 	for (int i = 0; i < TEXTURE_SCENE_NUM; ++i) {
-		m_TextureScene[i] = CreateTexture2DResource(pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 6, 1, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue);
+		m_TextureScene[i]->SetTexture(0,CreateTexture2DResource(pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 6, 1, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue));
+		ResourceManager::CreateShaderResourceViews(pd3dDevice, m_TextureScene[i], UI_TEXTURE, FALSE);
+
 	}
 
-	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
-	d3dDescriptorHeapDesc.NumDescriptors = 6;
-	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	d3dDescriptorHeapDesc.NodeMask = 0;
-	pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_ShaderSourceDescriptor);
-
-	ID3D12Resource* pShaderResource = m_BringGpuTex;
-
-	D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = {};
-	d3dShaderResourceViewDesc.Format = m_BringGpuTex->GetDesc().Format;
-	d3dShaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-
-	d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-	d3dShaderResourceViewDesc.Texture2D.MipLevels = -1;
-	d3dShaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-	d3dShaderResourceViewDesc.Texture2D.PlaneSlice = 0;
-	d3dShaderResourceViewDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dShaderDescriptorHandle = m_ShaderSourceDescriptor->GetCPUDescriptorHandleForHeapStart();
-	pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, d3dShaderDescriptorHandle);
-
 	//디스크립터힙에 대한 설명-> 나는 RTV로 쓰겠다.
-
+	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
-	d3dDescriptorHeapDesc.NumDescriptors = 6;
+	d3dDescriptorHeapDesc.NumDescriptors = TEXTURE_SCENE_NUM;
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
@@ -168,22 +160,19 @@ void SceneManager::CreateSceneTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	HRESULT hResult = pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_ShaderRtvDescriptor);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_ShaderRtvDescriptor->GetCPUDescriptorHandleForHeapStart();
-	RtvView = new D3D12_CPU_DESCRIPTOR_HANDLE[6];
-	for (int i = 0; i < 6; ++i) {
+	RtvView = new D3D12_CPU_DESCRIPTOR_HANDLE[TEXTURE_SCENE_NUM];
+	for (int i = 0; i < TEXTURE_SCENE_NUM; ++i) {
 		//랜더타겟 뷰에 대한 설명
 		D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc{};
 		d3dRenderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+		d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 		d3dRenderTargetViewDesc.Texture2D.MipSlice = 0;
 		d3dRenderTargetViewDesc.Texture2D.PlaneSlice = 0;
 
-		d3dRenderTargetViewDesc.Texture2DArray.FirstArraySlice = i;
 
-		d3dRenderTargetViewDesc.Texture2DArray.ArraySize = 1;
-
-		pd3dDevice->CreateRenderTargetView(m_BringGpuTex, &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
+		pd3dDevice->CreateRenderTargetView(m_TextureScene[i]->GetTexture(0), &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
 		RtvView[i] = d3dRtvCPUDescriptorHandle;
-		d3dRtvCPUDescriptorHandle.ptr += m_RenderTargetViewSize;
+		d3dRtvCPUDescriptorHandle.ptr += pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	}
 
 }

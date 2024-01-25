@@ -42,6 +42,7 @@ GamePlayScene::~GamePlayScene()
 {
 	
 }
+
 bool GamePlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 
@@ -162,7 +163,7 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 
 
 #define LOD 0
-void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName, const char* TexFileName)
+void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName, const char* TexFileName,ResourceManager* pResourceManager)
 {
 	FILE* pFile = NULL;
 	::fopen_s(&pFile, pstrFileName, "rb");
@@ -180,27 +181,25 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 	::ReadUnityBinaryString(pFile, pstrToken, &nStrLength); //"<GameObjects>:"
 	nReads = (UINT)::fread(&m_nGameObjects, sizeof(int), 1, pFile); //루트 게임 오브젝트 수 
 
-	m_pSceneObject.resize(m_nGameObjects);
-	for (int i = 0; i < m_nGameObjects; ++i) {
-		m_pSceneObject[i] = new GameObject();  // 또는 다른 방법으로 메모리 할당
-	}
+	m_pSceneObject.reserve(m_nGameObjects);
 
 	GameObject* pGameObject = NULL;
 
 	int cur_object = 0;
-	while (cur_object < m_nGameObjects)
+
+	while (m_pSceneObject.size() < m_nGameObjects)
 	{
-		pGameObject = new GameObject(7);
+	
 
 		::ReadUnityBinaryString(pFile, pstrToken, &nStrLength); //"<GameObject>:"
 		::ReadUnityBinaryString(pFile, pstrGameObjectName, &nObjectNameLength);
 		pstrGameObjectName[nObjectNameLength] = '\0';
 
 
-		strcpy_s(pGameObject->m_pstrFrameName, 64, pstrGameObjectName);
 		::ReadUnityBinaryString(pFile, pstrToken, &nStrLength); //"<Transform>:"
 		XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
 		XMFLOAT4 xmf4Rotation;
+		XMFLOAT4X4 mxf4x4Position;
 		nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pFile);
 		nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, pFile); //Euler Angle
 		nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pFile);
@@ -208,21 +207,29 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 
 		::ReadUnityBinaryString(pFile, pstrToken, &nStrLength); //"<TransformMatrix>:"
-		nReads = (UINT)::fread(&pGameObject->m_xmf4x4World, sizeof(float), 16, pFile);
+		nReads = (UINT)::fread(&mxf4x4Position, sizeof(float), 16, pFile);
 
 		if (strstr(pstrGameObjectName, str.c_str()) != nullptr) {
+
+			pGameObject = new GameObject;
+			strcpy_s(pGameObject->m_pstrFrameName, 64, pstrGameObjectName);
+			pGameObject->m_xmf4x4World = mxf4x4Position;
+
+
+
 
 			StandardMesh* pMesh = NULL;
 			for (int j = 0; j < cur_object; j++)
 			{
 				if (!strcmp(pstrGameObjectName, m_pSceneObject[j]->m_pstrFrameName))
 				{
+
 					pMesh = (StandardMesh*)m_pSceneObject[j]->m_pMesh;
 
 					pGameObject->SetMesh(pMesh);
-					for (int k = 0; k < m_pSceneObject[j]->m_nMaterials; k++) {
-						pGameObject->SetMaterial(k, m_pSceneObject[j]->m_ppMaterials[k]);
-					}
+					pGameObject->m_nMaterials = m_pSceneObject[j]->m_nMaterials;
+					pGameObject->m_ppMaterials = m_pSceneObject[j]->m_ppMaterials;
+
 					break;
 				}
 			}
@@ -242,17 +249,18 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 				pMesh = new StandardMesh(pd3dDevice, pd3dCommandList);
 				pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
-
 				pGameObject->SetMesh(pMesh);
 
+
 				::ReadUnityBinaryString(pInFile, pstrToken, &nStrLength); //"<Materials>:"
-				pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, pGameObject->GetParent(), pInFile,NULL,TexFileName);
+				pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList,NULL, pInFile,NULL,TexFileName, pResourceManager);
 
 				::fclose(pInFile);
 			}
-			m_pSceneObject[cur_object] = pGameObject;
-			cur_object += 1;
+			m_pSceneObject.push_back(pGameObject);
+			
 		}
+
 	}
 
 	::fclose(pFile);
@@ -294,9 +302,10 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		}
 	}
 
+	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/Scene.bin","Model/Textures/scene/", pResourceManager);
+
 	BuildDefaultLightsAndMaterials();
 
-	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/Scene.bin","Model/Textures/scene/");
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -313,6 +322,10 @@ void GamePlayScene::ReleaseObjects()
 
 	for (auto& GO : m_pGameObject) {
 		GO->Release();
+	}
+
+	for (int i = 0; i < m_pSceneObject.size(); ++i) {
+		m_pSceneObject[i]->Release();
 	}
 }
 
@@ -468,6 +481,13 @@ void GamePlayScene::ReleaseUploadBuffers()
 	for (int i = 0; i <1; i++) {
 		m_pGameObject[i]->ReleaseUploadBuffers();
 	}
+
+	for (int i = 0; i < m_pSceneObject.size(); ++i) {
+		m_pSceneObject[i]->ReleaseUploadBuffers();
+	}
+
+
+
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 
 }

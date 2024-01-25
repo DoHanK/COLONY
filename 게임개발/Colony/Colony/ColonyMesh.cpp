@@ -97,9 +97,15 @@ StandardMesh::StandardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 StandardMesh::~StandardMesh()
 {
 	if (m_pd3dTextureCoord0Buffer) m_pd3dTextureCoord0Buffer->Release();
+	m_pd3dTextureCoord0Buffer = NULL;
+	if (m_pd3dTextureCoord1Buffer) m_pd3dTextureCoord1Buffer->Release();
+	m_pd3dTextureCoord0Buffer = NULL;
 	if (m_pd3dNormalBuffer) m_pd3dNormalBuffer->Release();
+	m_pd3dNormalBuffer = NULL;
 	if (m_pd3dTangentBuffer) m_pd3dTangentBuffer->Release();
+	m_pd3dTangentBuffer = NULL;
 	if (m_pd3dBiTangentBuffer) m_pd3dBiTangentBuffer->Release();
+	m_pd3dBiTangentBuffer = NULL;
 
 	if (m_pxmf4Colors) delete[] m_pxmf4Colors;
 	if (m_pxmf3Normals) delete[] m_pxmf3Normals;
@@ -115,6 +121,9 @@ void StandardMesh::ReleaseUploadBuffers()
 
 	if (m_pd3dTextureCoord0UploadBuffer) m_pd3dTextureCoord0UploadBuffer->Release();
 	m_pd3dTextureCoord0UploadBuffer = NULL;
+
+	if (m_pd3dTextureCoord1UploadBuffer) m_pd3dTextureCoord1UploadBuffer->Release();
+	m_pd3dTextureCoord1UploadBuffer = NULL;
 
 	if (m_pd3dNormalUploadBuffer) m_pd3dNormalUploadBuffer->Release();
 	m_pd3dNormalUploadBuffer = NULL;
