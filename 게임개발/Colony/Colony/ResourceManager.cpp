@@ -62,7 +62,7 @@
 ResourceManager::ResourceManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pCommandList, ID3D12RootSignature* m_pRootSignature)
 {
 	//텍스쳐디스크립터힙 생성
-	CreateSrvDescriptorHeap(pd3dDevice, 100);
+	CreateSrvDescriptorHeap(pd3dDevice, 1000);
 	hGDescriptor = pSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	hCDescriptor = pSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	SRVHeapsize = pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);

@@ -228,8 +228,14 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 					pGameObject->SetMesh(pMesh);
 					pGameObject->SetBoundingMesh(m_pSceneObject[j]->m_pBoundingMesh);
+
 					pGameObject->m_nMaterials = m_pSceneObject[j]->m_nMaterials;
-					pGameObject->m_ppMaterials = m_pSceneObject[j]->m_ppMaterials;
+					pGameObject->m_ppMaterials = new Material * [pGameObject->m_nMaterials];
+					
+					for (int i = 0; i < pGameObject->m_nMaterials; ++i) {
+						pGameObject->m_ppMaterials[i] = m_pSceneObject[j]->m_ppMaterials[i];
+						pGameObject->m_ppMaterials[i]->AddRef();
+					}
 
 					break;
 				}
@@ -261,7 +267,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 				}
 
 				::ReadUnityBinaryString(pInFile, pstrToken, &nStrLength); //"<Materials>:"
-				pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList,NULL, pInFile,NULL,TexFileName, pResourceManager);
+					pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList,NULL, pInFile,NULL,TexFileName, pResourceManager);
 
 				::fclose(pInFile);
 			}
@@ -500,7 +506,7 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 		GO->Render(pd3dCommandList);
 	}
 
-	BoudingRendering(pd3dCommandList);
+	//BoudingRendering(pd3dCommandList);
 }
 
 void GamePlayScene::ReleaseUploadBuffers()

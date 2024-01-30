@@ -98,7 +98,7 @@ public:
 
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
-
+	int GetRef() { return m_nReferences; }
 public:
 	BasicShader* m_pShader = NULL;
 
