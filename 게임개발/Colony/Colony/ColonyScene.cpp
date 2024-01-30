@@ -266,7 +266,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 				::fclose(pInFile);
 			}
 			m_pSceneObject.push_back(pGameObject);
-			
+			cur_object += 1;
 		}
 
 	}
