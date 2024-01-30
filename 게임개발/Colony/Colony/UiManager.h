@@ -53,6 +53,6 @@ public:
 	void AnimateUI(float ElapsedTime);
 
 	void AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList);
-
+	void DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList);
 };
 

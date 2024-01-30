@@ -102,6 +102,9 @@
     <ClInclude Include="ColonyCamera.h">
       <Filter>GameBasicHeader</Filter>
     </ClInclude>
+    <ClInclude Include="KDTree.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -157,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="ColonyCamera.cpp">
       <Filter>GameBasicCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="KDTree.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

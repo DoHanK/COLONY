@@ -109,6 +109,7 @@ public:
 	
 	void PlayerControlInput();
 	void AnimateObjects(float fTimeElapsed);
+	void BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 
 	virtual void ReleaseUploadBuffers();
@@ -132,5 +133,6 @@ protected:
 	vector<GameObject*>					m_pGameObject;
 	vector<GameObject*>					m_pSceneObject;
 
-	GhostTraillerShader*				m_GhostTrailler;
+	GhostTraillerShader*				m_pGhostTraillerShader;
+	BoundingShader* m_pBoundigShader;
 };

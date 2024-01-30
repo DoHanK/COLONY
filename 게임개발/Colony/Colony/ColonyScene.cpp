@@ -23,7 +23,7 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	EffectInfo.RowNum = 6;
 	EffectInfo.SetTime = 0.1;
 	pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
-	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, NULL, 0, (MASKUSE | TEXTUREUSE), GetType());
+	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, NULL, 1, (MASKUSE | TEXTUREUSE), GetType());
 
 }
 
@@ -227,6 +227,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 					pMesh = (StandardMesh*)m_pSceneObject[j]->m_pMesh;
 
 					pGameObject->SetMesh(pMesh);
+					pGameObject->SetBoundingMesh(m_pSceneObject[j]->m_pBoundingMesh);
 					pGameObject->m_nMaterials = m_pSceneObject[j]->m_nMaterials;
 					pGameObject->m_ppMaterials = m_pSceneObject[j]->m_ppMaterials;
 
@@ -251,6 +252,13 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 				pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 				pGameObject->SetMesh(pMesh);
 
+				if (pGameObject->m_pMesh) {
+					pGameObject->m_BoundingBox.Center = pGameObject->m_pMesh->GetAABBCenter();
+					pGameObject->m_BoundingBox.Extents = pGameObject->m_pMesh->GetAABBExtend();
+					pGameObject->m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
+					pGameObject->m_pBoundingMesh->AddRef();
+					((BoundingBoxMesh*)pGameObject->m_pBoundingMesh)->UpdateVertexPosition(&pGameObject->m_BoundingBox);
+				}
 
 				::ReadUnityBinaryString(pInFile, pstrToken, &nStrLength); //"<Materials>:"
 				pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList,NULL, pInFile,NULL,TexFileName, pResourceManager);
@@ -266,8 +274,6 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 	::fclose(pFile);
 }
 
-
-
 void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature , ResourceManager* pResourceManager, UIManager* pUImanager)
 {
 
@@ -277,12 +283,16 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pCamera->GenerateProjectionMatrix(1.01, 1000.f, ASPECT_RATIO, 60.f);
 	m_pCamera->RegenerateViewMatrix();
 
-	m_GhostTrailler = new GhostTraillerShader();
-	
+	m_pGhostTraillerShader = new GhostTraillerShader();
+	m_pGhostTraillerShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pGhostTraillerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pGhostTraillerShader->AddRef();
 
-	m_GhostTrailler->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	m_GhostTrailler->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	m_GhostTrailler->AddRef();
+	m_pBoundigShader = new BoundingShader();
+	m_pBoundigShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pBoundigShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pBoundigShader->AddRef();
+
 	CLoadedModelInfo* pAngrybotModel = pResourceManager->BringModelInfo("Model/JU_Mannequin.bin", "Model/Textures/PlayerTexture/");
 	CLoadedModelInfo* pAngrybotModel1 = pResourceManager->BringModelInfo("Model/UMP5.bin", "Model/Textures/UMP5Texture/");
 
@@ -296,7 +306,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager);
 			p->SetPosition(0, 0, j);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 20);
-			p->SetGhostShader(m_GhostTrailler);
+			p->SetGhostShader(m_pGhostTraillerShader);
 			m_pGameObject.push_back(p);
 			
 		}
@@ -318,7 +328,8 @@ void GamePlayScene::ReleaseObjects()
 
 	if (m_pLights) delete[] m_pLights;
 
-	if (m_GhostTrailler) m_GhostTrailler->Release();
+	if (m_pGhostTraillerShader) m_pGhostTraillerShader->Release();
+	if(m_pBoundigShader) m_pBoundigShader->Release();
 
 	for (auto& GO : m_pGameObject) {
 		GO->Release();
@@ -449,6 +460,21 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 }
 
+void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
+
+	for (auto& GO : m_pGameObject) {
+		GO->BoudingBoxRender(pd3dCommandList);
+	}
+
+	m_pPlayer->BoudingBoxRender(pd3dCommandList);
+
+	for (auto& GO : m_pSceneObject) {
+		GO->BoudingBoxRender(pd3dCommandList);
+	}
+}
+
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
 
@@ -467,11 +493,14 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	for (auto& GO : m_pGameObject) {
 		GO->Render(pd3dCommandList);
 	}
+
 	m_pPlayer->Render(pd3dCommandList);
 
 	for (auto& GO : m_pSceneObject) {
 		GO->Render(pd3dCommandList);
 	}
+
+	BoudingRendering(pd3dCommandList);
 }
 
 void GamePlayScene::ReleaseUploadBuffers()

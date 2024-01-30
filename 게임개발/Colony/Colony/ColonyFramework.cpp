@@ -322,7 +322,8 @@ void ColonyFramework::ColonyGameLoop()
 	m_pDevice->CommandAllocatorReset();
 	m_pDevice->CommandListReset();
 	m_pDevice->MakeResourceBarrier();
-	m_pDevice->RtAndDepthReset();
+	m_pDevice->ResetBackBuffer();
+	m_pDevice->ResetDepthBuffer();
 	//루트 시그너쳐 연결 
 	m_pDevice->GetCommandList()->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
@@ -334,9 +335,11 @@ void ColonyFramework::ColonyGameLoop()
 
 	if(m_pSceneManager)
 		m_pSceneManager->RenderScene(GetDevice()->GetCommandList());
-	
+
+	m_pDevice->SetRtIntoBackBufferAndBasicDepth();
+
 	if (m_pUIManager)
-		m_pUIManager->AllLayerDrawRect(GetDevice()->GetCommandList());
+		m_pUIManager->DrawScene(GetDevice()->GetCommandList());
 
 
 
@@ -352,7 +355,6 @@ void ColonyFramework::ColonyGameLoop()
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 
 }
-
 
 LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {

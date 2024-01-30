@@ -104,6 +104,7 @@ void Texture::ReleaseUploadBuffers()
 
 void Texture::ReleaseShaderVariables()
 {
+
 }
 
 void Texture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, UINT nIndex, bool bIsDDSFile)
@@ -456,6 +457,8 @@ GameObject::~GameObject()
 {
 	if (m_pMesh) m_pMesh->Release();
 
+	if (m_pBoundingMesh) m_pBoundingMesh->Release();
+
 	if (m_nMaterials > 0)
 	{
 		for (int i = 0; i < m_nMaterials; i++)
@@ -507,6 +510,14 @@ void GameObject::SetMesh(BasicMesh* pMesh)
 	if (m_pMesh) m_pMesh->Release();
 	m_pMesh = pMesh;
 	if (m_pMesh) m_pMesh->AddRef();
+}
+
+void GameObject::SetBoundingMesh(DynamicMesh* pMesh)
+{
+	
+	if (m_pBoundingMesh) m_pBoundingMesh->Release();
+	m_pBoundingMesh = pMesh;
+	if (m_pBoundingMesh) m_pBoundingMesh->AddRef();
 }
 
 void GameObject::SetMaterial(int nMaterial, Material* pMaterial)
@@ -616,6 +627,18 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCam
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
+void GameObject::BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+{
+
+	if (m_pBoundingMesh) {
+		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		m_pBoundingMesh->Render(pd3dCommandList);
+	}
+
+	if (m_pSibling) m_pSibling->BoudingBoxRender(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->BoudingBoxRender(pd3dCommandList, pCamera);
+}
+
 void GameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
@@ -667,6 +690,8 @@ void GameObject::SetPosition(XMFLOAT3 xmf3Position)
 {
 	SetPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
 }
+
+
 
 void GameObject::SetScale(float x, float y, float z)
 {
@@ -926,7 +951,8 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3
 			if (!strcmp(pstrToken, "<Mesh>:")) pSkinnedMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 
 			pGameObject->SetMesh(pSkinnedMesh);
-		}
+
+		}													
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
 			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, pShader, TexFileName, pResourceManager);
@@ -953,6 +979,15 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3
 			break;
 		}
 	}
+	if (pGameObject->m_pMesh) {
+		pGameObject->m_BoundingBox.Center = pGameObject->m_pMesh->GetAABBCenter();
+		pGameObject->m_BoundingBox.Extents = pGameObject->m_pMesh->GetAABBExtend();
+		pGameObject->m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
+		pGameObject->m_pBoundingMesh->AddRef();
+		((BoundingBoxMesh*)pGameObject->m_pBoundingMesh)->UpdateVertexPosition(&pGameObject->m_BoundingBox);
+	}
+
+	
 	return(pGameObject);
 }
 

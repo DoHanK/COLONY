@@ -358,6 +358,7 @@ public:
 	char							m_pstrFrameName[64];
 
 	BasicMesh*						m_pMesh = NULL;
+	DynamicMesh*					m_pBoundingMesh = NULL;
 
 	int								m_nMaterials = 0;
 	Material**						m_ppMaterials = NULL;
@@ -365,12 +366,14 @@ public:
 	XMFLOAT4X4						m_xmf4x4ToParent;
 	XMFLOAT4X4						m_xmf4x4World;
 
+	BoundingOrientedBox  m_BoundingBox = BoundingOrientedBox();
+
 	GameObject* m_pParent = NULL;
 	GameObject* m_pChild = NULL;
 	GameObject* m_pSibling = NULL;
 
 	void SetMesh(BasicMesh* pMesh);
-
+	void SetBoundingMesh(DynamicMesh* pMesh);
 	void SetMaterial(int nMaterial, Material* pMaterial);
 
 	void SetChild(GameObject* pChild, bool bReferenceUpdate = false);
@@ -382,6 +385,8 @@ public:
 
 	virtual void UpdateMatrix() { }
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
+	virtual void BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
+
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -391,7 +396,6 @@ public:
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, Material* pMaterial);
 
 	virtual void ReleaseUploadBuffers();
-
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();

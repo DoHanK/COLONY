@@ -381,18 +381,58 @@ void D3Device::CloseResourceBarrier()
 	m_pd3dCommandList->ResourceBarrier(1, &m_d3dResourceBarrier);
 }
 
-void D3Device::RtAndDepthReset()
+void D3Device::SetRtIntoBackBufferAndBasicDepth()
+{
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * m_nRtvDescriptorIncrementSize);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+
+	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+}
+
+void D3Device::ResetBackBuffer()
 {
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * m_nRtvDescriptorIncrementSize);
 
 	float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 0.0f };
 	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);
+}
+
+void D3Device::ResetDepthBuffer()
+{
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+}
 
-	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+void D3Device::SetRtIntoTexture(ID3D12Resource* SetTexture, const D3D12_CPU_DESCRIPTOR_HANDLE& RenderTargetView)
+{
+
+
+	//초기화
+	float pfClearColor[4] = { 0.0f, 0.125f , 0.3f , 1.0f };
+	m_pd3dCommandList->ClearRenderTargetView(RenderTargetView, pfClearColor, 0, NULL);
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	m_pd3dCommandList->OMSetRenderTargets(1, &RenderTargetView, true, &d3dDsvCPUDescriptorHandle);
+
+}
+
+void D3Device::ChangeResourceBarrier(D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After, ID3D12Resource* SetTexture)
+{
+	//랜더타겟 쉐이더 초기화
+	D3D12_RESOURCE_BARRIER d3dResourceShaderBarrier;
+	::ZeroMemory(&d3dResourceShaderBarrier, sizeof(D3D12_RESOURCE_BARRIER));
+	d3dResourceShaderBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	d3dResourceShaderBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	d3dResourceShaderBarrier.Transition.pResource = SetTexture;
+	d3dResourceShaderBarrier.Transition.StateBefore = Before;
+	d3dResourceShaderBarrier.Transition.StateAfter = After;
+	d3dResourceShaderBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceShaderBarrier);
+
+
 }
 
 

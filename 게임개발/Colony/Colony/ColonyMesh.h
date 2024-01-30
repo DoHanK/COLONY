@@ -69,7 +69,8 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) { }
 	virtual void ReleaseShaderVariables() { }
-
+	virtual const XMFLOAT3& GetAABBCenter() { return m_xmf3AABBCenter; };
+	virtual const XMFLOAT3& GetAABBExtend() { return m_xmf3AABBExtents; };
 	virtual void ReleaseUploadBuffers();
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
@@ -215,7 +216,8 @@ public:
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dVertexBufferViews;
 
 	XMFLOAT3*						m_pcbMappedPositions = NULL;
-
+public:
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) {};
 };
 
 
@@ -260,5 +262,21 @@ public:
 	//Mask Setting
 	void UpdateMaskValue(const UINT& lefttop, const UINT& righttop, const UINT& leftbottom, const UINT& rightbottom);
 	void UpdateMaskValue(const UINT& AllRectMask);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//									AABBBoundingMesh Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+class BoundingBoxMesh : public DynamicMesh
+{
+public:
+	BoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual ~BoundingBoxMesh();
+
+	XMFLOAT3* m_pcbMappedPositions = NULL;
+
+	void UpdateVertexPosition(BoundingOrientedBox* pxmBoundingBox);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 };

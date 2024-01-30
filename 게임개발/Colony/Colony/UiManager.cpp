@@ -136,7 +136,7 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList)
 
 		m_Shader->OnPrepareRender(pd3d12CommandList);
 		//Rander Order 0 -> 1 -> 2
-		for (int i = 0 ; i < TEXTURE_LAYER; ++i) {
+		for (int i = 1 ; i < TEXTURE_LAYER; ++i) {
 			
 			for (const pair<UIInfo, bool(*)(void*)>& info : m_RenderUIList[i]) {
 
@@ -174,6 +174,45 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList)
 		}
 
 	}
+
+}
+
+void UIManager::DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList)
+{
+	int count = 0;
+
+	m_Shader->OnPrepareRender(pd3d12CommandList);
+		for (const pair<UIInfo, bool(*)(void*)>& info : m_RenderUIList[0]) {
+
+			//텍스쳐 있는지 없는지 확인
+			if (info.first.RenderTexture) {
+				info.first.RenderTexture->UpdateShaderVariable(pd3d12CommandList, 0);
+			}
+			if (info.first.MaskTexture) {
+
+				info.first.MaskTexture->UpdateShaderVariable(pd3d12CommandList, 0);
+			}
+
+			//옵션
+			m_pMesh[count]->UpdateMaskValue(info.first.Option);
+
+			//SPRITEANIMATION에 따른 UV 설정
+			if (info.first.EffectInfo) {
+				float m_row = info.first.EffectInfo->NowRow;
+				float m_rows = info.first.EffectInfo->RowNum;
+				float m_col = info.first.EffectInfo->NowCol;
+				float m_cols = info.first.EffectInfo->ColNum;;
+				m_pMesh[count]->UpdateMaskUvCoord(UIRect{ m_row * (1.0f / m_rows) , (m_row + 1.0f) * (1.0f / m_rows) , m_col * (1.0f / m_cols), (m_col + 1.f) * (1.0f / m_cols) });
+			}
+			else {
+				m_pMesh[count]->UpdateMaskUvCoord(UIRect(0.0f, 1.0f, 0.0f, 1.0f));
+			}
+
+			//랜더링 텍스쳐 설정
+			m_pMesh[count]->UpdateVertexPosition((*info.first.Rect));
+			m_pMesh[count++]->Render(pd3d12CommandList);
+		}
+	
 
 }
 

@@ -28,9 +28,11 @@ public:
 	ID3D12DescriptorHeap* m_ShaderSourceDescriptor;
 	ID3D12DescriptorHeap* m_ShaderRtvDescriptor = NULL;
 	UINT  m_RenderTargetViewSize = 0;
+	UINT  m_ShaderResourceViewSize = 0;
 	D3D12_CPU_DESCRIPTOR_HANDLE* RtvView = NULL;
 	//루트시그너쳐
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
+
 public:
 	//씬 추가 , 씬 삭제 , 씬 바꾸기
 	void PushScene(BasicScene* Scene ,bool bBuild);

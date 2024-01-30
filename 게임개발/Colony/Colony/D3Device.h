@@ -77,7 +77,18 @@ public:
 
 	void MakeResourceBarrier();
 	void CloseResourceBarrier();
-	void RtAndDepthReset();
+
+
+
+	void ResetBackBuffer();
+	void ResetDepthBuffer();
+	void SetRtIntoBackBufferAndBasicDepth();
+
+
+	void SetRtIntoTexture(ID3D12Resource* SetTexture, const D3D12_CPU_DESCRIPTOR_HANDLE& RenderTargetView);
+
+	void ChangeResourceBarrier(D3D12_RESOURCE_STATES Before , D3D12_RESOURCE_STATES After ,ID3D12Resource* SetTexture);
+
 
 	void PresentScreen() { m_pdxgiSwapChain->Present(0, 0); }
 
