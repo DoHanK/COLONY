@@ -247,7 +247,7 @@ bool ColonyFramework::MakeGameObjects()
 
 	//씬을 구성하는 매니져들
 	m_pSceneManager = new SceneManager(GetDevice(),m_pResourceManager, m_pUIManager);
-	m_pSceneManager->PushScene(new GamePlayScene, false);
+	m_pSceneManager->PushScene(new GameLobbyScene, false);
 	m_pSceneManager->m_SceneStack.top()->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(),m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
 	m_pSceneManager->SetRootSignature(m_pd3dGraphicsRootSignature);
 

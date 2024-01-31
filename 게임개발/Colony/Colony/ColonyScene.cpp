@@ -21,9 +21,9 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	UIEffectInfo EffectInfo;
 	EffectInfo.ColNum = 6;
 	EffectInfo.RowNum = 6;
-	EffectInfo.SetTime = 0.1;
+	EffectInfo.SetTime = 0.1f;
 	pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
-	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, NULL, 1, (MASKUSE | TEXTUREUSE), GetType());
+	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, NULL, 1, (MASKUSE|TEXTUREUSE) , GetType());
 
 }
 
@@ -261,6 +261,8 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 				if (pGameObject->m_pMesh) {
 					pGameObject->m_BoundingBox.Center = pGameObject->m_pMesh->GetAABBCenter();
 					pGameObject->m_BoundingBox.Extents = pGameObject->m_pMesh->GetAABBExtend();
+					pGameObject->m_BoundingBox.Extents.x / 2;
+					pGameObject->m_BoundingBox.Extents.z / 2;
 					pGameObject->m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
 					pGameObject->m_pBoundingMesh->AddRef();
 					((BoundingBoxMesh*)pGameObject->m_pBoundingMesh)->UpdateVertexPosition(&pGameObject->m_BoundingBox);
@@ -306,7 +308,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
 	m_pCamera->SetPlayer(m_pPlayer);
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 1; ++j) {
+	for (int j = 0; j < 40; ++j) {
 		for (int i = 0; i < 1; i++) {
 
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager);

@@ -131,7 +131,7 @@ void UIManager::AnimateUI(float ElapsedTime)
 void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList)
 {
 
-	int count = 0;
+	MeshCur = 0;
 	if (m_pMesh.size() != 0) {
 
 		m_Shader->OnPrepareRender(pd3d12CommandList);
@@ -153,7 +153,7 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList)
 				}
 
 				//옵션
-				m_pMesh[count]->UpdateMaskValue(info.first.Option);
+				m_pMesh[MeshCur]->UpdateMaskValue(info.first.Option);
 
 				//SPRITEANIMATION에 따른 UV 설정
 				if (info.first.EffectInfo) {
@@ -161,15 +161,15 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList)
 					float m_rows = info.first.EffectInfo->RowNum;
 					float m_col = info.first.EffectInfo->NowCol;
 					float m_cols = info.first.EffectInfo->ColNum;;
-					m_pMesh[count]->UpdateMaskUvCoord(UIRect{ m_row * (1.0f / m_rows) , (m_row + 1.0f) * (1.0f / m_rows) , m_col * (1.0f / m_cols), (m_col + 1.f) * (1.0f / m_cols) });
+					m_pMesh[MeshCur]->UpdateMaskUvCoord(UIRect{ m_row * (1.0f / m_rows) , (m_row + 1.0f) * (1.0f / m_rows) , m_col * (1.0f / m_cols), (m_col + 1.f) * (1.0f / m_cols) });
 				}
 				else {
-					m_pMesh[count]->UpdateMaskUvCoord(UIRect(0.0f, 1.0f, 0.0f, 1.0f));
+					m_pMesh[MeshCur]->UpdateMaskUvCoord(UIRect(0.0f, 1.0f, 0.0f, 1.0f));
 				}
 
 				//랜더링 텍스쳐 설정
-				m_pMesh[count]->UpdateVertexPosition((*info.first.Rect));
-				m_pMesh[count++]->Render(pd3d12CommandList);
+				m_pMesh[MeshCur]->UpdateVertexPosition((*info.first.Rect));
+				m_pMesh[MeshCur++]->Render(pd3d12CommandList);
 			}
 		}
 
@@ -179,7 +179,7 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList)
 
 void UIManager::DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList)
 {
-	int count = 0;
+
 
 	m_Shader->OnPrepareRender(pd3d12CommandList);
 		for (const pair<UIInfo, bool(*)(void*)>& info : m_RenderUIList[0]) {
@@ -194,7 +194,7 @@ void UIManager::DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList)
 			}
 
 			//옵션
-			m_pMesh[count]->UpdateMaskValue(info.first.Option);
+			m_pMesh[MeshCur]->UpdateMaskValue(info.first.Option);
 
 			//SPRITEANIMATION에 따른 UV 설정
 			if (info.first.EffectInfo) {
@@ -202,15 +202,15 @@ void UIManager::DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList)
 				float m_rows = info.first.EffectInfo->RowNum;
 				float m_col = info.first.EffectInfo->NowCol;
 				float m_cols = info.first.EffectInfo->ColNum;;
-				m_pMesh[count]->UpdateMaskUvCoord(UIRect{ m_row * (1.0f / m_rows) , (m_row + 1.0f) * (1.0f / m_rows) , m_col * (1.0f / m_cols), (m_col + 1.f) * (1.0f / m_cols) });
+				m_pMesh[MeshCur]->UpdateMaskUvCoord(UIRect{ m_row * (1.0f / m_rows) , (m_row + 1.0f) * (1.0f / m_rows) , m_col * (1.0f / m_cols), (m_col + 1.f) * (1.0f / m_cols) });
 			}
 			else {
-				m_pMesh[count]->UpdateMaskUvCoord(UIRect(0.0f, 1.0f, 0.0f, 1.0f));
+				m_pMesh[MeshCur]->UpdateMaskUvCoord(UIRect(0.0f, 1.0f, 0.0f, 1.0f));
 			}
 
 			//랜더링 텍스쳐 설정
-			m_pMesh[count]->UpdateVertexPosition((*info.first.Rect));
-			m_pMesh[count++]->Render(pd3d12CommandList);
+			m_pMesh[MeshCur]->UpdateVertexPosition((*info.first.Rect));
+			m_pMesh[MeshCur++]->Render(pd3d12CommandList);
 		}
 	
 

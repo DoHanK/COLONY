@@ -37,7 +37,7 @@ Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_fMaxVelocityXZ = 4.5f;
+	m_fMaxVelocityXZ = 40.5f;
 	m_fMaxVelocityY = 0.0f;
 	m_fFriction = 19.0f;
 

@@ -44,7 +44,7 @@ public:
 
 	vector<UIRectMesh*> m_pMesh;
 	list<pair<UIInfo, bool(*)(void*)>> m_RenderUIList[TEXTURE_LAYER];
-	
+	int MeshCur;
 
 	UIRect CreateNormalizePixel(float top, float bottom, float left, float right);
 	bool CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex ,Texture* Masktex, bool(*f)(void* argu),int Layer, UINT option, UINT SceneType);
