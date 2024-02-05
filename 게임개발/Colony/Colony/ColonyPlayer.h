@@ -7,8 +7,8 @@ class PlayerAnimationController;
 
 
 //Player Acceleration Speed Control
-#define PlayerRunAcel  40.4;
-#define NoGrapAcel 40.3;
+#define PlayerRunAcel  2.0f;
+#define NoGrapAcel 5.0f;
 
 //조작키
 #define W 'W'
@@ -132,14 +132,16 @@ public:
 
 	//입력 받은 방향키로부터 가속도 계산
 	void SetPosition(const XMFLOAT3& Position);
-	void CalVelocityFromInput(DWORD dwDirection, float fDistance);
+	void CalVelocityFromInput(DWORD dwDirection, float Acceleration, float fElapsedTime);
 	void AddAccel(const XMFLOAT3& xmf3Shift);
 	void AddPosition(const XMFLOAT3& xmf3Shift);
 	void UpdatePosition(float fTimeElapsed);
 	//입력받은 회전 처리
 	void Rotate(float x, float y, float z);
 	virtual void UpdateMatrix();
-
+public:
+	void SetMaxXZVelocity(const float& veclocity) {m_fMaxVelocityXZ = veclocity;}
+public:
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
 	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
@@ -178,6 +180,7 @@ public:
 
 	Player* m_player = NULL;
 	char m_WeaponState = RIGHT_HAND;
+
 public:
 	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
 	void SetAnimationFromInput(DWORD dwDir, DWORD dwState);

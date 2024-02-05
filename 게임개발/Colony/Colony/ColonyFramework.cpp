@@ -358,6 +358,7 @@ void ColonyFramework::ColonyGameLoop()
 
 LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+
 	switch (nMessageID) {
 	case WM_SIZE: {
 		m_nWndClientWidth = LOWORD(lParam);
@@ -368,13 +369,6 @@ LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM 
 	case WM_RBUTTONDOWN:
 		break;
 	case WM_LBUTTONUP:
-		if (m_pSceneManager->m_SceneStack.top()->GetType() == GameLobby) {
-			m_pSceneManager->ChangeScene(new GamePlayScene);
-		}
-		else {
-			m_pSceneManager->ChangeScene(new GameLobbyScene);
-		}
-
 		break;
 	case WM_RBUTTONUP:
 		break;
@@ -382,8 +376,18 @@ LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM 
 		//마우스 키입력
 		break;
 	case WM_KEYDOWN:
+		break;
 	case WM_KEYUP:
-	
+		if (wParam == 'Z') {
+			if (m_pSceneManager->m_SceneStack.top()->GetType() == GameLobby) {
+				m_pSceneManager->ChangeScene(new GamePlayScene);
+			}
+			else {
+				m_pSceneManager->ChangeScene(new GameLobbyScene);
+			}
+		}
+
+
 		//키보드키입력
 		break;
 	}

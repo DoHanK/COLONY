@@ -37,9 +37,9 @@ Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_fMaxVelocityXZ = 40.5f;
+	m_fMaxVelocityXZ = 5.5f;
 	m_fMaxVelocityY = 0.0f;
-	m_fFriction = 19.0f;
+	m_fFriction = 17.0f;
 
 	m_fPitch = 0.0f;
 	m_fRoll = 0.0f;
@@ -91,7 +91,7 @@ void Player::SetPosition(const XMFLOAT3& Position)
 	GameObject::SetPosition(Position);
 }
 // 현재 속력= 속도 + 가속도 * 시간 
-void Player::CalVelocityFromInput(DWORD dwDirection, float Velocity)
+void Player::CalVelocityFromInput(DWORD dwDirection, float Acceleration, float fElapsedTime)
 {
 	if (dwDirection)
 	{
@@ -102,9 +102,10 @@ void Player::CalVelocityFromInput(DWORD dwDirection, float Velocity)
 		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, Dir);
 		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -Dir);
 
-
-		xmf3Shift = Vector3::Normalize(xmf3Shift);
-		xmf3Shift = Vector3::ScalarProduct(xmf3Shift, Velocity, false);
+		float ScalarVelocity = Acceleration * fElapsedTime;
+		OutputDebugStringA(to_string(ScalarVelocity).c_str());
+		//xmf3Shift = Vector3::Normalize(xmf3Shift);
+		xmf3Shift = Vector3::ScalarProduct(xmf3Shift, ScalarVelocity);
 
 		//if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, Velocity);
 		//if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -Velocity);
@@ -652,11 +653,11 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 		}
 		else {
 
-			SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
+			SetTrackSpeed(NOW_LOWERTRACK, 1.5f);
 
-			if (m_WeaponState != RIGHT_HAND && IsUnChangeableUpperState()) {
-				SetTrackSpeed(NOW_UPPERTRACK, 1.5f);
-				SetTrackSpeed(NOW_LOWERTRACK, 1.5f);
+			if (m_WeaponState == SPINE_BACK && IsUnChangeableUpperState()) {
+				SetTrackSpeed(NOW_UPPERTRACK, 1.8f);
+				SetTrackSpeed(NOW_LOWERTRACK, 1.8f);
 			}
 	
 		}
@@ -668,10 +669,11 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 		}
 		else {
 
-			SetTrackSpeed(NOW_LOWERTRACK, 1.0f);
-			if (m_WeaponState != RIGHT_HAND && IsUnChangeableUpperState()) {
-				SetTrackSpeed(NOW_UPPERTRACK, 1.0f);
-				SetTrackSpeed(NOW_LOWERTRACK, 1.0f);
+			SetTrackSpeed(NOW_LOWERTRACK, 1.4f);
+			//등에 있을때
+			if (m_WeaponState == SPINE_BACK && IsUnChangeableUpperState()) {
+				SetTrackSpeed(NOW_UPPERTRACK, 1.6f);
+				SetTrackSpeed(NOW_LOWERTRACK, 1.6f);
 			}
 		
 		}

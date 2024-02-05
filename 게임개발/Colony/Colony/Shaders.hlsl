@@ -119,12 +119,10 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
         {
             normalW = normalize(input.normalW);
         }
-    //return cColor;
 	
         float4 cIllumination = Lighting(input.positionW, normalW);
         cColor = (lerp(cColor, cIllumination, 0.2f));
-    //cColor.rgb *= 1;
-    //cColor.a = 0.6f;
+
         return cColor;
     }
 
@@ -296,7 +294,7 @@ float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
             {
                 texColor = float4(0, 0.1, 0.1, 1);
                 texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);
-                texColor.r += 0.6f;
+                texColor *= 1.6f;
                
             }
             else

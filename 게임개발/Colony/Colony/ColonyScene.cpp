@@ -308,7 +308,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
 	m_pCamera->SetPlayer(m_pPlayer);
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 40; ++j) {
+	for (int j = 0; j < 100; ++j) {
 		for (int i = 0; i < 1; i++) {
 
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager);
@@ -351,7 +351,7 @@ void GamePlayScene::ReleaseObjects()
 void GamePlayScene::PlayerControlInput()
 {
 	static UCHAR pKeysBuffer[256];
-	float AddAcel = 0.19;
+	float AddAcel = 20.0f;
 	//플레이어 씬일때만 작동하도록 설정하기.
 	if (GetKeyboardState(pKeysBuffer)) {
 		//애니메이션 상태정의를 위한 플레이어 상태 정의
@@ -375,9 +375,28 @@ void GamePlayScene::PlayerControlInput()
 			{
 				AddAcel += PlayerRunAcel;
 				dwPlayerState = STATE_RUN;
+						//총기 소유 안할때
+					if (m_pPlayer->m_WeaponState == SPINE_BACK) {
+						m_pPlayer->SetMaxXZVelocity(7.0f);
+						AddAcel += NoGrapAcel;
+					}
+					else {
+						//총기소유하고 걸을때
+						m_pPlayer->SetMaxXZVelocity(4.0f);
+					}
+			
 			}
 			else {
+				//걸을때
 				dwPlayerState = STATE_WALK;
+				//총기 소유 안할때
+				if (m_pPlayer->m_WeaponState == SPINE_BACK) {
+					m_pPlayer->SetMaxXZVelocity(5.0f);
+					AddAcel += NoGrapAcel;
+				}
+				else {
+					m_pPlayer->SetMaxXZVelocity(3.5f);
+				}
 			}
 		}
 
@@ -419,8 +438,7 @@ void GamePlayScene::PlayerControlInput()
 		if (m_pPlayer)
 			((PlayerAnimationController*)(m_pPlayer->m_pSkinnedAnimationController))->SetAnimationFromInput(dwDirection, dwPlayerState);
 
-		if (m_pPlayer)
-			if (m_pPlayer->m_WeaponState == SPINE_BACK) AddAcel += NoGrapAcel;
+
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
@@ -435,7 +453,7 @@ void GamePlayScene::PlayerControlInput()
 		m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 
 		if (dwDirection) if (m_pPlayer)
-			m_pPlayer->CalVelocityFromInput(dwDirection, AddAcel);
+			m_pPlayer->CalVelocityFromInput(dwDirection, AddAcel, m_fElapsedTime);
 	}
 
 
