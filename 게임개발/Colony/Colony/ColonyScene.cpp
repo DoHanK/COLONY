@@ -211,6 +211,8 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 		if (strstr(pstrGameObjectName, str.c_str()) != nullptr) {
 
+
+
 			pGameObject = new GameObject;
 			strcpy_s(pGameObject->m_pstrFrameName, 64, pstrGameObjectName);
 			pGameObject->m_xmf4x4World = mxf4x4Position;
@@ -308,7 +310,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
 	m_pCamera->SetPlayer(m_pPlayer);
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 100; ++j) {
+	for (int j = 0; j < 1; ++j) {
 		for (int i = 0; i < 1; i++) {
 
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager);
@@ -352,6 +354,8 @@ void GamePlayScene::PlayerControlInput()
 {
 	static UCHAR pKeysBuffer[256];
 	float AddAcel = 20.0f;
+
+
 	//플레이어 씬일때만 작동하도록 설정하기.
 	if (GetKeyboardState(pKeysBuffer)) {
 		//애니메이션 상태정의를 위한 플레이어 상태 정의
@@ -445,10 +449,23 @@ void GamePlayScene::PlayerControlInput()
 		static POINT m_ptOldCursorPos = { WINDOWS_POS_X + FRAME_BUFFER_WIDTH / 2 , WINDOWS_POS_Y + FRAME_BUFFER_WIDTH / 2 };
 
 		//SetCursor(NULL);
+#if defined(_DEBUG)
+		if (pKeysBuffer[R_MOUSE] & 0xF0) {
+			GetCursorPos(&ptCursorPos);
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
+			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		}
+#else
 		GetCursorPos(&ptCursorPos);
 		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
 		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+#endif
+
+
+
+
 		if (m_pPlayer)
 		m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 
@@ -523,7 +540,12 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	m_pPlayer->Render(pd3dCommandList);
 
 	for (auto& GO : m_pSceneObject) {
-		GO->Render(pd3dCommandList);
+		//			if (strstr(GO->m_pstrFrameName, "SM_Mushroom_A") != nullptr) {
+
+
+		//}
+						GO->Render(pd3dCommandList);
+	
 	}
 
 	//BoudingRendering(pd3dCommandList);

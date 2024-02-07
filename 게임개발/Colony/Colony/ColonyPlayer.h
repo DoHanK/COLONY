@@ -20,6 +20,7 @@ class PlayerAnimationController;
 #define T 'T'
 
 #define L_MOUSE		 0x01
+#define R_MOUSE		 0x02
 #define L_SHIFT	     0x10
 #define L_CONTROL	 0x11
 #define SPACE_BAR    0x20
