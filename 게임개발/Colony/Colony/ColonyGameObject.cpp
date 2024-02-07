@@ -211,30 +211,34 @@ void Material::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		_stprintf_s(pstrDebug, 256, _T("Texture Name: %d %c %s\n"), (pstrTextureName[0] == '@') ? nRepeatedTextures++ : nTextures++, (pstrTextureName[0] == '@') ? '@' : ' ', pwstrTextureName);
 		OutputDebugString(pstrDebug);
 #endif
-		if (!bDuplicated)
-		{
+
+
+		* ppTexture = pResourceManager->BringTexture(pstrFilePath, nRootParameter, false);
+		if (*ppTexture) (*ppTexture)->AddRef();
+
+		//if (!bDuplicated)
+		//{
 
 	
-			*ppTexture = pResourceManager->BringTexture(pstrFilePath, nRootParameter, false);
-			//(*ppTexture)->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pwstrTextureName, 0, true);
-			if (*ppTexture) (*ppTexture)->AddRef();
+		//	*ppTexture = pResourceManager->BringTexture(pstrFilePath, nRootParameter, false);
+		//	if (*ppTexture) (*ppTexture)->AddRef();
 
-			//ResourceManager::CreateShaderResourceViews(pd3dDevice, *ppTexture, nRootParameter, false);
-		}
-		else
-		{
-			if (pParent)
-			{
-				while (pParent)
-				{
-					if (!pParent->m_pParent) break;
-					pParent = pParent->m_pParent;
-				}
-				GameObject* pRootGameObject = pParent;
-				*ppTexture = pRootGameObject->FindReplicatedTexture(pwstrTextureName);
-				if (*ppTexture) (*ppTexture)->AddRef();
-			}
-		}
+		//	//ResourceManager::CreateShaderResourceViews(pd3dDevice, *ppTexture, nRootParameter, false);
+		//}
+		//else
+		//{
+		//	if (pParent)
+		//	{
+		//		while (pParent)
+		//		{
+		//			if (!pParent->m_pParent) break;
+		//			pParent = pParent->m_pParent;
+		//		}
+		//		GameObject* pRootGameObject = pParent;
+		//		*ppTexture = pRootGameObject->FindReplicatedTexture(pwstrTextureName);
+		//		if (*ppTexture) (*ppTexture)->AddRef();
+		//	}
+		//}
 	}
 }
 
