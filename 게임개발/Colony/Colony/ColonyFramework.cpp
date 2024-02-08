@@ -114,7 +114,7 @@ void ColonyFramework::CreateGraphicsRootSignature()
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[1].Constants.Num32BitValues = 37;
+	pd3dRootParameters[1].Constants.Num32BitValues = 41;
 	pd3dRootParameters[1].Constants.ShaderRegister = 2; //GameObject
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -376,6 +376,7 @@ LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM 
 		//마우스 키입력
 		break;
 	case WM_KEYDOWN:
+		m_pSceneManager->m_SceneStack.top()->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 		break;
 	case WM_KEYUP:
 		if (wParam == 'Z') {

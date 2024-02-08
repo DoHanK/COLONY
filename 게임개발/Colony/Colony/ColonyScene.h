@@ -7,6 +7,7 @@
 #include "ResourceManager.h"
 #include "UiManager.h"
 #include "AlienSpider.h"
+#include "ColonyQuadtree.h"
 #define MAX_LIGHTS						16 
 
 #define POINT_LIGHT						1
@@ -127,12 +128,17 @@ protected:
 	ID3D12Resource*						m_pd3dcbLights = NULL;
 	LIGHTS*								m_pcbMappedLights = NULL;
 
-	Player*								m_pPlayer;
-	ThirdPersonCamera*					m_pCamera;
+	Player*								m_pPlayer = NULL;
+	ThirdPersonCamera*					m_pCamera = NULL;
 	int									m_nGameObjects = 0;
 	vector<GameObject*>					m_pGameObject;
 	vector<GameObject*>					m_pSceneObject;
 
+	QuadTree*							m_pQuadTree = NULL;
+	GameObject*							m_pScenePlane = NULL;
+	int									m_DepthRender = 0;
+
+
 	GhostTraillerShader*				m_pGhostTraillerShader;
-	BoundingShader* m_pBoundigShader;
+	BoundingShader*						m_pBoundigShader;
 };
