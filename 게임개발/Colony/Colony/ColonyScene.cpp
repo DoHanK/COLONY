@@ -1,7 +1,9 @@
 #include "ColonyScene.h"
 #include "ColonyShader.h"
+#include "ColonyQuadtree.h"
 
 
+#define QuadtreeDepth 2
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //												Desc											   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +67,7 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 {
 	static int count = 0;
 
+	char c = 187;
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
@@ -72,6 +75,14 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		{
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
+			break;
+		case '1':
+			if(QuadtreeDepth>m_DepthRender)
+				m_DepthRender++;
+			break;
+		case '2':
+			if(0 < m_DepthRender)
+				m_DepthRender--;
 			break;
 		default:
 			break;
@@ -161,7 +172,6 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 }
 
-
 #define LOD 0
 void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName, const char* TexFileName,ResourceManager* pResourceManager)
 {
@@ -217,10 +227,8 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 			strcpy_s(pGameObject->m_pstrFrameName, 64, pstrGameObjectName);
 			pGameObject->m_xmf4x4World = mxf4x4Position;
 
-
-
-
 			StandardMesh* pMesh = NULL;
+
 			for (int j = 0; j < cur_object; j++)
 			{
 				if (!strcmp(pstrGameObjectName, m_pSceneObject[j]->m_pstrFrameName))
@@ -275,6 +283,12 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 				::fclose(pInFile);
 			}
+
+			
+			if (strstr(pstrGameObjectName, "Plane") !=NULL) {
+				m_pScenePlane = pGameObject;
+			}
+
 			m_pSceneObject.push_back(pGameObject);
 			cur_object += 1;
 		}
@@ -309,6 +323,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pAngrybotModel, pAngrybotModel1);
 	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
 	m_pCamera->SetPlayer(m_pPlayer);
+
+
+	//Monster Create
 	m_pGameObject.reserve(400);
 	for (int j = 0; j < 1; ++j) {
 		for (int i = 0; i < 1; i++) {
@@ -323,6 +340,17 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 
 	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/Scene.bin","Model/Textures/scene/", pResourceManager);
+
+	//Octree Crate
+	XMFLOAT3 OctreeScale = m_pScenePlane->m_BoundingBox.Extents;
+	OctreeScale = Vector3::ScalarProduct(OctreeScale, 500.f, false);
+	OctreeScale.y = 25.f;
+
+	XMFLOAT3 OctreeCenter = m_pScenePlane->m_BoundingBox.Center;
+	OctreeCenter.y = 25.f;
+	m_pQuadTree = new QuadTree(pd3dDevice, pd3dCommandList, 0, OctreeCenter, OctreeScale);
+	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, 2);
+
 
 	BuildDefaultLightsAndMaterials();
 
@@ -507,6 +535,11 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
 
+	//»ö±ò¼±Á¤
+	XMFLOAT3 xmfloat3(0.5f, 0.0, 0);
+
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+
 	for (auto& GO : m_pGameObject) {
 		GO->BoudingBoxRender(pd3dCommandList);
 	}
@@ -516,6 +549,7 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 	for (auto& GO : m_pSceneObject) {
 		GO->BoudingBoxRender(pd3dCommandList);
 	}
+
 }
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
@@ -540,15 +574,15 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	m_pPlayer->Render(pd3dCommandList);
 
 	for (auto& GO : m_pSceneObject) {
-		//			if (strstr(GO->m_pstrFrameName, "SM_Mushroom_A") != nullptr) {
-
-
-		//}
 						GO->Render(pd3dCommandList);
-	
 	}
 
-	//BoudingRendering(pd3dCommandList);
+
+	m_pScenePlane->Render(pd3dCommandList);
+
+	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
+	m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);
+	BoudingRendering(pd3dCommandList);
 }
 
 void GamePlayScene::ReleaseUploadBuffers()

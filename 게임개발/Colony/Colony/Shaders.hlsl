@@ -20,7 +20,7 @@ cbuffer cbGameObjectInfo : register(b2)
 	MATERIAL				gMaterial : packoffset(c4);
 	uint					gnTexturesMask : packoffset(c8.x);
     float                   gfGhostNum : packoffset(c8.y);
-    
+    float3                  BoundingColor : packoffset(c9);
 };
 
 #include "Light.hlsl"
@@ -147,7 +147,7 @@ VS_BOUNDINGBOX_OUTPUT VSBoundingBox(VS_BOUNDINGBOX_INPUT input)
 
 float4 PSBoundingBox(VS_BOUNDINGBOX_OUTPUT input) : SV_TARGET
 {
-    return (float4(1.0f, 0.0f, 0.0f, 1.0f));
+    return (float4(BoundingColor, 1.0f));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
