@@ -103,7 +103,7 @@ void Player::CalVelocityFromInput(DWORD dwDirection, float Acceleration, float f
 		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -Dir);
 
 		float ScalarVelocity = Acceleration * fElapsedTime;
-		OutputDebugStringA(to_string(ScalarVelocity).c_str());
+
 		//xmf3Shift = Vector3::Normalize(xmf3Shift);
 		xmf3Shift = Vector3::ScalarProduct(xmf3Shift, ScalarVelocity);
 

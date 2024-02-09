@@ -207,9 +207,35 @@ Texture* ResourceManager::BringTexture(const char* filename, UINT RootParameter,
 		return TempTexture;
 	}
 	else {
-
 		//해당 타겟 리소스 반환
-		return pPosition->second;
+		if(pPosition->second->m_pRootArgumentInfos->m_nRootParameterIndex == RootParameter)
+			return pPosition->second;
+		//텍스쳐이름 검사.
+		else {
+			auto  pSameTexture = find_if(TextureList.begin(), TextureList.end(), [TargetName,RootParameter](pair<string, Texture*> element) {return (element.first == TargetName)&& (RootParameter == element.second->m_pRootArgumentInfos->m_nRootParameterIndex); });
+			//동일한게 없을때
+			if (TextureList.end() == pSameTexture) {
+				Texture* TempTexture = new Texture(1, RESOURCE_TEXTURE2D, 0);
+
+				// 필요한 버퍼 크기 계산
+				size_t bufferSize = mbstowcs(NULL, filename, 0);
+				// 변환된 와이드 문자열을 저장할 버퍼 할당
+				wchar_t* wideStringFile = new wchar_t[bufferSize + 1];
+				// 멀티바이트에서 와이드 문자열로 변환
+				mbstowcs(wideStringFile, filename, bufferSize + 1);
+
+				TempTexture->LoadTextureFromFile(m_pDevice, m_pGCommandList, wideStringFile, 0, bIsDDSFile);
+				//정보가 없을때
+				ResourceManager::CreateShaderResourceViews(m_pDevice, TempTexture, RootParameter, false);
+				TextureList.push_back({ TargetName, TempTexture });
+				TempTexture->AddRef();
+
+				return TempTexture;
+			}
+			else {
+				return pSameTexture->second;
+			}
+		}
 	}
 }
 

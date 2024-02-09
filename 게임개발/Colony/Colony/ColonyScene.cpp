@@ -227,6 +227,9 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 			strcpy_s(pGameObject->m_pstrFrameName, 64, pstrGameObjectName);
 			pGameObject->m_xmf4x4World = mxf4x4Position;
 
+			if (strstr(pstrGameObjectName, "SM_Tree_A_LOD0") != nullptr) {
+				strcpy_s(pGameObject->m_pstrFrameName, 64, pstrGameObjectName);
+			}
 			StandardMesh* pMesh = NULL;
 
 			for (int j = 0; j < cur_object; j++)
@@ -344,10 +347,10 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//Octree Crate
 	XMFLOAT3 OctreeScale = m_pScenePlane->m_BoundingBox.Extents;
 	OctreeScale = Vector3::ScalarProduct(OctreeScale, 500.f, false);
-	OctreeScale.y = 25.f;
+	OctreeScale.y = 20.f;
 
 	XMFLOAT3 OctreeCenter = m_pScenePlane->m_BoundingBox.Center;
-	OctreeCenter.y = 25.f;
+	OctreeCenter.y = 20.f;
 	m_pQuadTree = new QuadTree(pd3dDevice, pd3dCommandList, 0, OctreeCenter, OctreeScale);
 	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, 2);
 
@@ -493,9 +496,6 @@ void GamePlayScene::PlayerControlInput()
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 #endif
 
-
-
-
 		if (m_pPlayer)
 		m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 
@@ -576,15 +576,16 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	m_pPlayer->Render(pd3dCommandList);
 
 	for (auto& GO : m_pSceneObject) {
-						GO->Render(pd3dCommandList);
+			GO->Render(pd3dCommandList);
+
+
 	}
 
 
 	m_pScenePlane->Render(pd3dCommandList);
-
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
 	m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);
-	BoudingRendering(pd3dCommandList);
+	//BoudingRendering(pd3dCommandList);
 }
 
 void GamePlayScene::ReleaseUploadBuffers()
@@ -598,8 +599,6 @@ void GamePlayScene::ReleaseUploadBuffers()
 	for (int i = 0; i < m_pSceneObject.size(); ++i) {
 		m_pSceneObject[i]->ReleaseUploadBuffers();
 	}
-
-
 
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 
