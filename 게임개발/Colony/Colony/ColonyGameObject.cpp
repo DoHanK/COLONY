@@ -837,6 +837,9 @@ void GameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 					}
 				}
 			}
+			else {
+				pMaterial->SetShader(pShader);
+			}
 			SetMaterial(nMaterial, pMaterial);
 		}
 		else if (!strcmp(pstrToken, "<AlbedoColor>:"))

@@ -227,9 +227,6 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 			strcpy_s(pGameObject->m_pstrFrameName, 64, pstrGameObjectName);
 			pGameObject->m_xmf4x4World = mxf4x4Position;
 
-			if (strstr(pstrGameObjectName, "SM_Tree_A_LOD0") != nullptr) {
-				strcpy_s(pGameObject->m_pstrFrameName, 64, pstrGameObjectName);
-			}
 			StandardMesh* pMesh = NULL;
 
 			for (int j = 0; j < cur_object; j++)
@@ -282,18 +279,20 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 				}
 
 				::ReadUnityBinaryString(pInFile, pstrToken, &nStrLength); //"<Materials>:"
-					pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList,NULL, pInFile,NULL,TexFileName, pResourceManager);
-
+				if (strstr(pstrGameObjectName, "Plane") != NULL) {
+					pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, NULL, pInFile, m_pPlaneShader, TexFileName, pResourceManager);
+					m_pScenePlane = pGameObject;
+				}
+				else {
+					pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, NULL, pInFile, NULL, TexFileName, pResourceManager);
+				}
 				::fclose(pInFile);
 			}
 
 			
-			if (strstr(pstrGameObjectName, "Plane") !=NULL) {
-				m_pScenePlane = pGameObject;
-			}
-
 			m_pSceneObject.push_back(pGameObject);
 			cur_object += 1;
+			
 		}
 
 	}
@@ -342,6 +341,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		}
 	}
 
+	m_pPlaneShader = new PlaneShader();
+	m_pPlaneShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pPlaneShader->AddRef();
+
+
 	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/Scene.bin","Model/Textures/scene/", pResourceManager);
 
 	//Octree Crate
@@ -354,7 +358,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pQuadTree = new QuadTree(pd3dDevice, pd3dCommandList, 0, OctreeCenter, OctreeScale);
 	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, 2);
 
-
+	
 	BuildDefaultLightsAndMaterials();
 
 
@@ -379,8 +383,10 @@ void GamePlayScene::ReleaseObjects()
 	}
 
 	for (int i = 0; i < m_pSceneObject.size(); ++i) {
+		if(m_pSceneObject[i])
 		m_pSceneObject[i]->Release();
 	}
+
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -578,11 +584,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	for (auto& GO : m_pSceneObject) {
 			GO->Render(pd3dCommandList);
 
-
 	}
 
-
-	m_pScenePlane->Render(pd3dCommandList);
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
 	m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);
 	//BoudingRendering(pd3dCommandList);

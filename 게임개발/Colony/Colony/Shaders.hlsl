@@ -82,6 +82,7 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 
 float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 {
+    
     float4 cAlbedoColor = gMaterial.m_cDiffuse;
     if (gnTexturesMask & MATERIAL_ALBEDO_MAP)
     {
@@ -121,7 +122,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
         }
 	
         float4 cIllumination = Lighting(input.positionW, normalW);
-        cColor = (lerp(cColor, cIllumination, 0.4f));
+        cColor = (lerp(cColor, cIllumination, 0.2f));
 
         return cColor;
     }
@@ -347,4 +348,71 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 	float4 cColor = gtxtSkyCubeTexture.Sample(gssClamp, input.positionL);
 
 	return(cColor);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+VS_STANDARD_OUTPUT VSPlane(VS_STANDARD_INPUT input)
+{
+    VS_STANDARD_OUTPUT output;
+
+    output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
+    output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
+    output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
+    output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
+    output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+    output.uv = input.uv;
+
+    return (output);
+}
+
+float4 PSPlane(VS_STANDARD_OUTPUT input) : SV_TARGET
+{
+    const float RepeatCount = 100.0f;
+    input.uv.x *= RepeatCount;
+    input.uv.y *= RepeatCount;
+    
+    float4 cAlbedoColor = gMaterial.m_cDiffuse;
+    if (gnTexturesMask & MATERIAL_ALBEDO_MAP)
+    {
+        float4 texColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+        cAlbedoColor.rgb *= texColor.rgb;
+        cAlbedoColor.a *= texColor.a;
+    }
+    
+    float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_SPECULAR_MAP)
+        cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
+    float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+        cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
+    float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_METALLIC_MAP)
+        cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
+    
+    float4 cEmissionColor = gMaterial.m_cEmissive;
+    if (gnTexturesMask & MATERIAL_EMISSION_MAP)
+    {
+        float4 texColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
+        cEmissionColor.rgb *= texColor.rgb;
+        cEmissionColor.a *= texColor.a;
+    }
+    float3 normalW;
+    float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
+    if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+    {
+        float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
+        float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+        normalW = normalize(mul(vNormal, TBN));
+    }
+    else
+    {
+        normalW = normalize(input.normalW);
+    }
+	
+    float4 cIllumination = Lighting(input.positionW, normalW);
+    //cColor = (lerp(cColor, cIllumination, 0.5f));
+
+    return cColor;
 }
