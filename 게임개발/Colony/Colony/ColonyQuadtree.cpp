@@ -5,7 +5,28 @@ QuadTree::QuadTree(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 {
 	m_BoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
 	m_BoundingMesh->UpdateVertexPosition(&BoundingOrientedBox(m_BoundingBox.Center, m_BoundingBox.Extents, XMFLOAT4(0, 0, 0, 1)));
-};
+}
+QuadTree::~QuadTree()
+{
+	m_BoundingMesh->Release();
+}
+void QuadTree::AddRef()
+{
+	if (m_LeftUp) m_LeftUp->AddRef();
+	if (m_RightUp) m_RightUp->AddRef();
+	if (m_LeftBottom) m_LeftBottom->AddRef();
+	if (m_RightBottom) m_RightBottom->AddRef();
+	this->AddRef();
+}
+void QuadTree::Release(){
+	if (m_LeftUp) m_LeftUp->Release();
+	if (m_RightUp) m_RightUp->Release();
+	if (m_LeftBottom) m_LeftBottom->Release();
+	if (m_RightBottom) m_RightBottom->Release();
+
+	if (--m_nReferences <= 0) delete this;
+}
+;
 
 bool QuadTree::BuildTreeByDepth(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int limitdepth)
 {
