@@ -369,6 +369,8 @@ void GamePlayScene::ReleaseObjects()
 	if (m_pGhostTraillerShader) m_pGhostTraillerShader->Release();
 	if(m_pBoundigShader) m_pBoundigShader->Release();
 
+	if (m_pQuadTree)
+		m_pQuadTree->Release();
 	for (auto& GO : m_pGameObject) {
 		GO->Release();
 	}
@@ -536,7 +538,7 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
 
 	//»ö±ò¼±Á¤
-	XMFLOAT3 xmfloat3(0.5f, 0.0, 0);
+	XMFLOAT3 xmfloat3(1.0f, 0.0, 0);
 
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
 

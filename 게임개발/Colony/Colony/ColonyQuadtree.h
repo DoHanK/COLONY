@@ -6,7 +6,12 @@
 class QuadTree
 {public:
 	QuadTree(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int depth, XMFLOAT3 center, XMFLOAT3 Extend);
-	~QuadTree() {};
+	~QuadTree();
+protected:
+	int								m_nReferences = 0;
+public:
+	void AddRef();
+	void Release();
 public:
 	int							m_depth;
 	BoundingBox					m_BoundingBox;
@@ -23,6 +28,9 @@ public:
 
 	BoundingBoxMesh* m_BoundingMesh =NULL;
 public:
+
+
+
 	bool BuildTreeByDepth(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int limitdepth);
 
 	void InsertStaticObject();
