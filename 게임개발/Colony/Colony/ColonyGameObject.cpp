@@ -1322,3 +1322,29 @@ void AnimationController::DirectUpdateMatrix()
 	}
 
 }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SkyBox::SkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : GameObject(1) 
+{
+	SkyBoxMesh* skyBoxMesh = new SkyBoxMesh(pd3dDevice, pd3dCommandList);
+	SetMesh(skyBoxMesh);
+
+
+
+}
+
+SkyBox::~SkyBox() {
+
+}
+
+
+
+void SkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+{
+	XMFLOAT3 CameraPos = pCamera->GetPosition();
+	SetPosition(CameraPos.x, CameraPos.y, CameraPos.z);
+
+	GameObject::Render(pd3dCommandList, pCamera);
+}

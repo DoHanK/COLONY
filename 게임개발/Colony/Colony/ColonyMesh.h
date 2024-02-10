@@ -280,3 +280,16 @@ public:
 	void UpdateVertexPosition(BoundingOrientedBox* pxmBoundingBox);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 };
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										SkyBoxMesh Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class SkyBoxMesh :public BasicMesh
+{
+public:
+	SkyBoxMesh(ID3D12Device* pd3dDeivce, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual ~SkyBoxMesh();
+};
