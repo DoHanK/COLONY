@@ -333,6 +333,7 @@ void ColonyFramework::ColonyGameLoop()
 	if(m_pResourceManager)
 		GetDevice()->GetCommandList()->SetDescriptorHeaps(1, &m_pResourceManager->pSrvDescriptorHeap);
 
+	
 	if(m_pSceneManager)
 		m_pSceneManager->RenderScene(GetDevice()->GetCommandList());
 

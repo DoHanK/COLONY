@@ -88,7 +88,6 @@ void Texture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void Texture::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, int nIndex)
 {
-	
 	pd3dCommandList->SetGraphicsRootDescriptorTable(m_pRootArgumentInfos[nIndex].m_nRootParameterIndex, m_pRootArgumentInfos[nIndex].m_d3dSrvGpuDescriptorHandle);
 }
 
@@ -1331,8 +1330,18 @@ SkyBox::SkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	SkyBoxMesh* skyBoxMesh = new SkyBoxMesh(pd3dDevice, pd3dCommandList);
 	SetMesh(skyBoxMesh);
 
+	Texture* skyBoxTexture = new Texture(1, RESOURCE_TEXTURE_CUBE, 1);
+	skyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Model/Textures/skybox/SkyBox_1.dds", 0, true);
+	ResourceManager::CreateShaderResourceViews(pd3dDevice, skyBoxTexture, 10, false);
 
+	SkyBoxShader* skyBoxShader = new SkyBoxShader();
+	skyBoxShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
+	Material* skyBoxMaterial = new Material(1);
+	skyBoxMaterial->SetTexture(skyBoxTexture,0);
+	skyBoxMaterial->SetShader(skyBoxShader);
+
+	SetMaterial(0, skyBoxMaterial);
 }
 
 SkyBox::~SkyBox() {
@@ -1341,10 +1350,10 @@ SkyBox::~SkyBox() {
 
 
 
-void SkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+void SkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera,Player* player)
 {
-	XMFLOAT3 CameraPos = pCamera->GetPosition();
-	SetPosition(CameraPos.x, CameraPos.y, CameraPos.z);
+	XMFLOAT3 playerPos = player->GetPosition();
+	SetPosition(playerPos.x, playerPos.y, playerPos.z);
 
 	GameObject::Render(pd3dCommandList, pCamera);
 }

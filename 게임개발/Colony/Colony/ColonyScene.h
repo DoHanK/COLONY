@@ -136,6 +136,7 @@ protected:
 
 	QuadTree*							m_pQuadTree = NULL;
 	GameObject*							m_pScenePlane = NULL;
+	SkyBox*							    m_pskybox = NULL;
 	PlaneShader*						m_pPlaneShader = NULL;
 	int									m_DepthRender = 0;
 

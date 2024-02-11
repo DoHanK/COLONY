@@ -358,7 +358,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pQuadTree = new QuadTree(pd3dDevice, pd3dCommandList, 0, OctreeCenter, OctreeScale);
 	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, 2);
 
-	
+	m_pskybox = new SkyBox(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pskybox->AddRef();
+
 	BuildDefaultLightsAndMaterials();
 
 
@@ -387,6 +389,7 @@ void GamePlayScene::ReleaseObjects()
 		m_pSceneObject[i]->Release();
 	}
 
+	if (m_pskybox)m_pskybox->Release();
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -585,6 +588,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 			GO->Render(pd3dCommandList);
 
 	}
+
+	//m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
 
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
 	m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);

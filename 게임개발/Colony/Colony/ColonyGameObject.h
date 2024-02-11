@@ -3,6 +3,7 @@
 #include "ColonyShader.h"
 #include "ColonyMesh.h"
 #include "ResourceManager.h"
+#include "ColonyGameObject.h"
 class BasicShader;
 class ResourceManager;
 class Camera;
@@ -441,10 +442,11 @@ public:
 
 };
 
+class Player;
 
 class SkyBox : public GameObject {
 public:
 	SkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~SkyBox();
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
+	void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, Player* player);
 };
