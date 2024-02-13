@@ -378,6 +378,8 @@ void GamePlayScene::ReleaseObjects()
 	if (m_pGhostTraillerShader) m_pGhostTraillerShader->Release();
 	if(m_pBoundigShader) m_pBoundigShader->Release();
 
+	if (m_pPlaneShader) m_pPlaneShader->Release();
+
 	if (m_pQuadTree)
 		m_pQuadTree->Release();
 	for (auto& GO : m_pGameObject) {
@@ -388,7 +390,8 @@ void GamePlayScene::ReleaseObjects()
 		if(m_pSceneObject[i])
 		m_pSceneObject[i]->Release();
 	}
-
+	
+	
 	if (m_pskybox)m_pskybox->Release();
 }
 
@@ -609,6 +612,8 @@ void GamePlayScene::ReleaseUploadBuffers()
 	}
 
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+
+	if (m_pskybox) m_pskybox->ReleaseUploadBuffers();
 
 }
 

@@ -1333,19 +1333,23 @@ SkyBox::SkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	Texture* skyBoxTexture = new Texture(1, RESOURCE_TEXTURE_CUBE, 1);
 	skyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Model/Textures/skybox/SkyBox_1.dds", 0, true);
 	ResourceManager::CreateShaderResourceViews(pd3dDevice, skyBoxTexture, 10, false);
+	skyBoxTexture->AddRef();
 
-	SkyBoxShader* skyBoxShader = new SkyBoxShader();
+	skyBoxShader = new SkyBoxShader();
 	skyBoxShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	skyBoxShader->AddRef();
 
 	Material* skyBoxMaterial = new Material(1);
 	skyBoxMaterial->SetTexture(skyBoxTexture,0);
 	skyBoxMaterial->SetShader(skyBoxShader);
+	skyBoxMaterial->AddRef();
 
 	SetMaterial(0, skyBoxMaterial);
 }
 
 SkyBox::~SkyBox() {
-
+	if(skyBoxShader) skyBoxShader->Release();
+	
 }
 
 
