@@ -353,7 +353,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	OctreeScale = Vector3::ScalarProduct(OctreeScale, 500.f, false);
 	OctreeScale.y = 20.f;
 
-	XMFLOAT3 OctreeCenter = m_pScenePlane->m_BoundingBox.Center;
+	XMFLOAT3 OctreeCenter = XMFLOAT3(-1.0f,0,0);
 	OctreeCenter.y = 20.f;
 	m_pQuadTree = new QuadTree(pd3dDevice, pd3dCommandList, 0, OctreeCenter, OctreeScale);
 	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, 2);
@@ -363,6 +363,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	BuildDefaultLightsAndMaterials();
 
+	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, 1.6f, 250, 1);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -449,6 +450,8 @@ void GamePlayScene::PlayerControlInput()
 			}
 		}
 
+
+
 		//JUMP
 		if (pKeysBuffer[SPACE_BAR] & 0xF0) {
 			//¹æÇâ
@@ -495,6 +498,11 @@ void GamePlayScene::PlayerControlInput()
 
 		//SetCursor(NULL);
 #if defined(_DEBUG)
+		if (pKeysBuffer['X'] & 0xF0) {
+		
+			m_pPlayer->SetMaxXZVelocity(50.0f);
+			AddAcel += 40;
+		}
 		if (pKeysBuffer[R_MOUSE] & 0xF0) {
 			GetCursorPos(&ptCursorPos);
 			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
@@ -563,7 +571,6 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 	for (auto& GO : m_pSceneObject) {
 		GO->BoudingBoxRender(pd3dCommandList);
 	}
-
 }
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
@@ -596,6 +603,9 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
 	m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);
+	m_pNevMeshBaker->BoundingRendering(pd3dCommandList);
+
+
 	//BoudingRendering(pd3dCommandList);
 }
 

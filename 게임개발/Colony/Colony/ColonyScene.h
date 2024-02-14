@@ -8,6 +8,7 @@
 #include "UiManager.h"
 #include "AlienSpider.h"
 #include "ColonyQuadtree.h"
+#include "NevMeshBaker.h"
 #define MAX_LIGHTS						16 
 
 #define POINT_LIGHT						1
@@ -135,6 +136,7 @@ protected:
 	vector<GameObject*>					m_pSceneObject;
 
 	QuadTree*							m_pQuadTree = NULL;
+	NevMeshBaker*						m_pNevMeshBaker = NULL;
 	GameObject*							m_pScenePlane = NULL;
 	SkyBox*							    m_pskybox = NULL;
 	PlaneShader*						m_pPlaneShader = NULL;
