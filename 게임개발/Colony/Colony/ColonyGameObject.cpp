@@ -635,7 +635,6 @@ void GameObject::BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, Ca
 {
 
 	if (m_pBoundingMesh) {
-		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 		m_pBoundingMesh->Render(pd3dCommandList);
 	}
 

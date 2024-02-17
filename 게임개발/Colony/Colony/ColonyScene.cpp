@@ -237,7 +237,6 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 					pMesh = (StandardMesh*)m_pSceneObject[j]->m_pMesh;
 
 					pGameObject->SetMesh(pMesh);
-					pGameObject->SetBoundingMesh(m_pSceneObject[j]->m_pBoundingMesh);
 
 					pGameObject->m_nMaterials = m_pSceneObject[j]->m_nMaterials;
 					pGameObject->m_ppMaterials = new Material * [pGameObject->m_nMaterials];
@@ -268,15 +267,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 				pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 				pGameObject->SetMesh(pMesh);
 
-				if (pGameObject->m_pMesh) {
-					pGameObject->m_BoundingBox.Center = pGameObject->m_pMesh->GetAABBCenter();
-					pGameObject->m_BoundingBox.Extents = pGameObject->m_pMesh->GetAABBExtend();
-					pGameObject->m_BoundingBox.Extents.x / 2;
-					pGameObject->m_BoundingBox.Extents.z / 2;
-					pGameObject->m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
-					pGameObject->m_pBoundingMesh->AddRef();
-					((BoundingBoxMesh*)pGameObject->m_pBoundingMesh)->UpdateVertexPosition(&pGameObject->m_BoundingBox);
-				}
+
 
 				::ReadUnityBinaryString(pInFile, pstrToken, &nStrLength); //"<Materials>:"
 				if (strstr(pstrGameObjectName, "Plane") != NULL) {
@@ -287,6 +278,17 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 					pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, NULL, pInFile, NULL, TexFileName, pResourceManager);
 				}
 				::fclose(pInFile);
+			}
+
+			if (pGameObject->m_pMesh) {
+				pGameObject->m_BoundingBox.Center = pGameObject->m_pMesh->GetAABBCenter();
+				pGameObject->m_BoundingBox.Extents = pGameObject->m_pMesh->GetAABBExtend();
+				pGameObject->m_BoundingBox.Extents.x / 2;
+				pGameObject->m_BoundingBox.Extents.z / 2;
+				pGameObject->m_BoundingBox.Transform(pGameObject->m_BoundingBox, DirectX::XMLoadFloat4x4(&pGameObject->m_xmf4x4World));
+				pGameObject->m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
+				pGameObject->m_pBoundingMesh->AddRef();
+				((BoundingBoxMesh*)pGameObject->m_pBoundingMesh)->UpdateVertexPosition(&pGameObject->m_BoundingBox);
 			}
 
 			
@@ -363,7 +365,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	BuildDefaultLightsAndMaterials();
 
-	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, 1.6f, 250, 1);
+	//m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, 0.8f, 50, 50);
+
+	//m_pNevMeshBaker->BakeNevMeshByObject(m_pSceneObject);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -602,9 +606,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	//m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
 
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
-	m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);
-	m_pNevMeshBaker->BoundingRendering(pd3dCommandList);
-
+	//m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);
+	//m_pNevMeshBaker->BoundingRendering(pd3dCommandList);
 
 	//BoudingRendering(pd3dCommandList);
 }

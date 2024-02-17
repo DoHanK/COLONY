@@ -22,17 +22,23 @@
     <Filter Include="TextureLoad">
       <UniqueIdentifier>{7a2a142c-3beb-4d3a-a2a3-c2e15c6ce7a2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameManagerCpp">
-      <UniqueIdentifier>{e929e6e4-9085-4b9d-9f6a-f40ca11f3be2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GameManagerHeader">
-      <UniqueIdentifier>{946bcad3-6b7b-42fc-ada6-27955cfe7d08}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GameBasicCpp">
       <UniqueIdentifier>{1d4425f4-50c4-4a41-ba07-368a4fa78bbf}</UniqueIdentifier>
     </Filter>
     <Filter Include="GameBasicHeader">
       <UniqueIdentifier>{27a90f9d-876a-4769-8f80-fffdda0aba9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameCpp\GameManagerCpp">
+      <UniqueIdentifier>{e929e6e4-9085-4b9d-9f6a-f40ca11f3be2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameHeader\GameManagerHeader">
+      <UniqueIdentifier>{946bcad3-6b7b-42fc-ada6-27955cfe7d08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameCpp\GameAiCpp">
+      <UniqueIdentifier>{e80a4c7e-9fa5-47e5-9110-18406c5e8744}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameHeader\GameAiHeader">
+      <UniqueIdentifier>{b41ae8f0-ca24-4a10-a9fb-2a0c4b0df968}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -70,16 +76,16 @@
       <Filter>GameHeader</Filter>
     </ClInclude>
     <ClInclude Include="ResourceManager.h">
-      <Filter>GameManagerHeader</Filter>
+      <Filter>GameHeader\GameManagerHeader</Filter>
     </ClInclude>
     <ClInclude Include="UserDefineType.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="UiManager.h">
-      <Filter>GameManagerHeader</Filter>
+      <Filter>GameHeader\GameManagerHeader</Filter>
     </ClInclude>
     <ClInclude Include="SceneManager.h">
-      <Filter>GameManagerHeader</Filter>
+      <Filter>GameHeader\GameManagerHeader</Filter>
     </ClInclude>
     <ClInclude Include="AlienSpider.h">
       <Filter>GameHeader</Filter>
@@ -106,7 +112,7 @@
       <Filter>GameHeader</Filter>
     </ClInclude>
     <ClInclude Include="NevMeshBaker.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>GameHeader\GameAiHeader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -138,13 +144,13 @@
       <Filter>GameCpp</Filter>
     </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
-      <Filter>GameManagerCpp</Filter>
+      <Filter>GameCpp\GameManagerCpp</Filter>
     </ClCompile>
     <ClCompile Include="UiManager.cpp">
-      <Filter>GameManagerCpp</Filter>
+      <Filter>GameCpp\GameManagerCpp</Filter>
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
-      <Filter>GameManagerCpp</Filter>
+      <Filter>GameCpp\GameManagerCpp</Filter>
     </ClCompile>
     <ClCompile Include="AlienSpider.cpp">
       <Filter>GameCpp</Filter>
@@ -168,7 +174,7 @@
       <Filter>GameCpp</Filter>
     </ClCompile>
     <ClCompile Include="NevMeshBaker.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>GameCpp\GameAiCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
