@@ -772,7 +772,9 @@ SkyBoxMesh::SkyBoxMesh(ID3D12Device* pd3dDeivce, ID3D12GraphicsCommandList* pd3d
 
 	m_pxmf3Positions = new XMFLOAT3[m_nVertices];
 
-	float fWidth = 100000.0f, fHeight = 100000.0f, fDepth =100000.0f;
+	float length = 200.0f;
+
+	float fWidth = length, fHeight = length, fDepth = length;
 
 	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
 	// Front Quad (quads point inward)

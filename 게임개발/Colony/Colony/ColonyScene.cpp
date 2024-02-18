@@ -592,6 +592,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
+	m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
+
 	for (auto& GO : m_pGameObject) {
 		GO->Render(pd3dCommandList);
 	}
@@ -603,7 +605,6 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 	}
 
-	//m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
 
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
 	//m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);

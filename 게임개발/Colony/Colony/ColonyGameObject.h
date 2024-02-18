@@ -403,6 +403,7 @@ public:
 	XMFLOAT3 GetRight();
 
 	void SetPosition(float x, float y, float z);
+	void SetWorldPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
 

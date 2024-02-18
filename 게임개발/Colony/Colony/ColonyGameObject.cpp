@@ -694,7 +694,14 @@ void GameObject::SetPosition(XMFLOAT3 xmf3Position)
 	SetPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
 }
 
+void GameObject::SetWorldPosition(float x, float y, float z)
+{
+	m_xmf4x4World._41 = x;
+	m_xmf4x4World._42 = y;
+	m_xmf4x4World._43 = z;
 
+	//UpdateTransform(NULL);
+}
 
 void GameObject::SetScale(float x, float y, float z)
 {
@@ -1351,7 +1358,7 @@ SkyBox::~SkyBox() {
 void SkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera,Player* player)
 {
 	XMFLOAT3 playerPos = player->GetPosition();
-	SetPosition(playerPos.x, playerPos.y, playerPos.z);
+	SetWorldPosition(playerPos.x, playerPos.y, playerPos.z);
 
 	GameObject::Render(pd3dCommandList, pCamera);
 }
