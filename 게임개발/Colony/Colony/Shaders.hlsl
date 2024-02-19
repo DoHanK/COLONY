@@ -429,7 +429,7 @@ struct VS_NEVMESH_INPUT
 
 struct PS_NEVMESH_OUTPUT
 {
-    float4 position : SV_POSITION;
+    float4 positionH : SV_POSITION;
     uint use : USE;
 };
 
@@ -437,7 +437,7 @@ PS_NEVMESH_OUTPUT VSNevMesh(VS_NEVMESH_INPUT input)
 {
     
     PS_NEVMESH_OUTPUT output;
-    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.positionH = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
     output.use = input.use;
     
     return output;

@@ -114,6 +114,9 @@
     <ClInclude Include="NevMeshBaker.h">
       <Filter>GameHeader\GameAiHeader</Filter>
     </ClInclude>
+    <ClInclude Include="NevMesh.h">
+      <Filter>GameHeader\GameAiHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -174,6 +177,9 @@
       <Filter>GameCpp</Filter>
     </ClCompile>
     <ClCompile Include="NevMeshBaker.cpp">
+      <Filter>GameCpp\GameAiCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="NevMesh.cpp">
       <Filter>GameCpp\GameAiCpp</Filter>
     </ClCompile>
   </ItemGroup>

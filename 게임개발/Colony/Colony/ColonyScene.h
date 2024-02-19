@@ -140,6 +140,7 @@ protected:
 	GameObject*							m_pScenePlane = NULL;
 	SkyBox*							    m_pskybox = NULL;
 	PlaneShader*						m_pPlaneShader = NULL;
+	NevMeshShader*						m_pNevMeshShader = NULL;
 	int									m_DepthRender = 0;
 
 

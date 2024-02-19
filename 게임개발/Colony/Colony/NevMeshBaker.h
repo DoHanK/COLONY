@@ -17,20 +17,23 @@ class NevMeshBaker
 {
 public:
 	NevMeshBaker(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float CellSize, float WidthLengh, float HeightLengh);
-	~NevMeshBaker() {};
+	~NevMeshBaker();
 
 public:
 	Cell* m_Grid;
 
 	float m_CellSize;
 	//Half±Ê¿Ã
-	float m_WidthLengh;
-	float m_HeightLengh;
+	float m_Width;
+	float m_Height;
+
 
 	int m_WidthCount;
 	int m_HeightCount;
 	NevMesh* m_pMesh;
-	void BakeNevMeshByObject(const std::vector<GameObject*>& StaticObstacle);
+public:
+	void ReleaseUploadBuffers();
+	void BakeNevMeshByObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const std::vector<GameObject*>& StaticObstacle);
 	void BoundingRendering(ID3D12GraphicsCommandList* pd3dCommandList);
 };
 

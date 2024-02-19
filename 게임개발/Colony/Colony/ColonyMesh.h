@@ -49,19 +49,19 @@ protected:
 protected:
 	int								m_nVertices = 0;
 
-	XMFLOAT3* m_pxmf3Positions = NULL;
+	XMFLOAT3*						m_pxmf3Positions = NULL;
 
-	ID3D12Resource* m_pd3dPositionBuffer = NULL;
-	ID3D12Resource* m_pd3dPositionUploadBuffer = NULL;
+	ID3D12Resource*					m_pd3dPositionBuffer = NULL;
+	ID3D12Resource*					m_pd3dPositionUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dPositionBufferView;
 
 	int								m_nSubMeshes = 0;
-	int* m_pnSubSetIndices = NULL;
-	UINT** m_ppnSubSetIndices = NULL;
+	int*							m_pnSubSetIndices = NULL;
+	UINT**							m_ppnSubSetIndices = NULL;
 
-	ID3D12Resource** m_ppd3dSubSetIndexBuffers = NULL;
-	ID3D12Resource** m_ppd3dSubSetIndexUploadBuffers = NULL;
-	D3D12_INDEX_BUFFER_VIEW* m_pd3dSubSetIndexBufferViews = NULL;
+	ID3D12Resource**				m_ppd3dSubSetIndexBuffers = NULL;
+	ID3D12Resource**				m_ppd3dSubSetIndexUploadBuffers = NULL;
+	D3D12_INDEX_BUFFER_VIEW*		m_pd3dSubSetIndexBufferViews = NULL;
 
 public:
 	UINT GetType() { return(m_nType); }

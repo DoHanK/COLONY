@@ -67,7 +67,7 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 {
 	static int count = 0;
 
-	char c = 187;
+	
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
@@ -365,9 +365,15 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	BuildDefaultLightsAndMaterials();
 
-	//m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, 0.8f, 50, 50);
 
-	//m_pNevMeshBaker->BakeNevMeshByObject(m_pSceneObject);
+	m_pNevMeshShader = new NevMeshShader();
+	m_pNevMeshShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pNevMeshShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pNevMeshShader->AddRef();
+
+	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, 1.6f, 250, 250);
+
+	m_pNevMeshBaker->BakeNevMeshByObject(pd3dDevice, pd3dCommandList, m_pSceneObject);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -384,6 +390,10 @@ void GamePlayScene::ReleaseObjects()
 	if(m_pBoundigShader) m_pBoundigShader->Release();
 
 	if (m_pPlaneShader) m_pPlaneShader->Release();
+
+	if (m_pNevMeshShader) m_pNevMeshShader->Release();
+	if (m_pNevMeshBaker) delete m_pNevMeshBaker;
+
 
 	if (m_pQuadTree)
 		m_pQuadTree->Release();
@@ -608,7 +618,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
 	//m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);
-	//m_pNevMeshBaker->BoundingRendering(pd3dCommandList);
+	m_pNevMeshShader->OnPrepareRender(pd3dCommandList);
+	m_pNevMeshBaker->BoundingRendering(pd3dCommandList);
 
 	//BoudingRendering(pd3dCommandList);
 }
@@ -629,5 +640,6 @@ void GamePlayScene::ReleaseUploadBuffers()
 
 	if (m_pskybox) m_pskybox->ReleaseUploadBuffers();
 
+	if (m_pNevMeshBaker) m_pNevMeshBaker->ReleaseUploadBuffers();
 }
 

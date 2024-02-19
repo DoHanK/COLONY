@@ -5,6 +5,16 @@
 class Cell;
 
 class NevMesh {
+
+public:
+	NevMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float Width, float Height, float CellSize, Cell* Cell);
+	~NevMesh();
+private:
+	int								m_nReferences = 0;
+
+public:
+	void AddRef() { m_nReferences++; }
+	void Release() { if (--m_nReferences <= 0) delete this; }
 public:
 	//VertexBuffer
 	int m_nVerties;
@@ -12,13 +22,6 @@ public:
 	ID3D12Resource* m_pd3dVertexBuffer;
 	ID3D12Resource* m_pd3dVertexUploadBuffer;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dPositionBufferView;
-
-	//IndexBuffer
-	int m_nIndices;
-	UINT* m_pIndices;
-	ID3D12Resource* m_pd3dIndexBuffer;
-	ID3D12Resource* m_pd3dIndexUploadBuffer;
-	D3D12_INDEX_BUFFER_VIEW			m_d3dIndexBufferView;
 
 	//Determine
 	UINT* m_Pass;
@@ -32,12 +35,9 @@ public:
 	int m_WidthCellCount;
 	int m_HeightCellCount;
 	float m_CellSize;
-public:
-	NevMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float WidthCellCount, float HeightCellCount, float CellSize, Cell* Cell);
-	~NevMesh() {};
-
 
 public:
+	void ReleaseUploadBuffers();
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
 };
