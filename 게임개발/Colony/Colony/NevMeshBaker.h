@@ -2,6 +2,10 @@
 #include "stdafx.h"
 #include "ColonyGameObject.h"
 #include "ColonyMesh.h"
+#include "NevMesh.h"
+
+class NevMesh;
+
 class Cell {
 public:
 	BoundingOrientedBox m_BoundingBox;
@@ -25,6 +29,7 @@ public:
 
 	int m_WidthCount;
 	int m_HeightCount;
+	NevMesh* m_pMesh;
 	void BakeNevMeshByObject(const std::vector<GameObject*>& StaticObstacle);
 	void BoundingRendering(ID3D12GraphicsCommandList* pd3dCommandList);
 };

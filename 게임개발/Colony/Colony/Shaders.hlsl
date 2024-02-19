@@ -416,3 +416,46 @@ float4 PSPlane(VS_STANDARD_OUTPUT input) : SV_TARGET
 
     return cColor;
 }
+
+
+
+//NevMesh
+struct VS_NEVMESH_INPUT
+{
+    float3 position : POSITION;
+    uint use : USE;
+};
+
+
+struct PS_NEVMESH_OUTPUT
+{
+    float4 position : SV_POSITION;
+    uint use : USE;
+};
+
+PS_NEVMESH_OUTPUT VSNevMesh(VS_NEVMESH_INPUT input)
+{
+    
+    PS_NEVMESH_OUTPUT output;
+    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.use = input.use;
+    
+    return output;
+}
+
+float4 PSNevMesh(PS_NEVMESH_OUTPUT input) : SV_TARGET
+{
+    
+    float4 output;
+    if (input.use)
+    {
+        output = float4(1.0f, 0.0f, 0.0f, 1.0f);
+        
+    }
+    else
+    {
+        output = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+    return output;
+
+}
