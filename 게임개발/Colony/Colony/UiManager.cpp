@@ -57,7 +57,7 @@ UIRect UIManager::CreateNormalizePixel(float top, float bottom, float left, floa
 	return { NormalTop, NormalBottom, NormalLeft, NormalRight };
 }
 
-bool UIManager::CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, bool(*f)(void* argu),int Layer,UINT option ,UINT SceneType)
+bool UIManager::CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, std::function<void(UIControlHelper&)> f,int Layer,UINT option ,UINT SceneType)
 {
 	// is not invalid 
 	if (!(top < bottom && right > left))
@@ -75,7 +75,7 @@ bool UIManager::CreateUINonNormalRect(float top, float bottom, float left, float
 	return true;
 }
 
-bool UIManager::CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, bool(*f)(void* argu), int Layer, UINT option, UINT SceneType)
+bool UIManager::CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, std::function<void(UIControlHelper&)> f, int Layer, UINT option, UINT SceneType)
 {
 	// is not invalid 
 	if (!(top < bottom && right > left))
@@ -97,7 +97,7 @@ void UIManager::AnimateUI(float ElapsedTime)
 {
 	for (int i = 0; i < TEXTURE_LAYER; ++i) {
 
-		for (pair<UIInfo, bool(*)(void*)>& info : m_RenderUIList[i]) {
+		for (pair<UIInfo, std::function<void(UIControlHelper&)>>& info : m_RenderUIList[i]) {
 
 			if (info.first.EffectInfo) {
 		
@@ -138,10 +138,9 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList)
 		//Rander Order 0 -> 1 -> 2
 		for (int i = 1 ; i < TEXTURE_LAYER; ++i) {
 			
-			for (const pair<UIInfo, bool(*)(void*)>& info : m_RenderUIList[i]) {
+			for (const pair<UIInfo, std::function<void(UIControlHelper&)>>& info : m_RenderUIList[i]) {
 
-			
-
+		
 
 				//텍스쳐 있는지 없는지 확인
 				if (info.first.RenderTexture) {
@@ -182,7 +181,7 @@ void UIManager::DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList)
 
 
 	m_Shader->OnPrepareRender(pd3d12CommandList);
-		for (const pair<UIInfo, bool(*)(void*)>& info : m_RenderUIList[0]) {
+		for (const pair<UIInfo, std::function<void(UIControlHelper&)>>& info : m_RenderUIList[0]) {
 
 			//텍스쳐 있는지 없는지 확인
 			if (info.first.RenderTexture) {
@@ -213,6 +212,27 @@ void UIManager::DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList)
 			m_pMesh[MeshCur++]->Render(pd3d12CommandList);
 		}
 	
+
+}
+
+void UIManager::ClickUI(float x, float y)
+{	
+
+	float NomalizeY = 1 - ((y * 2) / FRAME_BUFFER_HEIGHT);
+	float  NomalizeX = -1 + ((x * 2) / FRAME_BUFFER_WIDTH);
+		//Rander Order 0 -> 1 -> 2
+		for (int i = 1; i < TEXTURE_LAYER; ++i) {
+
+			for (const pair<UIInfo, std::function<void(UIControlHelper&)>>& info : m_RenderUIList[i]) {
+				if (info.first.Rect->bottom < NomalizeY && NomalizeY < info.first.Rect->top)
+					if (info.first.Rect->left < NomalizeX && NomalizeX < info.first.Rect->right) {
+						if (info.second) {
+							m_pfunctionQueue->push_back(info.second);
+						}
+					}
+			
+			}
+		}
 
 }
 

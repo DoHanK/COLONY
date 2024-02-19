@@ -9,6 +9,9 @@
 #include "AlienSpider.h"
 #include "ColonyQuadtree.h"
 #include "NevMeshBaker.h"
+#include "UIControlHelper.h"
+
+class UIManager;
 #define MAX_LIGHTS						16 
 
 #define POINT_LIGHT						1
@@ -83,7 +86,7 @@ public:
 	GameLobbyScene() {};
 	virtual~GameLobbyScene() {};
 
-	virtual void  BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager);
+	virtual void  BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager);
 	virtual UINT GetType() { return GameLobby; };
 };
 
@@ -106,7 +109,7 @@ public:
 
 	void BuildDefaultLightsAndMaterials();
 	void LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName, const char* TexFileName,ResourceManager* pResourceManager);
-	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager);
+	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager);
 	void ReleaseObjects();
 	
 	void PlayerControlInput();

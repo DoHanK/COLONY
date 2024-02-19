@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //										SceneManager Class										   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-SceneManager::SceneManager(D3Device* pDevice,ResourceManager* pResourceManager, UIManager* pUIManager)
+SceneManager::SceneManager(D3Device* pDevice,ResourceManager* pResourceManager, UIManager* pUIManager )
 {
 	m_pResourceManager = pResourceManager;
 	m_pUIManager = pUIManager;

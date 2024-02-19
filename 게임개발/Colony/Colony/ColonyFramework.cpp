@@ -244,6 +244,7 @@ bool ColonyFramework::MakeGameObjects()
 	////씬 빌드 및 플레이어 및 객체들 생성 리소스들 로드
 	m_pResourceManager = new ResourceManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), NULL);
 	m_pUIManager = new UIManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pd3dGraphicsRootSignature);
+	m_pUIManager->m_pfunctionQueue = &m_functionQueue;
 
 	//씬을 구성하는 매니져들
 	m_pSceneManager = new SceneManager(GetDevice(),m_pResourceManager, m_pUIManager);
@@ -251,7 +252,8 @@ bool ColonyFramework::MakeGameObjects()
 	m_pSceneManager->m_SceneStack.top()->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(),m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
 	m_pSceneManager->SetRootSignature(m_pd3dGraphicsRootSignature);
 
-
+	m_pUIControlHelper = new UIControlHelper();
+	m_pUIControlHelper->m_pSceneManger = m_pSceneManager;
 
 	m_pDevice->CloseCommandAndPushQueue();
 	m_pDevice->WaitForGpuComplete();
@@ -313,7 +315,12 @@ void ColonyFramework::AnimationGameObjects()
 void ColonyFramework::ColonyGameLoop()
 {
 	m_GameTimer.Tick(0.0f);
-	
+	if (!m_functionQueue.empty()) {
+		for (auto& fun : m_functionQueue)
+			fun(*m_pUIControlHelper);
+
+		m_functionQueue.clear();
+	}
 
 
 	//애니메이션
@@ -367,9 +374,13 @@ LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM 
 		break;
 	}
 	case WM_LBUTTONDOWN:
+		if (m_pUIManager)
+			m_pUIManager->ClickUI(LOWORD(lParam), HIWORD(lParam));
+		break;
 	case WM_RBUTTONDOWN:
 		break;
 	case WM_LBUTTONUP:
+
 		break;
 	case WM_RBUTTONUP:
 		break;

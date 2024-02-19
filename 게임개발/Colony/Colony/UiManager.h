@@ -2,7 +2,9 @@
 #include "stdafx.h"
 #include "ColonyMesh.h"
 #include "ColonyGameObject.h"
+#include "UIControlHelper.h"
 
+class UIControlHelper;
 
 struct UIEffectInfo {
 	float RowNum = 0;
@@ -41,18 +43,21 @@ public:
 
 	//UI Shader
 	UIShader* m_Shader;
+	std::deque<std::function<void(UIControlHelper&)>>* m_pfunctionQueue;
 
 	vector<UIRectMesh*> m_pMesh;
-	list<pair<UIInfo, bool(*)(void*)>> m_RenderUIList[TEXTURE_LAYER];
+	list<pair<UIInfo, std::function<void(UIControlHelper&)>>> m_RenderUIList[TEXTURE_LAYER];
 	int MeshCur;
-
-	UIRect CreateNormalizePixel(float top, float bottom, float left, float right);
-	bool CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex ,Texture* Masktex, bool(*f)(void* argu),int Layer, UINT option, UINT SceneType);
 	
-	bool CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, bool(*f)(void* argu), int Layer, UINT option, UINT SceneType);
+	UIRect CreateNormalizePixel(float top, float bottom, float left, float right);
+	bool CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex ,Texture* Masktex, std::function<void(UIControlHelper&)>,int Layer, UINT option, UINT SceneType);
+	
+	bool CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, std::function<void(UIControlHelper&)>, int Layer, UINT option, UINT SceneType);
 	void AnimateUI(float ElapsedTime);
 
 	void AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList);
 	void DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList);
+
+	void ClickUI(float x, float y);
 };
 

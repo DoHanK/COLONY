@@ -4,6 +4,8 @@
 #include "ResourceManager.h"
 #include "D3Device.h"
 
+class BasicScene;
+class UIManager;
 #define TEXTURE_SCENE_NUM	6
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //										SceneManager Class										   //

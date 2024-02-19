@@ -157,6 +157,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="UIControlHelper.h" />
     <ClInclude Include="UiManager.h" />
     <ClInclude Include="UserDefineType.h" />
     <ClInclude Include="WICTextureLoader12.h" />
@@ -181,6 +182,7 @@
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="UIControlHelper.cpp" />
     <ClCompile Include="UiManager.cpp" />
     <ClCompile Include="WICTextureLoader12.cpp" />
   </ItemGroup>

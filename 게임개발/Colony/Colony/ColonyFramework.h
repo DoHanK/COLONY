@@ -7,7 +7,7 @@
 #include "UiManager.h"
 #include "SceneManager.h"
 #include "ColonyPlayer.h"
-
+#include "UIControlHelper.h"
 
 class ColonyFramework {
 private:
@@ -42,6 +42,11 @@ private:
 	ResourceManager*				 m_pResourceManager;
 	UIManager*						 m_pUIManager;
 	SceneManager*					 m_pSceneManager;
+	//Helper
+	UIControlHelper*				m_pUIControlHelper;
+
+	//실행 함수들
+	std::deque<std::function<void(UIControlHelper&)>> m_functionQueue;
 
 public:
 	ColonyFramework();

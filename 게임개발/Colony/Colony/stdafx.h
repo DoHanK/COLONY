@@ -34,6 +34,7 @@
 #include <fstream>
 #include <string>
 // STL 관련 헤더파일들
+#include <functional>
 #include <string>
 #include <deque>
 #include <list>
