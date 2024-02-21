@@ -78,6 +78,6 @@ void NevMeshBaker::BoundingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-
-	m_pMesh->Render(pd3dCommandList);
+	
+	if(m_pMesh) m_pMesh->Render(pd3dCommandList);
 }

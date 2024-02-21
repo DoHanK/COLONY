@@ -120,6 +120,12 @@
     <ClInclude Include="UIControlHelper.h">
       <Filter>GameHeader</Filter>
     </ClInclude>
+    <ClInclude Include="PathFinder.h">
+      <Filter>GameHeader\GameAiHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="PriorityQueue.h">
+      <Filter>GameHeader\GameAiHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -187,6 +193,9 @@
     </ClCompile>
     <ClCompile Include="UIControlHelper.cpp">
       <Filter>GameCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="PathFinder.cpp">
+      <Filter>GameCpp\GameAiCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

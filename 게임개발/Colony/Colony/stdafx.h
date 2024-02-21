@@ -41,6 +41,7 @@
 #include <algorithm>
 #include <vector>
 #include <stack>
+#include <random>
 ////////////////////////////////
 
 //Direct x 관련 라이브러리

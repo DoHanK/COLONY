@@ -1,0 +1,70 @@
+#pragma once
+#include "stdafx.h"
+#include "NevMeshBaker.h"
+#include "PriorityQueue.h"
+
+class EdgeInfo {
+public:
+	EdgeInfo(int From, int To, float cost):m_iFrom(From), m_ito(To),m_dCost(cost) {};
+	int m_iFrom;
+	int m_ito;
+	float m_dCost;
+};
+
+class PathFinder{
+public:
+	PathFinder() {};
+
+public:
+	std::vector<XMFLOAT2> m_Node;
+	std::vector<std::list<EdgeInfo>> m_Edge;
+	int m_widthCount;
+	int m_HeightCount;
+	Cell* m_Cell;
+
+	int m_s = 0;
+	int m_t = 0;
+	int m_count = 0;
+	std::vector<BoundingBoxMesh*> m_Mesh;
+public:
+	void BuildGraphFromCell(Cell* pCell, int WidthCount, int HeightCount);
+	void addAdjacentNodes(Cell* pCell,int col ,int row);
+	bool ValidAdjacnet(int x, int y);
+	float CalDistance(XMFLOAT2 a, XMFLOAT2 b);
+
+	void GetAstarPath(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int s, int t);
+	void GetPathRendom();
+	bool ValidNode(int ind) { return m_Cell[ind].m_Pass; }
+
+	void TargetNSourceRender(ID3D12GraphicsCommandList* pd3dCommandList);
+};
+
+
+class AStarAlgoritm {
+public:
+	AStarAlgoritm(PathFinder* pPthFinder, int Source, int Target) :m_Source(Source), m_Target(Target),
+																		m_GCosts(pPthFinder->m_Node.size(), 0.0),
+																		m_FCosts(pPthFinder->m_Node.size(), 0.0),
+																		m_ShortestPathTree(pPthFinder->m_Node.size()),
+																		m_SearchFrontier(pPthFinder->m_Node.size()),
+																		m_pPathFinder(pPthFinder)
+	{
+		Search();
+	};
+	PathFinder*					m_pPathFinder;
+
+
+	int  m_Target;
+	int  m_Source;
+
+	std::vector<double>             m_GCosts;
+	std::vector<double>             m_FCosts;
+	std::vector<const EdgeInfo*>       m_ShortestPathTree;
+	std::vector<const EdgeInfo*>       m_SearchFrontier;
+
+
+	void Search();
+
+	std::list<int> GetPathToTarget();
+
+};

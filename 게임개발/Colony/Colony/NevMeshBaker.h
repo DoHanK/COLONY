@@ -30,7 +30,7 @@ public:
 
 	int m_WidthCount;
 	int m_HeightCount;
-	NevMesh* m_pMesh;
+	NevMesh* m_pMesh =NULL;
 public:
 	void ReleaseUploadBuffers();
 	void BakeNevMeshByObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const std::vector<GameObject*>& StaticObstacle);
