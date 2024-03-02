@@ -336,7 +336,7 @@ void ColonyFramework::ColonyGameLoop()
 
 
 	//랜더링 작성
-	// 리로스 업로드힙에 세팅 (씬으로 편입 예정)
+	// 리소스 업로드힙에 세팅 (씬으로 편입 예정)
 	if(m_pResourceManager)
 		GetDevice()->GetCommandList()->SetDescriptorHeaps(1, &m_pResourceManager->pSrvDescriptorHeap);
 
