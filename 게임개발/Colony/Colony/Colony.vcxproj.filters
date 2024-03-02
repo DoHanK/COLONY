@@ -16,9 +16,6 @@
     <Filter Include="GameCpp">
       <UniqueIdentifier>{ac477bcf-40af-4c05-9c81-46ed68dd2ea0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameHeader">
-      <UniqueIdentifier>{79c47a10-f48a-46c1-b2f7-d6b39892d976}</UniqueIdentifier>
-    </Filter>
     <Filter Include="TextureLoad">
       <UniqueIdentifier>{7a2a142c-3beb-4d3a-a2a3-c2e15c6ce7a2}</UniqueIdentifier>
     </Filter>
@@ -31,14 +28,47 @@
     <Filter Include="GameCpp\GameManagerCpp">
       <UniqueIdentifier>{e929e6e4-9085-4b9d-9f6a-f40ca11f3be2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameHeader\GameManagerHeader">
-      <UniqueIdentifier>{946bcad3-6b7b-42fc-ada6-27955cfe7d08}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GameCpp\GameAiCpp">
       <UniqueIdentifier>{e80a4c7e-9fa5-47e5-9110-18406c5e8744}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameCpp\GameAiCpp\NavigationHeader">
+      <UniqueIdentifier>{fd71be07-c37d-490e-baa5-0a9eb800842e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameCpp\GameAiCpp\GoalCpp">
+      <UniqueIdentifier>{bb69ec09-c70e-45a7-8d3a-b3c0c931c5fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameHeader">
+      <UniqueIdentifier>{79c47a10-f48a-46c1-b2f7-d6b39892d976}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameHeader\GameManagerHeader">
+      <UniqueIdentifier>{946bcad3-6b7b-42fc-ada6-27955cfe7d08}</UniqueIdentifier>
+    </Filter>
     <Filter Include="GameHeader\GameAiHeader">
       <UniqueIdentifier>{b41ae8f0-ca24-4a10-a9fb-2a0c4b0df968}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameHeader\GameAiHeader\NevigationHeader">
+      <UniqueIdentifier>{9cba5e4c-6f28-4a8a-b680-437a2afebaaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameHeader\GameAiHeader\GoalHeader">
+      <UniqueIdentifier>{1384f0b6-9432-41cf-897d-41d65148807d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameCpp\GameSceneCpp">
+      <UniqueIdentifier>{f5b2edab-ac92-409f-af3e-e9ff931836fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameHeader\GameSceneHeader">
+      <UniqueIdentifier>{861d1e64-f773-40f0-a259-8d080ff20e9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameCpp\GameAiCpp\GoalCpp\CompositeGoalCpp">
+      <UniqueIdentifier>{ba3d9c0a-e857-492b-a9a9-a2bc02db3aa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameCpp\GameAiCpp\GoalCpp\SingleGoalCpp">
+      <UniqueIdentifier>{1ce56107-ccce-4d58-9062-483a0c0e358e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameHeader\GameAiHeader\GoalHeader\CompositeGoalHeader">
+      <UniqueIdentifier>{f57ef728-2f2d-4294-8bd0-1255f5b7e119}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameHeader\GameAiHeader\GoalHeader\SingleGoalHeader">
+      <UniqueIdentifier>{30029b46-08a9-4799-9384-cfc91c73a57c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -57,9 +87,6 @@
     <ClInclude Include="d3dx12.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ColonyFramework.h">
-      <Filter>GameHeader</Filter>
-    </ClInclude>
     <ClInclude Include="Colony.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -71,9 +98,6 @@
     </ClInclude>
     <ClInclude Include="WICTextureLoader12.h">
       <Filter>TextureLoad</Filter>
-    </ClInclude>
-    <ClInclude Include="ColonyPlayer.h">
-      <Filter>GameHeader</Filter>
     </ClInclude>
     <ClInclude Include="ResourceManager.h">
       <Filter>GameHeader\GameManagerHeader</Filter>
@@ -87,9 +111,6 @@
     <ClInclude Include="SceneManager.h">
       <Filter>GameHeader\GameManagerHeader</Filter>
     </ClInclude>
-    <ClInclude Include="AlienSpider.h">
-      <Filter>GameHeader</Filter>
-    </ClInclude>
     <ClInclude Include="ColonyTimer.h">
       <Filter>GameBasicHeader</Filter>
     </ClInclude>
@@ -102,29 +123,50 @@
     <ClInclude Include="ColonyGameObject.h">
       <Filter>GameBasicHeader</Filter>
     </ClInclude>
-    <ClInclude Include="ColonyScene.h">
-      <Filter>GameHeader</Filter>
-    </ClInclude>
     <ClInclude Include="ColonyCamera.h">
       <Filter>GameBasicHeader</Filter>
     </ClInclude>
-    <ClInclude Include="ColonyQuadtree.h">
-      <Filter>GameHeader</Filter>
+    <ClInclude Include="NevMesh.h">
+      <Filter>GameHeader\GameAiHeader\NevigationHeader</Filter>
     </ClInclude>
     <ClInclude Include="NevMeshBaker.h">
-      <Filter>GameHeader\GameAiHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="NevMesh.h">
-      <Filter>GameHeader\GameAiHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="UIControlHelper.h">
-      <Filter>GameHeader</Filter>
+      <Filter>GameHeader\GameAiHeader\NevigationHeader</Filter>
     </ClInclude>
     <ClInclude Include="PathFinder.h">
-      <Filter>GameHeader\GameAiHeader</Filter>
+      <Filter>GameHeader\GameAiHeader\NevigationHeader</Filter>
     </ClInclude>
     <ClInclude Include="PriorityQueue.h">
-      <Filter>GameHeader\GameAiHeader</Filter>
+      <Filter>GameHeader\GameAiHeader\NevigationHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="GoalThink.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="AlienSpider.h">
+      <Filter>GameHeader\GameSceneHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyFramework.h">
+      <Filter>GameHeader\GameSceneHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyPlayer.h">
+      <Filter>GameHeader\GameSceneHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyQuadtree.h">
+      <Filter>GameHeader\GameSceneHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="UIControlHelper.h">
+      <Filter>GameHeader\GameSceneHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="ColonyScene.h">
+      <Filter>GameHeader\GameSceneHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="Goal.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="GoalExplore.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader\CompositeGoalHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="FollowPathGoal.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader\SingleGoalHeader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -133,9 +175,6 @@
     </ClCompile>
     <ClCompile Include="D3Device.cpp">
       <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ColonyFramework.cpp">
-      <Filter>GameCpp</Filter>
     </ClCompile>
     <ClCompile Include="DDSTextureLoader.cpp">
       <Filter>TextureLoad</Filter>
@@ -149,12 +188,6 @@
     <ClCompile Include="DDSTextureLoader12.cpp">
       <Filter>TextureLoad</Filter>
     </ClCompile>
-    <ClCompile Include="ColonyScene.cpp">
-      <Filter>GameCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="ColonyPlayer.cpp">
-      <Filter>GameCpp</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
       <Filter>GameCpp\GameManagerCpp</Filter>
     </ClCompile>
@@ -163,9 +196,6 @@
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
       <Filter>GameCpp\GameManagerCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="AlienSpider.cpp">
-      <Filter>GameCpp</Filter>
     </ClCompile>
     <ClCompile Include="ColonyTimer.cpp">
       <Filter>GameBasicCpp</Filter>
@@ -182,20 +212,44 @@
     <ClCompile Include="ColonyCamera.cpp">
       <Filter>GameBasicCpp</Filter>
     </ClCompile>
-    <ClCompile Include="ColonyQuadtree.cpp">
-      <Filter>GameCpp</Filter>
+    <ClCompile Include="NevMesh.cpp">
+      <Filter>GameCpp\GameAiCpp\NavigationHeader</Filter>
     </ClCompile>
     <ClCompile Include="NevMeshBaker.cpp">
-      <Filter>GameCpp\GameAiCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="NevMesh.cpp">
-      <Filter>GameCpp\GameAiCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="UIControlHelper.cpp">
-      <Filter>GameCpp</Filter>
+      <Filter>GameCpp\GameAiCpp\NavigationHeader</Filter>
     </ClCompile>
     <ClCompile Include="PathFinder.cpp">
-      <Filter>GameCpp\GameAiCpp</Filter>
+      <Filter>GameCpp\GameAiCpp\NavigationHeader</Filter>
+    </ClCompile>
+    <ClCompile Include="Goal.cpp">
+      <Filter>GameCpp\GameAiCpp\GoalCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="GoalThink.cpp">
+      <Filter>GameCpp\GameAiCpp\GoalCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyScene.cpp">
+      <Filter>GameCpp\GameSceneCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="AlienSpider.cpp">
+      <Filter>GameCpp\GameSceneCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyFramework.cpp">
+      <Filter>GameCpp\GameSceneCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyPlayer.cpp">
+      <Filter>GameCpp\GameSceneCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ColonyQuadtree.cpp">
+      <Filter>GameCpp\GameSceneCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="UIControlHelper.cpp">
+      <Filter>GameCpp\GameSceneCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="GoalExplore.cpp">
+      <Filter>GameCpp\GameAiCpp\GoalCpp\CompositeGoalCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="FollowPathGoal.cpp">
+      <Filter>GameCpp\GameAiCpp\GoalCpp\SingleGoalCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

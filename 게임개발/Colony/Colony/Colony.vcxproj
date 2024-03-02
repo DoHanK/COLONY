@@ -150,6 +150,10 @@
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="ColonyQuadtree.h" />
+    <ClInclude Include="FollowPathGoal.h" />
+    <ClInclude Include="Goal.h" />
+    <ClInclude Include="GoalExplore.h" />
+    <ClInclude Include="GoalThink.h" />
     <ClInclude Include="NevMesh.h" />
     <ClInclude Include="NevMeshBaker.h" />
     <ClInclude Include="PathFinder.h" />
@@ -179,6 +183,10 @@
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="ColonyQuadtree.cpp" />
+    <ClCompile Include="FollowPathGoal.cpp" />
+    <ClCompile Include="Goal.cpp" />
+    <ClCompile Include="GoalExplore.cpp" />
+    <ClCompile Include="GoalThink.cpp" />
     <ClCompile Include="NevMesh.cpp" />
     <ClCompile Include="NevMeshBaker.cpp" />
     <ClCompile Include="PathFinder.cpp" />
