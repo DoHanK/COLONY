@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "ColonyGameObject.h"
+#include "AlienSpider.h"
 
 class Goal{
 public:
@@ -11,13 +12,13 @@ protected:
 
 	int m_iStatus;
 
-	GameObject* m_pOwner = NULL;	
+	AlienSpider* m_pOwner = NULL;
 
 	void ActivateIfInactive();
 
 	void ReactivateIfFailed();
 public:
-	Goal(GameObject* pOwner) :m_pOwner(pOwner) {};
+	Goal(AlienSpider* pOwner) :m_pOwner(pOwner) {};
 
 	virtual ~Goal() {}
 
@@ -46,7 +47,7 @@ protected:
 
 public:
 
-	GoalComposite(GameObject* pOwner) :Goal(pOwner) {};
+	GoalComposite(AlienSpider* pOwner) :Goal(pOwner) {};
 	
 	virtual ~GoalComposite() { RemoveAllSubgoals(); }
 

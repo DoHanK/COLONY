@@ -7,7 +7,7 @@ class GoalThink : GoalComposite{
 private:
 	std::vector<GoalEvalutor*>  m_GoalEvalutors;
 public:
-	GoalThink(GameObject* pOwner);
+	GoalThink(AlienSpider* pOwner);
 	~GoalThink();
 
 	void Arbitrate();

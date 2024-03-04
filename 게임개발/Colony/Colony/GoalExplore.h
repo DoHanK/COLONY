@@ -14,7 +14,7 @@ private:
 
 public:
 
-    GoalExplore(GameObject* pBot):Goal(pBot) {};
+    GoalExplore(AlienSpider* pBot):Goal(pBot) {};
 
     void Activate();
     int  Process();

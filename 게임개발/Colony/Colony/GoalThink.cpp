@@ -2,7 +2,7 @@
 
 
 
-GoalThink::GoalThink(GameObject* pOwner):GoalComposite(pOwner){
+GoalThink::GoalThink(AlienSpider* pOwner):GoalComposite(pOwner){
 
 
 }

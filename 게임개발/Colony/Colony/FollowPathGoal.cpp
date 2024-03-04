@@ -1,6 +1,6 @@
 #include "FollowPathGoal.h"
 
-FollowPathGoal::FollowPathGoal(GameObject* pOwner): Goal(pOwner){
+FollowPathGoal::FollowPathGoal(AlienSpider* pOwner): Goal(pOwner){
 
 }
 
