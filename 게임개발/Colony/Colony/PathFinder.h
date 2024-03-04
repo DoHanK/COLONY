@@ -14,7 +14,7 @@ public:
 class PathFinder{
 public:
 	PathFinder() {};
-
+	~PathFinder();
 public:
 	std::vector<XMFLOAT2> m_Node;
 	std::vector<std::list<EdgeInfo>> m_Edge;

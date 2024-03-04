@@ -1,5 +1,12 @@
 #include "PathFinder.h"
 
+PathFinder::~PathFinder()
+{
+	for (auto& Mesh : m_Mesh) {
+		Mesh->Release();
+	}
+}
+
 void PathFinder::BuildGraphFromCell(Cell* pCell, int WidthCount, int HeightCount)
 {
 	m_widthCount = WidthCount;
@@ -99,7 +106,8 @@ void PathFinder::GetAstarPath(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	for (int i = 0; i  < 5000; i++) {
 
-		BoundingBoxMesh* pMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
+		BoundingBoxMesh* pMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList); 
+		pMesh->AddRef();
 		m_Mesh.push_back(pMesh);
 	}
 

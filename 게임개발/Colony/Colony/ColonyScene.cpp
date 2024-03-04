@@ -360,7 +360,10 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, 1.6f, 250, 250);
 
 	m_pNevMeshBaker->BakeNevMeshByObject(pd3dDevice, pd3dCommandList, m_pSceneObject);
-
+	m_pPathFinder = new PathFinder();
+	m_pPathFinder->BuildGraphFromCell(m_pNevMeshBaker->m_Grid, m_pNevMeshBaker->m_WidthCount, m_pNevMeshBaker->m_HeightCount);
+	m_pPathFinder->GetAstarPath(pd3dDevice, pd3dCommandList, 1, 1);
+	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -379,7 +382,7 @@ void GamePlayScene::ReleaseObjects()
 
 	if (m_pNevMeshShader) m_pNevMeshShader->Release();
 	if (m_pNevMeshBaker) delete m_pNevMeshBaker;
-
+	if (m_pPathFinder)	delete m_pPathFinder;
 
 	if (m_pQuadTree)
 		m_pQuadTree->Release();
@@ -509,6 +512,16 @@ void GamePlayScene::PlayerControlInput()
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
+		if (pKeysBuffer['P'] & 0xF0) {
+			m_pPathFinder->GetPathRendom();
+		}
+		if (pKeysBuffer['M'] & 0xF0) {
+			m_pPlayer->AddPosition(XMFLOAT3(0, 1.0F, 0));
+		}
+		if (pKeysBuffer['N'] & 0xF0) {
+			m_pPlayer->AddPosition(XMFLOAT3(0, -1.0F, 0));
+		}
+
 #else
 		GetCursorPos(&ptCursorPos);
 		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
@@ -604,8 +617,11 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
 	//m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);
+	m_pPathFinder->TargetNSourceRender(pd3dCommandList);
+
 	m_pNevMeshShader->OnPrepareRender(pd3dCommandList);
 	m_pNevMeshBaker->BoundingRendering(pd3dCommandList);
+
 
 	//BoudingRendering(pd3dCommandList);
 }
@@ -627,5 +643,7 @@ void GamePlayScene::ReleaseUploadBuffers()
 	if (m_pskybox) m_pskybox->ReleaseUploadBuffers();
 
 	if (m_pNevMeshBaker) m_pNevMeshBaker->ReleaseUploadBuffers();
+
+
 }
 

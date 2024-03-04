@@ -10,6 +10,7 @@
 #include "ColonyQuadtree.h"
 #include "NevMeshBaker.h"
 #include "UIControlHelper.h"
+#include "PathFinder.h"
 
 class UIManager;
 #define MAX_LIGHTS						16 
@@ -144,6 +145,7 @@ protected:
 	SkyBox*							    m_pskybox = NULL;
 	PlaneShader*						m_pPlaneShader = NULL;
 	NevMeshShader*						m_pNevMeshShader = NULL;
+	PathFinder*							m_pPathFinder = NULL;
 	int									m_DepthRender = 0;
 
 
