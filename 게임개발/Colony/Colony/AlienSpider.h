@@ -3,9 +3,11 @@
 #include "ColonyGameObject.h"
 #include "ResourceManager.h"
 #include "ColonyShader.h"
+#include "GoalThink.h"
 #define TRAILER_COUNT 5
 class AlienSpiderAnimationController;
 
+class GoalThink;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15,6 +17,8 @@ class AlienSpider : public GameObject{
 public:
 	AlienSpider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManage);
 	virtual ~AlienSpider();
+public:
+	GoalThink* m_pBrain;
 public:
 	//GhostTrailEffect를 위한 변수들
 	GameObject*			m_pSkinnedModel;

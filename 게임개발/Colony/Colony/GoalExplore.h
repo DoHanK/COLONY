@@ -1,7 +1,9 @@
 #pragma once
 #include "stdafx.h"
 #include "Goal.h"
-class GoalExplore: public Goal{
+#include "AlienSpider.h"
+
+class GoalExplore: public Goal<AlienSpider>{
 
 
 private:

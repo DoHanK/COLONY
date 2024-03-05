@@ -159,13 +159,16 @@
     <ClInclude Include="ColonyScene.h">
       <Filter>GameHeader\GameSceneHeader</Filter>
     </ClInclude>
-    <ClInclude Include="Goal.h">
-      <Filter>GameHeader\GameAiHeader\GoalHeader</Filter>
-    </ClInclude>
     <ClInclude Include="GoalExplore.h">
       <Filter>GameHeader\GameAiHeader\GoalHeader\CompositeGoalHeader</Filter>
     </ClInclude>
     <ClInclude Include="FollowPathGoal.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader\SingleGoalHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="CompositeGoal.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader\CompositeGoalHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="Goal.h">
       <Filter>GameHeader\GameAiHeader\GoalHeader\SingleGoalHeader</Filter>
     </ClInclude>
   </ItemGroup>
@@ -220,9 +223,6 @@
     </ClCompile>
     <ClCompile Include="PathFinder.cpp">
       <Filter>GameCpp\GameAiCpp\NavigationHeader</Filter>
-    </ClCompile>
-    <ClCompile Include="Goal.cpp">
-      <Filter>GameCpp\GameAiCpp\GoalCpp</Filter>
     </ClCompile>
     <ClCompile Include="GoalThink.cpp">
       <Filter>GameCpp\GameAiCpp\GoalCpp</Filter>

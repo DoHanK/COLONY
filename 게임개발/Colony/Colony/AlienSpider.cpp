@@ -22,12 +22,13 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 	SetPosition(XMFLOAT3( 0, 0, 0));
 	SetChild(pSpider->m_pModelRootObject, true);
 	SetAnimator(pAnimationSpider);
-
 	m_pSkinnedModel = pSpider->m_pModelRootObject->FindFrame("polySurface10");
+	//m_pBrain
+	m_pBrain = new GoalThink(this);
 
+	//Ghost Effect
 	m_ppd3dcbSkinningBoneTransforms = new ID3D12Resource * [TRAILER_COUNT];
 	m_ppcbxmf4x4MappedSkinningBoneTransforms = new XMFLOAT4X4 * [TRAILER_COUNT];
-
 	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256ÀÇ ¹è¼ö
 	for (int i = 0; i < TRAILER_COUNT; ++i) {
 		m_GhostNum[i] = i;
@@ -36,17 +37,23 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 		m_ppd3dcbSkinningBoneTransforms[i]->Map(0, NULL, (void**)&m_ppcbxmf4x4MappedSkinningBoneTransforms[i]);
 	}
 
+	
 }
 
 AlienSpider::~AlienSpider()
 {
+	//Brain
+	if (m_pBrain) delete m_pBrain;
+
+	//Ghost Effect 
 	for (int i = 0; i < TRAILER_COUNT; ++i) {
 		m_ppd3dcbSkinningBoneTransforms[i]->Unmap(0, NULL);
 		m_ppd3dcbSkinningBoneTransforms[i]->Release();
 	}
-
 	if (m_ppd3dcbSkinningBoneTransforms) delete[] m_ppd3dcbSkinningBoneTransforms;
 	if (m_ppcbxmf4x4MappedSkinningBoneTransforms) delete[] m_ppcbxmf4x4MappedSkinningBoneTransforms;
+	
+
 }
 
 void AlienSpider::Animate(float fTimeElapsed)

@@ -145,6 +145,7 @@
     <ClInclude Include="ColonyScene.h" />
     <ClInclude Include="ColonyShader.h" />
     <ClInclude Include="ColonyTimer.h" />
+    <ClInclude Include="CompositeGoal.h" />
     <ClInclude Include="D3Device.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DDSTextureLoader.h" />
@@ -184,7 +185,6 @@
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="ColonyQuadtree.cpp" />
     <ClCompile Include="FollowPathGoal.cpp" />
-    <ClCompile Include="Goal.cpp" />
     <ClCompile Include="GoalExplore.cpp" />
     <ClCompile Include="GoalThink.cpp" />
     <ClCompile Include="NevMesh.cpp" />

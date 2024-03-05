@@ -4,6 +4,10 @@ FollowPathGoal::FollowPathGoal(AlienSpider* pOwner): Goal(pOwner){
 
 }
 
+FollowPathGoal::~FollowPathGoal()
+{
+}
+
 void FollowPathGoal::Activate(){
 }
 

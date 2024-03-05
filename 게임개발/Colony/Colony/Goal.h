@@ -1,8 +1,7 @@
 #pragma once
 #include "stdafx.h"
-#include "ColonyGameObject.h"
-#include "AlienSpider.h"
 
+template <typename entity_type>
 class Goal{
 public:
 
@@ -12,15 +11,15 @@ protected:
 
 	int m_iStatus;
 
-	AlienSpider* m_pOwner = NULL;
+	entity_type* m_pOwner = NULL;
 
 	void ActivateIfInactive();
 
 	void ReactivateIfFailed();
 public:
-	Goal(AlienSpider* pOwner) :m_pOwner(pOwner) {};
+	Goal(entity_type* pOwner):m_pOwner(pOwner), m_iStatus(inactive){};
 
-	virtual ~Goal() {}
+	virtual ~Goal() {};
 
 	virtual void Activate() = 0;
 
@@ -38,29 +37,23 @@ public:
 };
 
 
-class GoalComposite : public Goal {
-protected:
-	std::list<Goal*>		m_SubGoals;
 
-	int ProcessSubGoals();
+template <typename entity_type>
+void Goal<entity_type>::ActivateIfInactive()
+{
+	if (isInactive())
+	{
+		Activate();
+	}
+}
+template <typename entity_type>
+void Goal<entity_type>::ReactivateIfFailed()
+{
+	if (hasFailed())
+	{
+		m_iStatus = inactive;
+	}
+
+}
 
 
-public:
-
-	GoalComposite(AlienSpider* pOwner) :Goal(pOwner) {};
-	
-	virtual ~GoalComposite() { RemoveAllSubgoals(); }
-
-	virtual void Activate() = 0;
-
-	virtual void Terminate() = 0;
-
-	virtual int  Process() = 0;
-
-
-	void         AddSubgoal(Goal* g);
-
-	//this method iterates through the subgoals and calls each one's Terminate
-	//method before deleting the subgoal and removing it from the subgoal list
-	void         RemoveAllSubgoals();
-};
