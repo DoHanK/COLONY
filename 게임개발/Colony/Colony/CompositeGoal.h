@@ -12,7 +12,7 @@ protected:
 
 public:
 
-	GoalComposite(entity_type* pOwner) :Goal<entity_type>(pOwner) {}
+	GoalComposite(entity_type* pOwner,int GetType) :Goal<entity_type>(pOwner,GetType) {}
 
 	virtual ~GoalComposite() { RemoveAllSubgoals(); }
 

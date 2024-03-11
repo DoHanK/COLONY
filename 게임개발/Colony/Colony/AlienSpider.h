@@ -2,12 +2,15 @@
 #include "stdafx.h"
 #include "ColonyGameObject.h"
 #include "ResourceManager.h"
+#include "PathFinder.h"
 #include "ColonyShader.h"
 #include "GoalThink.h"
+#include "AIController.h"
 #define TRAILER_COUNT 5
 class AlienSpiderAnimationController;
 
 class GoalThink;
+class AIController;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15,10 +18,28 @@ class GoalThink;
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 class AlienSpider : public GameObject{
 public:
-	AlienSpider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManage);
+	AlienSpider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManage,PathFinder* pPathFinder);
 	virtual ~AlienSpider();
+
 public:
-	GoalThink* m_pBrain;
+	//Ai를 위한 
+	GoalThink*		m_pBrain;
+	AIController*	m_pSoul;
+	int				m_GoalType;
+	std::list<XMFLOAT2> m_Path;
+
+	//PathManager
+	PathFinder*		m_pPathFinder;
+	RouteMesh* m_pRoute;
+public:
+	//이동
+	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	float           			m_fMaxVelocityXZ = 0.0f;
+	void AddPostion(const XMFLOAT3& Pos);
+	//idle 기다리기
+	float						m_WaitingTime = 0;
+	float						m_WaitCoolTime = 0;
+	float						m_EndureLevel;
 public:
 	//GhostTrailEffect를 위한 변수들
 	GameObject*			m_pSkinnedModel;
@@ -32,6 +53,9 @@ public:
 	void SetGhostShader(GhostTraillerShader* pShader);
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
+
+	void RouteRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	void Update(float fTimeElapsed);
 
 };
 

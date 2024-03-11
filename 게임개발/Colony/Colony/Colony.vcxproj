@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AIController.h" />
     <ClInclude Include="AlienSpider.h" />
     <ClInclude Include="Colony.h" />
     <ClInclude Include="ColonyCamera.h" />
@@ -167,9 +168,11 @@
     <ClInclude Include="UIControlHelper.h" />
     <ClInclude Include="UiManager.h" />
     <ClInclude Include="UserDefineType.h" />
+    <ClInclude Include="WaitGoal.h" />
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AIController.cpp" />
     <ClCompile Include="AlienSpider.cpp" />
     <ClCompile Include="Colony.cpp" />
     <ClCompile Include="ColonyCamera.cpp" />
@@ -195,6 +198,7 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="UIControlHelper.cpp" />
     <ClCompile Include="UiManager.cpp" />
+    <ClCompile Include="WaitGoal.cpp" />
     <ClCompile Include="WICTextureLoader12.cpp" />
   </ItemGroup>
   <ItemGroup>

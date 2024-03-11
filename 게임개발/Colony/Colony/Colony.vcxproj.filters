@@ -171,6 +171,12 @@
     <ClInclude Include="Goal.h">
       <Filter>GameHeader\GameAiHeader\GoalHeader\SingleGoalHeader</Filter>
     </ClInclude>
+    <ClInclude Include="AIController.h">
+      <Filter>GameHeader\GameAiHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="WaitGoal.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -250,6 +256,12 @@
     </ClCompile>
     <ClCompile Include="FollowPathGoal.cpp">
       <Filter>GameCpp\GameAiCpp\GoalCpp\SingleGoalCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="AIController.cpp">
+      <Filter>GameCpp\GameAiCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="WaitGoal.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

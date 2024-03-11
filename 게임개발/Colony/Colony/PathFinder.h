@@ -22,21 +22,22 @@ public:
 	int m_HeightCount;
 	Cell* m_Cell;
 
-	int m_s = 0;
-	int m_t = 0;
-	int m_count = 0;
-	std::vector<BoundingBoxMesh*> m_Mesh;
+
 public:
 	void BuildGraphFromCell(Cell* pCell, int WidthCount, int HeightCount);
 	void addAdjacentNodes(Cell* pCell,int col ,int row);
 	bool ValidAdjacnet(int x, int y);
 	float CalDistance(XMFLOAT2 a, XMFLOAT2 b);
+	
+	int BringIndexCell(const XMFLOAT3& pos);
+	
+	std::list<XMFLOAT2> QueryPath(XMFLOAT3 ObjectPos);
+	
+	bool ValidNode(int ind) { 
+		if (ind == -1) return false;
+		return m_Cell[ind].m_Pass; }
 
-	void GetAstarPath(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int s, int t);
-	void GetPathRendom();
-	bool ValidNode(int ind) { return m_Cell[ind].m_Pass; }
 
-	void TargetNSourceRender(ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
 

@@ -6,9 +6,11 @@
 #include "AlienSpider.h"
 #include "Goal.h"
 #include "CompositeGoal.h"
-
-
+#include "FollowPathGoal.h"
+#include "GoalExplore.h"
 class AlienSpider;
+
+
 
 class GoalEvalutor {
 public:
@@ -31,6 +33,8 @@ public:
 	virtual void Terminate();
 
 	virtual int  Process();
+
+	void SetInactive() { m_iStatus = inactive; }
 
 };
 

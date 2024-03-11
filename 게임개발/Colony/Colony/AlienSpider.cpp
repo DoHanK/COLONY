@@ -13,7 +13,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //										AlienSpider Class											//
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager)
+AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, PathFinder* pPathFinder)
 {
 
 	CLoadedModelInfo* pSpider = pResourceManager->BringModelInfo("Model/AlienSpider.bin", "Model/");
@@ -23,8 +23,19 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 	SetChild(pSpider->m_pModelRootObject, true);
 	SetAnimator(pAnimationSpider);
 	m_pSkinnedModel = pSpider->m_pModelRootObject->FindFrame("polySurface10");
+
+
 	//m_pBrain
 	m_pBrain = new GoalThink(this);
+	//Soul
+	m_pSoul = new AIController(m_pBrain, this);
+	
+	m_pPathFinder = pPathFinder;
+	m_pRoute = new RouteMesh(pd3dDevice, pd3dCommandList);
+	m_pRoute->AddRef();
+	//Alien Æ¯¼º
+	m_EndureLevel = floatEndureDis(gen);
+
 
 	//Ghost Effect
 	m_ppd3dcbSkinningBoneTransforms = new ID3D12Resource * [TRAILER_COUNT];
@@ -44,6 +55,9 @@ AlienSpider::~AlienSpider()
 {
 	//Brain
 	if (m_pBrain) delete m_pBrain;
+	if (m_pSoul) delete m_pSoul;
+	if(m_pRoute) m_pRoute->Release();
+
 
 	//Ghost Effect 
 	for (int i = 0; i < TRAILER_COUNT; ++i) {
@@ -66,6 +80,14 @@ void AlienSpider::Animate(float fTimeElapsed)
 		m_AniTime = 0;
 	}
 	GameObject::Animate(fTimeElapsed);
+}
+
+void AlienSpider::AddPostion(const XMFLOAT3& Pos)
+{
+	m_xmf4x4ToParent._41 += Pos.x;
+	m_xmf4x4ToParent._42 += Pos.y;
+	m_xmf4x4ToParent._43 += Pos.z;
+
 }
 
 void AlienSpider::SetGhostShader(GhostTraillerShader* pShader)
@@ -91,15 +113,31 @@ void AlienSpider::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCa
 				}
 				for (int j = TRAILER_COUNT-1; j > -1; --j) {
 
-					pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1,  &m_GhostNum[j], 33);
-					((SkinnedMesh*)m_pSkinnedModel->m_pMesh)->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[j];
-						m_pSkinnedModel->m_pMesh->Render(pd3dCommandList, 0);
+					//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1,  &m_GhostNum[j], 33);
+					//((SkinnedMesh*)m_pSkinnedModel->m_pMesh)->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[j];
+					//	m_pSkinnedModel->m_pMesh->Render(pd3dCommandList, 0);
 
 				}
 
 			}
 		}
 	}
+
+}
+
+void AlienSpider::RouteRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (m_pRoute) {
+		m_pRoute->Render(pd3dCommandList);
+	}
+}
+
+void AlienSpider::Update(float fTimeElapsed)
+{
+	m_pBrain->Process();
+
+	m_pSoul->ExecuteGoal(fTimeElapsed);
+
 
 }
 

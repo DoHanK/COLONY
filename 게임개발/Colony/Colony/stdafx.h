@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#define FRAME_BUFFER_WIDTH 1000
-#define FRAME_BUFFER_HEIGHT	700
+#define FRAME_BUFFER_WIDTH  800
+#define FRAME_BUFFER_HEIGHT	600
 #define WINDOWS_POS_X	 250
 #define WINDOWS_POS_Y	 50
 //자주 사용하지 않는 API의 일부를 제외하는 명령어
@@ -29,6 +29,7 @@
 #include <math.h>
 #include <wrl.h>
 #include <shellapi.h>
+#include <cmath>
 
 //c++ 라이브러리
 #include <fstream>
@@ -68,7 +69,8 @@ using namespace std;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
-
+//사용자 정의 헤더파일
+#include "UserDefineType.h"
 
 //파일 입출력
 extern BYTE ReadStringFromFile(FILE* pInFile, char* pstrToken);
@@ -86,8 +88,9 @@ inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
 inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
 inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
-
-
+inline float XM2CalDis(const XMFLOAT2& a, const XMFLOAT2& b) { return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)); }
+inline float VectorSize(XMFLOAT3 V) {	return (float)sqrt(V.x * V.x + V.y * V.y + V.z * V.z);
+}
 inline int ReadUnityBinaryString(FILE* pFile, char* pstrToken, BYTE* pnStrLength)
 {
 	UINT nReads = 0;
@@ -116,6 +119,7 @@ enum RootSignatureNum{
 	UI_TEXTURE,
 	UI_MASK_TEXTURE
 };
+
 
 //Direct 관련 함수들
 namespace Vector3
@@ -166,7 +170,7 @@ namespace Vector3
 		return(xmf3Result.x);
 	}
 
-	inline XMFLOAT3 CrossProduct(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2, bool bNormalize = true)
+	inline XMFLOAT3 CrossProduct(const XMFLOAT3& xmf3Vector1, const XMFLOAT3& xmf3Vector2, bool bNormalize = true)
 	{
 		XMFLOAT3 xmf3Result;
 		if (bNormalize)

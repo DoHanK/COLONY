@@ -2,9 +2,7 @@
 
 PathFinder::~PathFinder()
 {
-	for (auto& Mesh : m_Mesh) {
-		Mesh->Release();
-	}
+
 }
 
 void PathFinder::BuildGraphFromCell(Cell* pCell, int WidthCount, int HeightCount)
@@ -25,22 +23,6 @@ void PathFinder::BuildGraphFromCell(Cell* pCell, int WidthCount, int HeightCount
 	}
 
 
-}
-
-
-void PathFinder::TargetNSourceRender(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	//색깔선정
-	XMFLOAT3 xmfloat3(0.0f, 0.0f, 1.0f);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-	int count = 0;
-	for (auto mesh : m_Mesh) {
-		if (count == m_count) break;
-		mesh->Render(pd3dCommandList);
-		count++;
-	}
 }
 
 void PathFinder::addAdjacentNodes( Cell* pCell, int col , int row)
@@ -88,66 +70,69 @@ bool PathFinder::ValidAdjacnet(int x, int y)
 	return !((x < 0) || (x >= m_widthCount) || (y < 0) || (y >= m_HeightCount));
 }
 
-void PathFinder::GetAstarPath(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int s , int t)
+int PathFinder::BringIndexCell(const XMFLOAT3& pos)
 {
+	int x = floor((pos.x + H_MAPSIZE_X ) / CELL_SIZE) ;
+	int y = floor((pos.z + H_MAPSIZE_Y )/ CELL_SIZE) ;
 
-	srand(time(0));
-	while (!ValidNode(s)) {
-		s = rand() % m_Node.size();
-	}
-	m_s = 19169;
-	while (!ValidNode(t)) {
-		t = rand() % m_Node.size();
-	}
-
-
-	m_t = t;
-	AStarAlgoritm Astar(this, m_s, m_t);
-
-	for (int i = 0; i  < 5000; i++) {
-
-		BoundingBoxMesh* pMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList); 
-		pMesh->AddRef();
-		m_Mesh.push_back(pMesh);
-	}
-
-	
-
+	return (x  + m_widthCount * y);
 }
 
-
-void PathFinder::GetPathRendom()
+std::list<XMFLOAT2> PathFinder::QueryPath(XMFLOAT3 ObjectPos)
 {
 
-	std::random_device rd;
-	std::mt19937 gen(rd());
 	std::uniform_int_distribution<> dis(0, m_Node.size());
-	m_s = dis(gen);
-	m_t = dis(gen);
-	while (!ValidNode(m_s)) {
-		m_s = dis(gen);
-	}
-	while (!ValidNode(m_t)) {
-		m_t = dis(gen);
-	}
-	OutputDebugStringA("값들(M: ,");
-	OutputDebugStringA(to_string(m_t).c_str());
+	
+	int DestIndex = dis(gen);
 
-	OutputDebugStringA("T: ");
-	OutputDebugStringA(to_string(m_s).c_str());
-	OutputDebugStringA(")\n");
-	AStarAlgoritm Astar(this, m_s, m_t);
-	std::list<int> path = Astar.GetPathToTarget();
-	m_count = 0;
-	for (auto l : path) {
+	int StartIndex = BringIndexCell(ObjectPos);
+	
+	float Min = FLT_MAX;
+	//시작 지점이 유효하지 않을때
+	if (!ValidNode(StartIndex)) {
 
-		
-		m_Mesh[m_count++]->UpdateVertexPosition(&m_Cell[l].m_BoundingBox);
-		if (5000 < m_count) {
+		XMFLOAT2  StartCoord = XMFLOAT2(ObjectPos.x, ObjectPos.z);
+
+		for (int i = 0; i < m_Node.size(); ++i) {
+			if (m_Cell[i].m_Pass) {
+
+				XMFLOAT2  DestCoord = XMFLOAT2(m_Cell[i].m_BoundingBox.Center.x, m_Cell[i].m_BoundingBox.Center.z);
+
+				float fmin = XM2CalDis(StartCoord, DestCoord);
+
+				if (fmin < Min) {
+					Min = fmin;
+					StartIndex = i;
+				}
+
+			}
+		}
+
+	}
+
+	std::list<int> path;
+	while (true) {
+		while (!ValidNode(DestIndex)) {
+			DestIndex = dis(gen);
+		}
+
+		AStarAlgoritm Astar(this, StartIndex, DestIndex);
+		 path = Astar.GetPathToTarget();
+		if (path.size()>1) {
 			break;
 		}
+		DestIndex = -1;
 	}
 
+	std::list<XMFLOAT2> XMPath;
+	for (const auto& nodeIndex : path) {
+		XMFLOAT2 Coord = XMFLOAT2(m_Cell[nodeIndex].m_BoundingBox.Center.x, m_Cell[nodeIndex].m_BoundingBox.Center.z);
+
+		
+		XMPath.push_back(Coord);
+	}
+
+	return XMPath;
 }
 
 
@@ -201,8 +186,6 @@ void AStarAlgoritm::Search()
 	}
 
 }
-
-
 
 std::list<int> AStarAlgoritm::GetPathToTarget() {
 

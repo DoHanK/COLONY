@@ -132,3 +132,57 @@ void NevMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList)
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dPositionBufferView,m_d3dPassBufferView };
 	pd3dCommandList->IASetVertexBuffers(0, 2, pVertexBufferViews);
 }
+
+RouteMesh::RouteMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_nVertices = ShowNodeNum;
+	m_nStride = sizeof(XMFLOAT3);
+
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
+
+	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, m_nStride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dPositionBuffer->Map(0, NULL, (void**)&m_pcbMappedPositions);
+
+	m_nVertexBufferViews = 1;
+
+	m_d3dVertexBufferViews.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferViews.StrideInBytes = sizeof(XMFLOAT3);
+	m_d3dVertexBufferViews.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+}
+
+RouteMesh::~RouteMesh()
+{
+	if (m_pd3dPositionBuffer) {
+		m_pd3dPositionBuffer->Unmap(0, NULL);
+		m_pd3dPositionBuffer->Release();
+	}
+}
+
+void RouteMesh::Update(std::list<XMFLOAT2> path)
+{
+	int i = 0;
+	for (const auto& pos : path) {
+		if (i > m_nVertices) break;
+			m_pcbMappedPositions[i++] = XMFLOAT3(pos.x, 0.01f, pos.y);
+	}
+
+	for (; i < m_nVertices; ++i) {
+		m_pcbMappedPositions[i] = XMFLOAT3(path.back().x, 0.01f, path.back().y);
+	}
+}
+
+void RouteMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+
+	OnPreRender(pd3dCommandList);
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+
+	pd3dCommandList->DrawInstanced(m_nVertices, 1, 0, 0);
+}
+
+void RouteMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+
+	pd3dCommandList->IASetVertexBuffers(0, 1, &m_d3dVertexBufferViews);
+}

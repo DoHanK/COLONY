@@ -2,7 +2,7 @@
 
 
 
-GoalThink::GoalThink(AlienSpider* pOwner):GoalComposite<AlienSpider>(pOwner){
+GoalThink::GoalThink(AlienSpider* pOwner):GoalComposite<AlienSpider>(pOwner,Think_Goal){
 
 
 }
@@ -19,28 +19,36 @@ GoalThink::~GoalThink()
 
 void GoalThink::Arbitrate()
 {
-	
-	
-	
-
+	AddSubgoal(new GoalExplore(m_pOwner));
 
 }
 
 void GoalThink::Activate()
 {
+	Arbitrate();
+	m_iStatus = active;
+}
 
 
+
+int GoalThink::Process()
+{
+	ActivateIfInactive();
+
+	int SubgoalStatus = ProcessSubGoals();
+
+	if (SubgoalStatus == completed || SubgoalStatus == failed)
+	{
+	
+		m_iStatus = inactive;
+		
+	}
+
+	return m_iStatus;
 }
 
 void GoalThink::Terminate()
 {
 
 
-}
-
-int GoalThink::Process()
-{
-
-
-	return 0;
 }

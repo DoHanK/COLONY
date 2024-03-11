@@ -315,19 +315,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pCamera->SetPlayer(m_pPlayer);
 
 
-	//Monster Create
-	m_pGameObject.reserve(400);
-	for (int j = 0; j < 1; ++j) {
-		for (int i = 0; i < 1; i++) {
 
-			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager);
-			p->SetPosition(0, 0, j);
-			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 20);
-			p->SetGhostShader(m_pGhostTraillerShader);
-			m_pGameObject.push_back(p);
-			
-		}
-	}
 
 	m_pPlaneShader = new PlaneShader();
 	m_pPlaneShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -357,13 +345,37 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pNevMeshShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	m_pNevMeshShader->AddRef();
 
-	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, 1.6f, 250, 250);
+	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, CELL_SIZE, H_MAPSIZE_X, H_MAPSIZE_Y);
 
 	m_pNevMeshBaker->BakeNevMeshByObject(pd3dDevice, pd3dCommandList, m_pSceneObject);
 	m_pPathFinder = new PathFinder();
 	m_pPathFinder->BuildGraphFromCell(m_pNevMeshBaker->m_Grid, m_pNevMeshBaker->m_WidthCount, m_pNevMeshBaker->m_HeightCount);
-	m_pPathFinder->GetAstarPath(pd3dDevice, pd3dCommandList, 1, 1);
+
 	
+
+	//Monster Create
+	m_pGameObject.reserve(400);
+	for (int j = 0; j < 20; ++j) {
+		for (int i = 0; i < 1; i++) {
+			int idex;
+			do {
+				idex = rand() % 90000;
+				
+
+			} while (m_pPathFinder->ValidNode(idex));
+
+			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
+			//p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
+			p->SetPosition(0.f, 0.f, 0.f);
+			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 20);
+			p->SetGhostShader(m_pGhostTraillerShader);
+			m_pGameObject.push_back(p);
+
+		}
+	}
+
+
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -512,16 +524,19 @@ void GamePlayScene::PlayerControlInput()
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
-		if (pKeysBuffer['P'] & 0xF0) {
-			m_pPathFinder->GetPathRendom();
-		}
+
 		if (pKeysBuffer['M'] & 0xF0) {
 			m_pPlayer->AddPosition(XMFLOAT3(0, 1.0F, 0));
 		}
 		if (pKeysBuffer['N'] & 0xF0) {
 			m_pPlayer->AddPosition(XMFLOAT3(0, -1.0F, 0));
 		}
+		if (pKeysBuffer['P'] & 0xF0) {
+			for (const auto& game : m_pGameObject) {
+				((AlienSpider*)game)->m_pBrain->SetInactive();
+			}
 
+		}
 #else
 		GetCursorPos(&ptCursorPos);
 		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
@@ -553,11 +568,8 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	for (auto& GO : m_pGameObject) {
 		GO->Animate(fTimeElapsed);
-		GO->SetPosition(GO->GetPosition().x + fTimeElapsed * (rand() % 4) , GO->GetPosition().y, GO->GetPosition().z + fTimeElapsed * (rand() % 4));
-		//if (time > 1.7f) {
-		//	time = 0;
-		//	GO->m_pSkinnedAnimationController->SetTrackAnimationSet(0, rand() % 19);
-		//}
+		//GO->SetPosition(GO->GetPosition().x + fTimeElapsed * (rand() % 4) , GO->GetPosition().y, GO->GetPosition().z + fTimeElapsed * (rand() % 4));
+		((AlienSpider*)(GO))->Update(fTimeElapsed);
 	}
 
 
@@ -617,7 +629,17 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
 	//m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);
-	m_pPathFinder->TargetNSourceRender(pd3dCommandList);
+	//m_pPathFinder->TargetNSourceRender(pd3dCommandList);
+
+	for (auto& GO : m_pGameObject) {
+		//»ö±ò¼±Á¤
+		XMFLOAT3 xmfloat3(0.0f, 0.0f, 1.0f);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+		XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+		((AlienSpider*)(GO))->RouteRender(pd3dCommandList);
+	}
 
 	m_pNevMeshShader->OnPrepareRender(pd3dCommandList);
 	m_pNevMeshBaker->BoundingRendering(pd3dCommandList);

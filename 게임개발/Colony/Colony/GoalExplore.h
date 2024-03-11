@@ -2,21 +2,21 @@
 #include "stdafx.h"
 #include "Goal.h"
 #include "AlienSpider.h"
+#include "CompositeGoal.h"
 
-class GoalExplore: public Goal<AlienSpider>{
+class AlienSpider;
+
+class GoalExplore: public GoalComposite<AlienSpider>{
 
 
 private:
 
     
 
-    bool      m_bLastEdgeInPath;
-
-
 
 public:
 
-    GoalExplore(AlienSpider* pBot):Goal(pBot) {};
+    GoalExplore(AlienSpider* pBot) :GoalComposite(pBot, Explore_Goal) {};
 
     void Activate();
     int  Process();
