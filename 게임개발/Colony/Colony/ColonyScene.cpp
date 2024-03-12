@@ -355,7 +355,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//Monster Create
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 20; ++j) {
+	for (int j = 0; j < 100; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {

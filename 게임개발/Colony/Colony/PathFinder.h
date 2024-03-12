@@ -32,6 +32,8 @@ public:
 	int BringIndexCell(const XMFLOAT3& pos);
 	
 	std::list<XMFLOAT2> QueryPath(XMFLOAT3 ObjectPos);
+	std::list<XMFLOAT2> QueryClosePath(XMFLOAT3 ObjectPos);
+
 	
 	bool ValidNode(int ind) { 
 		if (ind == -1) return false;

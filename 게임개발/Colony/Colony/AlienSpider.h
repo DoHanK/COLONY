@@ -13,6 +13,8 @@ class GoalThink;
 class AIController;
 
 
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //										AlienSpider Class											//
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,6 +71,15 @@ public:
 	virtual ~AlienSpiderAnimationController() {};
 
 public:
+	//GhostEffect
 	void SavePrevFrameInfo(XMFLOAT4X4** m_ppcbxmf4x4MappedSkinningBoneTransforms, float* elapsedTime);
+public:
+	//애니메이션 보간 및 상태
+	DWORD m_AnimationState = AlienAnimationName::Idle_1;
+	float m_nowAnimationWeight = 1.0f;
+	float m_PreAnimationWeight = 0.0f;
 
+	void ChangeAnimation(DWORD ChangeState);
+	bool isSameState(DWORD dwState);
+	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
 };

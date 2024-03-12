@@ -51,17 +51,6 @@ class PlayerAnimationController;
 
 
 
-enum PlayerAnimationTrack {
-	NOW_UPPERTRACK,
-	NOW_LOWERTRACK,
-	PRE_UPPERTRACK,
-	PRE_LOWERTRACK
-};
-
-enum WeaponPosition {
-	RIGHT_HAND,
-	SPINE_BACK
-};
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

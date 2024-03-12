@@ -17,7 +17,7 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 {
 
 	CLoadedModelInfo* pSpider = pResourceManager->BringModelInfo("Model/AlienSpider.bin", "Model/");
-	AlienSpiderAnimationController* pAnimationSpider = new AlienSpiderAnimationController(pd3dDevice, pd3dCommandList, 1, pSpider);
+	AlienSpiderAnimationController* pAnimationSpider = new AlienSpiderAnimationController(pd3dDevice, pd3dCommandList, 2, pSpider);
 	pAnimationSpider->SetTrackAnimationSet(0, 0);
 	SetPosition(XMFLOAT3( 0, 0, 0));
 	SetChild(pSpider->m_pModelRootObject, true);
@@ -29,7 +29,7 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 	m_pBrain = new GoalThink(this);
 	//Soul
 	m_pSoul = new AIController(m_pBrain, this);
-	
+	m_pSoul->m_pAnimationControl = ((AlienSpiderAnimationController*)m_pSkinnedAnimationController);
 	m_pPathFinder = pPathFinder;
 	m_pRoute = new RouteMesh(pd3dDevice, pd3dCommandList);
 	m_pRoute->AddRef();
@@ -163,4 +163,79 @@ void AlienSpiderAnimationController::SavePrevFrameInfo(XMFLOAT4X4** ppcbxmf4x4Ma
 
 	
 	
+}
+
+void AlienSpiderAnimationController::ChangeAnimation(DWORD ChangeState)
+{
+	m_nowAnimationWeight = 0.0f;
+
+	SetTrackAnimationSet(PRE_TRACK, m_AnimationState);
+
+	m_AnimationState = ChangeState;
+	SetTrackAnimationSet(NOW_TRACK, ChangeState);
+
+
+	m_pAnimationTracks[PRE_TRACK].m_fPosition = m_pAnimationTracks[NOW_TRACK].m_fPosition;
+	m_pAnimationTracks[NOW_TRACK].m_fPosition = 0.0f;
+}
+
+bool AlienSpiderAnimationController::isSameState(DWORD dwState)
+{
+	if (m_AnimationState == dwState) return true;
+	return false;
+}
+
+void AlienSpiderAnimationController::AdvanceTime(float fElapsedTime, GameObject* pRootGameObject)
+{
+	m_fTime += fElapsedTime;
+
+	if (m_nowAnimationWeight < 1.0f) {
+		m_nowAnimationWeight += fElapsedTime*2;
+		m_PreAnimationWeight = 1.0f - m_nowAnimationWeight;
+
+	}
+	else {
+		m_nowAnimationWeight = 1.0f;
+		m_PreAnimationWeight = 0.0f;
+	}
+	SetTrackWeight(NOW_TRACK, m_nowAnimationWeight);
+	SetTrackWeight(PRE_TRACK, m_PreAnimationWeight);
+
+
+	if (m_pAnimationTracks)
+	{
+		for (int i = 0; i < m_nAnimationTracks; i++) {
+			//»óÃ¼
+			if (m_nowAnimationWeight == 1 && (i == NOW_TRACK || i == PRE_TRACK)) {
+				m_pAnimationTracks[i].m_fPosition += (fElapsedTime * m_pAnimationTracks[i].m_fSpeed);
+			}
+
+	
+		}
+		for (int i = 0; i < m_nSkinnedMeshes; i++)
+		{
+			for (int j = 0; j < m_pnAnimatedBoneFrames[i]; j++)
+			{
+				XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Zero();
+			
+
+				for (int k = 0; k < m_nAnimationTracks; k++)
+				{
+					AnimationSet* pAnimationSet = m_ppAnimationSets[i]->m_ppAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
+					pAnimationSet->SetPosition(m_pAnimationTracks[k].m_fPosition);
+					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j);
+
+				
+					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
+				}
+			m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
+			}
+
+		}
+
+		pRootGameObject->UpdateTransform(NULL);
+
+	}
+
+
 }

@@ -12,26 +12,31 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 	//길찾기
 	if (m_pBody->m_GoalType == FollowPath_Goal) {
 		//애니메이션
-		if (m_AnimationName != AlienAnimationName::Run_1) {
-			m_AnimationName = Run_1;
-			m_pBody->SetTrackAnimationSet(0, Run_1);
+		if (!m_pAnimationControl->isSameState(AlienAnimationName::Run_2)) {
+			m_pAnimationControl->ChangeAnimation(Run_2);
 		}
+	
 		//연산
 		ExecuteFollowPath(fTimeElapsed);
 	}
 	//멍때리기
 	else if (m_pBody->m_GoalType == Wait_Goal) {
 
-		if ((m_AnimationName != AlienAnimationName::Idle_1) &&	
-			(m_AnimationName != AlienAnimationName::Idle_2) &&
-			(m_AnimationName != AlienAnimationName::Idle_3) &&
-			(m_AnimationName != AlienAnimationName::Idle_4)){
-			
-			m_AnimationName = Idle_1+rand()%3;
-			m_pBody->SetTrackAnimationSet(0, m_AnimationName);
+		
+			if ((!m_pAnimationControl->isSameState(AlienAnimationName::Idle_1))&&
+				(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_2))&&
+				(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_3))&&
+				(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_4))) {
 
-		}
+				m_pAnimationControl->ChangeAnimation(Idle_1 + IdleRandom(gen));
+			}
+
+
+
+
+
 		ExecuteWait(fTimeElapsed);
+
 	}
 
 
@@ -98,7 +103,7 @@ void AIController::ExecuteFollowPath(float fTimeElapsed)
 		
 
 
-				if (angle > 1.0f) {
+				if (angle > 10.0f) {
 
 					if (Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), m_CrossBetween) > 0)
 						m_pBody->m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(0.0f), AlienSpinSpeed * fTimeElapsed, 0.0f), m_pBody->m_xmf4x4ToParent);

@@ -4,7 +4,7 @@
 
 class GoalThink;
 class AlienSpider;
-
+class AlienSpiderAnimationController;
 
 
 
@@ -12,6 +12,7 @@ class AIController{
 public:
 	GoalThink* m_pBrain;
 	AlienSpider* m_pBody;
+	AlienSpiderAnimationController* m_pAnimationControl;
 public:
 	AIController(GoalThink* pBrain, AlienSpider* pBody);
 	~AIController() {};
