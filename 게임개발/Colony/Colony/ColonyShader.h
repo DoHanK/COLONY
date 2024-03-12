@@ -179,7 +179,7 @@ public:
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-//										 SkyBoxShader Class				  			     		   //
+//										 NevMeshShader Class				  			     	   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class NevMeshShader :public BoundingShader
@@ -190,6 +190,25 @@ public:
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+
+
+};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										 ShadowMapRenderShader Class		  			     	   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+class ShadowMapRenderShader :public StandardShader {
+public:
+	ShadowMapRenderShader();
+	virtual ~ShadowMapRenderShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	//StandardShader 와 같은 버텍스 쉐이더 사용
+	//virtual D3D12_SHADER_BYTECODE CreateVertexShader();
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 
 
