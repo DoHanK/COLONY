@@ -41,6 +41,10 @@ enum AlienAnimationName {
 	Walk_right,
 
 };
+enum AlienAnimationTrack {
+	NOW_TRACK,
+	PRE_TRACK
+};
 //이동 속도
 #define AlienAccel		3.0f
 #define AlienMaxXZSpeed 2.0f
@@ -77,6 +81,17 @@ enum PlayerAnimationName {
 	RUNNING,
 	IDLE_NORMAL
 };
+enum PlayerAnimationTrack {
+	NOW_UPPERTRACK,
+	NOW_LOWERTRACK,
+	PRE_UPPERTRACK,
+	PRE_LOWERTRACK
+};
+
+enum WeaponPosition {
+	RIGHT_HAND,
+	SPINE_BACK
+};
 
 
 
@@ -95,4 +110,5 @@ enum PlayerAnimationName {
 //랜덤값 생성
 static std::random_device rd;
 static std::mt19937 gen(rd());
-static std::uniform_real_distribution<float> floatEndureDis(10.f, 30.f);
+static std::uniform_real_distribution<float> floatEndureDis(5.f, 10.f);
+static std::uniform_int_distribution<> IdleRandom(0, 3);

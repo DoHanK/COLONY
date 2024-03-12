@@ -321,20 +321,20 @@ public:
 	XMFLOAT4X4** m_ppcbxmf4x4MappedSkinningBoneTransforms = NULL;
 
 public:
-	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	void SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet);
-	void SetTrackEnable(int nAnimationTrack, bool bEnable);
-	void SetTrackPosition(int nAnimationTrack, float fPosition);
-	void SetTrackSpeed(int nAnimationTrack, float fSpeed);
-	void SetTrackWeight(int nAnimationTrack, float fWeight);
+	virtual void SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet);
+	virtual void SetTrackEnable(int nAnimationTrack, bool bEnable);
+	virtual void SetTrackPosition(int nAnimationTrack, float fPosition);
+	virtual void SetTrackSpeed(int nAnimationTrack, float fSpeed);
+	virtual void SetTrackWeight(int nAnimationTrack, float fWeight);
 
-	void SetCallbackKeys(int nSkinnedMesh, int nAnimationSet, int nCallbackKeys);
-	void SetCallbackKey(int nSkinnedMesh, int nAnimationSet, int nKeyIndex, float fTime, void* pData);
-	void SetAnimationCallbackHandler(int nSkinnedMesh, int nAnimationSet, CAnimationCallbackHandler* pCallbackHandler);
+	virtual void SetCallbackKeys(int nSkinnedMesh, int nAnimationSet, int nCallbackKeys);
+	virtual void SetCallbackKey(int nSkinnedMesh, int nAnimationSet, int nKeyIndex, float fTime, void* pData);
+	virtual void SetAnimationCallbackHandler(int nSkinnedMesh, int nAnimationSet, CAnimationCallbackHandler* pCallbackHandler);
 
-	void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
-	void DirectUpdateMatrix();
+	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
+	virtual void DirectUpdateMatrix();
 };
 
 

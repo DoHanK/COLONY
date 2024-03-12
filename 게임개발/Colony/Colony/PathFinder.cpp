@@ -135,6 +135,82 @@ std::list<XMFLOAT2> PathFinder::QueryPath(XMFLOAT3 ObjectPos)
 	return XMPath;
 }
 
+std::list<XMFLOAT2> PathFinder::QueryClosePath(XMFLOAT3 ObjectPos)
+{
+	float Min = FLT_MAX;
+	//시작 지점이 유효하지 않을때
+
+	int StartIndex = BringIndexCell(ObjectPos);
+	int nodeX = 0;
+	int nodeY = 0;
+
+	if (!ValidNode(StartIndex)) {
+
+		XMFLOAT2  StartCoord = XMFLOAT2(ObjectPos.x, ObjectPos.z);
+
+		for (int i = 0; i < m_Node.size(); ++i) {
+			if (m_Cell[i].m_Pass) {
+
+				XMFLOAT2  DestCoord = XMFLOAT2(m_Cell[i].m_BoundingBox.Center.x, m_Cell[i].m_BoundingBox.Center.z);
+
+				float fmin = XM2CalDis(StartCoord, DestCoord);
+
+				if (fmin < Min) {
+					Min = fmin;
+					StartIndex = i;
+					
+				}
+
+			}
+		}
+
+	}
+	nodeX = StartIndex % m_widthCount;
+	nodeY = StartIndex / m_widthCount;
+	
+
+
+	//전방 0~ 1.6 * range수만큼의 유효셀 찾기
+	std::list<XMFLOAT2> XMPath;
+	for (int range = 1; range < 5; ++range) {
+
+		for (int i = -1; i < 2; ++i)
+		{
+			for (int j = -1; j < 2; ++j)
+			{
+				if ((i == 0) && (j == 0)) continue;
+
+				int X = nodeX + j*range;
+				int Y = nodeY + i*range;
+
+				if (ValidAdjacnet(X, Y)) { //유효하면
+					int index = X + Y * m_widthCount;
+					if (m_Cell[index].m_Pass) {
+						XMPath.push_back(XMFLOAT2(m_Cell[index].m_BoundingBox.Center.x, m_Cell[index].m_BoundingBox.Center.z));
+					}
+
+				}
+	
+
+			}
+		}
+
+	}
+	// std::list에서 std::vector로 요소들을 복사
+	std::vector<DirectX::XMFLOAT2> tempVec(XMPath.begin(), XMPath.end());
+
+	// std::vector를 무작위로 섞음
+	std::shuffle(tempVec.begin(), tempVec.end(), gen);
+
+	// std::vector를 std::list로 다시 옮김
+	XMPath.assign(tempVec.begin(), tempVec.end());
+
+
+
+	return XMPath;
+	
+}
+
 
 void AStarAlgoritm::Search()
 {

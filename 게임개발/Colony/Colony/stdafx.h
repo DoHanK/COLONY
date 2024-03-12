@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#define FRAME_BUFFER_WIDTH  800
-#define FRAME_BUFFER_HEIGHT	600
-#define WINDOWS_POS_X	 250
-#define WINDOWS_POS_Y	 50
+#define FRAME_BUFFER_WIDTH  1024
+#define FRAME_BUFFER_HEIGHT	800
+#define WINDOWS_POS_X	 0
+#define WINDOWS_POS_Y	 0
 //자주 사용하지 않는 API의 일부를 제외하는 명령어
 #ifndef WIN32_LEAN_AND_MEAN //활성화 상태
 # define WIN32_LEAN_AND_MEAN
