@@ -36,6 +36,8 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 	//Alien Æ¯¼º
 	m_EndureLevel = floatEndureDis(gen);
 
+	m_pHead = pSpider->m_pModelRootObject->FindFrame("DEF-HEAD");
+
 
 	//Ghost Effect
 	m_ppd3dcbSkinningBoneTransforms = new ID3D12Resource * [TRAILER_COUNT];

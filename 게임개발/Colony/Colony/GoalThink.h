@@ -7,7 +7,10 @@
 #include "Goal.h"
 #include "CompositeGoal.h"
 #include "FollowPathGoal.h"
-#include "GoalExplore.h"
+#include "ExploreGoal.h"
+#include "WanderGoal.h"
+#include "WanderAndWaitGoal.h"
+
 class AlienSpider;
 
 
@@ -19,7 +22,7 @@ public:
 
 };
 
-class GoalThink :public GoalComposite<AlienSpider>{
+class GoalThink :public CompositeGoal<AlienSpider>{
 private:
 	std::vector<GoalEvalutor*>  m_GoalEvalutors;
 public:

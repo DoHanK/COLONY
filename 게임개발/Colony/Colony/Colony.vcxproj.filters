@@ -16,9 +16,6 @@
     <Filter Include="GameCpp">
       <UniqueIdentifier>{ac477bcf-40af-4c05-9c81-46ed68dd2ea0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="TextureLoad">
-      <UniqueIdentifier>{7a2a142c-3beb-4d3a-a2a3-c2e15c6ce7a2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GameBasicCpp">
       <UniqueIdentifier>{1d4425f4-50c4-4a41-ba07-368a4fa78bbf}</UniqueIdentifier>
     </Filter>
@@ -69,6 +66,9 @@
     </Filter>
     <Filter Include="GameHeader\GameAiHeader\GoalHeader\SingleGoalHeader">
       <UniqueIdentifier>{30029b46-08a9-4799-9384-cfc91c73a57c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TextureLoad">
+      <UniqueIdentifier>{7a2a142c-3beb-4d3a-a2a3-c2e15c6ce7a2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -159,7 +159,7 @@
     <ClInclude Include="ColonyScene.h">
       <Filter>GameHeader\GameSceneHeader</Filter>
     </ClInclude>
-    <ClInclude Include="GoalExplore.h">
+    <ClInclude Include="ExploreGoal.h">
       <Filter>GameHeader\GameAiHeader\GoalHeader\CompositeGoalHeader</Filter>
     </ClInclude>
     <ClInclude Include="FollowPathGoal.h">
@@ -175,7 +175,16 @@
       <Filter>GameHeader\GameAiHeader</Filter>
     </ClInclude>
     <ClInclude Include="WaitGoal.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>GameHeader\GameAiHeader\GoalHeader\SingleGoalHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="WanderGoal.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader\SingleGoalHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="WanderAndWaitGoal.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader\CompositeGoalHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="TraceGoal.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader\SingleGoalHeader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -251,7 +260,7 @@
     <ClCompile Include="UIControlHelper.cpp">
       <Filter>GameCpp\GameSceneCpp</Filter>
     </ClCompile>
-    <ClCompile Include="GoalExplore.cpp">
+    <ClCompile Include="ExploreGoal.cpp">
       <Filter>GameCpp\GameAiCpp\GoalCpp\CompositeGoalCpp</Filter>
     </ClCompile>
     <ClCompile Include="FollowPathGoal.cpp">
@@ -261,7 +270,16 @@
       <Filter>GameCpp\GameAiCpp</Filter>
     </ClCompile>
     <ClCompile Include="WaitGoal.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>GameCpp\GameAiCpp\GoalCpp\SingleGoalCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="WanderGoal.cpp">
+      <Filter>GameCpp\GameAiCpp\GoalCpp\SingleGoalCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="WanderAndWaitGoal.cpp">
+      <Filter>GameCpp\GameAiCpp\GoalCpp\CompositeGoalCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="TraceGoal.cpp">
+      <Filter>GameCpp\GameAiCpp\GoalCpp\SingleGoalCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

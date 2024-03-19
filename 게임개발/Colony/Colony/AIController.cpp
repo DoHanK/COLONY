@@ -10,7 +10,7 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 	m_pBrain->Process();
 
 	//길찾기
-	if (m_pBody->m_GoalType == FollowPath_Goal) {
+	if (m_pBody->m_GoalType == FollowPath_Goal || m_pBody->m_GoalType == Wander_Goal) {
 		//애니메이션
 		if (!m_pAnimationControl->isSameState(AlienAnimationName::Run_2)) {
 			m_pAnimationControl->ChangeAnimation(Run_2);
@@ -26,17 +26,13 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 			if ((!m_pAnimationControl->isSameState(AlienAnimationName::Idle_1))&&
 				(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_2))&&
 				(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_3))&&
-				(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_4))) {
-
+				(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_4))&&
+				(!m_pAnimationControl->isSameState(AlienAnimationName::Range_1))&&
+				(!m_pAnimationControl->isSameState(AlienAnimationName::Range_2))) {
 				m_pAnimationControl->ChangeAnimation(Idle_1 + IdleRandom(gen));
 			}
 
-
-
-
-
 		ExecuteWait(fTimeElapsed);
-
 	}
 
 
@@ -158,4 +154,10 @@ void AIController::ExecuteFollowPath(float fTimeElapsed)
 void AIController::ExecuteWait(float fTimeElapsed)
 {
 	m_pBody->m_WaitingTime += fTimeElapsed;
+}
+
+void AIController::ExecuteWanderPath(float fTimeElapsed)
+{
+
+
 }

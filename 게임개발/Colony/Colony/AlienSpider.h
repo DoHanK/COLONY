@@ -42,6 +42,9 @@ public:
 	float						m_WaitingTime = 0;
 	float						m_WaitCoolTime = 0;
 	float						m_EndureLevel;
+
+	//인식
+	GameObject*		m_pHead = NULL;
 public:
 	//GhostTrailEffect를 위한 변수들
 	GameObject*			m_pSkinnedModel;

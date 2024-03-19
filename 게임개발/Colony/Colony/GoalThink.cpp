@@ -2,7 +2,7 @@
 
 
 
-GoalThink::GoalThink(AlienSpider* pOwner):GoalComposite<AlienSpider>(pOwner,Think_Goal){
+GoalThink::GoalThink(AlienSpider* pOwner):CompositeGoal<AlienSpider>(pOwner,Think_Goal){
 
 
 }
@@ -19,8 +19,12 @@ GoalThink::~GoalThink()
 
 void GoalThink::Arbitrate()
 {
-	AddSubgoal(new GoalExplore(m_pOwner));
-
+	if (IdleRandom(gen) == 0|| IdleRandom(gen) == 1|| IdleRandom(gen) == 2) {
+		AddSubgoal(new ExploreGoal(m_pOwner));
+	}
+	else {
+		AddSubgoal(new WanderAndWaitGoal(m_pOwner));
+	}
 }
 
 void GoalThink::Activate()

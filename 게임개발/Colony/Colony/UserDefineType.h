@@ -1,16 +1,18 @@
 #pragma once
 
-
-
-
 /// AI
 //GoalState 정의
 enum AIBehaviorState {
-	Think_Goal,
+	//단일 목적
 	Idle_Goal,
 	Wait_Goal,
-	Explore_Goal,
+	Wander_Goal,
 	FollowPath_Goal,
+	Trace_Goal,
+	//복합 목적
+	Think_Goal,
+	Explore_Goal,
+	WanderAndWait_Goal
 };
 //애니메이션 번호 정의
 enum AlienAnimationName {
@@ -110,5 +112,5 @@ enum WeaponPosition {
 //랜덤값 생성
 static std::random_device rd;
 static std::mt19937 gen(rd());
-static std::uniform_real_distribution<float> floatEndureDis(5.f, 10.f);
-static std::uniform_int_distribution<> IdleRandom(0, 3);
+static std::uniform_real_distribution<float> floatEndureDis(30.f, 45.f);
+static std::uniform_int_distribution<> IdleRandom(0, 6);

@@ -21,6 +21,7 @@ int WaitGoal::Process()
 {
 	ActivateIfInactive();
 	PushGoalType();
+
 	if (m_time < m_pOwner->m_WaitingTime) {
 		m_iStatus = completed;
 	}

@@ -31,5 +31,6 @@ public:
 private:
 	void ExecuteFollowPath(float fTimeElapsed);
 	void ExecuteWait(float fTimeElapsed);
+	void ExecuteWanderPath(float fTimeElapsed);
 };
 

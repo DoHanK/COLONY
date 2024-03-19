@@ -4,7 +4,7 @@
 
 
 template <typename entity_type>
-class GoalComposite : public Goal<entity_type> {
+class CompositeGoal : public Goal<entity_type> {
 protected:
 	std::list<Goal<entity_type>*>		m_SubGoals;
 
@@ -12,9 +12,9 @@ protected:
 
 public:
 
-	GoalComposite(entity_type* pOwner,int GetType) :Goal<entity_type>(pOwner,GetType) {}
+	CompositeGoal(entity_type* pOwner,int GetType) :Goal<entity_type>(pOwner,GetType) {}
 
-	virtual ~GoalComposite() { RemoveAllSubgoals(); }
+	virtual ~CompositeGoal() { RemoveAllSubgoals(); }
 
 	virtual void Activate() = 0;
 
@@ -33,7 +33,7 @@ public:
 
 
 template <typename entity_type>
-int GoalComposite<entity_type>::ProcessSubGoals()
+int CompositeGoal<entity_type>::ProcessSubGoals()
 {
     while (!m_SubGoals.empty() &&
         (m_SubGoals.front()->isComplete() || m_SubGoals.front()->hasFailed()))
@@ -65,13 +65,13 @@ int GoalComposite<entity_type>::ProcessSubGoals()
 
 
 template <typename entity_type>
-void GoalComposite<entity_type>::AddSubgoal(Goal<entity_type>* g)
+void CompositeGoal<entity_type>::AddSubgoal(Goal<entity_type>* g)
 {
     m_SubGoals.push_front(g);
 }
 
 template <typename entity_type>
-void GoalComposite<entity_type>::RemoveAllSubgoals()
+void CompositeGoal<entity_type>::RemoveAllSubgoals()
 {
     for (std::list<Goal<entity_type>*>::iterator it = m_SubGoals.begin();
         it != m_SubGoals.end();
