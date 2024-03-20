@@ -60,6 +60,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 
 	void RouteRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, bool isUpdateBounding = true, Camera* pCamera = NULL);
 	void Update(float fTimeElapsed);
 
 };

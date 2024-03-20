@@ -135,20 +135,27 @@ protected:
 
 	Player*								m_pPlayer = NULL;
 	ThirdPersonCamera*					m_pCamera = NULL;
+
 	int									m_nGameObjects = 0;
+	SkyBox*								m_pskybox = NULL;
+	GameObject*							m_pScenePlane = NULL;
 	vector<GameObject*>					m_pGameObject;
 	vector<GameObject*>					m_pSceneObject;
 
+
 	QuadTree*							m_pQuadTree = NULL;
+	PathFinder*							m_pPathFinder = NULL;
 	NevMeshBaker*						m_pNevMeshBaker = NULL;
-	GameObject*							m_pScenePlane = NULL;
-	SkyBox*							    m_pskybox = NULL;
+	//Ω¶¿Ã¥ı
 	PlaneShader*						m_pPlaneShader = NULL;
 	NevMeshShader*						m_pNevMeshShader = NULL;
-	PathFinder*							m_pPathFinder = NULL;
+	GhostTraillerShader*				m_pGhostTraillerShader =NULL;
+	BoundingShader*						m_pBoundigShader = NULL;
+
+
+	bool								m_bBoundingRender = false;
 	int									m_DepthRender = 0;
 
 
-	GhostTraillerShader*				m_pGhostTraillerShader;
-	BoundingShader*						m_pBoundigShader;
+
 };

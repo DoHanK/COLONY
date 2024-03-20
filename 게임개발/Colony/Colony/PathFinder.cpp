@@ -5,7 +5,7 @@ PathFinder::~PathFinder()
 
 }
 
-void PathFinder::BuildGraphFromCell(Cell* pCell, int WidthCount, int HeightCount)
+void PathFinder::BuildGraphFromCell(std::vector<Cell>& pCell, int WidthCount, int HeightCount)
 {
 	m_widthCount = WidthCount;
 	m_HeightCount = HeightCount;
@@ -17,7 +17,7 @@ void PathFinder::BuildGraphFromCell(Cell* pCell, int WidthCount, int HeightCount
 
 			m_Node.push_back({ pCell[x + WidthCount * y].m_BoundingBox.Center.x, pCell[x + WidthCount * y].m_BoundingBox.Center.z });
 
-			if(pCell[x + WidthCount * y].m_Pass) addAdjacentNodes(pCell, x, y);
+			if(pCell[x + WidthCount * y].m_Pass) addAdjacentNodes(&pCell[0], x, y);
 
 		}
 	}

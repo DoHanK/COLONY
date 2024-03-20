@@ -151,6 +151,8 @@ void StandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		{
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
+			m_BoundingBox.Center = m_xmf3AABBCenter;
+			m_BoundingBox.Extents = m_xmf3AABBExtents;
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
 		{
@@ -764,8 +766,7 @@ void BoundingBoxMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 //										SkyBoxMesh Class										   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SkyBoxMesh::SkyBoxMesh(ID3D12Device* pd3dDeivce, ID3D12GraphicsCommandList* pd3dCommandList):BasicMesh(pd3dDeivce, pd3dCommandList)
-{
+SkyBoxMesh::SkyBoxMesh(ID3D12Device* pd3dDeivce, ID3D12GraphicsCommandList* pd3dCommandList):BasicMesh(pd3dDeivce, pd3dCommandList){
 
 	m_nVertices = 36;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;

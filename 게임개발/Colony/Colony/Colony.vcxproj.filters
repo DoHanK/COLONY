@@ -28,9 +28,6 @@
     <Filter Include="GameCpp\GameAiCpp">
       <UniqueIdentifier>{e80a4c7e-9fa5-47e5-9110-18406c5e8744}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameCpp\GameAiCpp\NavigationHeader">
-      <UniqueIdentifier>{fd71be07-c37d-490e-baa5-0a9eb800842e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GameCpp\GameAiCpp\GoalCpp">
       <UniqueIdentifier>{bb69ec09-c70e-45a7-8d3a-b3c0c931c5fc}</UniqueIdentifier>
     </Filter>
@@ -69,6 +66,15 @@
     </Filter>
     <Filter Include="TextureLoad">
       <UniqueIdentifier>{7a2a142c-3beb-4d3a-a2a3-c2e15c6ce7a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameCpp\GameAiCpp\SenseCpp">
+      <UniqueIdentifier>{9a2b30ab-535d-473c-86b4-726cd2e7b8fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameCpp\GameAiCpp\NavigationCpp">
+      <UniqueIdentifier>{fd71be07-c37d-490e-baa5-0a9eb800842e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameHeader\GameAiHeader\SenseHeader">
+      <UniqueIdentifier>{7aa03731-1352-4966-941c-db7c301f29c5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -186,6 +192,9 @@
     <ClInclude Include="TraceGoal.h">
       <Filter>GameHeader\GameAiHeader\GoalHeader\SingleGoalHeader</Filter>
     </ClInclude>
+    <ClInclude Include="Perception.h">
+      <Filter>GameHeader\GameAiHeader\SenseHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -231,13 +240,13 @@
       <Filter>GameBasicCpp</Filter>
     </ClCompile>
     <ClCompile Include="NevMesh.cpp">
-      <Filter>GameCpp\GameAiCpp\NavigationHeader</Filter>
+      <Filter>GameCpp\GameAiCpp\NavigationCpp</Filter>
     </ClCompile>
     <ClCompile Include="NevMeshBaker.cpp">
-      <Filter>GameCpp\GameAiCpp\NavigationHeader</Filter>
+      <Filter>GameCpp\GameAiCpp\NavigationCpp</Filter>
     </ClCompile>
     <ClCompile Include="PathFinder.cpp">
-      <Filter>GameCpp\GameAiCpp\NavigationHeader</Filter>
+      <Filter>GameCpp\GameAiCpp\NavigationCpp</Filter>
     </ClCompile>
     <ClCompile Include="GoalThink.cpp">
       <Filter>GameCpp\GameAiCpp\GoalCpp</Filter>
@@ -280,6 +289,9 @@
     </ClCompile>
     <ClCompile Include="TraceGoal.cpp">
       <Filter>GameCpp\GameAiCpp\GoalCpp\SingleGoalCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Perception.cpp">
+      <Filter>GameCpp\GameAiCpp\SenseCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

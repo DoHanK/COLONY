@@ -631,15 +631,16 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCam
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
-void GameObject::BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+void GameObject::BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList,bool isUpdateBounding ,Camera* pCamera)
 {
-
 	if (m_pBoundingMesh) {
+		if(isUpdateBounding) UpdateBoundingBox();
+
 		m_pBoundingMesh->Render(pd3dCommandList);
 	}
 
-	if (m_pSibling) m_pSibling->BoudingBoxRender(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->BoudingBoxRender(pd3dCommandList, pCamera);
+	if (m_pSibling) m_pSibling->BoudingBoxRender(pd3dCommandList, isUpdateBounding,pCamera);
+	if (m_pChild) m_pChild->BoudingBoxRender(pd3dCommandList, isUpdateBounding,pCamera);
 }
 
 void GameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -661,6 +662,17 @@ void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList
 
 void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, Material* pMaterial)
 {
+}
+
+void GameObject::UpdateBoundingBox()
+{
+	if (m_pMesh) {
+		m_pMesh->GetBoundingBox().Transform(m_BoundingBox, DirectX::XMLoadFloat4x4(&m_xmf4x4World));
+
+		((BoundingBoxMesh*)m_pBoundingMesh)->UpdateVertexPosition(&m_BoundingBox);
+	}
+	if (m_pSibling) m_pSibling->UpdateBoundingBox();
+	if (m_pChild) m_pChild->UpdateBoundingBox();
 }
 
 void GameObject::ReleaseShaderVariables()

@@ -20,11 +20,11 @@ public:
 	std::vector<std::list<EdgeInfo>> m_Edge;
 	int m_widthCount;
 	int m_HeightCount;
-	Cell* m_Cell;
+	std::vector<Cell> m_Cell;
 
 
 public:
-	void BuildGraphFromCell(Cell* pCell, int WidthCount, int HeightCount);
+	void BuildGraphFromCell(std::vector<Cell>& pCell, int WidthCount, int HeightCount);
 	void addAdjacentNodes(Cell* pCell,int col ,int row);
 	bool ValidAdjacnet(int x, int y);
 	float CalDistance(XMFLOAT2 a, XMFLOAT2 b);

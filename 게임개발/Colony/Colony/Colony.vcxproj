@@ -159,6 +159,7 @@
     <ClInclude Include="NevMesh.h" />
     <ClInclude Include="NevMeshBaker.h" />
     <ClInclude Include="PathFinder.h" />
+    <ClInclude Include="Perception.h" />
     <ClInclude Include="PriorityQueue.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="SceneManager.h" />
@@ -196,6 +197,7 @@
     <ClCompile Include="NevMesh.cpp" />
     <ClCompile Include="NevMeshBaker.cpp" />
     <ClCompile Include="PathFinder.cpp" />
+    <ClCompile Include="Perception.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="stdafx.cpp" />

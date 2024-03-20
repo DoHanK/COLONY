@@ -13,8 +13,11 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //										Player Class											   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,CLoadedModelInfo* PlayerModelInfo , CLoadedModelInfo* WeaponModelInfo)
+Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager)
 {
+	CLoadedModelInfo* PlayerModelInfo = pResourceManager->BringModelInfo("Model/JU_Mannequin.bin", "Model/Textures/PlayerTexture/");
+	CLoadedModelInfo* WeaponModelInfo = pResourceManager->BringModelInfo("Model/UMP5.bin", "Model/Textures/UMP5Texture/");
+
 
 	if (PlayerModelInfo) {
 		SetChild(PlayerModelInfo->m_pModelRootObject,true);

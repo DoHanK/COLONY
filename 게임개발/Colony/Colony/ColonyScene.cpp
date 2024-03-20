@@ -89,6 +89,9 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			if(0 < m_DepthRender)
 				m_DepthRender--;
 			break;
+		case 'B':
+			m_bBoundingRender = (m_bBoundingRender + 1) % 2;
+			break;
 		default:
 			break;
 		}
@@ -297,6 +300,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pCamera->GenerateProjectionMatrix(1.01, 1000.f, ASPECT_RATIO, 60.f);
 	m_pCamera->RegenerateViewMatrix();
 
+	//쉐이더 로드
 	m_pGhostTraillerShader = new GhostTraillerShader();
 	m_pGhostTraillerShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pGhostTraillerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -307,55 +311,46 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBoundigShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	m_pBoundigShader->AddRef();
 
-	CLoadedModelInfo* pAngrybotModel = pResourceManager->BringModelInfo("Model/JU_Mannequin.bin", "Model/Textures/PlayerTexture/");
-	CLoadedModelInfo* pAngrybotModel1 = pResourceManager->BringModelInfo("Model/UMP5.bin", "Model/Textures/UMP5Texture/");
-
-	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pAngrybotModel, pAngrybotModel1);
-	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
-	m_pCamera->SetPlayer(m_pPlayer);
-
-
-
+	m_pNevMeshShader = new NevMeshShader();
+	m_pNevMeshShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pNevMeshShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pNevMeshShader->AddRef();
 
 	m_pPlaneShader = new PlaneShader();
 	m_pPlaneShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pPlaneShader->AddRef();
 
 
+
 	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/Scene.bin","Model/Textures/scene/", pResourceManager);
 
 	//Octree Crate
 	XMFLOAT3 OctreeScale = m_pScenePlane->m_BoundingBox.Extents;
-	OctreeScale = Vector3::ScalarProduct(OctreeScale, 500.f, false);
+	
 	OctreeScale.y = 20.f;
-
 	XMFLOAT3 OctreeCenter = XMFLOAT3(-1.0f,0,0);
 	OctreeCenter.y = 20.f;
 	m_pQuadTree = new QuadTree(pd3dDevice, pd3dCommandList, 0, OctreeCenter, OctreeScale);
-	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, 2);
+	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, QuadtreeDepth);
+
+
+	
+	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, CELL_SIZE, H_MAPSIZE_X, H_MAPSIZE_Y ,true);
+	m_pNevMeshBaker->LoadNevMesh();
+
+	m_pPathFinder = new PathFinder();
+	m_pPathFinder->BuildGraphFromCell(m_pNevMeshBaker->m_Grid, m_pNevMeshBaker->m_WidthCount, m_pNevMeshBaker->m_HeightCount);
+
+	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pResourceManager);
+	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
+	m_pCamera->SetPlayer(m_pPlayer);
 
 	m_pskybox = new SkyBox(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pskybox->AddRef();
 
-	BuildDefaultLightsAndMaterials();
-
-
-	m_pNevMeshShader = new NevMeshShader();
-	m_pNevMeshShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	m_pNevMeshShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	m_pNevMeshShader->AddRef();
-
-	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, CELL_SIZE, H_MAPSIZE_X, H_MAPSIZE_Y);
-
-	m_pNevMeshBaker->BakeNevMeshByObject(pd3dDevice, pd3dCommandList, m_pSceneObject);
-	m_pPathFinder = new PathFinder();
-	m_pPathFinder->BuildGraphFromCell(m_pNevMeshBaker->m_Grid, m_pNevMeshBaker->m_WidthCount, m_pNevMeshBaker->m_HeightCount);
-
-	
-
 	//Monster Create
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 100; ++j) {
+	for (int j = 0; j < 2; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
@@ -375,6 +370,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 
 
+
+	BuildDefaultLightsAndMaterials();
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -568,7 +565,6 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	for (auto& GO : m_pGameObject) {
 		GO->Animate(fTimeElapsed);
-		//GO->SetPosition(GO->GetPosition().x + fTimeElapsed * (rand() % 4) , GO->GetPosition().y, GO->GetPosition().z + fTimeElapsed * (rand() % 4));
 		((AlienSpider*)(GO))->Update(fTimeElapsed);
 	}
 
@@ -584,18 +580,42 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	//색깔선정
 	XMFLOAT3 xmfloat3(1.0f, 0.0, 0);
-
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
 
+	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 	for (auto& GO : m_pGameObject) {
-		GO->BoudingBoxRender(pd3dCommandList);
+		GO->BoudingBoxRender(pd3dCommandList, true);
 	}
 
-	m_pPlayer->BoudingBoxRender(pd3dCommandList);
+	//m_pPlayer->BoudingBoxRender(pd3dCommandList,true);
+
 
 	for (auto& GO : m_pSceneObject) {
-		GO->BoudingBoxRender(pd3dCommandList);
+		GO->BoudingBoxRender(pd3dCommandList,false);
 	}
+
+	//쿼드 트리
+	//색깔선정
+	xmfloat3 = XMFLOAT3(1.0f, 1.0f, 0);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
+	m_pQuadTree->BoundingRendering(pd3dCommandList, m_DepthRender);
+
+
+	////네비메쉬
+	m_pNevMeshShader->OnPrepareRender(pd3dCommandList);
+	m_pNevMeshBaker->BoundingRendering(pd3dCommandList);
+	
+	////파란색
+	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
+	for (auto& GO : m_pGameObject) {
+
+		xmfloat3 = XMFLOAT3(0.0f, 0.0f, 1.0f);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+		((AlienSpider*)(GO))->RouteRender(pd3dCommandList);
+	}
+
 }
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
@@ -627,25 +647,7 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	}
 
 
-	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
-	//m_pQuadTree->BoundingRendering(pd3dCommandList,m_DepthRender);
-	//m_pPathFinder->TargetNSourceRender(pd3dCommandList);
-
-	for (auto& GO : m_pGameObject) {
-		//색깔선정
-		XMFLOAT3 xmfloat3(0.0f, 0.0f, 1.0f);
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-		XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-
-		((AlienSpider*)(GO))->RouteRender(pd3dCommandList);
-	}
-
-	m_pNevMeshShader->OnPrepareRender(pd3dCommandList);
-	m_pNevMeshBaker->BoundingRendering(pd3dCommandList);
-
-
-	//BoudingRendering(pd3dCommandList);
+	if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
 }
 
 void GamePlayScene::ReleaseUploadBuffers()

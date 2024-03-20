@@ -449,12 +449,12 @@ float4 PSNevMesh(PS_NEVMESH_OUTPUT input) : SV_TARGET
     float4 output;
     if (input.use)
     {
-        output = float4(0.0f, 0.2f, 0.0f, 1.0f);
+        output = float4(0.0f, 0.7f, 0.0f, 1.0f);
         
     }
     else
     {
-        output = float4(0.2f, 0.0f, 0.0f, 1.0f);
+        output = float4(0.7f, 0.0f, 0.0f, 1.0f);
     }
     return output;
 

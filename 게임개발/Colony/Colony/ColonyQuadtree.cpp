@@ -98,14 +98,6 @@ void QuadTree::InsertDynamicObject()
 void QuadTree::BoundingRendering(ID3D12GraphicsCommandList* pd3dCommandList,int DepthLevel){
 
 	if (m_BoundingMesh && (DepthLevel == m_depth) ) {
-
-		XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-
-		XMFLOAT3 xmfloat3(0.0f,0.5f,0);
-
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3,&xmfloat3,36);
-
 		m_BoundingMesh->Render(pd3dCommandList);
 	}
 	//ChildNode

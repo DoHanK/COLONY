@@ -38,6 +38,9 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 
 	m_pHead = pSpider->m_pModelRootObject->FindFrame("DEF-HEAD");
 
+	m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
+	m_pBoundingMesh->AddRef();
+	m_BoundingBox = pSpider->m_pModelRootObject->FindFrame("polySurface10")->m_BoundingBox;
 
 	//Ghost Effect
 	m_ppd3dcbSkinningBoneTransforms = new ID3D12Resource * [TRAILER_COUNT];
@@ -59,7 +62,6 @@ AlienSpider::~AlienSpider()
 	if (m_pBrain) delete m_pBrain;
 	if (m_pSoul) delete m_pSoul;
 	if(m_pRoute) m_pRoute->Release();
-
 
 	//Ghost Effect 
 	for (int i = 0; i < TRAILER_COUNT; ++i) {
@@ -115,9 +117,9 @@ void AlienSpider::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCa
 				}
 				for (int j = TRAILER_COUNT-1; j > -1; --j) {
 
-					//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1,  &m_GhostNum[j], 33);
-					//((SkinnedMesh*)m_pSkinnedModel->m_pMesh)->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[j];
-					//	m_pSkinnedModel->m_pMesh->Render(pd3dCommandList, 0);
+					pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1,  &m_GhostNum[j], 33);
+					((SkinnedMesh*)m_pSkinnedModel->m_pMesh)->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[j];
+						m_pSkinnedModel->m_pMesh->Render(pd3dCommandList, 0);
 
 				}
 
@@ -132,6 +134,19 @@ void AlienSpider::RouteRender(ID3D12GraphicsCommandList* pd3dCommandList)
 	if (m_pRoute) {
 		m_pRoute->Render(pd3dCommandList);
 	}
+}
+
+void AlienSpider::BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, bool isUpdateBounding, Camera* pCamera)
+{
+	if (m_pBoundingMesh) {
+		BoundingOrientedBox MoveBox;
+		m_BoundingBox.Transform(MoveBox, DirectX::XMLoadFloat4x4(&m_xmf4x4World));
+
+		((BoundingBoxMesh*)m_pBoundingMesh)->UpdateVertexPosition(&MoveBox);
+
+		m_pBoundingMesh->Render(pd3dCommandList);
+	}
+
 }
 
 void AlienSpider::Update(float fTimeElapsed)
