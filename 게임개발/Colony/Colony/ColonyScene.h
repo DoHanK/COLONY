@@ -11,6 +11,7 @@
 #include "NevMeshBaker.h"
 #include "UIControlHelper.h"
 #include "PathFinder.h"
+#include "PerceptionMesh.h"
 
 class UIManager;
 #define MAX_LIGHTS						16 
@@ -156,6 +157,6 @@ protected:
 	bool								m_bBoundingRender = false;
 	int									m_DepthRender = 0;
 
-
-
+	PerceptionRangeMesh*						m_pPerceptionRangeMesh = NULL;
+	BoundingBoxMesh*							m_pTestBox;
 };

@@ -36,6 +36,11 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 	//Alien 특성
 	m_EndureLevel = floatEndureDis(gen);
 
+	//인식
+	m_pPerception = new Perception(this);
+
+
+
 	m_pHead = pSpider->m_pModelRootObject->FindFrame("DEF-HEAD");
 
 	m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
@@ -61,7 +66,10 @@ AlienSpider::~AlienSpider()
 	//Brain
 	if (m_pBrain) delete m_pBrain;
 	if (m_pSoul) delete m_pSoul;
+	//perception
+	if (m_pPerception) delete m_pPerception;
 	if(m_pRoute) m_pRoute->Release();
+
 
 	//Ghost Effect 
 	for (int i = 0; i < TRAILER_COUNT; ++i) {
@@ -127,6 +135,16 @@ void AlienSpider::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCa
 		}
 	}
 
+}
+
+void AlienSpider::PerceptionBindRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (m_pPerceptionRangeMesh)m_pPerceptionRangeMesh->PerceptionBindRender(pd3dCommandList);
+}
+
+void AlienSpider::PerceptRangeRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if(m_pPerceptionRangeMesh)m_pPerceptionRangeMesh->PerceptionRangeRender(pd3dCommandList,0);
 }
 
 void AlienSpider::RouteRender(ID3D12GraphicsCommandList* pd3dCommandList)

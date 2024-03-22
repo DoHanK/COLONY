@@ -348,6 +348,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pskybox = new SkyBox(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pskybox->AddRef();
 
+
+	m_pPerceptionRangeMesh = new PerceptionRangeMesh(pd3dDevice, pd3dCommandList);
 	//Monster Create
 	m_pGameObject.reserve(400);
 	for (int j = 0; j < 2; ++j) {
@@ -362,14 +364,17 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
 			//p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
 			p->SetPosition(0.f, 0.f, 0.f);
+			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 20);
 			p->SetGhostShader(m_pGhostTraillerShader);
 			m_pGameObject.push_back(p);
 
 		}
 	}
+	
 
-
+	m_pTestBox = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
+	
 
 	BuildDefaultLightsAndMaterials();
 
@@ -406,6 +411,9 @@ void GamePlayScene::ReleaseObjects()
 	
 	
 	if (m_pskybox)m_pskybox->Release();
+	if (m_pPerceptionRangeMesh) m_pPerceptionRangeMesh->Release();
+
+	if (m_pTestBox) m_pTestBox->Release();
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -564,58 +572,101 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	time += m_fElapsedTime;
 
 	for (auto& GO : m_pGameObject) {
-		GO->Animate(fTimeElapsed);
+
 		((AlienSpider*)(GO))->Update(fTimeElapsed);
+
+		((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
+		GO->Animate(fTimeElapsed);
+		if (((AlienSpider*)(GO))->m_pPlayer != NULL) {
+			XMFLOAT3 POS(m_pPlayer->m_xmf4x4World._41, m_pPlayer->m_xmf4x4World._42+ AISIGHTHEIGHT, m_pPlayer->m_xmf4x4World._43);
+			BoundingOrientedBox BOS(POS, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+			m_pTestBox->UpdateVertexPosition(&BOS);
+		}
 	}
 
 
 	m_pPlayer->Animate(fTimeElapsed);
 	
 
+
 }
 
 void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
-
-	//색깔선정
-	XMFLOAT3 xmfloat3(1.0f, 0.0, 0);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-
+	XMFLOAT3 xmfloat3;
 	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-	for (auto& GO : m_pGameObject) {
-		GO->BoudingBoxRender(pd3dCommandList, true);
-	}
-
-	//m_pPlayer->BoudingBoxRender(pd3dCommandList,true);
-
-
-	for (auto& GO : m_pSceneObject) {
-		GO->BoudingBoxRender(pd3dCommandList,false);
-	}
-
-	//쿼드 트리
-	//색깔선정
-	xmfloat3 = XMFLOAT3(1.0f, 1.0f, 0);
+	xmfloat3 = XMFLOAT3(0.0f, 0.0, 1.0f);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
-	m_pQuadTree->BoundingRendering(pd3dCommandList, m_DepthRender);
 
+	m_pTestBox->Render(pd3dCommandList);
 
-	////네비메쉬
-	m_pNevMeshShader->OnPrepareRender(pd3dCommandList);
-	m_pNevMeshBaker->BoundingRendering(pd3dCommandList);
-	
-	////파란색
-	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
 	for (auto& GO : m_pGameObject) {
 
-		xmfloat3 = XMFLOAT3(0.0f, 0.0f, 1.0f);
+		xmfloat3 = XMFLOAT3(0.0f, 0.0, 1.0f);
 		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-		((AlienSpider*)(GO))->RouteRender(pd3dCommandList);
+		xmf4x4World = GO->m_xmf4x4World;
+		xmf4x4World._42 = 0.8f;
+		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+		GO->PerceptRangeRender(pd3dCommandList);
+
+		xmfloat3 = XMFLOAT3(1.0f, 0.0, 0.0f);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+
+		//눈 레이저
+		((AlienSpider*)(GO))->PerceptionBindRender(pd3dCommandList);
+
+		 xmfloat3=XMFLOAT3(1.0f, 0.0, 0.0f);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+		XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+		GO->BoudingBoxRender(pd3dCommandList, true);
+		
 	}
 
+	if (true) {
+		xmf4x4World = Matrix4x4::Identity();
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+		//에일리언 경로
+		//////파란색
+		m_pBoundigShader->OnPrepareRender(pd3dCommandList);
+		for (auto& GO : m_pGameObject) {
+
+			xmfloat3 = XMFLOAT3(0.0f, 0.0f, 1.0f);
+			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+			((AlienSpider*)(GO))->RouteRender(pd3dCommandList);
+		}
+
+
+		m_pPlayer->BoudingBoxRender(pd3dCommandList, true);
+
+
+
+		for (auto& GO : m_pSceneObject) {
+			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+			GO->BoudingBoxRender(pd3dCommandList, false);
+
+		}
+
+		//쿼드 트리
+		//초록색
+		xmfloat3 = XMFLOAT3(1.0f, 1.0f, 0);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+		m_pBoundigShader->OnPrepareRender(pd3dCommandList);
+		m_pQuadTree->BoundingRendering(pd3dCommandList, m_DepthRender);
+
+
+		//////네비메쉬
+		m_pNevMeshShader->OnPrepareRender(pd3dCommandList);
+		m_pNevMeshBaker->BoundingRendering(pd3dCommandList);
+
+
+
+	}
 }
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
@@ -633,19 +684,22 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
-	m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
+	if (true) {
+		m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
 
-	for (auto& GO : m_pGameObject) {
-		GO->Render(pd3dCommandList);
-	}
+		for (auto& GO : m_pGameObject) {
+			GO->Render(pd3dCommandList);
+		}
 
-	m_pPlayer->Render(pd3dCommandList);
+		m_pPlayer->Render(pd3dCommandList);
 
-	for (auto& GO : m_pSceneObject) {
+		for (auto& GO : m_pSceneObject) {
 			GO->Render(pd3dCommandList);
 
-	}
+		}
 
+
+	}
 
 	if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
 }
@@ -668,6 +722,7 @@ void GamePlayScene::ReleaseUploadBuffers()
 
 	if (m_pNevMeshBaker) m_pNevMeshBaker->ReleaseUploadBuffers();
 
+	if (m_pPerceptionRangeMesh) m_pPerceptionRangeMesh->ReleaseUploadBuffers();
 
 }
 

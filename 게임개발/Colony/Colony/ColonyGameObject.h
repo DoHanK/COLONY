@@ -387,8 +387,9 @@ public:
 	virtual void UpdateMatrix() { }
 	virtual void UpdateBoundingBox();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
+	virtual void PerceptRangeRender(ID3D12GraphicsCommandList* pd3dCommandList) {};
 	virtual void BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, bool isUpdateBounding = true, Camera* pCamera = NULL);
-
+	virtual void PerceptionBindRender(ID3D12GraphicsCommandList* pd3dCommandList) {}
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);

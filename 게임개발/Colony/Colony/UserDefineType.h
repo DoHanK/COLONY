@@ -53,8 +53,14 @@ enum AlienAnimationTrack {
 #define AlienSpinSpeed  1.0f
 #define friction		2.0f
 
+//AI 시각 범위
+#define AISIGHTRANGE	11.f
+#define AIFOV			60.f
+#define AIFOVHEIGHT		0.4f
 
+#define AISIGHTHEIGHT	0.7f
 
+#define PlayerRange	    0.001f
 ////////////////////////////
 
 //Player 

@@ -491,8 +491,8 @@ D3D12_RASTERIZER_DESC BoundingShader::CreateRasterizerState()
 {
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
-	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
 	d3dRasterizerDesc.DepthBias = 0;
 	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
@@ -641,7 +641,6 @@ NevMeshShader::~NevMeshShader()
 {
 }
 
-
 D3D12_INPUT_LAYOUT_DESC NevMeshShader::CreateInputLayout()
 {
 	UINT nInputElementDescs = 2;
@@ -657,16 +656,16 @@ D3D12_INPUT_LAYOUT_DESC NevMeshShader::CreateInputLayout()
 	return(d3dInputLayoutDesc);
 }
 
-
-
-
 D3D12_SHADER_BYTECODE NevMeshShader::CreateVertexShader()
 {
 	return(BasicShader::CompileShaderFromFile(L"Shaders.hlsl", "VSNevMesh", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
-
 D3D12_SHADER_BYTECODE NevMeshShader::CreatePixelShader()
 {
 	return(BasicShader::CompileShaderFromFile(L"Shaders.hlsl", "PSNevMesh", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
+
+
+
+

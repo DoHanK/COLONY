@@ -25,6 +25,7 @@ class GameObject;
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 class BasicMesh{
 public:
+	BasicMesh() {};
 	BasicMesh(ID3D12Device* pd3dDeivce, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual ~BasicMesh();
 private:

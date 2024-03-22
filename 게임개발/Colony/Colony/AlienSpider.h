@@ -6,12 +6,14 @@
 #include "ColonyShader.h"
 #include "GoalThink.h"
 #include "AIController.h"
+#include "PerceptionMesh.h"
+#include "Perception.h"
 #define TRAILER_COUNT 5
 class AlienSpiderAnimationController;
 
 class GoalThink;
 class AIController;
-
+class Perception;
 
 
 
@@ -33,6 +35,11 @@ public:
 	//PathManager
 	PathFinder*		m_pPathFinder;
 	RouteMesh* m_pRoute;
+
+	//시야 범위
+	PerceptionRangeMesh*		m_pPerceptionRangeMesh = NULL;
+	Perception*					m_pPerception = NULL;
+	Player*						m_pPlayer = NULL;
 public:
 	//이동
 	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -55,10 +62,13 @@ public:
 	
 	GhostTraillerShader* m_pGhostShader = NULL;
 public:
+	void SetPerceptionRangeMesh(PerceptionRangeMesh* pPerceptMesh) { m_pPerceptionRangeMesh = pPerceptMesh; };
 	void SetGhostShader(GhostTraillerShader* pShader);
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 
+	void PerceptionBindRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	void PerceptRangeRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	void RouteRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, bool isUpdateBounding = true, Camera* pCamera = NULL);
 	void Update(float fTimeElapsed);

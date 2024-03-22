@@ -89,6 +89,7 @@ inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
 inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
 inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
 inline float XM2CalDis(const XMFLOAT2& a, const XMFLOAT2& b) { return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)); }
+inline float XM3CalDis(const XMFLOAT3& a, const XMFLOAT3& b) { return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z)); }
 inline float VectorSize(XMFLOAT3 V) {	return (float)sqrt(V.x * V.x + V.y * V.y + V.z * V.z);
 }
 inline int ReadUnityBinaryString(FILE* pFile, char* pstrToken, BYTE* pnStrLength)

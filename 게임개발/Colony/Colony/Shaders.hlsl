@@ -426,7 +426,6 @@ struct VS_NEVMESH_INPUT
     uint use : USE;
 };
 
-
 struct PS_NEVMESH_OUTPUT
 {
     float4 positionH : SV_POSITION;
@@ -462,3 +461,4 @@ float4 PSNevMesh(PS_NEVMESH_OUTPUT input) : SV_TARGET
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+

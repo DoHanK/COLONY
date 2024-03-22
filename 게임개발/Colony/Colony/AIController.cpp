@@ -4,7 +4,6 @@ AIController::AIController(GoalThink* pBrain, AlienSpider* pBody) :m_pBrain(pBra
 
 };
 
-
 bool AIController::ExecuteGoal(float fTimeElapsed)
 {
 	m_pBrain->Process();

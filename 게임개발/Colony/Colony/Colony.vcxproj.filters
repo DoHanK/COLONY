@@ -195,6 +195,9 @@
     <ClInclude Include="Perception.h">
       <Filter>GameHeader\GameAiHeader\SenseHeader</Filter>
     </ClInclude>
+    <ClInclude Include="PerceptionMesh.h">
+      <Filter>GameHeader\GameAiHeader\SenseHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -291,6 +294,9 @@
       <Filter>GameCpp\GameAiCpp\GoalCpp\SingleGoalCpp</Filter>
     </ClCompile>
     <ClCompile Include="Perception.cpp">
+      <Filter>GameCpp\GameAiCpp\SenseCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="PerceptionMesh.cpp">
       <Filter>GameCpp\GameAiCpp\SenseCpp</Filter>
     </ClCompile>
   </ItemGroup>
