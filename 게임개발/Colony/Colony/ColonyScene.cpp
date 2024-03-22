@@ -373,7 +373,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 	
 
-	m_pTestBox = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
+	m_pTestBox = new ShphereMesh(pd3dDevice, pd3dCommandList,20,20, PlayerRange);
 	
 
 	BuildDefaultLightsAndMaterials();
@@ -573,15 +573,11 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	for (auto& GO : m_pGameObject) {
 
-		((AlienSpider*)(GO))->Update(fTimeElapsed);
+		//((AlienSpider*)(GO))->Update(fTimeElapsed);
 
 		((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
 		GO->Animate(fTimeElapsed);
-		if (((AlienSpider*)(GO))->m_pPlayer != NULL) {
-			XMFLOAT3 POS(m_pPlayer->m_xmf4x4World._41, m_pPlayer->m_xmf4x4World._42+ AISIGHTHEIGHT, m_pPlayer->m_xmf4x4World._43);
-			BoundingOrientedBox BOS(POS, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
-			m_pTestBox->UpdateVertexPosition(&BOS);
-		}
+
 	}
 
 
@@ -599,24 +595,37 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-	xmfloat3 = XMFLOAT3(0.0f, 0.0, 1.0f);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
 
-	m_pTestBox->Render(pd3dCommandList);
 
+	
 	for (auto& GO : m_pGameObject) {
+
+		if (((AlienSpider*)(GO))->m_pPlayer != NULL) {
+
+			XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+			xmfloat3 = XMFLOAT3(0.0f, 1.0, 0.0f);
+			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+			XMFLOAT3 POS(m_pPlayer->m_xmf4x4World._41, m_pPlayer->m_xmf4x4World._42 + AISIGHTHEIGHT, m_pPlayer->m_xmf4x4World._43);
+			xmf4x4World._41 = POS.x;
+			xmf4x4World._42 = POS.y;
+			xmf4x4World._43 = POS.z;
+
+			XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+			m_pTestBox->Render(pd3dCommandList,0);
+		}
 
 		xmfloat3 = XMFLOAT3(0.0f, 0.0, 1.0f);
 		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+
 		xmf4x4World = GO->m_xmf4x4World;
-		xmf4x4World._42 = 0.8f;
+		xmf4x4World._42 = AISIGHTHEIGHT;
 		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
 		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 		GO->PerceptRangeRender(pd3dCommandList);
 
 		xmfloat3 = XMFLOAT3(1.0f, 0.0, 0.0f);
 		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-
 		//눈 레이저
 		((AlienSpider*)(GO))->PerceptionBindRender(pd3dCommandList);
 
@@ -634,20 +643,22 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 		//에일리언 경로
 		//////파란색
 		m_pBoundigShader->OnPrepareRender(pd3dCommandList);
+		xmfloat3 = XMFLOAT3(0.0f, 0.0f, 1.0f);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
 		for (auto& GO : m_pGameObject) {
 
-			xmfloat3 = XMFLOAT3(0.0f, 0.0f, 1.0f);
-			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+
 			((AlienSpider*)(GO))->RouteRender(pd3dCommandList);
 		}
 
 
-		m_pPlayer->BoudingBoxRender(pd3dCommandList, true);
+		//m_pPlayer->BoudingBoxRender(pd3dCommandList, true);
 
 
 
+			xmfloat3 = XMFLOAT3(1.0f, 0.0f, 0.0f);
+			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
 		for (auto& GO : m_pSceneObject) {
-			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 			GO->BoudingBoxRender(pd3dCommandList, false);
 
 		}

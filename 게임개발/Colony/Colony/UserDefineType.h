@@ -58,9 +58,9 @@ enum AlienAnimationTrack {
 #define AIFOV			60.f
 #define AIFOVHEIGHT		0.4f
 
-#define AISIGHTHEIGHT	0.7f
+#define AISIGHTHEIGHT	0.9f
 
-#define PlayerRange	    0.001f
+#define PlayerRange	    0.4f
 ////////////////////////////
 
 //Player 

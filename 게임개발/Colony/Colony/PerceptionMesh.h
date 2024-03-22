@@ -13,6 +13,7 @@ public:
 	float m_fRadius		= AISIGHTRANGE;
 	float m_fov			= AIFOV * XM_PI / 180.0f;
 	float m_fovHeight	= AIFOVHEIGHT;
+
 //Fov 
 public:
 	XMFLOAT3* m_pVertices = NULL;

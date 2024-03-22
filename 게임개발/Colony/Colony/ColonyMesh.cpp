@@ -829,3 +829,107 @@ SkyBoxMesh::SkyBoxMesh(ID3D12Device* pd3dDeivce, ID3D12GraphicsCommandList* pd3d
 }
 
 SkyBoxMesh::~SkyBoxMesh() {}
+
+ShphereMesh::ShphereMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nslice, int nstack ,float radian): 
+	m_nSlices(nslice), 
+	m_nStacks(nstack),
+	m_fRadius(radian)
+{
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
+	m_nVertices = 2 + (m_nSlices * (m_nStacks - 1));
+	m_pxmf3Positions = new XMFLOAT3[m_nVertices];
+
+	//180도를 nStacks 만큼 분할한다. 
+	float fDeltaPhi = float(XM_PI / m_nStacks);
+	//360도를 nSlices 만큼 분할한다. 
+	float fDeltaTheta = float((2.0f * XM_PI) / m_nSlices);
+
+	int k = 0;
+
+	float theta_i, phi_j;
+
+	m_pxmf3Positions[k++] = XMFLOAT3(0.0f, +m_fRadius, 0.0f);
+
+	for (int j = 1; j < m_nStacks; ++j) {
+
+		phi_j = fDeltaPhi * j;
+		for (int i = 0; i < m_nSlices; i++)
+		{
+			theta_i = fDeltaTheta * i;
+			m_pxmf3Positions[k++] = XMFLOAT3(m_fRadius * sinf(phi_j) * cosf(theta_i),
+				m_fRadius * cosf(phi_j), m_fRadius * sinf(phi_j) * sinf(theta_i));
+
+			
+		}
+
+	}
+	m_pxmf3Positions[k++] = XMFLOAT3(0.0f, -m_fRadius, 0.0f);
+
+	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions,
+		sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+		&m_pd3dPositionUploadBuffer);
+
+	m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
+	m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+	m_nSubMeshes = 1;
+
+	int nIndices = (m_nSlices * 3) * 2 + (m_nSlices * (m_nStacks - 2) * 3 * 2);
+
+	m_pnSubSetIndices = new int[m_nSubMeshes];
+	m_ppnSubSetIndices = new UINT * [m_nSubMeshes];
+
+	m_ppd3dSubSetIndexBuffers = new ID3D12Resource * [m_nSubMeshes];
+	m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource * [m_nSubMeshes];
+	m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
+
+
+	m_pnSubSetIndices[0] = nIndices;
+	m_ppnSubSetIndices[0] = new UINT[m_pnSubSetIndices[0]];
+	k = 0;
+
+	//구의 위쪽 원뿔의 표면을 표현하는 삼각형들의 인덱스이다. 
+	for (int i = 0; i < m_nSlices; i++)
+	{
+		m_ppnSubSetIndices[0][k++] = 0;
+		m_ppnSubSetIndices[0][k++] = 1 + ((i + 1) % m_nSlices);
+		m_ppnSubSetIndices[0][k++] = 1 + i;
+	}
+	//구의 원기둥의 표면을 표현하는 삼각형들의 인덱스이다. 
+	for (int j = 0; j < m_nStacks-2; j++)
+	{
+		for (int i = 0; i < m_nSlices; i++)
+		{
+			//사각형의 첫 번째 삼각형의 인덱스이다. 
+			m_ppnSubSetIndices[0][k++] = 1 + (i + (j * m_nSlices));
+			m_ppnSubSetIndices[0][k++] = 1 + (((i + 1) % m_nSlices) + (j * m_nSlices));
+			m_ppnSubSetIndices[0][k++] = 1 + (i + ((j + 1) * m_nSlices));
+			//사각형의 두 번째 삼각형의 인덱스이다.
+			m_ppnSubSetIndices[0][k++] = 1 + (i + ((j + 1) * m_nSlices));
+			m_ppnSubSetIndices[0][k++] = 1 + (((i + 1) % m_nSlices) + (j * m_nSlices));
+			m_ppnSubSetIndices[0][k++] = 1 + (((i + 1) % m_nSlices) + ((j + 1) * m_nSlices));
+		}
+	}
+
+
+	//구의 아래쪽 원뿔의 표면을 표현하는 삼각형들의 인덱스이다. 
+	for (int i = 0; i < m_nSlices; i++)
+	{
+		m_ppnSubSetIndices[0][k++] = (m_nVertices - 1);
+		m_ppnSubSetIndices[0][k++] = ((m_nVertices - 1) - m_nSlices) + i;
+		m_ppnSubSetIndices[0][k++] = ((m_nVertices - 1) - m_nSlices) + ((i + 1) % m_nSlices);
+	}
+
+
+
+	m_ppd3dSubSetIndexBuffers[0] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_ppnSubSetIndices[0], sizeof(UINT) * m_pnSubSetIndices[0], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_ppd3dSubSetIndexUploadBuffers[0]);
+
+	m_pd3dSubSetIndexBufferViews[0].BufferLocation = m_ppd3dSubSetIndexBuffers[0]->GetGPUVirtualAddress();
+	m_pd3dSubSetIndexBufferViews[0].Format = DXGI_FORMAT_R32_UINT;
+	m_pd3dSubSetIndexBufferViews[0].SizeInBytes = sizeof(UINT) * m_pnSubSetIndices[0];
+
+
+
+
+}

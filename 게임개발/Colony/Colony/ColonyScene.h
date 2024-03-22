@@ -158,5 +158,5 @@ protected:
 	int									m_DepthRender = 0;
 
 	PerceptionRangeMesh*						m_pPerceptionRangeMesh = NULL;
-	BoundingBoxMesh*							m_pTestBox;
+	ShphereMesh*							m_pTestBox;
 };
