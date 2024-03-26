@@ -69,8 +69,6 @@ public:
 	UINT GetTextureType() { return(m_nTextureType); }
 
 	void ReleaseUploadBuffers();
-	ID3D12Resource* GetResource(int i) { return (m_ppd3dTextures[i]); };
-	ID3D12Resource* CreateTexture(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue, UINT nResourceType, UINT nIndex);
 
 };
 
@@ -370,7 +368,6 @@ public:
 	XMFLOAT4X4						m_xmf4x4World;
 
 	BoundingOrientedBox  m_BoundingBox = BoundingOrientedBox();
-	BoundingBox m_AABoundingBox = BoundingBox();
 
 	GameObject* m_pParent = NULL;
 	GameObject* m_pChild = NULL;
@@ -389,7 +386,6 @@ public:
 
 	virtual void UpdateMatrix() { }
 	virtual void UpdateBoundingBox();
-	void	UpdateAABoundingBox();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 	virtual void PerceptRangeRender(ID3D12GraphicsCommandList* pd3dCommandList) {};
 	virtual void BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, bool isUpdateBounding = true, Camera* pCamera = NULL);

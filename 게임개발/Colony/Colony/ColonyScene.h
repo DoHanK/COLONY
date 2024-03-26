@@ -15,7 +15,6 @@
 
 class UIManager;
 #define MAX_LIGHTS						16 
-#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
 
 #define POINT_LIGHT						1
 #define SPOT_LIGHT						2
@@ -75,7 +74,7 @@ public:
 	virtual void ReleaseUploadBuffers() {};
 	virtual void AnimateObjects(float fTimeElapsed) {};
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL) {};
-	virtual void MakeShadowMap(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL) {};
+
 
 	virtual UINT GetType() { return Basic; };
 
@@ -119,12 +118,9 @@ public:
 	void AnimateObjects(float fTimeElapsed);
 	void BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
-	void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
-	BoundingBox CalculateBoundingBox();
 
 	virtual void ReleaseUploadBuffers();
 	virtual UINT GetType() { return GamePlay; };
-	void MakeShadowMap(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera=NULL);
 
 protected:
 
@@ -156,7 +152,7 @@ protected:
 	NevMeshShader*						m_pNevMeshShader = NULL;
 	GhostTraillerShader*				m_pGhostTraillerShader =NULL;
 	BoundingShader*						m_pBoundigShader = NULL;
-	ShadowMapRenderShader*				m_pShadowMapRenderShader = NULL;
+
 
 	bool								m_bBoundingRender = false;
 	int									m_DepthRender = 0;

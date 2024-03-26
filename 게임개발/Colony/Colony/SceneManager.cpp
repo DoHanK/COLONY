@@ -140,10 +140,6 @@ void SceneManager::AnimationGameObjects(const float& m_ElapsedTime)
 void SceneManager::RenderScene(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
-	if (m_SceneStack.top()->GetType() == GamePlay) {
-		m_SceneStack.top()->MakeShadowMap(pd3dCommandList, m_pCamera);
-	}
-
 	m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET, m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0));
 	m_pD3Device->SetRtIntoTexture(m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0), RtvView[m_SceneStack.top()->GetType()]);
 	if(!m_SceneStack.empty()) m_SceneStack.top()->Render(pd3dCommandList);
