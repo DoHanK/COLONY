@@ -114,6 +114,13 @@ void Texture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromWICFile(pd3dDevice, pd3dCommandList, pszFileName, &(m_ppd3dTextureUploadBuffers[nIndex]), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
+ID3D12Resource* Texture::CreateTexture(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue, UINT nResourceType, UINT nIndex)
+{
+	m_pnResourceTypes[nIndex] = nResourceType;
+	m_ppd3dTextures[nIndex] = ::CreateTexture2DResource(pd3dDevice, nWidth, nHeight, 1, 0, dxgiFormat, d3dResourceFlags, d3dResourceStates, pd3dClearValue);
+	return(m_ppd3dTextures[nIndex]);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //										Material Class												//
@@ -664,6 +671,17 @@ void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList
 {
 }
 
+void GameObject::UpdateAABoundingBox()
+{
+	if (m_pMesh) {
+		m_pMesh->GetAABoundingBox().Transform(m_AABoundingBox, DirectX::XMLoadFloat4x4(&m_xmf4x4World));
+
+		//((BoundingBoxMesh*)m_pBoundingMesh)->UpdateVertexPosition(&m_AABoundingBox);
+	}
+	if (m_pSibling) m_pSibling->UpdateBoundingBox();
+	if (m_pChild) m_pChild->UpdateBoundingBox();
+}
+
 void GameObject::UpdateBoundingBox()
 {
 	if (m_pMesh) {
@@ -1167,6 +1185,7 @@ CLoadedModelInfo* GameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd3
 
 	return(pLoadedModel);
 }
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -462,3 +462,18 @@ float4 PSNevMesh(PS_NEVMESH_OUTPUT input) : SV_TARGET
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct PS_DEPTH_OUTPUT
+{
+    float fzPosition : SV_Target;
+    float fDepth : SV_Depth;
+};
+
+PS_DEPTH_OUTPUT PSDepthWriteShader(VS_STANDARD_OUTPUT input)
+{
+    PS_DEPTH_OUTPUT output;
+
+    output.fzPosition = input.position.z;
+    output.fDepth = input.position.z;
+
+    return (output);
+}

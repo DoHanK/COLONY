@@ -374,9 +374,16 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 
 	m_pTestBox = new ShphereMesh(pd3dDevice, pd3dCommandList,20,20, PlayerRange);
+	 
 	
-
 	BuildDefaultLightsAndMaterials();
+
+	//*** 조명 생성 이후에 그림자 맵 생성해야 함
+	m_pShadowMapRenderShader = new ShadowMapRenderShader(m_pLights);
+	m_pShadowMapRenderShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pShadowMapRenderShader->BuildObjects(pd3dDevice, pd3dCommandList,NULL);
+	m_pShadowMapRenderShader->AddRef();
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -683,17 +690,17 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
 
-	//카메라 초기화
-	if (m_pCamera) {
-		m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-		m_pCamera->UpdateShaderVariables(pd3dCommandList);
-	}
+	////카메라 초기화
+	//if (m_pCamera) {
+	//	m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	//	m_pCamera->UpdateShaderVariables(pd3dCommandList);
+	//}
 
 
-	UpdateShaderVariables(pd3dCommandList);
-	                                                                                                                                                                                     
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+	//UpdateShaderVariables(pd3dCommandList);
+	//                                                                                                                                                                                     
+	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	//pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
 	if (true) {
 		m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
@@ -708,12 +715,55 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 			GO->Render(pd3dCommandList);
 
 		}
-
-
 	}
 
 	if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
 }
+
+void GamePlayScene::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+{
+
+	//카메라 초기화
+	if (pCamera) {
+		pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		pCamera->UpdateShaderVariables(pd3dCommandList);
+	}
+
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+
+	for (auto& GO : m_pGameObject) {
+		GO->Render(pd3dCommandList);
+	}
+
+	m_pPlayer->Render(pd3dCommandList);
+
+	for (auto& GO : m_pSceneObject) {
+		GO->Render(pd3dCommandList);
+
+	}
+}
+
+BoundingBox GamePlayScene::CalculateBoundingBox()
+{
+	BoundingBox xmBoundingBox = m_pPlayer->m_AABoundingBox;
+
+	for (auto& GO : m_pGameObject) {
+		GO->UpdateBoundingBox();
+		BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, GO->m_AABoundingBox);
+	}
+
+	for (auto& GO : m_pSceneObject) {
+		GO->UpdateBoundingBox();
+		BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, GO->m_AABoundingBox);
+	}
+
+	return(xmBoundingBox);
+}
+
 
 void GamePlayScene::ReleaseUploadBuffers()
 {
@@ -735,5 +785,23 @@ void GamePlayScene::ReleaseUploadBuffers()
 
 	if (m_pPerceptionRangeMesh) m_pPerceptionRangeMesh->ReleaseUploadBuffers();
 
+}
+
+
+void GamePlayScene::MakeShadowMap(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+{
+	//카메라 초기화
+	if (m_pCamera) {
+		m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		m_pCamera->UpdateShaderVariables(pd3dCommandList);
+	}
+
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+
+	m_pShadowMapRenderShader->MakeShadowMap(pd3dCommandList, pCamera);
 }
 
