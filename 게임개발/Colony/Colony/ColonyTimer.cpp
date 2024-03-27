@@ -127,6 +127,7 @@ float ColonyTimer::GetTimeElapsed()
 
 float ColonyTimer::GetTotalTime()
 {
+	::QueryPerformanceCounter((LARGE_INTEGER*)&m_nCurrentPerformanceCounter);
 	if (m_bStopped) return(float(((m_nStopPerformanceCounter - m_nPausedPerformanceCounter) - m_nBasePerformanceCounter) * m_fTimeScale));
 	return(float(((m_nCurrentPerformanceCounter - m_nPausedPerformanceCounter) - m_nBasePerformanceCounter) * m_fTimeScale));
 }

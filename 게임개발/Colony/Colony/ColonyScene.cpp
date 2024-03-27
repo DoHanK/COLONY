@@ -291,6 +291,15 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 	::fclose(pFile);
 }
 
+
+void BringUINum(UIManager* pUImanager, ResourceManager* pResourceManager, float top, float bottom, float left, float right, int num, int layer, UINT SceneType) {
+	string nums = to_string(num);
+	string filename = "Model/Textures/UITexture/number/" + nums + ".dds";
+	const char* charFilename = filename.c_str();
+	pUImanager->CreateUINonNormalRect(top, bottom, left, right, pResourceManager->BringTexture(charFilename, UI_TEXTURE, true),
+		NULL, NULL, layer, TEXTUREUSE, SceneType);
+}
+
 void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
 {
 
@@ -375,11 +384,36 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pTestBox = new ShphereMesh(pd3dDevice, pd3dCommandList,20,20, PlayerRange);
 	
+	//UI
+
+	//Timer
+	pUImanager->CreateUINonNormalRect(30, 70, 462, 562, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
+		NULL, NULL, 1, TEXTUREUSE, GetType());
+	for (int i = 0; i < 5; i++) {
+		pUImanager->CreateUINonNormalRect(80, 90, 427+35*i, 457+35*i, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
+			NULL, NULL, 1, TEXTUREUSE, GetType());
+	}
+
+
+	//Weapon
+	pUImanager->CreateUINonNormalRect(690, 720, 140, 220, pResourceManager->BringTexture("Model/Textures/UITexture/Gun.dds", UI_TEXTURE, true),
+		NULL, NULL, 1, TEXTUREUSE, GetType());
+	//Item
+	
+	//HP
+	pUImanager->CreateUINonNormalRect(680, 760, 40, 120, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE,true),
+		NULL, NULL, 1, TEXTUREUSE, GetType());
+	//HP (number) ***test
+	BringUINum(pUImanager, pResourceManager, 710, 730, 65, 75, 1, 2, GetType());
+	BringUINum(pUImanager, pResourceManager, 710, 730, 75, 85, 0,2, GetType());
+	BringUINum(pUImanager, pResourceManager, 710, 730, 85, 95, 0, 2, GetType());
 
 	BuildDefaultLightsAndMaterials();
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
+
+
 
 void GamePlayScene::ReleaseObjects()
 {
@@ -682,6 +716,14 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
+	int TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
+	if (TotalPlayTime == 10 * 60) {
+		//10분경과 -> 게임종료
+	}
+	else {
+		//pUImanager->CreateUINonNormalRect(690, 720, 140, 220, pResourceManager->BringTexture("Model/Textures/UITexture/Gun.dds", UI_TEXTURE, true),
+		//	NULL, NULL, 1, TEXTUREUSE, GetType());
+	}
 
 	//카메라 초기화
 	if (m_pCamera) {

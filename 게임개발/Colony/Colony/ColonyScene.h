@@ -12,6 +12,7 @@
 #include "UIControlHelper.h"
 #include "PathFinder.h"
 #include "PerceptionMesh.h"
+#include "ColonyTimer.h"
 
 class UIManager;
 #define MAX_LIGHTS						16 
@@ -159,4 +160,6 @@ protected:
 
 	PerceptionRangeMesh*						m_pPerceptionRangeMesh = NULL;
 	ShphereMesh*							m_pTestBox;
+
+	ColonyTimer							m_PlayTimeTimer;
 };
