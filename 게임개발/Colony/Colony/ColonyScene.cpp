@@ -320,6 +320,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPlaneShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pPlaneShader->AddRef();
 
+	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
+	m_pDepthSkinnedShader = new DepthSkinnedRenderingShader();
+	m_pDepthSkinnedShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
 
 
 	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/Scene.bin","Model/Textures/scene/", pResourceManager);
@@ -715,6 +718,25 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
 }
 
+void GamePlayScene::BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+{
+
+	//카메라 초기화
+	if (m_pCamera) {
+		m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		m_pCamera->UpdateShaderVariables(pd3dCommandList);
+	}
+
+	m_pDepthSkinnedShader->OnPrepareRender(pd3dCommandList);
+
+	m_pPlayer->DepthRender(pd3dCommandList);
+
+
+	for (auto& GO : m_pGameObject) {
+		GO->DepthRender(pd3dCommandList);
+	}
+}
+
 void GamePlayScene::ReleaseUploadBuffers()
 {
 	//Camera Player...등등.
@@ -735,5 +757,6 @@ void GamePlayScene::ReleaseUploadBuffers()
 
 	if (m_pPerceptionRangeMesh) m_pPerceptionRangeMesh->ReleaseUploadBuffers();
 
+	if (m_pTestBox) m_pTestBox->ReleaseUploadBuffers();
 }
 

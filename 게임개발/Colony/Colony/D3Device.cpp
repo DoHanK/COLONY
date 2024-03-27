@@ -418,6 +418,18 @@ void D3Device::SetRtIntoTexture(ID3D12Resource* SetTexture, const D3D12_CPU_DESC
 	m_pd3dCommandList->OMSetRenderTargets(1, &RenderTargetView, true, &d3dDsvCPUDescriptorHandle);
 
 }
+	
+void D3Device::SetRtIntoDepthTexture(const D3D12_CPU_DESCRIPTOR_HANDLE& RenderTargetView, const D3D12_CPU_DESCRIPTOR_HANDLE& DepthBufferView)
+{
+
+	//ÃÊ±âÈ­
+	float pfClearColor[4] =  { 1.0f, 1.0f, 1.0f, 1.0f } ;
+	m_pd3dCommandList->ClearRenderTargetView(RenderTargetView, pfClearColor, 0, NULL);
+	m_pd3dCommandList->ClearDepthStencilView(DepthBufferView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	m_pd3dCommandList->OMSetRenderTargets(1, &RenderTargetView, TRUE, &DepthBufferView);
+
+}
 
 void D3Device::ChangeResourceBarrier(D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After, ID3D12Resource* SetTexture)
 {

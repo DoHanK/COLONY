@@ -73,6 +73,16 @@ void Camera::Release()
 	if (--m_nReferences <= 0) delete this;
 }
 
+void Camera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ, float fMaxZ)
+{
+	m_d3dViewport.TopLeftX = float(xTopLeft);
+	m_d3dViewport.TopLeftY = float(yTopLeft);
+	m_d3dViewport.Width = float(nWidth);
+	m_d3dViewport.Height = float(nHeight);
+	m_d3dViewport.MinDepth = fMinZ;
+	m_d3dViewport.MaxDepth = fMaxZ;
+}
+
 void Camera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom)
 {
 	m_d3dScissorRect.left = xLeft;
