@@ -15,11 +15,7 @@
 #include "ColonyTimer.h"
 
 class UIManager;
-#define MAX_LIGHTS						16 
 
-#define POINT_LIGHT						1
-#define SPOT_LIGHT						2
-#define DIRECTIONAL_LIGHT				3
 
 struct LIGHT
 {
@@ -76,7 +72,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {};
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL) {};
 
-
+	virtual void BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL) {};
 	virtual UINT GetType() { return Basic; };
 
 
@@ -119,6 +115,8 @@ public:
 	void AnimateObjects(float fTimeElapsed);
 	void BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
+	virtual void BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
+
 
 	virtual void ReleaseUploadBuffers();
 	virtual UINT GetType() { return GamePlay; };
@@ -153,12 +151,13 @@ protected:
 	NevMeshShader*						m_pNevMeshShader = NULL;
 	GhostTraillerShader*				m_pGhostTraillerShader =NULL;
 	BoundingShader*						m_pBoundigShader = NULL;
-
+	//그림잠 쉐이더
+	DepthSkinnedRenderingShader*		m_pDepthSkinnedShader = NULL;
 
 	bool								m_bBoundingRender = false;
 	int									m_DepthRender = 0;
 
-	PerceptionRangeMesh*						m_pPerceptionRangeMesh = NULL;
+	PerceptionRangeMesh*					m_pPerceptionRangeMesh = NULL;
 	ShphereMesh*							m_pTestBox;
 
 	ColonyTimer							m_PlayTimeTimer;

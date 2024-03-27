@@ -10,6 +10,19 @@
 #endif
 
 
+//Light 정의
+#define MAX_LIGHTS						2
+#define POINT_LIGHT						1
+#define SPOT_LIGHT						2
+#define DIRECTIONAL_LIGHT				3
+
+#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
+#define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
+#define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
+
+
+#define _WITH_RASTERIZER_DEPTH_BIAS
+
 #include "targetver.h"
 
 

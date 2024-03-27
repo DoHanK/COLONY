@@ -70,6 +70,7 @@ public:
 
 	void ReleaseUploadBuffers();
 
+
 };
 
 
@@ -387,6 +388,7 @@ public:
 	virtual void UpdateMatrix() { }
 	virtual void UpdateBoundingBox();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
+	virtual void DepthRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 	virtual void PerceptRangeRender(ID3D12GraphicsCommandList* pd3dCommandList) {};
 	virtual void BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, bool isUpdateBounding = true, Camera* pCamera = NULL);
 	virtual void PerceptionBindRender(ID3D12GraphicsCommandList* pd3dCommandList) {}

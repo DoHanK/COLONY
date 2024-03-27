@@ -631,6 +631,31 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCam
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
+void GameObject::DepthRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+{
+	//프레임으로 이뤄진 것이기에 필요가 없음
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
+
+	if (m_pMesh)
+	{
+		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+
+		if (m_nMaterials > 0)
+		{
+			for (int i = 0; i < m_nMaterials; i++)
+			{
+
+				m_pMesh->Render(pd3dCommandList, i);
+
+			}
+		}
+	}
+
+	if (m_pSibling) m_pSibling->DepthRender(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->DepthRender(pd3dCommandList, pCamera);
+}
+
 void GameObject::BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList,bool isUpdateBounding ,Camera* pCamera)
 {
 	if (m_pBoundingMesh) {
@@ -674,6 +699,8 @@ void GameObject::UpdateBoundingBox()
 	if (m_pSibling) m_pSibling->UpdateBoundingBox();
 	if (m_pChild) m_pChild->UpdateBoundingBox();
 }
+
+
 
 void GameObject::ReleaseShaderVariables()
 {

@@ -462,3 +462,20 @@ float4 PSNevMesh(PS_NEVMESH_OUTPUT input) : SV_TARGET
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//DepthWriter
+struct PS_DEPTH_OUTPUT
+{
+    float fzPosition : SV_TARGET0 ;
+    float fDepth : SV_Depth;
+};
+
+PS_DEPTH_OUTPUT PSDepthWriteShader(VS_STANDARD_OUTPUT input) 
+{
+    PS_DEPTH_OUTPUT output;
+    
+    float4 texColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+    output.fzPosition = texColor;
+    output.fDepth.r = input.position.z;
+
+    return (output);
+}
