@@ -41,6 +41,17 @@ struct LIGHTS
 	int									m_nLights;
 };
 
+struct TOOBJECTSPACEINFO
+{
+	XMFLOAT4X4						m_xmf4x4ToTexture;
+	XMFLOAT4						m_xmf4Position;
+};
+
+struct TOLIGHTSPACES
+{
+	TOOBJECTSPACEINFO				m_pToLightSpaces[MAX_LIGHTS];
+};
+
 enum SceneType{
 	Basic,
 	GameLobby,
@@ -72,7 +83,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {};
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL) {};
 
-	virtual void BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL) {};
+	virtual void BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, int CameraIndex) {};
 	virtual UINT GetType() { return Basic; };
 
 
@@ -115,11 +126,14 @@ public:
 	void AnimateObjects(float fTimeElapsed);
 	void BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
-	virtual void BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 
-
+	virtual void BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, int CameraIndex);
+	virtual void PrepareDepthTexture(Camera* pCamera, int CameraIndex);
 	virtual void ReleaseUploadBuffers();
 	virtual UINT GetType() { return GamePlay; };
+
+	virtual void TestCameraRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
 
 protected:
 
@@ -132,6 +146,13 @@ protected:
 
 	ID3D12Resource*						m_pd3dcbLights = NULL;
 	LIGHTS*								m_pcbMappedLights = NULL;
+protected:
+	TOLIGHTSPACES*						m_pToLightSpaces;
+	ID3D12Resource*						m_pd3dcbToLightSpaces = NULL;
+	TOLIGHTSPACES*						m_pcbMappedToLightSpaces = NULL;
+	XMMATRIX							m_xmProjectionToTexture;
+
+protected:
 
 	Player*								m_pPlayer = NULL;
 	ThirdPersonCamera*					m_pCamera = NULL;
@@ -153,6 +174,8 @@ protected:
 	BoundingShader*						m_pBoundigShader = NULL;
 	//그림잠 쉐이더
 	DepthSkinnedRenderingShader*		m_pDepthSkinnedShader = NULL;
+	DepthRenderingShader*				m_pDepthShader = NULL;
+
 
 	bool								m_bBoundingRender = false;
 	int									m_DepthRender = 0;
@@ -161,4 +184,6 @@ protected:
 	ShphereMesh*							m_pTestBox;
 
 	ColonyTimer							m_PlayTimeTimer;
+
+
 };

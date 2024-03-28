@@ -1,15 +1,27 @@
 //--------------------------------------------------------------------------------------
-#define MAX_LIGHTS			4
+#define MAX_LIGHTS			3
 #define MAX_MATERIALS		4
 
 #define POINT_LIGHT			1
 #define SPOT_LIGHT			2
 #define DIRECTIONAL_LIGHT	3
 
+
+#define FRAME_BUFFER_WIDTH		1024
+#define FRAME_BUFFER_HEIGHT		800
+
+#define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
+#define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
+
+#define DELTA_X					(1.0f / _DEPTH_BUFFER_WIDTH)
+#define DELTA_Y					(1.0f / _DEPTH_BUFFER_HEIGHT)
+
+#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
+
 #define _WITH_LOCAL_VIEWER_HIGHLIGHTING
 #define _WITH_THETA_PHI_CONES
 #define _WITH_REFLECT
-
+#define _WITH_PCF_FILTERING
 struct LIGHT
 {
 	float4					m_cAmbient;
@@ -33,6 +45,25 @@ cbuffer cbLights : register(b4)
 	float4					gcGlobalAmbientLight;
 	int						gnLights;
 };
+
+Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t14);
+SamplerComparisonState gssComparisonPCFShadow : register(s2);
+
+float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
+{
+    float fPercentLit = gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv, fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, 0.0f), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, 0.0f), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, -DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, +DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, -DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, +DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y), fDepth).r;
+
+    return (fPercentLit / 9.0f);
+}
+
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 {
@@ -132,7 +163,7 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera)
 	return(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-float4 Lighting(float3 vPosition, float3 vNormal)
+float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_LIGHTS])
 {
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
@@ -142,21 +173,35 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 	{
 		if (gLights[i].m_bEnable)
 		{
+            float fShadowFactor = 1.0f;
+#ifdef _WITH_PCF_FILTERING
+			if (bShadow) fShadowFactor = Compute3x3ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
+#else
+           if (bShadow)
+               fShadowFactor = gtxtDepthTextures[i].SampleCmpLevelZero(gssComparisonPCFShadow, uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w).r;
+#endif
+	
+            //if (fShadowFactor < 0.3f)
+            //{
+            //    fShadowFactor = 0.3f;
+
+            //}
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
-				cColor += DirectionalLight(i, vNormal, vToCamera);
-			}
+                cColor += DirectionalLight(i, vNormal, vToCamera) * fShadowFactor;
+            }
 			else if (gLights[i].m_nType == POINT_LIGHT)
 			{
-				cColor += PointLight(i, vPosition, vNormal, vToCamera);
-			}
+                cColor += PointLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
+            }
 			else if (gLights[i].m_nType == SPOT_LIGHT)
 			{
-				cColor += SpotLight(i, vPosition, vNormal, vToCamera);
-			}
+                cColor += SpotLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
+            }
 		}
 	}
-	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
+
+    cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
 	cColor.a = gMaterial.m_cDiffuse.a;
 
 	return(cColor);

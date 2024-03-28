@@ -46,6 +46,7 @@ SceneManager::~SceneManager()
 
 	}
 
+
 	if(m_ShaderRtvDescriptor) m_ShaderRtvDescriptor->Release();
 	//뷰포트 정의를 위한 카메라 삭제
 	if (m_pCamera) delete m_pCamera;
@@ -149,7 +150,8 @@ void SceneManager::ChangeScene(BasicScene* Scene)
 	
 	m_pUIManager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, m_TextureScene[m_SceneStack.top()->GetType()], NULL, NULL, 0, TEXTUREUSE, m_SceneStack.top()->GetType());
 
-	m_pUIManager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT/4, 0, FRAME_BUFFER_WIDTH/4, m_pDepthFromLightTexture[0], NULL, NULL, 1, TEXTUREUSE, m_SceneStack.top()->GetType());
+	//m_pUIManager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT/4, 0, FRAME_BUFFER_WIDTH/4, m_pDepthFromLightTexture[0], NULL, NULL, 1, AMPLIFIER, m_SceneStack.top()->GetType());
+	//m_pUIManager->CreateUINonNormalRect(FRAME_BUFFER_HEIGHT / 4, FRAME_BUFFER_HEIGHT/4 + FRAME_BUFFER_HEIGHT / 4, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_WIDTH/4+ FRAME_BUFFER_WIDTH / 4, m_pDepthFromLightTexture[1], NULL, NULL, 1, AMPLIFIER, m_SceneStack.top()->GetType());
 }
 
 //애니메이션
@@ -169,9 +171,23 @@ void SceneManager::RenderScene(ID3D12GraphicsCommandList* pd3dCommandList)
 		}
 	}
 
+
+
 	m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET, m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0));
 	m_pD3Device->SetRtIntoTexture(m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0), RtvView[m_SceneStack.top()->GetType()]);
+	
+	m_pDepthFromLightTexture[0]->UpdateShaderVariable(pd3dCommandList,0);
 	if(!m_SceneStack.empty()) m_SceneStack.top()->Render(pd3dCommandList);
+	
+	if (!m_SceneStack.empty()) {
+		if (m_SceneStack.top()->GetType() == GamePlay) {
+			for (int i = 0; i < MAX_DEPTH_TEXTURES; ++i) {
+				//((GamePlayScene*)m_SceneStack.top())->TestCameraRender(pd3dCommandList, m_ppDepthRenderCameras[i]);
+			}
+		
+		}
+	}
+	
 	if(m_pCamera) m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	m_pUIManager->AllLayerDrawRect(pd3dCommandList);
 	m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON,  m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0));
@@ -239,7 +255,7 @@ void SceneManager::CreateDepthTextureFromLight(ID3D12Device* pd3dDevice, ID3D12G
 	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++) {
 
 		m_pDepthFromLightTexture[i]->SetTexture(0, CreateTexture2DResource(pd3dDevice, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, 1, 1, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue));
-		ResourceManager::CreateShaderResourceViews(pd3dDevice, m_pDepthFromLightTexture[i], UI_TEXTURE, FALSE);
+		ResourceManager::CreateShaderResourceViews(pd3dDevice, m_pDepthFromLightTexture[i], DEPTH_TEXTURE, FALSE);
 
 	}
 	D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
@@ -317,10 +333,10 @@ void SceneManager::CreateDepthTextureFromLight(ID3D12Device* pd3dDevice, ID3D12G
 void SceneManager::RenderDepthScene(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
-	for (int i = 0; i < MAX_DEPTH_TEXTURES; ++i) {
+	for (int i = 0; i < 1; ++i) {
 		m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET, m_pDepthFromLightTexture[i]->GetTexture(0));
 		m_pD3Device->SetRtIntoDepthTexture(m_RtvDepthView[i], m_d3dDsvDescriptorCPUHandle);
-		if (!m_SceneStack.empty()) m_SceneStack.top()->BakeDepthTexture(pd3dCommandList);
+		if (!m_SceneStack.empty()) m_SceneStack.top()->BakeDepthTexture(pd3dCommandList,m_ppDepthRenderCameras[i], i);
 		m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, m_pDepthFromLightTexture[i]->GetTexture(0));
 
 	}

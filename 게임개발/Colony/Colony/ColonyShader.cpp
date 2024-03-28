@@ -784,10 +784,10 @@ D3D12_RASTERIZER_DESC DepthSkinnedRenderingShader::CreateRasterizerState()
 	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
 #ifdef _WITH_RASTERIZER_DEPTH_BIAS
-	d3dRasterizerDesc.DepthBias = 250000;
+	d3dRasterizerDesc.DepthBias = 1.0f;
 #endif
 	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
-	d3dRasterizerDesc.SlopeScaledDepthBias = 1.0f;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 2.0f;
 	d3dRasterizerDesc.DepthClipEnable = TRUE;
 	d3dRasterizerDesc.MultisampleEnable = FALSE;
 	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
@@ -795,4 +795,15 @@ D3D12_RASTERIZER_DESC DepthSkinnedRenderingShader::CreateRasterizerState()
 	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
 	return(d3dRasterizerDesc);
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										 DepthRenderingShader Class		  			     		    //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+D3D12_SHADER_BYTECODE DepthRenderingShader::CreateVertexShader()
+{
+	return(BasicShader::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", &m_pd3dVertexShaderBlob));
 }

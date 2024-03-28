@@ -20,7 +20,7 @@ class Camera
 {
 protected:
 	int								m_nReferences = 0;
-
+public:
 	XMFLOAT3						m_xmf3Position;
 	XMFLOAT3						m_xmf3Right;
 	XMFLOAT3						m_xmf3Up;
@@ -34,8 +34,6 @@ protected:
 	XMFLOAT3						m_xmf3Offset;
 	float           				m_fTimeLag;
 
-	XMFLOAT4X4						m_xmf4x4View;
-	XMFLOAT4X4						m_xmf4x4Projection;
 
 	D3D12_VIEWPORT					m_d3dViewport;
 	D3D12_RECT						m_d3dScissorRect;
@@ -44,6 +42,12 @@ protected:
 
 	ID3D12Resource* m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
+
+public:
+
+	XMFLOAT4X4						m_xmf4x4View;
+	XMFLOAT4X4						m_xmf4x4Projection;
+
 
 public:
 	Camera();

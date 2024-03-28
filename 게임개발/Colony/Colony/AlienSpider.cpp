@@ -125,9 +125,9 @@ void AlienSpider::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCa
 				}
 				for (int j = TRAILER_COUNT-1; j > -1; --j) {
 
-					pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1,  &m_GhostNum[j], 33);
-					((SkinnedMesh*)m_pSkinnedModel->m_pMesh)->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[j];
-						m_pSkinnedModel->m_pMesh->Render(pd3dCommandList, 0);
+					//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1,  &m_GhostNum[j], 33);
+					//((SkinnedMesh*)m_pSkinnedModel->m_pMesh)->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[j];
+					//	m_pSkinnedModel->m_pMesh->Render(pd3dCommandList, 0);
 
 				}
 

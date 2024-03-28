@@ -23,12 +23,24 @@ cbuffer cbGameObjectInfo : register(b2)
     float3                  BoundingColor : packoffset(c9);
 };
 
+struct CB_TOOBJECTSPACE
+{
+    matrix mtxToTexture;
+    float4 f4Position;
+};
 #include "Light.hlsl"
+
+cbuffer cbToLightSpace : register(b3)
+{
+    CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //#define _WITH_VERTEX_LIGHTING
-
+#define DOWNGRAY 1.0f
+#define LIGHTRATIO 1.0f
 #define MATERIAL_ALBEDO_MAP			0x01
 #define MATERIAL_SPECULAR_MAP		0x02
 #define MATERIAL_NORMAL_MAP			0x04
@@ -64,18 +76,26 @@ struct VS_STANDARD_OUTPUT
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
 	float2 uv : TEXCOORD;
+    
+    float4 uvs[MAX_LIGHTS] : TEXCOORD1;
 };
 
 VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 {
 	VS_STANDARD_OUTPUT output;
-
-	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
+    float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+    output.positionW = positionW.xyz;
 	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
 	output.tangentW = mul(input.tangent, (float3x3)gmtxGameObject);
 	output.bitangentW = mul(input.bitangent, (float3x3)gmtxGameObject);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
+    
+    for (int i = 0; i < MAX_LIGHTS; i++)
+    {
+        if (gcbToLightSpaces[i].f4Position.w != 0.0f)
+            output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
+    }
 
 	return(output);
 }
@@ -120,9 +140,14 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
         {
             normalW = normalize(input.normalW);
         }
-	
-        float4 cIllumination = Lighting(input.positionW, normalW);
-        cColor = (lerp(cColor, cIllumination, 0.2f));
+    //cColor.xyz *= DOWNGRAY;
+    //cColor.xyz *= DOWNGRAY;
+    
+    float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
+    
+    //cColor = lerp(cColor, cIllumination, LIGHTRATIO);
+   //cColor += cIllumination * LIGHTRATIO;
+    cColor *= cIllumination * LIGHTRATIO;
 
         return cColor;
     }
@@ -188,7 +213,9 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
         mtxVertexToBoneWorld += input.weights[i] * mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
     }
 
-    output.positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
+    float4 positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld);
+    
+    output.positionW = positionW.xyz;
     output.normalW = mul(input.normal, (float3x3) mtxVertexToBoneWorld).xyz;
     output.tangentW = mul(input.tangent, (float3x3) mtxVertexToBoneWorld).xyz;
     output.bitangentW = mul(input.bitangent, (float3x3) mtxVertexToBoneWorld).xyz;
@@ -197,6 +224,13 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
+    for (int j = 0; j < MAX_LIGHTS; j++)
+    {
+        if (gcbToLightSpaces[j].f4Position.w != 0.0f)
+            output.uvs[j] = mul(positionW, gcbToLightSpaces[j].mtxToTexture);
+    }
+    
+    
 	return(output);
 }
 
@@ -234,12 +268,12 @@ float4 PSGhostTrailler(VS_STANDARD_OUTPUT input) : SV_TARGET
     }
     //return cColor;
 	
-    float4 cIllumination = Lighting(input.positionW, normalW);
+    //float4 cIllumination = Lighting(input.positionW, normalW);
 	//cColor = (lerp(cColor, cIllumination, 0.2f));
     //cColor.rgb *= 1;
     // cColor.r = 1-GhostTime;
     cColor.a = 0.7f - (gfGhostNum/100);
-    cColor.rgb *= 0.7;
+    cColor.rgb *= 0.7 * DOWNGRAY;
     cColor.rgb *= (1.0f - (gfGhostNum / 5));
     return cColor;
 }
@@ -310,6 +344,7 @@ float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
     }
     else
     {
+        
         texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);
     }
 
@@ -346,7 +381,7 @@ SamplerState gssClamp : register(s1);
 float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtSkyCubeTexture.Sample(gssClamp, input.positionL);
-
+    cColor.xyz *= 0.6;
 	return(cColor);
 }
 
@@ -357,13 +392,20 @@ VS_STANDARD_OUTPUT VSPlane(VS_STANDARD_INPUT input)
 {
     VS_STANDARD_OUTPUT output;
 
-    output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
+    float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+    output.positionW = positionW.xyz;
     output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
     output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
     output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
     output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
     output.uv = input.uv;
 
+    for (int i = 0; i < MAX_LIGHTS; i++)
+    {
+        if (gcbToLightSpaces[i].f4Position.w != 0.0f)
+            output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
+    }
+    
     return (output);
 }
 
@@ -410,10 +452,14 @@ float4 PSPlane(VS_STANDARD_OUTPUT input) : SV_TARGET
     {
         normalW = normalize(input.normalW);
     }
-	
-    float4 cIllumination = Lighting(input.positionW, normalW);
-    //cColor = (lerp(cColor, cIllumination, 0.5f));
-
+    cColor.xyz *= DOWNGRAY;
+    float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
+    
+    //cColor = lerp(cColor, cIllumination, LIGHTRATIO);
+   //cColor += cIllumination * LIGHTRATIO;
+    cColor *= cIllumination * LIGHTRATIO;
+    //cColor.r *= 1.7f;
+    //cColor.b *= 5.0f;
     return cColor;
 }
 
@@ -473,8 +519,8 @@ PS_DEPTH_OUTPUT PSDepthWriteShader(VS_STANDARD_OUTPUT input)
 {
     PS_DEPTH_OUTPUT output;
     
-    float4 texColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
-    output.fzPosition = texColor;
+   
+    output.fzPosition = input.position.z;
     output.fDepth.r = input.position.z;
 
     return (output);

@@ -18,6 +18,7 @@ class PlayerAnimationController;
 #define R 'R'
 #define F 'F'
 #define T 'T'
+#define Q 'Q'
 
 #define L_MOUSE		 0x01
 #define R_MOUSE		 0x02
