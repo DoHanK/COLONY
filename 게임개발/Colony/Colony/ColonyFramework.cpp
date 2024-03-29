@@ -377,12 +377,6 @@ void ColonyFramework::ColonyGameLoop()
 	if(m_pSceneManager)
 		m_pSceneManager->RenderScene(GetDevice()->GetCommandList());
 
-	m_pDevice->SetRtIntoBackBufferAndBasicDepth();
-
-	if (m_pUIManager)
-		m_pUIManager->DrawScene(GetDevice()->GetCommandList());
-
-
 
 	m_pDevice->CloseResourceBarrier();
 	m_pDevice->CloseCommandAndPushQueue();

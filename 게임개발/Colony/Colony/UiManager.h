@@ -18,7 +18,7 @@ struct UIEffectInfo {
 
 struct UIInfo {
 	UINT	SceneType;	//필수
-	UIRect* Rect;		//필수
+	UIRect Rect;		//필수
 	UINT	Option;
 	//선택사항
 	UIEffectInfo* EffectInfo;
@@ -45,18 +45,20 @@ public:
 	UIShader* m_Shader;
 	std::deque<std::function<void(UIControlHelper&)>>* m_pfunctionQueue;
 
-	vector<UIRectMesh*> m_pMesh;
+	vector<UIRectMesh*> m_pUIMesh;
 	list<pair<UIInfo, std::function<void(UIControlHelper&)>>> m_RenderUIList[TEXTURE_LAYER];
-	int MeshCur;
-	
-	UIRect CreateNormalizePixel(float top, float bottom, float left, float right);
-	bool CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex ,Texture* Masktex, std::function<void(UIControlHelper&)>,int Layer, UINT option, UINT SceneType);
-	
-	bool CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, std::function<void(UIControlHelper&)>, int Layer, UINT option, UINT SceneType);
-	void AnimateUI(float ElapsedTime);
+	vector<UIRectMesh*> m_pUISceneMesh;
+	list<pair<UIInfo, std::function<void(UIControlHelper&)>>> m_pRenderTargetList;
 
-	void AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList);
-	void DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList);
+	UIRect CreateNormalizePixel(float top, float bottom, float left, float right);
+	UIInfo* CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex ,Texture* Masktex, std::function<void(UIControlHelper&)>,int Layer, UINT option, UINT SceneType);
+	
+	UIInfo* CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, std::function<void(UIControlHelper&)>, int Layer, UINT option, UINT SceneType);
+	void AnimateUI(float ElapsedTime);
+	void AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList, int SceneType);
+
+	UIInfo* CreateRederTargetRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, std::function<void(UIControlHelper&)> f, int Layer, UINT option, UINT SceneType);
+	void DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList, int SceneType);
 
 	void ClickUI(float x, float y);
 };

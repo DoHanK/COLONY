@@ -15,7 +15,8 @@
 #include "ColonyTimer.h"
 
 class UIManager;
-
+struct UIInfo;
+class ResourceManager;
 
 struct LIGHT
 {
@@ -185,5 +186,9 @@ protected:
 
 	ColonyTimer							m_PlayTimeTimer;
 
+
+	ResourceManager*					m_pResourceManager;
+
+	UIInfo*								h_handle;
 
 };

@@ -248,13 +248,10 @@ void BasicShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCa
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //							SkinnedAnimationStandardShader Class				  				   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-SkinnedAnimationStandardShader::SkinnedAnimationStandardShader()
-{
+SkinnedAnimationStandardShader::SkinnedAnimationStandardShader(){
 }
 
-SkinnedAnimationStandardShader::~SkinnedAnimationStandardShader()
-{
-
+SkinnedAnimationStandardShader::~SkinnedAnimationStandardShader(){
 }
 
 D3D12_INPUT_LAYOUT_DESC SkinnedAnimationStandardShader::CreateInputLayout()

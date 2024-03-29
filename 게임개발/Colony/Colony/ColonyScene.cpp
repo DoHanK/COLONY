@@ -113,14 +113,23 @@ void GamePlayScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphi
 void GamePlayScene::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
-	//m_pLights[1].m_xmf3Position.z += 10.0f;
 	m_pLights[1].m_xmf3Position.y += 2.f;
 	m_pLights[1].m_xmf3Direction = m_pPlayer->GetCamera()->m_xmf3Look;
 
+
+
 	m_pLights[2].m_xmf3Position = m_pPlayer->GetPosition();
-	//m_pLights[1].m_xmf3Position.z += 10.0f;
-	m_pLights[2].m_xmf3Position.y += 20.f;
-	//m_pLights[2].m_xmf3Direction = m_pPlayer->GetCamera()->m_xmf3Look;
+	m_pLights[2].m_xmf3Position.y += 3.f;
+
+	//XMFLOAT3 dir = m_pPlayer->GetCamera()->m_xmf3Look;
+	//XMFLOAT3  against  = Vector3::ScalarProduct(m_pPlayer->GetCamera()->m_xmf3Look, -1, true);
+
+	//m_pLights[2].m_xmf3Position = m_pPlayer->GetCamera()->GetPosition();
+	//m_pLights[2].m_xmf3Position.x += against.x;
+	//m_pLights[2].m_xmf3Position.z += against.z;
+	//m_pLights[2].m_xmf3Position.y += 1.f;
+	//XMFLOAT3 LookPlayerVectore = Vector3::Subtract( m_pPlayer->GetCamera()->GetPosition(), m_pLights[2].m_xmf3Position);
+	//m_pLights[2].m_xmf3Direction = LookPlayerVectore;
 
 	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHT) * m_nLights);
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
@@ -170,9 +179,9 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_fRange = 2000.0f;
 	m_pLights[0].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	//m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(3.0f, 3.0f, 3.0f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), _PLANE_HEIGHT, 0.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
@@ -192,19 +201,20 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
-	m_pLights[2].m_bEnable = true;
+	m_pLights[2].m_bEnable = false;
 	m_pLights[2].m_nType = SPOT_LIGHT;
 	m_pLights[2].m_fRange = 200.0f;
 	m_pLights[2].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.02f, 0.02f, 0.02f, 1.0f);
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_pLights[2].m_xmf3Position = m_pPlayer->GetPosition();
-	m_pLights[2].m_xmf3Position.y += 30.0f;
+	m_pLights[2].m_xmf3Position.y += 10.0f;
 	m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 	m_pLights[2].m_xmf3Attenuation = XMFLOAT3(0.5f, 0.5f, 0.5f);
 	m_pLights[2].m_fFalloff = 20.0f;
 	m_pLights[2].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+
 }
 
 #define LOD 0
@@ -410,7 +420,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPerceptionRangeMesh = new PerceptionRangeMesh(pd3dDevice, pd3dCommandList);
 	//Monster Create
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 2; ++j) {
+	for (int j = 0; j < 50; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
@@ -420,8 +430,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			} while (m_pPathFinder->ValidNode(idex));
 
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
-			//p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
-			p->SetPosition(0.f, 0.f, 0.f);
+			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
+			//p->SetPosition(0.f, 0.f, 0.f);
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 20);
 			p->SetGhostShader(m_pGhostTraillerShader);
@@ -433,6 +443,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pTestBox = new ShphereMesh(pd3dDevice, pd3dCommandList,20,20, PlayerRange);
 	
+
+	m_pResourceManager = pResourceManager;
 	////UI
 
 	////Timer
@@ -450,7 +462,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//Item
 	
 	//HP
-	pUImanager->CreateUINonNormalRect(680, 760, 40, 120, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE,true),
+	h_handle = pUImanager->CreateUINonNormalRect(680, 760, 40, 120, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE,true),
 		NULL, NULL, 1, TEXTUREUSE, GetType());
 	//HP (number) ***test
 	BringUINum(pUImanager, pResourceManager, 710, 730, 65, 75, 1, 2, GetType());
@@ -508,7 +520,6 @@ void GamePlayScene::PlayerControlInput()
 	static UCHAR pKeysBuffer[256];
 	float AddAcel = 20.0f;
 
-
 	//플레이어 씬일때만 작동하도록 설정하기.
 	if (GetKeyboardState(pKeysBuffer)) {
 		//애니메이션 상태정의를 위한 플레이어 상태 정의
@@ -558,7 +569,7 @@ void GamePlayScene::PlayerControlInput()
 			}
 		}
 
-
+		
 
 		//JUMP
 		if (pKeysBuffer[SPACE_BAR] & 0xF0) {
@@ -656,8 +667,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	m_fElapsedTime = fTimeElapsed;
 
 	PlayerControlInput();
-	static float time = 0;
-	time += m_fElapsedTime;
+
 
 	for (auto& GO : m_pGameObject) {
 

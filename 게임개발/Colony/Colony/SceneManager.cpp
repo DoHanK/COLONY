@@ -90,17 +90,29 @@ void SceneManager::PushScene(BasicScene* Scene,bool bBuild = true)
 		m_SceneStack.top()->ReleaseUploadBuffers();
 		if (m_pResourceManager) m_pResourceManager->ReleaseUploadBuffers();
 	}
-		m_pUIManager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, m_TextureScene[m_SceneStack.top()->GetType()], NULL, NULL, 0, TEXTUREUSE, m_SceneStack.top()->GetType());
+		m_pUIManager->CreateRederTargetRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, m_TextureScene[m_SceneStack.top()->GetType()], NULL, NULL, 0, TEXTUREUSE, m_SceneStack.top()->GetType());
 }
 
 void SceneManager::PopScene()
 {
-	for (int i = 0; i < TEXTURE_LAYER; ++i) {
-		m_pUIManager->m_RenderUIList[i].clear();
-	}
+
 
 	BasicScene* pScene = m_SceneStack.top();
+	for (int i = 0; i < TEXTURE_LAYER; ++i) {
+	
+		m_pUIManager->m_RenderUIList[i].remove_if([pScene](pair<UIInfo, std::function<void(UIControlHelper&)>> p) {
+			return (pScene->GetType() == p.first.SceneType);
+			});
+		
+
+	}
+	m_pUIManager->m_pRenderTargetList.remove_if([pScene](pair<UIInfo, std::function<void(UIControlHelper&)>> p) {
+		return (pScene->GetType() == p.first.SceneType);
+		});
+
 	m_SceneStack.pop();
+
+
 	pScene->ReleaseObjects();
 	delete pScene;
 
@@ -127,6 +139,7 @@ void SceneManager::ChangeScene(BasicScene* Scene)
 	for (int i = 0; i < TEXTURE_LAYER; ++i) {
 		m_pUIManager->m_RenderUIList[i].clear();
 	}
+	m_pUIManager->m_pRenderTargetList.clear();
 	//다음 씬 로딩 및
 
 
@@ -148,7 +161,7 @@ void SceneManager::ChangeScene(BasicScene* Scene)
 	m_SceneStack.top()->ReleaseUploadBuffers();
 	if (m_pResourceManager) m_pResourceManager->ReleaseUploadBuffers();
 	
-	m_pUIManager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, m_TextureScene[m_SceneStack.top()->GetType()], NULL, NULL, 0, TEXTUREUSE, m_SceneStack.top()->GetType());
+	m_pUIManager->CreateRederTargetRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, m_TextureScene[m_SceneStack.top()->GetType()], NULL, NULL, 0, TEXTUREUSE, m_SceneStack.top()->GetType());
 
 	//m_pUIManager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT/4, 0, FRAME_BUFFER_WIDTH/4, m_pDepthFromLightTexture[0], NULL, NULL, 1, AMPLIFIER, m_SceneStack.top()->GetType());
 	//m_pUIManager->CreateUINonNormalRect(FRAME_BUFFER_HEIGHT / 4, FRAME_BUFFER_HEIGHT/4 + FRAME_BUFFER_HEIGHT / 4, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_WIDTH/4+ FRAME_BUFFER_WIDTH / 4, m_pDepthFromLightTexture[1], NULL, NULL, 1, AMPLIFIER, m_SceneStack.top()->GetType());
@@ -182,15 +195,21 @@ void SceneManager::RenderScene(ID3D12GraphicsCommandList* pd3dCommandList)
 	if (!m_SceneStack.empty()) {
 		if (m_SceneStack.top()->GetType() == GamePlay) {
 			for (int i = 0; i < MAX_DEPTH_TEXTURES; ++i) {
-				//((GamePlayScene*)m_SceneStack.top())->TestCameraRender(pd3dCommandList, m_ppDepthRenderCameras[i]);
+				((GamePlayScene*)m_SceneStack.top())->TestCameraRender(pd3dCommandList, m_ppDepthRenderCameras[i]);
 			}
 		
 		}
 	}
 	
 	if(m_pCamera) m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	m_pUIManager->AllLayerDrawRect(pd3dCommandList);
+	m_pUIManager->AllLayerDrawRect(pd3dCommandList, m_SceneStack.top()->GetType());
 	m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON,  m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0));
+
+
+	m_pD3Device->SetRtIntoBackBufferAndBasicDepth();
+
+	if (m_pUIManager)
+		m_pUIManager->DrawScene(pd3dCommandList, m_SceneStack.top()->GetType());
 
 
 }
@@ -333,7 +352,7 @@ void SceneManager::CreateDepthTextureFromLight(ID3D12Device* pd3dDevice, ID3D12G
 void SceneManager::RenderDepthScene(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
-	for (int i = 0; i < 1; ++i) {
+	for (int i = 0; i < 3; ++i) {
 		m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET, m_pDepthFromLightTexture[i]->GetTexture(0));
 		m_pD3Device->SetRtIntoDepthTexture(m_RtvDepthView[i], m_d3dDsvDescriptorCPUHandle);
 		if (!m_SceneStack.empty()) m_SceneStack.top()->BakeDepthTexture(pd3dCommandList,m_ppDepthRenderCameras[i], i);
