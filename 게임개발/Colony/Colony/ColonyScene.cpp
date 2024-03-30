@@ -197,7 +197,7 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
 	m_pLights[1].m_xmf3Position.y += 10.0f;
 	m_pLights[1].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(0.5f, 0.5f, 0.5f);
+	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	m_pLights[1].m_fFalloff = 20.0f;
 	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(45.0f));
 	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(25.0f));

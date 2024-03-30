@@ -320,8 +320,180 @@ VS_UIRECT_OUTPUT VSUiRect(VS_UIRECT_INPUT input)
 #define TEXTUREUSE 0x02 // 텍스쳐 사용 여부
 #define AMPLIFIER 0x04
 
+float4 Blur(int size, float2 uv)
+{
+    int intensity = 0;
+    float4 texColor = gtxtUiTexture.Sample(gssWrap, uv);
+    if (size == 0)
+    {
+        if (intensity != 0)
+        {
+        
+            int size = intensity;
+        
+            for (int j = -size; j < size; ++j)
+            {
+            
+                for (int i = -size; i < size; ++i)
+                {
+                    if (i == 0 && j == 0)
+                    {
+                        continue;
+                    }
+                        
+                    texColor += gtxtUiTexture.Sample(gssWrap, uv + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
+  
+                }
+            }
+            texColor.rgb /= float(2 * 2 * size * size);
+        }
+    }
+    else if (size == 1 || size == 2 || size == 3)
+    {
+        int size = 1 + intensity;
+        
+        for (int j = -size; j < size; ++j)
+        {
+            
+            for (int i = -size; i < size; ++i)
+            {
+                if (i == 0 && j == 0)
+                {
+                    continue;
+                }
+                        
+                texColor += gtxtUiTexture.Sample(gssWrap, uv + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
+  
+            }
+        }
+        texColor.rgb /= float(2 * 2 * size * size);
+    }
+    else if (size == 1 || size == 2 || size == 3 || size == 4)
+    {
+        int size = 2 + intensity;
+        
+        for (int j = -size; j < size; ++j)
+        {
+            
+            for (int i = -size; i < size; ++i)
+            {
+                if (i == 0 && j == 0)
+                {
+                    continue;
+                }
+                        
+                texColor += gtxtUiTexture.Sample(gssWrap, uv + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
+  
+            }
+        }
+        texColor.rgb /= float(2 * 2 * size * size);
+    }
+    else if (size == 5 || size == 6 || size == 7 || size == 8)
+    {
+        int size = 3 + intensity;
+        
+        for (int j = -size; j < size; ++j)
+        {
+            
+            for (int i = -size; i < size; ++i)
+            {
+                if (i == 0 && j == 0)
+                {
+                    continue;
+                }
+                        
+                texColor += gtxtUiTexture.Sample(gssWrap, uv + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
+  
+            }
+        }
+        texColor.rgb /= float(2 * 2 * size * size);
+    }
+    else if (size == 9 || size == 10 || size == 11 || size == 12)
+    {
+        int size = 4 + intensity;
+        
+        for (int j = -size; j < size; ++j)
+        {
+            
+            for (int i = -size; i < size; ++i)
+            {
+                if (i == 0 && j == 0)
+                {
+                    continue;
+                }
+                        
+                texColor += gtxtUiTexture.Sample(gssWrap, uv + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
+  
+            }
+        }
+        texColor.rgb /= float(2 * 2 * size * size);
+    }
+    else if (size == 13 || size == 14 || size == 15 || size == 16)
+    {
+        int size = 5 + intensity;
+        
+        for (int j = -size; j < size; ++j)
+        {
+            
+            for (int i = -size; i < size; ++i)
+            {
+                if (i == 0 && j == 0)
+                {
+                    continue;
+                }
+                        
+                texColor += gtxtUiTexture.Sample(gssWrap, uv + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
+  
+            }
+        }
+        texColor.rgb /= float(2 * 2 * size * size);
+    }
+    else if (size == 17 || size == 18 || size == 19 || size == 20)
+    {
+        int size = 6 + intensity;
+        
+        for (int j = -size; j < size; ++j)
+        {
+            
+            for (int i = -size; i < size; ++i)
+            {
+                if (i == 0 && j == 0)
+                {
+                    continue;
+                }
+                        
+                texColor += gtxtUiTexture.Sample(gssWrap, uv + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
+  
+            }
+        }
+        texColor.rgb /= float(2 * 2 * size * size);
+    }
+    else
+    {
+        int size = 7 + intensity;
+        
+        for (int j = -size; j < size; ++j)
+        {
+            
+            for (int i = -size; i < size; ++i)
+            {
+                if (i == 0 && j == 0)
+                {
+                    continue;
+                }
+                        
+                texColor += gtxtUiTexture.Sample(gssWrap, uv + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
+  
+            }
+        }
+        texColor.rgb /= float(2 * 2 * size * size);
+    }
+    return texColor;
+}
+
 float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
 {
+
     float4 texColor = 0 ;
     
     if (input.Mask & MASKUSE)
@@ -350,72 +522,21 @@ float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
     {
         if (input.Mask & AMPLIFIER)
         {
-        
+            
             texColor =  gtxtUiTexture.Sample(gssWrap, input.TexC);
             int size = PlayerVelocityScalar;
-       
-            if (size == 0 || size == 1 || size == 2 || size == 3);
-            else if (size == 4)
+            if (size > 5)
             {
-                int size = 2;
-                for (int j = -size; j < size; ++j)
-                {
-            
-                    for (int i = -size; i < size; ++i)
-                    {
-                        if (i == 0 && j == 0)
-                        {
-                            continue;
-                        }
-                        
-                        texColor += gtxtUiTexture.Sample(gssWrap, input.TexC + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
-  
-                    }
-                }
-                texColor.rgb /= float(2 * 2 * size * size);
+                float dis = (input.TexC.x
+                -0.5f) * (input.TexC.x - 0.5f)
+                +(input.TexC.y - 0.5f) * (input.TexC.y - 0.5f);
+                
+                dis *= 100;
+                int uvsize = dis;
+                texColor = Blur(uvsize, input.TexC);
+                
             }
-            else if (size == 5)
-            {
-                int size = 3;
-                for (int j = -size; j < size; ++j)
-                {
             
-                    for (int i = -size; i < size; ++i)
-                    {
-                        if (i == 0 && j == 0)
-                        {
-                            continue;
-                        }
-                        
-                        texColor += gtxtUiTexture.Sample(gssWrap, input.TexC + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
-  
-                    }
-                }
-                texColor.rgb /= float(2 * 2 * size * size);
-            }
-            else
-            {
-                int size = 5;
-                for (int j = -size; j < size; ++j)
-                {
-            
-                    for (int i = -size; i < size; ++i)
-                    {
-                        if (i == 0 && j == 0)
-                        {
-                            continue;
-                        }
-                        
-                        texColor += gtxtUiTexture.Sample(gssWrap, input.TexC + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
-  
-                    }
-                }
-                texColor.rgb /= float(2 * 2 * size * size);
-            }
-                    
-   
-        
-            return (texColor);
         }
         else
         {
