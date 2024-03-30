@@ -65,6 +65,8 @@ float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
 }
 
 
+
+
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 {
 	float3 vToLight = -gLights[nIndex].m_vDirection;

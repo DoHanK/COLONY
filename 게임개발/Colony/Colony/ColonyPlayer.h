@@ -104,6 +104,7 @@ public:
 	void AddAccel(const XMFLOAT3& xmf3Shift);
 	void AddPosition(const XMFLOAT3& xmf3Shift);
 	void UpdatePosition(float fTimeElapsed);
+	XMFLOAT3 GetVelocity() { return m_xmf3Velocity; }
 	//입력받은 회전 처리
 	void Rotate(float x, float y, float z);
 	virtual void UpdateMatrix();

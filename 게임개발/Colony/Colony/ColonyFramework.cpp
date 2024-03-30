@@ -374,9 +374,9 @@ void ColonyFramework::ColonyGameLoop()
 		GetDevice()->GetCommandList()->SetDescriptorHeaps(1, &m_pResourceManager->pSrvDescriptorHeap);
 
 	
-	if(m_pSceneManager)
+	if (m_pSceneManager) {
 		m_pSceneManager->RenderScene(GetDevice()->GetCommandList());
-
+	}
 
 	m_pDevice->CloseResourceBarrier();
 	m_pDevice->CloseCommandAndPushQueue();
@@ -426,8 +426,14 @@ LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM 
 				m_pSceneManager->ChangeScene(new GameLobbyScene);
 			}
 		}
-
-
+		if (wParam == '0') {
+	
+			m_pSceneManager->p->Option = UINT(AMPLIFIER | TEXTUREUSE);
+		}
+		if (wParam == '9')
+		{
+			m_pSceneManager->p->Option = UINT(TEXTUREUSE);
+		}
 		//키보드키입력
 		break;
 	}

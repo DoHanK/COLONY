@@ -179,9 +179,9 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_fRange = 2000.0f;
 	m_pLights[0].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	//m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(3.0f, 3.0f, 3.0f, 1.0f);
-	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), _PLANE_HEIGHT, 0.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
@@ -191,15 +191,16 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_nType = SPOT_LIGHT;
 	m_pLights[1].m_fRange = 200.0f;
 	m_pLights[1].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.2f, 1.0f);
+	//m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.2f, 1.0f);
+	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.1f, 0.1f, 0.05f, 1.0f);
 	m_pLights[1].m_xmf4Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
 	m_pLights[1].m_xmf3Position.y += 10.0f;
 	m_pLights[1].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(0.5f, 0.5f, 0.5f);
 	m_pLights[1].m_fFalloff = 20.0f;
-	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(45.0f));
+	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(25.0f));
 
 	m_pLights[2].m_bEnable = false;
 	m_pLights[2].m_nType = SPOT_LIGHT;
@@ -655,7 +656,6 @@ void GamePlayScene::PlayerControlInput()
 			m_pPlayer->CalVelocityFromInput(dwDirection, AddAcel, m_fElapsedTime);
 	}
 
-
 	if (m_pPlayer)
 		m_pPlayer->UpdatePosition(m_fElapsedTime);
 }
@@ -780,6 +780,13 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
+	//속도에 따른 블러링
+	XMFLOAT3 vel = m_pPlayer->GetVelocity();
+	float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
+	int	 velo = int(velocity);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
+
+
 	int TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
 	if (TotalPlayTime == 10 * 60) {
 		//10분경과 -> 게임종료

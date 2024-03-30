@@ -21,6 +21,7 @@ cbuffer cbGameObjectInfo : register(b2)
 	uint					gnTexturesMask : packoffset(c8.x);
     float                   gfGhostNum : packoffset(c8.y);
     float3                  BoundingColor : packoffset(c9);
+    int                     PlayerVelocityScalar : packoffset(c9.w);
 };
 
 struct CB_TOOBJECTSPACE
@@ -41,6 +42,9 @@ cbuffer cbToLightSpace : register(b3)
 //#define _WITH_VERTEX_LIGHTING
 #define DOWNGRAY 1.0f
 #define LIGHTRATIO 1.0f
+#define SCENE_SIZE_Dx     1.0f/1024.f
+#define SCENE_SIZE_Dy     1.0f/800.f
+
 #define MATERIAL_ALBEDO_MAP			0x01
 #define MATERIAL_SPECULAR_MAP		0x02
 #define MATERIAL_NORMAL_MAP			0x04
@@ -318,7 +322,7 @@ VS_UIRECT_OUTPUT VSUiRect(VS_UIRECT_INPUT input)
 
 float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
 {
-    float4 texColor;
+    float4 texColor = 0 ;
     
     if (input.Mask & MASKUSE)
     {
@@ -344,12 +348,86 @@ float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
     }
     else
     {
+        if (input.Mask & AMPLIFIER)
+        {
         
-        texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);
+            texColor =  gtxtUiTexture.Sample(gssWrap, input.TexC);
+            int size = PlayerVelocityScalar;
+       
+            if (size == 0 || size == 1 || size == 2 || size == 3);
+            else if (size == 4)
+            {
+                int size = 2;
+                for (int j = -size; j < size; ++j)
+                {
+            
+                    for (int i = -size; i < size; ++i)
+                    {
+                        if (i == 0 && j == 0)
+                        {
+                            continue;
+                        }
+                        
+                        texColor += gtxtUiTexture.Sample(gssWrap, input.TexC + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
+  
+                    }
+                }
+                texColor.rgb /= float(2 * 2 * size * size);
+            }
+            else if (size == 5)
+            {
+                int size = 3;
+                for (int j = -size; j < size; ++j)
+                {
+            
+                    for (int i = -size; i < size; ++i)
+                    {
+                        if (i == 0 && j == 0)
+                        {
+                            continue;
+                        }
+                        
+                        texColor += gtxtUiTexture.Sample(gssWrap, input.TexC + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
+  
+                    }
+                }
+                texColor.rgb /= float(2 * 2 * size * size);
+            }
+            else
+            {
+                int size = 5;
+                for (int j = -size; j < size; ++j)
+                {
+            
+                    for (int i = -size; i < size; ++i)
+                    {
+                        if (i == 0 && j == 0)
+                        {
+                            continue;
+                        }
+                        
+                        texColor += gtxtUiTexture.Sample(gssWrap, input.TexC + float2(i * SCENE_SIZE_Dx, j * SCENE_SIZE_Dy));
+  
+                    }
+                }
+                texColor.rgb /= float(2 * 2 * size * size);
+            }
+                    
+   
+        
+            return (texColor);
+        }
+        else
+        {
+        
+            texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);
+        }
     }
 
     return texColor;
 }
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -458,8 +536,7 @@ float4 PSPlane(VS_STANDARD_OUTPUT input) : SV_TARGET
     //cColor = lerp(cColor, cIllumination, LIGHTRATIO);
    //cColor += cIllumination * LIGHTRATIO;
     cColor *= cIllumination * LIGHTRATIO;
-    //cColor.r *= 1.7f;
-    //cColor.b *= 5.0f;
+
     return cColor;
 }
 

@@ -6,6 +6,7 @@
 
 class BasicScene;
 class UIManager;
+class UIInfo;
 #define TEXTURE_SCENE_NUM	6
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47,6 +48,7 @@ public:
 	//≈ÿΩ∫√ƒ
 	Camera* m_ppDepthRenderCameras[MAX_DEPTH_TEXTURES];
 
+	UIInfo* p;
 public:
 	//æ¿ √ﬂ∞° , æ¿ ªË¡¶ , æ¿ πŸ≤Ÿ±‚
 	void PushScene(BasicScene* Scene ,bool bBuild);
