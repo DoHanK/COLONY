@@ -199,8 +199,8 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	m_pLights[1].m_fFalloff = 20.0f;
-	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(45.0f));
-	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(25.0f));
+	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
 	m_pLights[2].m_bEnable = false;
 	m_pLights[2].m_nType = SPOT_LIGHT;
@@ -398,6 +398,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 	OctreeScale.y = 20.f;
 	XMFLOAT3 OctreeCenter = XMFLOAT3(-1.0f,0,0);
+
 	OctreeCenter.y = 20.f;
 	m_pQuadTree = new QuadTree(pd3dDevice, pd3dCommandList, 0, OctreeCenter, OctreeScale);
 	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, QuadtreeDepth);
@@ -421,7 +422,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPerceptionRangeMesh = new PerceptionRangeMesh(pd3dDevice, pd3dCommandList);
 	//Monster Create
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 50; ++j) {
+	for (int j = 0; j < 10; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
