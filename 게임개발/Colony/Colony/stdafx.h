@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#define FRAME_BUFFER_WIDTH  1824
+#define FRAME_BUFFER_WIDTH  1024
 #define FRAME_BUFFER_HEIGHT	800
 #define WINDOWS_POS_X	 0
 #define WINDOWS_POS_Y	 0

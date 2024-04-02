@@ -27,7 +27,7 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
 	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, NULL, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
 
-
+	// -1 ~ 1 »çÀÌ·Î
 	pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT/2, 0, FRAME_BUFFER_WIDTH/2, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
 		pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, &UIControlHelper::TestFunc, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
 
@@ -190,15 +190,15 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_bEnable = true;
 	m_pLights[1].m_nType = SPOT_LIGHT;
 	m_pLights[1].m_fRange = 200.0f;
-	m_pLights[1].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.01f, 0.01f, 0.01f, 1.0f);
 	//m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.2f, 1.0f);
-	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.1f, 0.1f, 0.05f, 1.0f);
-	m_pLights[1].m_xmf4Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.01f, 0.01f, 0.005f, 1.0f);
+	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.01f, 0.01f, 0.01f, 1.0f);
 	m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
 	m_pLights[1].m_xmf3Position.y += 10.0f;
 	m_pLights[1].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(0.1f, 0.1f, 0.1f);
-	m_pLights[1].m_fFalloff = 20.0f;
+	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(0.01f, 0.01f, 0.01f);
+	m_pLights[1].m_fFalloff = 15.0f;
 	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
