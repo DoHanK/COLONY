@@ -152,6 +152,7 @@
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="ColonyQuadtree.h" />
+    <ClInclude Include="ExploreForPlayerGoal.h" />
     <ClInclude Include="FollowPathGoal.h" />
     <ClInclude Include="Goal.h" />
     <ClInclude Include="ExploreGoal.h" />
@@ -173,6 +174,7 @@
     <ClInclude Include="UserDefineType.h" />
     <ClInclude Include="WaitGoal.h" />
     <ClInclude Include="WanderAndWaitGoal.h" />
+    <ClInclude Include="WanderForPlayerGoal.h" />
     <ClInclude Include="WanderGoal.h" />
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
@@ -192,6 +194,7 @@
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="ColonyQuadtree.cpp" />
+    <ClCompile Include="ExploreForPlayerGoal.cpp" />
     <ClCompile Include="FollowPathGoal.cpp" />
     <ClCompile Include="ExploreGoal.cpp" />
     <ClCompile Include="GoalThink.cpp" />
@@ -208,6 +211,7 @@
     <ClCompile Include="UiManager.cpp" />
     <ClCompile Include="WaitGoal.cpp" />
     <ClCompile Include="WanderAndWaitGoal.cpp" />
+    <ClCompile Include="WanderForPlayerGoal.cpp" />
     <ClCompile Include="WanderGoal.cpp" />
     <ClCompile Include="WICTextureLoader12.cpp" />
   </ItemGroup>

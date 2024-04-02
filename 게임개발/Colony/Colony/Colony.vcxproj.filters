@@ -198,6 +198,12 @@
     <ClInclude Include="PerceptionMesh.h">
       <Filter>GameHeader\GameAiHeader\SenseHeader</Filter>
     </ClInclude>
+    <ClInclude Include="ExploreForPlayerGoal.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader\CompositeGoalHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="WanderForPlayerGoal.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader\CompositeGoalHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -298,6 +304,12 @@
     </ClCompile>
     <ClCompile Include="PerceptionMesh.cpp">
       <Filter>GameCpp\GameAiCpp\SenseCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ExploreForPlayerGoal.cpp">
+      <Filter>GameCpp\GameAiCpp\GoalCpp\CompositeGoalCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="WanderForPlayerGoal.cpp">
+      <Filter>GameCpp\GameAiCpp\GoalCpp\CompositeGoalCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

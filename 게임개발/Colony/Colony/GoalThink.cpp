@@ -20,10 +20,10 @@ GoalThink::~GoalThink()
 void GoalThink::Arbitrate()
 {
 	if (IdleRandom(gen) == 0|| IdleRandom(gen) == 1|| IdleRandom(gen) == 2) {
-		AddSubgoal(new ExploreGoal(m_pOwner));
+		AddSubgoal(new ExploreForPlayerGoal(m_pOwner));
 	}
 	else {
-		AddSubgoal(new WanderAndWaitGoal(m_pOwner));
+		AddSubgoal(new WanderForPlayerGoal(m_pOwner));
 	}
 }
 
@@ -47,6 +47,7 @@ int GoalThink::Process()
 		m_iStatus = inactive;
 		
 	}
+
 
 	return m_iStatus;
 }

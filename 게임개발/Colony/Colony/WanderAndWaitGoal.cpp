@@ -25,11 +25,12 @@ int WanderAndWaitGoal::Process()
 	if (m_SubGoals.front()->GetGoalType() == Wander_Goal) {
 		if (m_pOwner->m_WaitCoolTime > 4.0f) {
 
-			AddSubgoal(new WaitGoal(m_pOwner));
+			AddSubgoal(new WaitGoal(m_pOwner,3.f));
 			m_pOwner->m_WaitCoolTime = 0;
 		}
 
 	}
+
 
 
 	return m_iStatus;

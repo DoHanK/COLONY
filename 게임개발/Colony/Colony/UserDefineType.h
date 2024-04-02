@@ -12,8 +12,11 @@ enum AIBehaviorState {
 	//복합 목적
 	Think_Goal,
 	Explore_Goal,
-	WanderAndWait_Goal
+	WanderAndWait_Goal,
+	ExploreForPlayer_Goal,
+	Wander_Player_Goal
 };
+
 //애니메이션 번호 정의
 enum AlienAnimationName {
 	Attack_1,

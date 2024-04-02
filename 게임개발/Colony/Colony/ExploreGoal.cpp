@@ -17,7 +17,7 @@ int ExploreGoal::Process()
 	if (m_SubGoals.front()->GetGoalType() == FollowPath_Goal) {
 		if (m_pOwner->m_WaitCoolTime > m_pOwner->m_EndureLevel) {
 	
-			AddSubgoal(new WaitGoal(m_pOwner));
+			AddSubgoal(new WaitGoal(m_pOwner,3.0f));
 			m_pOwner->m_WaitCoolTime = 0;
 		}
 

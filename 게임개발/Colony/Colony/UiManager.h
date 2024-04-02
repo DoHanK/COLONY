@@ -51,13 +51,13 @@ public:
 	list<pair<UIInfo, std::function<void(UIControlHelper&)>>> m_pRenderTargetList;
 
 	UIRect CreateNormalizePixel(float top, float bottom, float left, float right);
-	UIInfo* CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex ,Texture* Masktex, std::function<void(UIControlHelper&)>,int Layer, UINT option, UINT SceneType);
+	UIInfo* CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex ,Texture* Masktex, std::function<void(UIControlHelper&)>,int Layer, UINT option, UINT SceneType,bool bNormal);
 	
-	UIInfo* CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, std::function<void(UIControlHelper&)>, int Layer, UINT option, UINT SceneType);
+	UIInfo* CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, std::function<void(UIControlHelper&)>, int Layer, UINT option, UINT SceneType, bool bNormal);
 	void AnimateUI(float ElapsedTime);
 	void AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList, int SceneType);
 
-	UIInfo* CreateRederTargetRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, std::function<void(UIControlHelper&)> f, int Layer, UINT option, UINT SceneType);
+	UIInfo* CreateRederTargetRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, std::function<void(UIControlHelper&)> f, int Layer, UINT option, UINT SceneType, bool bNormal);
 	void DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList, int SceneType);
 
 	void ClickUI(float x, float y);

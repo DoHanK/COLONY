@@ -32,5 +32,6 @@ private:
 	void ExecuteFollowPath(float fTimeElapsed);
 	void ExecuteWait(float fTimeElapsed);
 	void ExecuteWanderPath(float fTimeElapsed);
+	void MoveDest(float fTimeElapsed);
 };
 

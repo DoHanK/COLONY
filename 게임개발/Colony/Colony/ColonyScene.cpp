@@ -25,11 +25,11 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	EffectInfo.RowNum = 6;
 	EffectInfo.SetTime = 0.1f;
 	pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
-	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, NULL, 1, (MASKUSE | TEXTUREUSE), GetType());
+	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, NULL, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
 
 
 	pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT/2, 0, FRAME_BUFFER_WIDTH/2, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
-		pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, &UIControlHelper::TestFunc, 1, (MASKUSE | TEXTUREUSE), GetType());
+		pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, &UIControlHelper::TestFunc, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
 
 
 }
@@ -354,7 +354,7 @@ void BringUINum(UIManager* pUImanager, ResourceManager* pResourceManager, float 
 	string filename = "Model/Textures/UITexture/number/" + nums + ".dds";
 	const char* charFilename = filename.c_str();
 	pUImanager->CreateUINonNormalRect(top, bottom, left, right, pResourceManager->BringTexture(charFilename, UI_TEXTURE, true),
-		NULL, NULL, layer, TEXTUREUSE, SceneType);
+		NULL, NULL, layer, TEXTUREUSE, SceneType,false);
 }
 
 void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
@@ -422,7 +422,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPerceptionRangeMesh = new PerceptionRangeMesh(pd3dDevice, pd3dCommandList);
 	//Monster Create
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 10; ++j) {
+	for (int j = 0; j < 1; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
@@ -432,8 +432,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			} while (m_pPathFinder->ValidNode(idex));
 
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
-			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
-			//p->SetPosition(0.f, 0.f, 0.f);
+			//p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
+			p->SetPosition(0.f, 0.f, 0.f);
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 20);
 			p->SetGhostShader(m_pGhostTraillerShader);
@@ -451,21 +451,21 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	////Timer
 	pUImanager->CreateUINonNormalRect(30, 70, 462, 562, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
-		NULL, NULL, 1, TEXTUREUSE, GetType());
+		NULL, NULL, 1, TEXTUREUSE, GetType(),false);
 	for (int i = 0; i < 5; i++) {
 		pUImanager->CreateUINonNormalRect(80, 90, 427+35*i, 457+35*i, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
-			NULL, NULL, 1, TEXTUREUSE, GetType());
+			NULL, NULL, 1, TEXTUREUSE, GetType(), false);
 	}
 
 
 	//Weapon
 	pUImanager->CreateUINonNormalRect(690, 720, 140, 220, pResourceManager->BringTexture("Model/Textures/UITexture/Gun.dds", UI_TEXTURE, true),
-		NULL, NULL, 1, TEXTUREUSE, GetType());
+		NULL, NULL, 1, TEXTUREUSE, GetType(), false);
 	//Item
 	
 	//HP
 	h_handle = pUImanager->CreateUINonNormalRect(680, 760, 40, 120, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE,true),
-		NULL, NULL, 1, TEXTUREUSE, GetType());
+		NULL, NULL, 1, TEXTUREUSE, GetType(), false);
 	//HP (number) ***test
 	BringUINum(pUImanager, pResourceManager, 710, 730, 65, 75, 1, 2, GetType());
 	BringUINum(pUImanager, pResourceManager, 710, 730, 75, 85, 0,2, GetType());
@@ -672,7 +672,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	for (auto& GO : m_pGameObject) {
 
-		//((AlienSpider*)(GO))->Update(fTimeElapsed);
+		((AlienSpider*)(GO))->Update(fTimeElapsed);
 
 		((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
 		GO->Animate(fTimeElapsed);

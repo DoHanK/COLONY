@@ -90,7 +90,7 @@ void SceneManager::PushScene(BasicScene* Scene,bool bBuild = true)
 		m_SceneStack.top()->ReleaseUploadBuffers();
 		if (m_pResourceManager) m_pResourceManager->ReleaseUploadBuffers();
 	}
-		m_pUIManager->CreateRederTargetRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, m_TextureScene[m_SceneStack.top()->GetType()], NULL, NULL, 0, AMPLIFIER | TEXTUREUSE, m_SceneStack.top()->GetType());
+		m_pUIManager->CreateRederTargetRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, m_TextureScene[m_SceneStack.top()->GetType()], NULL, NULL, 0, AMPLIFIER | TEXTUREUSE, m_SceneStack.top()->GetType(), false);
 }
 
 void SceneManager::PopScene()
@@ -161,7 +161,7 @@ void SceneManager::ChangeScene(BasicScene* Scene)
 	m_SceneStack.top()->ReleaseUploadBuffers();
 	if (m_pResourceManager) m_pResourceManager->ReleaseUploadBuffers();
 	
-	p = m_pUIManager->CreateRederTargetRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, m_TextureScene[m_SceneStack.top()->GetType()], NULL, NULL, 0, AMPLIFIER|TEXTUREUSE, m_SceneStack.top()->GetType());
+	p = m_pUIManager->CreateRederTargetRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, m_TextureScene[m_SceneStack.top()->GetType()], NULL, NULL, 0, AMPLIFIER|TEXTUREUSE, m_SceneStack.top()->GetType(), false);
 
 	//m_pUIManager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT/4, 0, FRAME_BUFFER_WIDTH/4, m_pDepthFromLightTexture[0], NULL, NULL, 1, AMPLIFIER, m_SceneStack.top()->GetType());
 	//m_pUIManager->CreateUINonNormalRect(FRAME_BUFFER_HEIGHT / 4, FRAME_BUFFER_HEIGHT/4 + FRAME_BUFFER_HEIGHT / 4, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_WIDTH/4+ FRAME_BUFFER_WIDTH / 4, m_pDepthFromLightTexture[1], NULL, NULL, 1, AMPLIFIER, m_SceneStack.top()->GetType());

@@ -7,9 +7,10 @@
 #include "Goal.h"
 #include "CompositeGoal.h"
 #include "FollowPathGoal.h"
-#include "ExploreGoal.h"
 #include "WanderGoal.h"
 #include "WanderAndWaitGoal.h"
+#include "ExploreForPlayerGoal.h"
+#include "WanderForPlayerGoal.h"
 
 class AlienSpider;
 

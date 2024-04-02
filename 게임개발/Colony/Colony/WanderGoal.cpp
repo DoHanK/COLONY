@@ -21,6 +21,8 @@ int WanderGoal::Process(){
 
 	PushGoalType();
 
+
+
 	if (m_pOwner->m_Path.size() == 0) {
 		m_iStatus = completed;
 	}

@@ -1,6 +1,6 @@
 #include "WaitGoal.h"
 
-WaitGoal::WaitGoal(AlienSpider* pOwner) : Goal(pOwner, Wait_Goal) {
+WaitGoal::WaitGoal(AlienSpider* pOwner , float WaitingTime) : Goal(pOwner, Wait_Goal) ,m_time(WaitingTime) {
 
 
 }
@@ -12,7 +12,6 @@ WaitGoal::~WaitGoal()
 void WaitGoal::Activate()
 {
 	
-	m_time = 5.f;
 	m_pOwner->m_WaitingTime = 0.f;
 	m_iStatus = active;
 }

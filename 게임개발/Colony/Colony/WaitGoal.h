@@ -5,9 +5,9 @@
 class WaitGoal :public Goal<AlienSpider> {
 
 public:
-	WaitGoal(AlienSpider* pOwner);
+	WaitGoal(AlienSpider* pOwner,float WaitingTime);
 	~WaitGoal();
-	int m_time;
+	float m_time;
 	//the usual suspects
 	void Activate();
 	int  Process();

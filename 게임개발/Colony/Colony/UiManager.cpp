@@ -83,13 +83,22 @@ UIRect UIManager::CreateNormalizePixel(float top, float bottom, float left, floa
 }
 
 // UISystem
-UIInfo* UIManager::CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, std::function<void(UIControlHelper&)> f,int Layer,UINT option ,UINT SceneType)
+UIInfo* UIManager::CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, std::function<void(UIControlHelper&)> f,int Layer,UINT option ,UINT SceneType, bool bNormal)
 {
 	// is not invalid 
 	if (!(top < bottom && right > left))
 		return false;
 
-	UIRect PRect = UIRect{ CreateNormalizePixel(top, bottom, left, right) };
+
+	UIRect PRect;
+	if (bNormal) {
+		PRect = UIRect{ top, bottom, left, right };
+
+	}
+	else {
+		PRect = UIRect{ CreateNormalizePixel(top, bottom, left, right) };
+
+	}
 	//Init RootSignature for UIShader
 	if(tex) tex->SetRootSignatureIndex(0, UI_TEXTURE);
 	if(Masktex) Masktex->SetRootSignatureIndex(0, UI_MASK_TEXTURE);
@@ -101,13 +110,20 @@ UIInfo* UIManager::CreateUINonNormalRect(float top, float bottom, float left, fl
 	return &m_RenderUIList[Layer].back().first;
 }
 
-UIInfo* UIManager::CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, std::function<void(UIControlHelper&)> f, int Layer, UINT option, UINT SceneType)
+UIInfo* UIManager::CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, std::function<void(UIControlHelper&)> f, int Layer, UINT option, UINT SceneType, bool bNormal)
 {
 	// is not invalid 
 	if (!(top < bottom && right > left))
 		return false;
+	UIRect PRect;
+	if (bNormal) {
+		PRect = UIRect{ top, bottom, left, right };
 
-	UIRect PRect = UIRect{ CreateNormalizePixel(top, bottom, left, right) };
+	}
+	else {
+		PRect = UIRect{ CreateNormalizePixel(top, bottom, left, right) };
+
+	}
 	UIEffectInfo* pEffectInfo = new UIEffectInfo(Uieffect);
 
 	//Init RootSignature for UIShader
@@ -120,13 +136,21 @@ UIInfo* UIManager::CreateUISpriteNormalRect(float top, float bottom, float left,
 	return &m_RenderUIList[Layer].back().first;
 }
 
-UIInfo* UIManager::CreateRederTargetRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, std::function<void(UIControlHelper&)> f, int Layer, UINT option, UINT SceneType) {
+UIInfo* UIManager::CreateRederTargetRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, std::function<void(UIControlHelper&)> f, int Layer, UINT option, UINT SceneType, bool bNormal) {
 
 	// is not invalid 
 	if (!(top < bottom && right > left))
 		return false;
 
-	UIRect PRect = UIRect{ CreateNormalizePixel(top, bottom, left, right) };
+	UIRect PRect;
+	if (bNormal) {
+		PRect = UIRect{ top, bottom, left, right };
+
+	}
+	else {
+		PRect = UIRect{ CreateNormalizePixel(top, bottom, left, right) };
+
+	}
 	//Init RootSignature for UIShader
 	if (tex) tex->SetRootSignatureIndex(0, UI_TEXTURE);
 	if (Masktex) Masktex->SetRootSignatureIndex(0, UI_MASK_TEXTURE);
