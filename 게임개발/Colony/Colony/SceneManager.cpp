@@ -208,6 +208,8 @@ void SceneManager::RenderScene(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	m_pD3Device->SetRtIntoBackBufferAndBasicDepth();
 
+	if (!m_SceneStack.empty()) m_SceneStack.top()->updateUI();
+
 	if (m_pUIManager) {
 		m_pUIManager->DrawScene(pd3dCommandList, m_SceneStack.top()->GetType());
 		m_pUIManager->AllLayerDrawRect(pd3dCommandList, m_SceneStack.top()->GetType());

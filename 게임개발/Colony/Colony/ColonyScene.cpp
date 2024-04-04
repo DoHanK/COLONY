@@ -779,15 +779,7 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
-void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
-{
-	//속도에 따른 블러링
-	XMFLOAT3 vel = m_pPlayer->GetVelocity();
-	float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
-	int	 velo = int(velocity);
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
-
-
+void GamePlayScene::updateUI() {
 	int TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
 	if (TotalPlayTime == 10 * 60) {
 		//10분경과 -> 게임종료
@@ -796,6 +788,17 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 		//pUImanager->CreateUINonNormalRect(690, 720, 140, 220, pResourceManager->BringTexture("Model/Textures/UITexture/Gun.dds", UI_TEXTURE, true),
 		//	NULL, NULL, 1, TEXTUREUSE, GetType());
 	}
+}
+
+
+void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+{
+	//속도에 따른 블러링
+	XMFLOAT3 vel = m_pPlayer->GetVelocity();
+	float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
+	int	 velo = int(velocity);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
+
 
 	//카메라 초기화
 	if (m_pCamera) {
