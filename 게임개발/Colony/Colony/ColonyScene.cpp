@@ -189,7 +189,7 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	
 	m_pLights[1].m_bEnable = true;
 	m_pLights[1].m_nType = SPOT_LIGHT;
-	m_pLights[1].m_fRange = 200.0f;
+	m_pLights[1].m_fRange = 600.0f;
 	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.01f, 0.01f, 0.01f, 1.0f);
 	//m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.2f, 1.0f);
 	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.01f, 0.01f, 0.005f, 1.0f);
