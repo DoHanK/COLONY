@@ -85,7 +85,8 @@ UIRect UIManager::CreateNormalizePixel(float top, float bottom, float left, floa
 // UISystem
 UIInfo* UIManager::CreateUINonNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, std::function<void(UIControlHelper&)> f,int Layer,UINT option ,UINT SceneType, bool bNormal)
 {
-	// is not invalid 
+	// is not invalid
+	if(!bNormal)
 	if (!(top < bottom && right > left))
 		return false;
 
@@ -113,11 +114,12 @@ UIInfo* UIManager::CreateUINonNormalRect(float top, float bottom, float left, fl
 UIInfo* UIManager::CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, std::function<void(UIControlHelper&)> f, int Layer, UINT option, UINT SceneType, bool bNormal)
 {
 	// is not invalid 
+	//if (!bNormal)
 	if (!(top < bottom && right > left))
 		return false;
 	UIRect PRect;
 	if (bNormal) {
-		PRect = UIRect{ top, bottom, left, right };
+		PRect = UIRect{ UIRect (top, bottom, left, right)};
 
 	}
 	else {
