@@ -114,7 +114,7 @@ UIInfo* UIManager::CreateUINonNormalRect(float top, float bottom, float left, fl
 UIInfo* UIManager::CreateUISpriteNormalRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, UIEffectInfo Uieffect, std::function<void(UIControlHelper&)> f, int Layer, UINT option, UINT SceneType, bool bNormal)
 {
 	// is not invalid 
-	//if (!bNormal)
+	if (!bNormal)
 	if (!(top < bottom && right > left))
 		return false;
 	UIRect PRect;
@@ -141,6 +141,7 @@ UIInfo* UIManager::CreateUISpriteNormalRect(float top, float bottom, float left,
 UIInfo* UIManager::CreateRederTargetRect(float top, float bottom, float left, float right, Texture* tex, Texture* Masktex, std::function<void(UIControlHelper&)> f, int Layer, UINT option, UINT SceneType, bool bNormal) {
 
 	// is not invalid 
+	if (!bNormal)
 	if (!(top < bottom && right > left))
 		return false;
 
