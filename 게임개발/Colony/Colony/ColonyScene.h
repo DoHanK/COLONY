@@ -87,7 +87,7 @@ public:
 	virtual void BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, int CameraIndex) {};
 	virtual UINT GetType() { return Basic; };
 
-	virtual void updateUI() {};
+	virtual void UpdateUI() {};
 
 
 };
@@ -135,7 +135,7 @@ public:
 	virtual UINT GetType() { return GamePlay; };
 
 	virtual void TestCameraRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
-	virtual void updateUI();
+	virtual void UpdateUI();
 
 protected:
 
@@ -190,6 +190,11 @@ protected:
 
 	ResourceManager*					m_pResourceManager;
 
-	UIInfo*								h_handle;
 
+	UIInfo*								h_TImer1;
+	UIInfo*								h_TImer2;
+	UIInfo*								h_TImer3;
+	UIInfo*								h_TImer4;
+	
+	UIInfo* h_TimerBar[5];
 };
