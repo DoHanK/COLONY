@@ -808,7 +808,7 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 void GamePlayScene::UpdateUI() {	
 	int TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
 	int minute, second;
-	if (TotalPlayTime >= 10 * 60) {
+	if (TotalPlayTime > 10 * 60) {
 		//10분경과 -> 게임종료
 	}
 	else {
