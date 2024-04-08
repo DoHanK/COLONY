@@ -137,6 +137,7 @@
   <ItemGroup>
     <ClInclude Include="AIController.h" />
     <ClInclude Include="AlienSpider.h" />
+    <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="Colony.h" />
     <ClInclude Include="ColonyCamera.h" />
     <ClInclude Include="ColonyFramework.h" />
@@ -181,6 +182,7 @@
   <ItemGroup>
     <ClCompile Include="AIController.cpp" />
     <ClCompile Include="AlienSpider.cpp" />
+    <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="Colony.cpp" />
     <ClCompile Include="ColonyCamera.cpp" />
     <ClCompile Include="ColonyFramework.cpp" />

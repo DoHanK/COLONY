@@ -204,6 +204,9 @@
     <ClInclude Include="WanderForPlayerGoal.h">
       <Filter>GameHeader\GameAiHeader\GoalHeader\CompositeGoalHeader</Filter>
     </ClInclude>
+    <ClInclude Include="CollisionManager.h">
+      <Filter>GameHeader\GameManagerHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -310,6 +313,9 @@
     </ClCompile>
     <ClCompile Include="WanderForPlayerGoal.cpp">
       <Filter>GameCpp\GameAiCpp\GoalCpp\CompositeGoalCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>GameCpp\GameManagerCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
