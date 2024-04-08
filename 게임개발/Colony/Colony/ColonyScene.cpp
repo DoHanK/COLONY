@@ -4,6 +4,21 @@
 
 
 #define QuadtreeDepth 2
+
+
+
+string ReturnTexAddress(int num) {
+	string str_m = to_string(num);
+	return "Model/Textures/UITexture/number/" + str_m + ".dds";
+}
+
+UIInfo* BringUINum(UIManager* pUImanager, ResourceManager* pResourceManager, float top, float bottom, float left, float right, int num, int layer, UINT SceneType) {
+	string str=ReturnTexAddress(num);
+	const char* charFilename = str.c_str();
+	return pUImanager->CreateUINonNormalRect(top, bottom, left, right, pResourceManager->BringTexture(charFilename, UI_TEXTURE, true),
+		NULL, NULL, layer, TEXTUREUSE, SceneType,true);
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //												Desc											   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,7 +57,7 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 GamePlayScene::GamePlayScene()
 {
-	
+	m_PlayTimeTimer.Reset();
 }
 
 GamePlayScene::~GamePlayScene()
@@ -349,14 +364,6 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 }
 
 
-void BringUINum(UIManager* pUImanager, ResourceManager* pResourceManager, float top, float bottom, float left, float right, int num, int layer, UINT SceneType) {
-	string nums = to_string(num);
-	string filename = "Model/Textures/UITexture/number/" + nums + ".dds";
-	const char* charFilename = filename.c_str();
-	pUImanager->CreateUINonNormalRect(top, bottom, left, right, pResourceManager->BringTexture(charFilename, UI_TEXTURE, true),
-		NULL, NULL, layer, TEXTUREUSE, SceneType,false);
-}
-
 void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
 {
 
@@ -447,29 +454,48 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 
 	m_pResourceManager = pResourceManager;
+
 	////UI
 
 	////Timer
-	pUImanager->CreateUINonNormalRect(30, 70, 462, 562, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
-		NULL, NULL, 1, TEXTUREUSE, GetType(),false);
+
+	pUImanager->CreateUINonNormalRect(0.95, 0.85, -0.09, 0.09, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
+		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
 	for (int i = 0; i < 5; i++) {
-		pUImanager->CreateUINonNormalRect(80, 90, 427+35*i, 457+35*i, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
-			NULL, NULL, 1, TEXTUREUSE, GetType(), false);
+		h_TimerBar[i]=pUImanager->CreateUINonNormalRect(0.82, 0.8, (-0.17) + 0.07 * i, (-0.11) + 0.07 * i, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
+			NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	}
+
+	// 시간 표시 layer 1
+	h_TImer1 = BringUINum(pUImanager, pResourceManager, 0.94, 0.86, -0.08, -0.05, 0, 1, GetType());
+	h_TImer2 = BringUINum(pUImanager, pResourceManager, 0.94, 0.86, -0.04, -0.01, 0, 1, GetType());
+
+	pUImanager->CreateUINonNormalRect(0.93, 0.87, -0.01, 0.01, pResourceManager->BringTexture("Model/Textures/UITexture/TimeDivide.dds", UI_TEXTURE, true),
+		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
+	h_TImer3 = BringUINum(pUImanager, pResourceManager, 0.94, 0.86, 0.01, 0.04, 0, 1, GetType());
+	h_TImer4 = BringUINum(pUImanager, pResourceManager, 0.94, 0.86, 0.05, 0.08, 0, 1, GetType());
+
+
 
 
 	//Weapon
-	pUImanager->CreateUINonNormalRect(690, 720, 140, 220, pResourceManager->BringTexture("Model/Textures/UITexture/Gun.dds", UI_TEXTURE, true),
-		NULL, NULL, 1, TEXTUREUSE, GetType(), false);
+	pUImanager->CreateUINonNormalRect(-0.7, -0.8, -0.75, -0.55, pResourceManager->BringTexture("Model/Textures/UITexture/Gun.dds", UI_TEXTURE, true),
+		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	//Item
 	
 	//HP
-	h_handle = pUImanager->CreateUINonNormalRect(680, 760, 40, 120, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE,true),
-		NULL, NULL, 1, TEXTUREUSE, GetType(), false);
+	 pUImanager->CreateUINonNormalRect(-0.7, -0.9, -0.955, -0.785, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE,true),
+		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	//HP (number) ***test
-	BringUINum(pUImanager, pResourceManager, 710, 730, 65, 75, 1, 2, GetType());
-	BringUINum(pUImanager, pResourceManager, 710, 730, 75, 85, 0,2, GetType());
-	BringUINum(pUImanager, pResourceManager, 710, 730, 85, 95, 0, 2, GetType());
+	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.9,- 0.88, 1, 1, GetType());
+	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.88, -0.86, 0,1, GetType());
+	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.86, -0.84, 0, 1, GetType());
+
+	//Target
+	//pUImanager->CreateUINonNormalRect(0.1, -0.1, -0.1, 0.1, pResourceManager->BringTexture("Model/Textures/UITexture/test.dds",UI_TEXTURE, true),
+	//	NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
 
@@ -779,20 +805,55 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
-void GamePlayScene::updateUI() {
+void GamePlayScene::UpdateUI() {	
 	int TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
-	if (TotalPlayTime == 10 * 60) {
+	int minute, second;
+	if (TotalPlayTime > 10 * 60) {
 		//10분경과 -> 게임종료
 	}
 	else {
-		//pUImanager->CreateUINonNormalRect(690, 720, 140, 220, pResourceManager->BringTexture("Model/Textures/UITexture/Gun.dds", UI_TEXTURE, true),
-		//	NULL, NULL, 1, TEXTUREUSE, GetType());
+		minute = TotalPlayTime / 60;
+		if (minute >= 10) {
+			int ten_s = minute / 10;
+			int one_s = minute % 10;
+			h_TImer3->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(ten_s).c_str(), UI_TEXTURE, true);
+			h_TImer4->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(one_s).c_str(), UI_TEXTURE, true);
+		}
+		else {
+			h_TImer2->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(minute).c_str(), UI_TEXTURE, true);
+		}
+		
+		second = TotalPlayTime % 60;
+		if (second >= 10) {
+			int ten_s = second / 10;
+			int one_s = second % 10;
+			h_TImer3->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(ten_s).c_str(), UI_TEXTURE, true);
+			h_TImer4->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(one_s).c_str(), UI_TEXTURE, true);
+		}
+		else {
+			h_TImer3->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(0).c_str(), UI_TEXTURE, true);
+			h_TImer4->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(second).c_str(), UI_TEXTURE, true);
+		}
 	}
+
+	//타이머 바 표시
+	int division = TotalPlayTime / 120;
+
+	for (int i = 1; i < 6; i++) {
+		if (division == i) {
+			h_TimerBar[i-1]->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/UITexture/TimerBAR(T).dds", UI_TEXTURE, true);
+		}
+	}
+
+
+
+
 }
 
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
+
 	//속도에 따른 블러링
 	XMFLOAT3 vel = m_pPlayer->GetVelocity();
 	float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
