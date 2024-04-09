@@ -165,7 +165,7 @@ void SceneManager::ChangeScene(BasicScene* Scene)
 
 	//m_pUIManager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT/4, 0, FRAME_BUFFER_WIDTH/4, m_pDepthFromLightTexture[0], NULL, NULL, 1, AMPLIFIER, m_SceneStack.top()->GetType());
 	//m_pUIManager->CreateUINonNormalRect(FRAME_BUFFER_HEIGHT / 4, FRAME_BUFFER_HEIGHT/4 + FRAME_BUFFER_HEIGHT / 4, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_WIDTH/4+ FRAME_BUFFER_WIDTH / 4, m_pDepthFromLightTexture[1], NULL, NULL, 1, AMPLIFIER, m_SceneStack.top()->GetType());
-}
+} 
 
 //애니메이션
 void SceneManager::AnimationGameObjects(const float& m_ElapsedTime)

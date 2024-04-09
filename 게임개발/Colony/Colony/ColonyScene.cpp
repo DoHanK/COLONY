@@ -494,8 +494,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.86, -0.84, 0, 1, GetType());
 
 	//Target
-	//pUImanager->CreateUINonNormalRect(0.1, -0.1, -0.1, 0.1, pResourceManager->BringTexture("Model/Textures/UITexture/test.dds",UI_TEXTURE, true),
-	//	NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(0.02, -0.02, -0.015, 0.015, pResourceManager->BringTexture("Model/Textures/UITexture/Target_01_a.dds",UI_TEXTURE, true),
+		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
 
