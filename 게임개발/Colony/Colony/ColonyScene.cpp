@@ -499,6 +499,16 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 
+
+	Texture* tempTexture = NULL;
+	for (int i = 0; i < 10; ++i) {
+		tempTexture=m_pResourceManager->BringTexture(ReturnTexAddress(i).c_str(), UI_TEXTURE, true);
+		numTexture.push_back(tempTexture);
+	}
+
+	m_pResourceManager->BringTexture("Model/Textures/UITexture/TimerBAR(T).dds", UI_TEXTURE, true);
+
+
 	BuildDefaultLightsAndMaterials();
 	BuildDepthTexture(pd3dDevice, pd3dCommandList);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -808,7 +818,7 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 void GamePlayScene::UpdateUI() {	
 	int TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
 	int minute, second;
-	if (TotalPlayTime > 10 * 60) {
+	if (TotalPlayTime >= 10 * 60) {
 		//10분경과 -> 게임종료
 	}
 	else {
@@ -816,23 +826,23 @@ void GamePlayScene::UpdateUI() {
 		if (minute >= 10) {
 			int ten_s = minute / 10;
 			int one_s = minute % 10;
-			h_TImer3->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(ten_s).c_str(), UI_TEXTURE, true);
-			h_TImer4->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(one_s).c_str(), UI_TEXTURE, true);
+			h_TImer3->RenderTexture = numTexture[ten_s];
+			h_TImer4->RenderTexture = numTexture[one_s];
 		}
 		else {
-			h_TImer2->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(minute).c_str(), UI_TEXTURE, true);
+			h_TImer2->RenderTexture = numTexture[minute];
 		}
 		
 		second = TotalPlayTime % 60;
 		if (second >= 10) {
 			int ten_s = second / 10;
 			int one_s = second % 10;
-			h_TImer3->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(ten_s).c_str(), UI_TEXTURE, true);
-			h_TImer4->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(one_s).c_str(), UI_TEXTURE, true);
+			h_TImer3->RenderTexture = numTexture[ten_s];
+			h_TImer4->RenderTexture = numTexture[one_s];
 		}
 		else {
-			h_TImer3->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(0).c_str(), UI_TEXTURE, true);
-			h_TImer4->RenderTexture = m_pResourceManager->BringTexture(ReturnTexAddress(second).c_str(), UI_TEXTURE, true);
+			h_TImer3->RenderTexture = numTexture[0];
+			h_TImer4->RenderTexture = numTexture[second];
 		}
 	}
 

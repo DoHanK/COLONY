@@ -197,4 +197,5 @@ protected:
 	UIInfo*								h_TImer4;
 	
 	UIInfo* h_TimerBar[5];
+	vector<Texture*> numTexture;
 };
