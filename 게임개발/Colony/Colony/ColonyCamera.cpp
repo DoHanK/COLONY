@@ -181,7 +181,7 @@ ThirdPersonCamera::ThirdPersonCamera()
 	m_fPitch = 0.0f;
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
-	m_xmf3Offset = XMFLOAT3(0.15f, 1.6f, -1.7f);
+	m_xmf3Offset = XMFLOAT3(0.15f, 1.8f, -1.7f);
 	m_fTimeLag = 0.10f;
 	m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pPlayer = NULL;
