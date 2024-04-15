@@ -60,7 +60,7 @@ class PlayerAnimationController;
 class Player :public GameObject
 {
 protected:
-	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	
 	XMFLOAT3					m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	XMFLOAT3					m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
@@ -72,6 +72,7 @@ protected:
 	float           			m_fRoll = 0.0f;
 
 	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	
 	XMFLOAT3     				m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float           			m_fMaxVelocityXZ = 0.0f;
 	float           			m_fMaxVelocityY = 0.0f;
@@ -79,8 +80,10 @@ protected:
 
 
 	ThirdPersonCamera* m_pCamera = NULL;
-
-
+public:
+	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3					m_xmfPre3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3					m_xmfPre3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 public:
 	Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,ResourceManager* pResourceManager);
@@ -119,6 +122,7 @@ public:
 	void SetUpVector(const XMFLOAT3& UpVector) { m_xmf3Up = UpVector; }
 	void SetRightVector(const XMFLOAT3& RightVector) { m_xmf3Right = RightVector; }
 	void SetCamera(ThirdPersonCamera* pCamera);
+	void RollbackPosition() { m_xmf3Position = m_xmfPre3Position; }
 	ThirdPersonCamera* GetCamera() { return m_pCamera; }
 
 	virtual void ReleaseUploadBuffers();

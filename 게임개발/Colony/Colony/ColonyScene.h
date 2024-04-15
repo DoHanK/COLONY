@@ -13,7 +13,7 @@
 #include "PathFinder.h"
 #include "PerceptionMesh.h"
 #include "ColonyTimer.h"
-
+#include "CollisionManager.h"
 class UIManager;
 struct UIInfo;
 class ResourceManager;
@@ -198,4 +198,5 @@ protected:
 	
 	UIInfo* h_TimerBar[5];
 	vector<Texture*> numTexture;
+	CollisionManager* m_pCollisionManager;
 };

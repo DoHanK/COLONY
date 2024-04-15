@@ -1,5 +1,137 @@
 #include "CollisionManager.h"
 
+// 벡터의 길이(크기)를 계산하는 함수
+float VectorLength(XMFLOAT3 vec) {
+	return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+}
+float DistancePointToPlane(XMFLOAT3 point, XMFLOAT3 planeNormal, XMFLOAT3 planePoint) {
+	// XMFLOAT3에서 XMVECTOR로 변환
+	XMVECTOR vecPoint = XMLoadFloat3(&point);
+	XMVECTOR vecPlaneNormal = XMLoadFloat3(&planeNormal);
+	XMVECTOR vecPlanePoint = XMLoadFloat3(&planePoint);
+
+	// 법선 벡터 정규화
+	vecPlaneNormal = XMVector3Normalize(vecPlaneNormal);
+
+	// 점과 평면 사이의 거리 계산
+	float numerator = XMVectorGetX(XMVector3Dot(vecPlaneNormal, vecPoint)) - XMVectorGetX(XMVector3Dot(vecPlaneNormal, vecPlanePoint));
+	return fabs(numerator);  // 절대값 계산
+}
+
+CollisionManager::CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	
+	for (int i = 0; i < 500; ++i) {
+		BoundingBoxMesh* pBounding = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
+		m_BoundingBoxMeshes.push_back(pBounding);
+	}
+	 m_pCapsuleMesh = new CapsuleMesh(pd3dDevice, pd3dCommandList,20,10,1,1,0);
+	m_pPlayerCapsuleMesh = new CapsuleMesh(pd3dDevice, pd3dCommandList,20,10, 0.3, 1.3, 0.3);
+	m_psphere = new ShphereMesh(pd3dDevice, pd3dCommandList, 20, 10,1) ;
+
+
+}
+
+CollisionManager::~CollisionManager()
+{
+
+	for (auto& BoxMesh : m_BoundingBoxMeshes) {
+		BoxMesh->Release();
+	}
+
+	if(m_pCapsuleMesh) m_pCapsuleMesh->Release();
+	if(m_pPlayerCapsuleMesh) m_pPlayerCapsuleMesh->Release();
+	if(m_psphere) m_psphere->Release();
+}
+void CollisionManager::ReleaseUploadBuffers()
+{
+
+	if (m_pCapsuleMesh) m_pCapsuleMesh->ReleaseUploadBuffers();
+	if (m_pPlayerCapsuleMesh) m_pPlayerCapsuleMesh->ReleaseUploadBuffers();
+	if (m_psphere) m_psphere->ReleaseUploadBuffers();
+}
+XMFLOAT4X4 CollisionManager::MakeScaleMatrix(float x, float y, float z)
+{
+
+	XMFLOAT4X4 m = Matrix4x4::Identity();
+
+	m._11 *= x;
+	m._22 *= y;
+	m._33 *= z;
+
+	return m;
+}
+
+XMFLOAT4X4 CollisionManager::GetSphereMatrix(BSphere* pSphere)
+{
+	float r = pSphere->m_radius;
+	XMFLOAT4X4 SM = MakeScaleMatrix(r, r, r);
+	XMFLOAT4X4 WM = Matrix4x4::Identity();
+	if (pSphere->m_pOwner) WM = pSphere->m_pOwner->m_xmf4x4World;
+	return Matrix4x4::Multiply(SM, WM);
+}
+XMFLOAT4X4 CollisionManager::GetSphereMatrix(BCapsule* pCapsule)
+{
+	float r = pCapsule->m_radius;
+	XMFLOAT4X4 SM = MakeScaleMatrix(r, r, r);
+	XMFLOAT4X4 WM = Matrix4x4::Identity();
+	if (pCapsule) {
+		WM._41 = pCapsule->m_boundingshpere.Center.x;
+		WM._42 = pCapsule->m_boundingshpere.Center.y;
+		WM._43 = pCapsule->m_boundingshpere.Center.z;
+	}
+	return Matrix4x4::Multiply(SM, WM);
+}
+
+
+//박스 등록
+void CollisionManager::EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, GameObject* pOwner)
+{
+	BOBBox* pBox = new BOBBox(center, extend, pOwner);
+
+	if (isAccel) {
+		m_AccelationObjects.push_back(pBox);
+	}
+	else {
+		m_StaticObjects.push_back(pBox);
+	}
+
+}
+//구 등록
+void CollisionManager::EnrollObjectIntoSphere(bool isAccel, XMFLOAT3 center, float radius, GameObject* pOwner)
+{
+	BSphere* psphere = new BSphere(center, radius, pOwner);
+
+	if (isAccel) {
+		m_AccelationObjects.push_back(psphere);
+	}
+	else {
+		m_StaticObjects.push_back(psphere);
+	}
+
+}
+//캡슐 등록
+void CollisionManager::EnrollObjectIntoCapsule(bool isAccel, XMFLOAT3 center, float radius, float tip, float base, GameObject* pOwner)
+{
+	BCapsule* pCapsule = new BCapsule(center,radius,tip ,base, pOwner);
+
+	if (isAccel) {
+		m_AccelationObjects.push_back(pCapsule);
+	}
+	else {
+		m_StaticObjects.push_back(pCapsule);
+	}
+
+}
+
+void CollisionManager::EnrollPlayerIntoCapsule(XMFLOAT3 center, float radius, float tip, float base, GameObject* pOwner)
+{
+
+	BCapsule* pCapsule = new BCapsule(center, radius, tip, base, pOwner);
+
+	m_pPlayer = pCapsule;
+}
+
 
 void CollisionManager::LoadCollisionBoxInfo(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList ,const char* filename)
 {
@@ -19,27 +151,306 @@ void CollisionManager::LoadCollisionBoxInfo(ID3D12Device* pd3dDevice, ID3D12Grap
 		Extend.x *= 0.5f;
 		Extend.y *= 0.5f;
 		Extend.z *= 0.5f;
-		BoundingOrientedBox * bxinfo = new BoundingOrientedBox(XMFLOAT3(0,0,0), Extend,XMFLOAT4(0,0,0,1));
-		bxinfo->Transform(*bxinfo, DirectX::XMLoadFloat4x4(&mxf4x4Position));
+		BOBBox* bxinfo = new BOBBox(XMFLOAT3(0, 0, 0), Extend, NULL);
+		bxinfo->mxf4x4Position = mxf4x4Position;
+		bxinfo->m_boundingbox.Transform(bxinfo->m_boundingbox, DirectX::XMLoadFloat4x4(&mxf4x4Position));
 
-		m_BoundingOrientedBoxes.push_back(bxinfo);
+		m_StaticObjects.push_back(bxinfo);
 
-		BoundingBoxMesh* pBounding = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
-		pBounding->UpdateVertexPosition(bxinfo);
-		m_BoundingBoxMeshes.push_back(pBounding);
+		
+		m_BoundingBoxMeshes[boundingcur]->UpdateVertexPosition(&bxinfo->m_boundingbox);
+
+		boundingcur++;
 	}
 	
 
 	is.close();
 }
 
-void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList)
+
+
+
+
+bool CollisionManager::CollisionPlayerToStaticObeject()
 {
 
+	
+	//콜리전 위치 이동
+	int count = 0;
+	for (const auto &a: m_StaticObjects) {
+		BoundingSphere boundingsphere = ((BCapsule*)m_pPlayer)->GetCapsuleBounding(*reinterpret_cast<BOBBox*>(a));
+		if (boundingsphere.Intersects(((BOBBox*)a)->m_boundingbox)) {
+			m_PlayerCapsulePos = boundingsphere.Center;
+			((BCapsule*)m_pPlayer)->m_boundingshpere.Center = m_PlayerCapsulePos;
+			
+			
 
-	for (auto& RenderingBox : m_BoundingBoxMeshes) {
+			//충돌면 구하기
+			XMFLOAT3 m_BoundingCorner[8];
+			
+			XMFLOAT3 BoxCenter = reinterpret_cast<BOBBox*>(a)->m_boundingbox.Center;
+			((BOBBox*)a)->m_boundingbox.GetCorners(m_BoundingCorner);
+			//캡슐의 센터
+			XMFLOAT3 CapsuleCenter = m_PlayerCapsulePos;
+			XMFLOAT3 CapsuleToBox = Vector3::Normalize(Vector3::Subtract(CapsuleCenter, BoxCenter));
 
-		RenderingBox->Render(pd3dCommandList);
+
+			// 뒷면 , 앞면 , 오른쪽 면 , 왼쪽 면 , 아래면 , 윗면
+			XMFLOAT3 PLANECENTER[6];
+			XMFLOAT3 PLANENORMAL[6];
+		
+			
+			// 앞면
+			PLANECENTER[0].x = (m_BoundingCorner[0].x + m_BoundingCorner[1].x + m_BoundingCorner[2].x + m_BoundingCorner[3].x) / 4;
+			PLANECENTER[0].y = (m_BoundingCorner[0].y + m_BoundingCorner[1].y + m_BoundingCorner[2].y + m_BoundingCorner[3].y) / 4;
+			PLANECENTER[0].z = (m_BoundingCorner[0].z + m_BoundingCorner[1].z + m_BoundingCorner[2].z + m_BoundingCorner[3].z) / 4;
+
+			// 뒷면
+			PLANECENTER[1].x = (m_BoundingCorner[4].x + m_BoundingCorner[5].x + m_BoundingCorner[6].x + m_BoundingCorner[7].x) / 4;
+			PLANECENTER[1].y = (m_BoundingCorner[4].y + m_BoundingCorner[5].y + m_BoundingCorner[6].y + m_BoundingCorner[7].y) / 4;
+			PLANECENTER[1].z = (m_BoundingCorner[4].z + m_BoundingCorner[5].z + m_BoundingCorner[6].z + m_BoundingCorner[7].z) / 4;
+
+			// 오른쪽 면
+			PLANECENTER[2].x = (m_BoundingCorner[1].x + m_BoundingCorner[5].x + m_BoundingCorner[6].x + m_BoundingCorner[2].x) / 4;
+			PLANECENTER[2].y = (m_BoundingCorner[1].y + m_BoundingCorner[5].y + m_BoundingCorner[6].y + m_BoundingCorner[2].y) / 4;
+			PLANECENTER[2].z = (m_BoundingCorner[1].z + m_BoundingCorner[5].z + m_BoundingCorner[6].z + m_BoundingCorner[2].z) / 4;
+
+			// 왼쪽 면
+			PLANECENTER[3].x = (m_BoundingCorner[0].x + m_BoundingCorner[4].x + m_BoundingCorner[7].x + m_BoundingCorner[3].x) / 4;
+			PLANECENTER[3].y = (m_BoundingCorner[0].y + m_BoundingCorner[4].y + m_BoundingCorner[7].y + m_BoundingCorner[3].y) / 4;
+			PLANECENTER[3].z = (m_BoundingCorner[0].z + m_BoundingCorner[4].z + m_BoundingCorner[7].z + m_BoundingCorner[3].z) / 4;
+
+			// 윗면
+			PLANECENTER[4].x = (m_BoundingCorner[3].x + m_BoundingCorner[2].x + m_BoundingCorner[6].x + m_BoundingCorner[7].x) / 4;
+			PLANECENTER[4].y = (m_BoundingCorner[3].y + m_BoundingCorner[2].y + m_BoundingCorner[6].y + m_BoundingCorner[7].y) / 4;
+			PLANECENTER[4].z = (m_BoundingCorner[3].z + m_BoundingCorner[2].z + m_BoundingCorner[6].z + m_BoundingCorner[7].z) / 4;
+
+			// 아랫면
+			PLANECENTER[5].x = (m_BoundingCorner[0].x + m_BoundingCorner[1].x + m_BoundingCorner[5].x + m_BoundingCorner[4].x) / 4;
+			PLANECENTER[5].y = (m_BoundingCorner[0].y + m_BoundingCorner[1].y + m_BoundingCorner[5].y + m_BoundingCorner[4].y) / 4;
+			PLANECENTER[5].z = (m_BoundingCorner[0].z + m_BoundingCorner[1].z + m_BoundingCorner[5].z + m_BoundingCorner[4].z) / 4;
+
+
+	
+			for (int i = 0; i < 6; ++i) {
+				PLANENORMAL[i] = Vector3::Normalize(Vector3::Subtract(PLANECENTER[i], BoxCenter));
+			}
+
+			int selectNum = -1;
+			float minDistance = FLT_MAX;
+			for (int i = 0; i < 6; ++i) {
+				if (0 < Vector3::DotProduct(PLANENORMAL[i], CapsuleToBox)) {
+					float distance = DistancePointToPlane(CapsuleCenter, PLANENORMAL[i], PLANECENTER[i]);
+					if (distance < minDistance) {
+						selectNum = i;
+						minDistance = distance;
+					}
+				}
+			}
+
+			//string tt = "";
+			//switch (selectNum) {
+			//case 0:
+			//	tt = "뒷 ";
+			//	break;
+			//case 1:
+			//	tt = "앞 ";
+			//	break;
+			//case 2:
+			//	tt = "오른 ";
+			//	break;
+			//case 3:
+			//	tt = "왼 ";
+			//	break;
+			//case 4:
+			//	tt = "위 ";
+			//	break;
+			//case 5:
+			//	tt = "아래 ";
+			//	break;
+			//default:
+			//	tt = " 충돌면 없음 ";
+			//	break;
+
+			//}
+
+			//count++;
+			//string temp = "충돌  ";
+			//temp += to_string(count);
+			//temp += "번호  ";
+			////temp += to_string(selectNum);
+			//temp += tt;
+			//temp += "\n";
+			//OutputDebugStringA(temp.c_str());
+
+
+			float dotProduct = Vector3::DotProduct(((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity, PLANENORMAL[selectNum]);
+			if (dotProduct <= EPSILON) {
+				XMFLOAT3 slidingVector = Vector3::Subtract(((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity, { PLANENORMAL[selectNum].x * dotProduct, PLANENORMAL[selectNum].y * dotProduct, PLANENORMAL[selectNum].z * dotProduct });
+				((Player*)m_pPlayer->m_pOwner)->RollbackPosition();
+				((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Position = ((Player*)m_pPlayer->m_pOwner)->m_xmf3Position;
+				((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity = slidingVector;
+				((Player*)m_pPlayer->m_pOwner)->AddPosition(slidingVector);
+	//			string temp = "x  ";
+	//temp += to_string(((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity.x);
+	// temp += "y  ";
+	//temp += to_string(((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity.y);
+	// temp += "z  ";
+	//temp += to_string(((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity.z);
+	//temp += "\n";
+	//OutputDebugStringA(temp.c_str());
+			}
+		}
+
 	}
 
+
+	
+	return true;
 }
+
+void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	
+	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+
+	for (int i = 0; i < boundingcur; ++i) {
+		m_BoundingBoxMeshes[i]->Render(pd3dCommandList);
+	}
+	 xmf4x4World = m_pPlayer->m_pOwner->m_xmf4x4World;
+	 xmf4x4World._41 += ((BCapsule*)(m_pPlayer))->m_center.x;
+	 xmf4x4World._42 += ((BCapsule*)(m_pPlayer))->m_center.y;
+	 xmf4x4World._43 += ((BCapsule*)(m_pPlayer))->m_center.z;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+
+
+	if (m_pPlayerCapsuleMesh) m_pPlayerCapsuleMesh->Render(pd3dCommandList, 0);
+	XMFLOAT3 xmfloat3 = XMFLOAT3(0, 1, 0);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+	xmf4x4World = GetSphereMatrix((BCapsule*)m_pPlayer);
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	if(m_psphere) m_psphere->Render(pd3dCommandList,0);
+
+}
+
+
+
+CapsuleMesh::CapsuleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nslice, int nstack, float radius, float tip, float base) :
+	m_nSlices(nslice),
+	m_nStacks(nstack),
+	m_fRadius(radius)
+{
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
+	m_nVertices = 2 + (m_nSlices * (m_nStacks - 1));
+				//꼭대기 ,아래,  상, 하 
+	m_pxmf3Positions = new XMFLOAT3[m_nVertices];
+
+	//180도를 nStacks 만큼 분할한다. 
+	float fDeltaPhi = float(XM_PI / m_nStacks);
+	//360도를 nSlices 만큼 분할한다. 
+	float fDeltaTheta = float((2.0f * XM_PI) / m_nSlices);
+
+	int k = 0;
+
+	float theta_i, phi_j;
+
+	m_pxmf3Positions[k++] = XMFLOAT3(0.0f, +m_fRadius + tip, 0.0f);
+
+	for (int j = 1; j < m_nStacks; ++j) {
+
+		phi_j = fDeltaPhi * j;
+		for (int i = 0; i < m_nSlices; i++)
+		{
+			theta_i = fDeltaTheta * i;
+
+			if (phi_j < 90 * (XM_PI / 180)) {
+				m_pxmf3Positions[k++] = XMFLOAT3(m_fRadius * sinf(phi_j) * cosf(theta_i),
+					m_fRadius * cosf(phi_j) + tip, m_fRadius * sinf(phi_j) * sinf(theta_i));
+			}
+			else {
+				m_pxmf3Positions[k++] = XMFLOAT3(m_fRadius * sinf(phi_j) * cosf(theta_i),
+					m_fRadius * cosf(phi_j) + base, m_fRadius * sinf(phi_j) * sinf(theta_i));
+			}
+
+
+		}
+
+	}
+	m_pxmf3Positions[k++] = XMFLOAT3(0.0f, -m_fRadius + base, 0.0f);
+
+	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions,
+		sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+		&m_pd3dPositionUploadBuffer);
+
+	m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
+	m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+	m_nSubMeshes = 1;
+
+	int nIndices = (m_nSlices * 3) * 2 + (m_nSlices * (m_nStacks - 2) * 3 * 2);
+
+	m_pnSubSetIndices = new int[m_nSubMeshes];
+	m_ppnSubSetIndices = new UINT * [m_nSubMeshes];
+
+	m_ppd3dSubSetIndexBuffers = new ID3D12Resource * [m_nSubMeshes];
+	m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource * [m_nSubMeshes];
+	m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
+
+
+	m_pnSubSetIndices[0] = nIndices;
+	m_ppnSubSetIndices[0] = new UINT[m_pnSubSetIndices[0]];
+	k = 0;
+
+	//구의 위쪽 원뿔의 표면을 표현하는 삼각형들의 인덱스이다. 
+	for (int i = 0; i < m_nSlices; i++)
+	{
+		m_ppnSubSetIndices[0][k++] = 0;
+		m_ppnSubSetIndices[0][k++] = 1 + ((i + 1) % m_nSlices);
+		m_ppnSubSetIndices[0][k++] = 1 + i;
+	}
+	//구의 원기둥의 표면을 표현하는 삼각형들의 인덱스이다. 
+	for (int j = 0; j < m_nStacks - 2; j++)
+	{
+		for (int i = 0; i < m_nSlices; i++)
+		{
+			//사각형의 첫 번째 삼각형의 인덱스이다. 
+			m_ppnSubSetIndices[0][k++] = 1 + (i + (j * m_nSlices));
+			m_ppnSubSetIndices[0][k++] = 1 + (((i + 1) % m_nSlices) + (j * m_nSlices));
+			m_ppnSubSetIndices[0][k++] = 1 + (i + ((j + 1) * m_nSlices));
+			//사각형의 두 번째 삼각형의 인덱스이다.
+			m_ppnSubSetIndices[0][k++] = 1 + (i + ((j + 1) * m_nSlices));
+			m_ppnSubSetIndices[0][k++] = 1 + (((i + 1) % m_nSlices) + (j * m_nSlices));
+			m_ppnSubSetIndices[0][k++] = 1 + (((i + 1) % m_nSlices) + ((j + 1) * m_nSlices));
+		}
+	}
+
+
+	//구의 아래쪽 원뿔의 표면을 표현하는 삼각형들의 인덱스이다. 
+	for (int i = 0; i < m_nSlices; i++)
+	{
+		m_ppnSubSetIndices[0][k++] = (m_nVertices - 1);
+		m_ppnSubSetIndices[0][k++] = ((m_nVertices - 1) - m_nSlices) + i;
+		m_ppnSubSetIndices[0][k++] = ((m_nVertices - 1) - m_nSlices) + ((i + 1) % m_nSlices);
+	}
+
+
+
+	m_ppd3dSubSetIndexBuffers[0] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_ppnSubSetIndices[0], sizeof(UINT) * m_pnSubSetIndices[0], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_ppd3dSubSetIndexUploadBuffers[0]);
+	m_pd3dSubSetIndexBufferViews[0].BufferLocation = m_ppd3dSubSetIndexBuffers[0]->GetGPUVirtualAddress();
+	m_pd3dSubSetIndexBufferViews[0].Format = DXGI_FORMAT_R32_UINT;
+	m_pd3dSubSetIndexBufferViews[0].SizeInBytes = sizeof(UINT) * m_pnSubSetIndices[0];
+
+
+
+
+}
+
+

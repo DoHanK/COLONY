@@ -110,6 +110,15 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		case 'Q':
 				if (m_pLights[1].m_bEnable)	m_pLights[1].m_bEnable = false;
 				else m_pLights[1].m_bEnable = true;
+				break;
+		case 'M':
+					m_pPlayer->AddPosition(XMFLOAT3(0, 5.0F, 0));
+				break;
+		case 'N':
+			m_pPlayer->AddPosition(XMFLOAT3(0, -5.0F, 0));
+			break;
+			
+				
 		default:
 			break;
 		}
@@ -363,7 +372,6 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 	::fclose(pFile);
 }
 
-
 void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
 {
 
@@ -429,7 +437,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPerceptionRangeMesh = new PerceptionRangeMesh(pd3dDevice, pd3dCommandList);
 	//Monster Create
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 1; ++j) {
+	for (int j = 0; j < 200; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
@@ -508,6 +516,10 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pResourceManager->BringTexture("Model/Textures/UITexture/TimerBAR(T).dds", UI_TEXTURE, true);
 
+	m_pCollisionManager = new CollisionManager(pd3dDevice, pd3dCommandList);
+	
+	m_pCollisionManager->LoadCollisionBoxInfo(pd3dDevice, pd3dCommandList,"boundinginfo.bin");
+	m_pCollisionManager->EnrollPlayerIntoCapsule(XMFLOAT3(EPSILON, 0.01, EPSILON), 0.3, 1.3, 0.3, m_pPlayer);
 
 	BuildDefaultLightsAndMaterials();
 	BuildDepthTexture(pd3dDevice, pd3dCommandList);
@@ -551,6 +563,7 @@ void GamePlayScene::ReleaseObjects()
 	if (m_pPerceptionRangeMesh) m_pPerceptionRangeMesh->Release();
 
 	if (m_pTestBox) m_pTestBox->Release();
+	if (m_pCollisionManager) delete m_pCollisionManager;
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -667,12 +680,7 @@ void GamePlayScene::PlayerControlInput()
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
-		if (pKeysBuffer['M'] & 0xF0) {
-			m_pPlayer->AddPosition(XMFLOAT3(0, 1.0F, 0));
-		}
-		if (pKeysBuffer['N'] & 0xF0) {
-			m_pPlayer->AddPosition(XMFLOAT3(0, -1.0F, 0));
-		}
+
 		if (pKeysBuffer['P'] & 0xF0) {
 			for (const auto& game : m_pGameObject) {
 				((AlienSpider*)game)->m_pBrain->SetInactive();
@@ -714,7 +722,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 		GO->Animate(fTimeElapsed);
 
 	}
-
+	m_pCollisionManager->CollisionPlayerToStaticObeject();
 
 	m_pPlayer->Animate(fTimeElapsed);
 	
@@ -860,15 +868,15 @@ void GamePlayScene::UpdateUI() {
 
 }
 
-
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
 
 	//속도에 따른 블러링
-	XMFLOAT3 vel = m_pPlayer->GetVelocity();
-	float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
-	int	 velo = int(velocity);
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
+	//if(m_pPlayer.)
+	//XMFLOAT3 vel = m_pPlayer->GetVelocity();
+	//float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
+	//int	 velo = int(velocity);
+	//	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
 
 
 	//카메라 초기화
@@ -900,7 +908,15 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 	}
 
-	if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
+	//if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
+	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
+	XMFLOAT3 xmfloat3 =XMFLOAT3(1,0,0);
+	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+	m_pCollisionManager->RenderBoundingBox(pd3dCommandList);
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1012,6 +1028,8 @@ void GamePlayScene::ReleaseUploadBuffers()
 	if (m_pPerceptionRangeMesh) m_pPerceptionRangeMesh->ReleaseUploadBuffers();
 
 	if (m_pTestBox) m_pTestBox->ReleaseUploadBuffers();
+
+	if (m_pCollisionManager) m_pCollisionManager->ReleaseUploadBuffers();
 }
 
 void GamePlayScene::TestCameraRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)

@@ -33,15 +33,15 @@ Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 
 	m_pCamera = NULL;
 
-	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf3Position = XMFLOAT3(0.0f, 0.1f, 0.0f);
 	m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf3Gravity = XMFLOAT3(0.0f, -0.5f, 0.0f);
 	m_fMaxVelocityXZ = 5.5f;
-	m_fMaxVelocityY = 0.0f;
+	m_fMaxVelocityY = 5.5f;
 	m_fFriction = 17.0f;
 
 	m_fPitch = 0.0f;
@@ -104,14 +104,14 @@ void Player::CalVelocityFromInput(DWORD dwDirection, float Acceleration, float f
 		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -Dir);
 		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, Dir);
 		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -Dir);
-
+		//if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -Dir);
 		float ScalarVelocity = Acceleration * fElapsedTime;
 
 		//xmf3Shift = Vector3::Normalize(xmf3Shift);
 		xmf3Shift = Vector3::ScalarProduct(xmf3Shift, ScalarVelocity);
+		if (dwDirection & DIR_JUMP_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, 1000 * fElapsedTime);
 
-		//if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, Velocity);
-		//if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -Velocity);
+
 
 		AddAccel(xmf3Shift);
 	}
@@ -142,10 +142,11 @@ void Player::UpdatePosition(float fTimeElapsed)
 	float fMaxVelocityY = m_fMaxVelocityY;
 	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
 	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
-
+	
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+	m_xmfPre3Position = m_xmf3Position;
 	AddPosition(xmf3Velocity);
-
+	m_xmfPre3Velocity = xmf3Velocity;
 
 	m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	m_pCamera->RegenerateViewMatrix();
