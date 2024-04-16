@@ -91,9 +91,11 @@ void CollisionManager::EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOA
 
 	if (isAccel) {
 		m_AccelationObjects.push_back(pBox);
+
 	}
 	else {
 		m_StaticObjects.push_back(pBox);
+		m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);
 	}
 
 }
@@ -158,9 +160,9 @@ void CollisionManager::LoadCollisionBoxInfo(ID3D12Device* pd3dDevice, ID3D12Grap
 		m_StaticObjects.push_back(bxinfo);
 
 		
-		m_BoundingBoxMeshes[boundingcur]->UpdateVertexPosition(&bxinfo->m_boundingbox);
+		m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&bxinfo->m_boundingbox);
 
-		boundingcur++;
+	
 	}
 	
 
@@ -247,7 +249,10 @@ bool CollisionManager::CollisionPlayerToStaticObeject()
 					}
 				}
 			}
-
+			// selectNum 0 µÞ , 1 ¾Õ , 2 ¿À¸¥ ,3 ¿Þ ,4 À§ ,5  ¾Æ·¡
+			if (selectNum == 4) {
+				((Player*)m_pPlayer->m_pOwner)->isJump = false;
+			}
 			//string tt = "";
 			//switch (selectNum) {
 			//case 0:
@@ -291,6 +296,19 @@ bool CollisionManager::CollisionPlayerToStaticObeject()
 				((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Position = ((Player*)m_pPlayer->m_pOwner)->m_xmf3Position;
 				((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity = slidingVector;
 				((Player*)m_pPlayer->m_pOwner)->AddPosition(slidingVector);
+	//			if (a->m_pOwner) {
+	//				OutputDebugStringA(a->m_pOwner->m_pstrFrameName);
+	//				;
+	//							string temp = "x  ";
+	//temp += to_string(((BOBBox*)a)->m_boundingbox.Center.x);
+	// temp += "y  ";
+	//temp += to_string(((BOBBox*)a)->m_boundingbox.Center.y);
+	// temp += "z  ";
+	//temp += to_string(((BOBBox*)a)->m_boundingbox.Center.z);
+	//OutputDebugStringA(temp.c_str());
+	//				OutputDebugStringA("Ãæµ¹\n");
+	//				
+	//			}
 	//			string temp = "x  ";
 	//temp += to_string(((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity.x);
 	// temp += "y  ";

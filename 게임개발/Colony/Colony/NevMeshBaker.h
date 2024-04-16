@@ -3,7 +3,7 @@
 #include "ColonyGameObject.h"
 #include "ColonyMesh.h"
 #include "NevMesh.h"
-
+#include "CollisionManager.h"
 class NevMesh;
 
 class Cell {
@@ -38,6 +38,7 @@ public:
 	void LoadNevMesh();
 	void ReleaseUploadBuffers();
 	void BakeNevMeshByObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const std::vector<GameObject*>& StaticObstacle);
+	void BakeNevMeshByCollision(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const std::vector<Collision*>& StaticObstacle);
 	void BoundingRendering(ID3D12GraphicsCommandList* pd3dCommandList);
 };
 

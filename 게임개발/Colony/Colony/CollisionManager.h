@@ -8,7 +8,9 @@
 class Collision {
 public:
 	Collision() {};
-	Collision(GameObject* pOwner):m_pOwner(pOwner){};
+	Collision(GameObject* pOwner):m_pOwner(pOwner){
+
+	};
 	virtual ~Collision() {};
 	 
 	 BasicMesh* m_pMesh = NULL;
@@ -32,7 +34,7 @@ public:
 public:
 	BOBBox(XMFLOAT3 center, XMFLOAT3  extend, GameObject* pOwner) :Collision(pOwner) {
 		m_boundingbox = BoundingOrientedBox(center, extend, XMFLOAT4(0, 0, 0, 1));
-
+		if (m_pOwner) mxf4x4Position = m_pOwner->m_xmf4x4World;
 	};
 
 

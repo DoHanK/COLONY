@@ -33,7 +33,7 @@ Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 
 	m_pCamera = NULL;
 
-	m_xmf3Position = XMFLOAT3(0.0f, 0.1f, 0.0f);
+	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
@@ -41,7 +41,7 @@ Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Gravity = XMFLOAT3(0.0f, -0.5f, 0.0f);
 	m_fMaxVelocityXZ = 5.5f;
-	m_fMaxVelocityY = 5.5f;
+	m_fMaxVelocityY = 15.5f;
 	m_fFriction = 17.0f;
 
 	m_fPitch = 0.0f;
@@ -104,13 +104,14 @@ void Player::CalVelocityFromInput(DWORD dwDirection, float Acceleration, float f
 		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -Dir);
 		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, Dir);
 		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -Dir);
-		//if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -Dir);
+
 		float ScalarVelocity = Acceleration * fElapsedTime;
 
 		//xmf3Shift = Vector3::Normalize(xmf3Shift);
 		xmf3Shift = Vector3::ScalarProduct(xmf3Shift, ScalarVelocity);
-		if (dwDirection & DIR_JUMP_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, 1000 * fElapsedTime);
-
+		
+			if (dwDirection & DIR_JUMP_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, 100000 * fElapsedTime);
+	
 
 
 		AddAccel(xmf3Shift);
@@ -130,15 +131,19 @@ void Player::AddPosition(const XMFLOAT3& xmf3Shift)
 void Player::UpdatePosition(float fTimeElapsed)
 {
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
+	//마찰계수
+	float  fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ = m_fMaxVelocityXZ;		
 
-	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	float fMaxVelocityXZ = m_fMaxVelocityXZ;
 	if (fLength > m_fMaxVelocityXZ)
 	{
 		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
 		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
 
 	}
+
+
+
 	float fMaxVelocityY = m_fMaxVelocityY;
 	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
 	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
@@ -151,11 +156,10 @@ void Player::UpdatePosition(float fTimeElapsed)
 	m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	m_pCamera->RegenerateViewMatrix();
 
-	//마찰계수
-	fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = (m_fFriction * fTimeElapsed);
-	if (fDeceleration > fLength) fDeceleration = fLength;
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	//fLength = Vector3::Length(m_xmf3Velocity);
+	//float fDeceleration = (m_fFriction * fTimeElapsed);
+	//if (fDeceleration > fLength) fDeceleration = fLength;
+	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 
 }
 
@@ -560,58 +564,71 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 			if (dwState == STATE_IDLE && (!isSameLowerState(IDLE_RIFLE))) {
 				ChangeLowerAnimation(IDLE_RIFLE);
 			}
-			else if ((dwState & STATE_JUMP) && (!isSameLowerState(IDLE_JUMP))) {
-				SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
-				ChangeAnimation(IDLE_JUMP);
+			else if ((dwState & STATE_JUMP)) {
+				if (m_WeaponState != SPINE_BACK && (!isSameLowerState(WALK_JUMP))) {
+					ChangeAnimation(WALK_JUMP);
+
+				}
+				else if (!isSameLowerState(IDLE_JUMP)) {
+					SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
+					ChangeAnimation(IDLE_JUMP); 
+				}
+
 			}
 
 		}
 		//걸을때
 		if ( dwState & STATE_WALK || dwState & STATE_RUN) {
 
-			//점프
-			if ((dwState & STATE_JUMP) && (!isSameLowerState(WALK_JUMP))) {
-				ChangeAnimation(WALK_JUMP);
-			}
-			else {
+			
+			
+		
 
 				//총이 있을때
 				if (m_WeaponState != SPINE_BACK) {
+					if ((dwState & STATE_JUMP) && (!isSameLowerState(WALK_JUMP))) {
+						ChangeAnimation(WALK_JUMP);
+					}
+					else {
 
-
-					if ((dwDir == (DIR_FORWARD | DIR_LEFT)) && (!isSameLowerState(WALK_FORWORD_LEFT))) {
-						ChangeLowerAnimation(WALK_FORWORD_LEFT);
-					}
-					else if ((dwDir == (DIR_FORWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_FORWORD_RIGHT))) {
-						ChangeLowerAnimation(WALK_FORWORD_RIGHT);
-					}
-					else if ((dwDir == (DIR_BACKWARD | DIR_LEFT)) && (!isSameLowerState(WALK_BACKWORD_LEFT))) {
-						ChangeLowerAnimation(WALK_BACKWORD_LEFT);
-					}
-					else if ((dwDir == (DIR_BACKWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_BACKWORD_RIGHT))) {
-						ChangeLowerAnimation(WALK_BACKWORD_RIGHT);
-					}
-					else if ((dwDir == DIR_LEFT) && (!isSameLowerState(WALK_LEFT))) {
-						ChangeLowerAnimation(WALK_LEFT);
-					}
-					else if ((dwDir == DIR_RIGHT) && (!isSameLowerState(WALK_RIGHT))) {
-						ChangeLowerAnimation(WALK_RIGHT);
-					}
-					else if ((dwDir == DIR_FORWARD) && (!isSameLowerState(WALK_FORWORD))) {
-						ChangeLowerAnimation(WALK_FORWORD);
-					}
-					else if ((dwDir == DIR_BACKWARD) && (!isSameLowerState(WALK_BACKWORD))) {
-						ChangeLowerAnimation(WALK_BACKWORD);
+						if ((dwDir == (DIR_FORWARD | DIR_LEFT)) && (!isSameLowerState(WALK_FORWORD_LEFT))) {
+							ChangeLowerAnimation(WALK_FORWORD_LEFT);
+						}
+						else if ((dwDir == (DIR_FORWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_FORWORD_RIGHT))) {
+							ChangeLowerAnimation(WALK_FORWORD_RIGHT);
+						}
+						else if ((dwDir == (DIR_BACKWARD | DIR_LEFT)) && (!isSameLowerState(WALK_BACKWORD_LEFT))) {
+							ChangeLowerAnimation(WALK_BACKWORD_LEFT);
+						}
+						else if ((dwDir == (DIR_BACKWARD | DIR_RIGHT)) && (!isSameLowerState(WALK_BACKWORD_RIGHT))) {
+							ChangeLowerAnimation(WALK_BACKWORD_RIGHT);
+						}
+						else if ((dwDir == DIR_LEFT) && (!isSameLowerState(WALK_LEFT))) {
+							ChangeLowerAnimation(WALK_LEFT);
+						}
+						else if ((dwDir == DIR_RIGHT) && (!isSameLowerState(WALK_RIGHT))) {
+							ChangeLowerAnimation(WALK_RIGHT);
+						}
+						else if ((dwDir == DIR_FORWARD) && (!isSameLowerState(WALK_FORWORD))) {
+							ChangeLowerAnimation(WALK_FORWORD);
+						}
+						else if ((dwDir == DIR_BACKWARD) && (!isSameLowerState(WALK_BACKWORD))) {
+							ChangeLowerAnimation(WALK_BACKWORD);
+						}
 					}
 				}
 				//총이 없을때 전력 질주
 				else {
-
-					if ((!isSameLowerState(RUNNING))&&(dwDir&DIR_FORWARD)) {
-						ChangeLowerAnimation(RUNNING);
+					if ((dwState & STATE_JUMP) && (!isSameLowerState(IDLE_JUMP))) {
+						SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
+						ChangeAnimation(IDLE_JUMP);
 					}
+					else if ((!isSameLowerState(RUNNING))&&(dwDir&DIR_FORWARD)) {
+						ChangeLowerAnimation(RUNNING);
+					}//점프
+		
 				}
-			}
+			
 		}
 
 	}
@@ -627,7 +644,7 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 		else if (isSameLowerState(IDLE_JUMP)) {
 			
 			if (isAnimationPlayProgress(false, IDLE_JUMP, 1.0f)) {
-				SetTrackSpeed(NOW_LOWERTRACK, 1.3f);
+				SetTrackSpeed(NOW_LOWERTRACK, 4.3f);
 				ChangeAnimation(IDLE_JUMPING);
 			}
 
@@ -635,14 +652,15 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 		else if (isSameLowerState(IDLE_JUMPING)) {
 
 			//아랫면과 충돌시 실행되도록 조건문 추가
-			if (isAnimationPlayProgress(false, IDLE_JUMPING, 0.6)) {
-				SetTrackSpeed(NOW_LOWERTRACK, 1.5f);
+			if (isAnimationPlayProgress(false, IDLE_JUMPING, 1.0)) {
+				SetTrackSpeed(NOW_LOWERTRACK, 2.5f);
 				ChangeAnimation(IDLE_LANDING);
 			}
 		}
 		else if (isSameLowerState(IDLE_LANDING)) {
 			//아랫면과 충돌시 실행되도록 조건문 추가
-			if (isAnimationPlayProgress(false, IDLE_LANDING, 0.5)) {
+			if (isAnimationPlayProgress(false, IDLE_LANDING, 0.8)) {
+				SetTrackSpeed(NOW_LOWERTRACK, 1.5f);
 				ChangeLowerAnimation(IDLE_RIFLE);
 			}
 		}
@@ -785,7 +803,7 @@ bool PlayerAnimationController::IsUnChangeableUpperState()
 
 bool PlayerAnimationController::IsUnChangeableLowerState()
 {
-	if ((!isSameLowerState(IDLE_JUMP)) && (!isSameLowerState(IDLE_JUMPING)) && (!isSameLowerState(IDLE_LANDING)) && (!isSameLowerState(WALK_JUMP))) {
+	if ((!isSameLowerState(IDLE_JUMP)) && (!isSameLowerState(IDLE_JUMPING)) && (!isSameLowerState(IDLE_LANDING)) && (!isSameLowerState(WALK_JUMP))&& !isSameUpperState(WEAPON_SWITCH_BACK)) {
 		return true;
 	}
 	return false;
