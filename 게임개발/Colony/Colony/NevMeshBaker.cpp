@@ -103,6 +103,31 @@ void NevMeshBaker::BakeNevMeshByObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 }
 
+void NevMeshBaker::BakeNevMeshByCollision(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const std::vector<Collision*>& StaticObstacle)
+{
+	int count = 0;
+	for (int y = 0; y < m_HeightCount; y++) {
+
+		for (int x = 0; x < m_WidthCount; x++) {
+
+			for (const auto& Object : StaticObstacle) {
+
+				if (((BOBBox*)Object)->m_boundingbox.Extents.x > 200.f) continue;
+
+				if (((BOBBox*)Object)->m_boundingbox.Intersects(m_Grid[m_WidthCount * y + x].m_BoundingBox)) {
+					m_Grid[m_WidthCount * y + x].m_Pass = false;
+				}
+
+			}
+			if (!m_Grid[m_WidthCount * y + x].m_Pass) {
+				count++;
+
+			}
+		}
+
+	}
+}
+
 void NevMeshBaker::BoundingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();

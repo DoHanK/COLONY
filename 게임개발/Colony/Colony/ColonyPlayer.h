@@ -71,7 +71,7 @@ protected:
 	float           			m_fYaw = 0.0f;
 	float           			m_fRoll = 0.0f;
 
-	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
 	
 	XMFLOAT3     				m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float           			m_fMaxVelocityXZ = 0.0f;
@@ -81,6 +81,7 @@ protected:
 
 	ThirdPersonCamera* m_pCamera = NULL;
 public:
+	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmfPre3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmfPre3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -94,9 +95,10 @@ public:
 	GameObject* m_RightHand;
 	GameObject* m_Spine;
 
-
 	GameObject m_SelectWeapon;
 	char m_WeaponState = RIGHT_HAND;
+	
+	bool isJump = false;
 	virtual void SetAnimator(PlayerAnimationController* animator);
 	void SetWeapon(GameObject* Weapon);
 

@@ -356,9 +356,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 				pGameObject->m_BoundingBox.Extents.x / 2;
 				pGameObject->m_BoundingBox.Extents.z / 2;
 				pGameObject->m_BoundingBox.Transform(pGameObject->m_BoundingBox, DirectX::XMLoadFloat4x4(&pGameObject->m_xmf4x4World));
-				pGameObject->m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
-				pGameObject->m_pBoundingMesh->AddRef();
-				((BoundingBoxMesh*)pGameObject->m_pBoundingMesh)->UpdateVertexPosition(&pGameObject->m_BoundingBox);
+
 			}
 
 			
@@ -408,6 +406,24 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pDepthShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
 	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/Scene.bin","Model/Textures/scene/", pResourceManager);
 
+	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pResourceManager);
+	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
+	m_pCamera->SetPlayer(m_pPlayer);
+
+	m_pCollisionManager = new CollisionManager(pd3dDevice, pd3dCommandList);
+	m_pCollisionManager->LoadCollisionBoxInfo(pd3dDevice, pd3dCommandList, "boundinginfo.bin");
+	m_pCollisionManager->EnrollPlayerIntoCapsule(XMFLOAT3(EPSILON, 0.0, EPSILON), 0.3, 1.3, 0.3, m_pPlayer);
+	for (auto& GO : m_pSceneObject) {
+		GO->m_BoundingBox;
+		if ((strstr(GO->m_pstrFrameName, "SM_Mountain_A") == NULL
+			&& strstr(GO->m_pstrFrameName, "SM_Mountain_B") == NULL
+			&& strstr(GO->m_pstrFrameName, "SM_Plant_A") == NULL
+			&& strstr(GO->m_pstrFrameName, "SM_Plant_B") == NULL)) {
+			m_pCollisionManager->EnrollObjectIntoBox(false, GO->m_BoundingBox.Center, GO->m_BoundingBox.Extents, GO);
+
+		}
+	}
+
 	//Octree Crate
 	XMFLOAT3 OctreeScale = m_pScenePlane->m_BoundingBox.Extents;
 	
@@ -421,14 +437,14 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	
 	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, CELL_SIZE, H_MAPSIZE_X, H_MAPSIZE_Y ,true);
-	m_pNevMeshBaker->LoadNevMesh();
+	//m_pNevMeshBaker->BakeNevMeshByCollision(pd3dDevice, pd3dCommandList,m_pCollisionManager->m_StaticObjects);
+	//m_pNevMeshBaker->SaveNevMesh();
+	//m_pNevMeshBaker->LoadNevMesh();
 
 	m_pPathFinder = new PathFinder();
 	m_pPathFinder->BuildGraphFromCell(m_pNevMeshBaker->m_Grid, m_pNevMeshBaker->m_WidthCount, m_pNevMeshBaker->m_HeightCount);
 
-	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pResourceManager);
-	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
-	m_pCamera->SetPlayer(m_pPlayer);
+
 
 	m_pskybox = new SkyBox(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pskybox->AddRef();
@@ -437,7 +453,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPerceptionRangeMesh = new PerceptionRangeMesh(pd3dDevice, pd3dCommandList);
 	//Monster Create
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 200; ++j) {
+	for (int j = 0; j < 1; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
@@ -463,7 +479,19 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pResourceManager = pResourceManager;
 
-	////UI
+	
+
+	
+
+
+	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
+	BuildDefaultLightsAndMaterials();
+	BuildDepthTexture(pd3dDevice, pd3dCommandList);
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
+{////UI
 
 	////Timer
 
@@ -471,7 +499,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 	for (int i = 0; i < 5; i++) {
-		h_TimerBar[i]=pUImanager->CreateUINonNormalRect(0.82, 0.8, (-0.17) + 0.07 * i, (-0.11) + 0.07 * i, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
+		h_TimerBar[i] = pUImanager->CreateUINonNormalRect(0.82, 0.8, (-0.17) + 0.07 * i, (-0.11) + 0.07 * i, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
 			NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	}
 
@@ -492,17 +520,17 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUImanager->CreateUINonNormalRect(-0.7, -0.8, -0.75, -0.55, pResourceManager->BringTexture("Model/Textures/UITexture/Gun.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	//Item
-	
+
 	//HP
-	 pUImanager->CreateUINonNormalRect(-0.7, -0.9, -0.955, -0.785, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE,true),
+	pUImanager->CreateUINonNormalRect(-0.7, -0.9, -0.955, -0.785, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	//HP (number) ***test
-	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.9,- 0.88, 1, 1, GetType());
-	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.88, -0.86, 0,1, GetType());
+	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.9, -0.88, 1, 1, GetType());
+	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.88, -0.86, 0, 1, GetType());
 	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.86, -0.84, 0, 1, GetType());
 
 	//Target
-	pUImanager->CreateUINonNormalRect(0.02, -0.02, -0.015, 0.015, pResourceManager->BringTexture("Model/Textures/UITexture/Target_01_a.dds",UI_TEXTURE, true),
+	pUImanager->CreateUINonNormalRect(0.02, -0.02, -0.015, 0.015, pResourceManager->BringTexture("Model/Textures/UITexture/Target_01_a.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
@@ -510,20 +538,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	Texture* tempTexture = NULL;
 	for (int i = 0; i < 10; ++i) {
-		tempTexture=m_pResourceManager->BringTexture(ReturnTexAddress(i).c_str(), UI_TEXTURE, true);
+		tempTexture = m_pResourceManager->BringTexture(ReturnTexAddress(i).c_str(), UI_TEXTURE, true);
 		numTexture.push_back(tempTexture);
 	}
 
 	m_pResourceManager->BringTexture("Model/Textures/UITexture/TimerBAR(T).dds", UI_TEXTURE, true);
-
-	m_pCollisionManager = new CollisionManager(pd3dDevice, pd3dCommandList);
-	
-	m_pCollisionManager->LoadCollisionBoxInfo(pd3dDevice, pd3dCommandList,"boundinginfo.bin");
-	m_pCollisionManager->EnrollPlayerIntoCapsule(XMFLOAT3(EPSILON, 0.01, EPSILON), 0.3, 1.3, 0.3, m_pPlayer);
-
-	BuildDefaultLightsAndMaterials();
-	BuildDepthTexture(pd3dDevice, pd3dCommandList);
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void GamePlayScene::ReleaseObjects()
@@ -580,14 +599,20 @@ void GamePlayScene::PlayerControlInput()
 		//Move
 		if (pKeysBuffer[W] & 0xF0)
 			dwDirection |= DIR_FORWARD;
-		if (pKeysBuffer[S] & 0xF0)
-			dwDirection |= DIR_BACKWARD;
-		if (pKeysBuffer[A] & 0xF0)
-			dwDirection |= DIR_LEFT;
-		if (pKeysBuffer[D] & 0xF0)
-			dwDirection |= DIR_RIGHT;
-
-
+		if (m_pPlayer->m_WeaponState == RIGHT_HAND) {
+			if (pKeysBuffer[S] & 0xF0)
+				dwDirection |= DIR_BACKWARD;
+			if (pKeysBuffer[A] & 0xF0)
+				dwDirection |= DIR_LEFT;
+			if (pKeysBuffer[D] & 0xF0)
+				dwDirection |= DIR_RIGHT;
+		}
+		//하나라도 안눌려있으면 0
+		if (!((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) || (dwDirection & DIR_LEFT) || (dwDirection & DIR_RIGHT))) {
+			m_pPlayer->m_xmf3Velocity.x = 0.0f;
+			m_pPlayer->m_xmf3Velocity.z = 0.0f;
+				
+		}
 		//W S A D 키입력 검사
 		//RUN
 		if ((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) || (dwDirection & DIR_LEFT) || (dwDirection & DIR_RIGHT)) {
@@ -596,6 +621,7 @@ void GamePlayScene::PlayerControlInput()
 				AddAcel += PlayerRunAcel;
 				dwPlayerState = STATE_RUN;
 						//총기 소유 안할때
+
 					if (m_pPlayer->m_WeaponState == SPINE_BACK) {
 						m_pPlayer->SetMaxXZVelocity(7.0f);
 						AddAcel += NoGrapAcel;
@@ -621,13 +647,14 @@ void GamePlayScene::PlayerControlInput()
 		}
 
 		
-
+	
 		//JUMP
-		if (pKeysBuffer[SPACE_BAR] & 0xF0) {
+		if (!m_pPlayer->isJump && pKeysBuffer[SPACE_BAR] & 0xF0) {
 			//방향
 			dwDirection |= DIR_JUMP_UP;
 			// 플레이어 상태
 			dwPlayerState |= STATE_JUMP;
+			m_pPlayer->isJump = true;
 		}
 		// 총알 리로드
 		if (pKeysBuffer[R] & 0xF0) {
@@ -799,13 +826,6 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 
 
 
-			xmfloat3 = XMFLOAT3(1.0f, 0.0f, 0.0f);
-			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-		for (auto& GO : m_pSceneObject) {
-			GO->BoudingBoxRender(pd3dCommandList, false);
-
-		}
-
 		//쿼드 트리
 		//초록색
 		xmfloat3 = XMFLOAT3(1.0f, 1.0f, 0);
@@ -819,7 +839,13 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 		m_pNevMeshBaker->BoundingRendering(pd3dCommandList);
 
 
+		XMFLOAT3 xmfloat3 = XMFLOAT3(1, 0, 0);
+		XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
 
+		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+		m_pCollisionManager->RenderBoundingBox(pd3dCommandList);
 	}
 }
 
@@ -908,15 +934,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 	}
 
-	//if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
-	m_pBoundigShader->OnPrepareRender(pd3dCommandList);
-	XMFLOAT3 xmfloat3 =XMFLOAT3(1,0,0);
-	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+	if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
 
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-	m_pCollisionManager->RenderBoundingBox(pd3dCommandList);
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
