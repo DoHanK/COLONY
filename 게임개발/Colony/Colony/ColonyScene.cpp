@@ -267,7 +267,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	int cur_object = 0;
 
-	while (m_pSceneObject.size() < m_nGameObjects)
+	while (m_pSceneObject.size() <= m_nGameObjects)
 	{
 	
 
@@ -289,7 +289,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 		::ReadUnityBinaryString(pFile, pstrToken, &nStrLength); //"<TransformMatrix>:"
 		nReads = (UINT)::fread(&mxf4x4Position, sizeof(float), 16, pFile);
 
-		if (strstr(pstrGameObjectName, str.c_str()) != nullptr) {
+		//if (strstr(pstrGameObjectName, str.c_str()) != nullptr) {
 
 
 
@@ -363,7 +363,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 			m_pSceneObject.push_back(pGameObject);
 			cur_object += 1;
 			
-		}
+		//}
 
 	}
 
