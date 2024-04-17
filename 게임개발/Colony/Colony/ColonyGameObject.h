@@ -7,6 +7,7 @@
 class BasicShader;
 class ResourceManager;
 class Camera;
+class BillboardShader;
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////// 모델의 표면을 정의 ///////////////////////////////////////
@@ -457,4 +458,38 @@ public:
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, Player* player);
 
 	SkyBoxShader* skyBoxShader;
+};
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										Billboard Class											   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Billboard :public GameObject {
+public:
+	Billboard(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, Texture* texture,
+		BillboardShader* pShader, GameObject* ownerObject=NULL);
+	~Billboard();
+	BillBoardMesh* m_BillMesh;
+	Material* BillboardMaterial;
+	// Set
+	float m_rows = 8;
+	float m_cols = 8;
+
+	float m_row = 0;
+	float m_col = 0;
+
+	float SettedTimer = 0.5f;
+	float Timer = 0;
+	bool active = true;
+	bool doAnimate = false;
+	bool doOnce = false;
+	XMFLOAT3 TickAddPosition =XMFLOAT3(0.0f, 0.0f, 0.0f);
+	GameObject* m_ownerObject;
+	void SetRowNCol(float row, float col) { m_rows = row; m_cols = col; }
+	virtual void Animate(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
+	void Update(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up);
+	void SetAddPosition(XMFLOAT3 xmf3AddPosition) {TickAddPosition = xmf3AddPosition;}
 };

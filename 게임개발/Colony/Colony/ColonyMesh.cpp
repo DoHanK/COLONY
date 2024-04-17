@@ -933,3 +933,137 @@ ShphereMesh::ShphereMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 
 }
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										BillboardMesh Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+BillBoardMesh::BillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) :BasicMesh(pd3dDevice, pd3dCommandList)
+{
+	//position
+	m_nVertices = 6;
+	float stride = sizeof(XMFLOAT3);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, stride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dPositionBuffer->Map(0, NULL, (void**)&m_pcbMappedPositions);
+
+	m_nVertexBufferViews = 1;
+	m_pd3dVertexBufferViews = new D3D12_VERTEX_BUFFER_VIEW[m_nVertexBufferViews];
+
+	m_pd3dVertexBufferViews[0].BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_pd3dVertexBufferViews[0].StrideInBytes = sizeof(XMFLOAT3);
+	m_pd3dVertexBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+	//normal
+	XMFLOAT3* Normal = new XMFLOAT3[m_nVertices];
+	Normal[0] = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	Normal[1] = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	Normal[2] = XMFLOAT3(0.0f, 0.0f, -1.0f);
+
+	Normal[3] = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	Normal[4] = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	Normal[5] = XMFLOAT3(0.0f, 0.0f, -1.0f);
+
+	m_pd3dNormalBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, Normal, stride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
+	m_pd3dNormalBufferViews = new D3D12_VERTEX_BUFFER_VIEW[1];
+
+	m_pd3dNormalBufferViews[0].BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
+	m_pd3dNormalBufferViews[0].StrideInBytes = sizeof(XMFLOAT3);
+	m_pd3dNormalBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+	//uv
+	m_pd3dUvBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dUvBuffer->Map(0, NULL, (void**)&m_pcbMappedUvs);
+	m_pd3dUvBufferViews = new D3D12_VERTEX_BUFFER_VIEW[1];
+
+	m_pd3dUvBufferViews[0].BufferLocation = m_pd3dUvBuffer->GetGPUVirtualAddress();
+	m_pd3dUvBufferViews[0].StrideInBytes = sizeof(XMFLOAT2);
+	m_pd3dUvBufferViews[0].SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+
+
+	// left top
+	m_pcbMappedUvs[0].x = 0.0f; m_pcbMappedUvs[0].y = 0.0f;
+	//right top
+	m_pcbMappedUvs[1].x = 1.0f; m_pcbMappedUvs[1].y = 0.0f;
+	//left bottom
+	m_pcbMappedUvs[2].x = 0.0f;	m_pcbMappedUvs[2].y = 1.0f;
+
+	//left bottom
+	m_pcbMappedUvs[3].x = 0.0f;	m_pcbMappedUvs[3].y = 1.0f;
+	//right top
+	m_pcbMappedUvs[4].x = 1.0f;	m_pcbMappedUvs[4].y = 0.0f;
+	//right bottom 
+	m_pcbMappedUvs[5].x = 1.0f;	m_pcbMappedUvs[5].y = 1.0f;
+}
+
+BillBoardMesh::~BillBoardMesh()
+{
+	if (m_pd3dNormalBuffer) m_pd3dNormalBuffer->Release();
+	if (m_pd3dNormalUploadBuffer) m_pd3dNormalUploadBuffer->Release();
+	if (m_pcbMappedPositions) {
+		m_pd3dPositionBuffer->Unmap(0, NULL);
+		m_pd3dPositionBuffer->Release();
+	}
+	if (m_pd3dUvBuffer) {
+		m_pd3dUvBuffer->Unmap(0, NULL);
+		m_pd3dUvBuffer->Release();
+	}
+	if (m_pd3dVertexBufferViews) delete[]m_pd3dVertexBufferViews;
+	if (m_pd3dNormalBufferViews) delete[]m_pd3dNormalBufferViews;
+	if (m_pd3dUvBufferViews) delete[]m_pd3dUvBufferViews;
+}
+
+void BillBoardMesh::UpdataVertexPosition(UIRect Rect, float z)
+{
+	int i = 0;
+	//LEFT TOP 
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.left, Rect.bottom, z);
+	// RIGHT TOP
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.right, Rect.bottom, z);
+	// LEFT BOTTOM
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.right, Rect.top, z);
+
+	// LEFT BOTTOM
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.right, Rect.top, z);
+	// RIGHT TOP
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.left, Rect.top, z);
+	// RIGHT BOTTOM
+	m_pcbMappedPositions[i++] = XMFLOAT3(Rect.left, Rect.bottom, z);
+
+
+}
+
+void BillBoardMesh::UpdateUvCoord(UIRect Rect)
+{
+	// left top
+	m_pcbMappedUvs[0].x = Rect.left; m_pcbMappedUvs[0].y = Rect.bottom;
+	//right top
+	m_pcbMappedUvs[1].x = Rect.right; m_pcbMappedUvs[1].y = Rect.bottom;
+	//left bottom
+	m_pcbMappedUvs[2].x = Rect.right; m_pcbMappedUvs[2].y = Rect.top;
+
+
+	////left bottom
+	m_pcbMappedUvs[3].x = Rect.right;  m_pcbMappedUvs[3].y = Rect.top;
+	////right top
+	m_pcbMappedUvs[4].x = Rect.left;	m_pcbMappedUvs[4].y = Rect.top;
+	////right bottom 
+	m_pcbMappedUvs[5].x = Rect.left;	m_pcbMappedUvs[5].y = Rect.bottom;
+}
+
+void BillBoardMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[3] = { *m_pd3dVertexBufferViews,*m_pd3dUvBufferViews,*m_pd3dNormalBufferViews };
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 3, pVertexBufferViews);
+	pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+}
+

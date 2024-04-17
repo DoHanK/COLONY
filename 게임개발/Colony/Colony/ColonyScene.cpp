@@ -70,6 +70,9 @@ bool GamePlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 
 	switch (nMessageID)
 	{
+	case WM_LBUTTONDOWN:
+		m_pBillObject->active = true;
+		break;
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
@@ -372,6 +375,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
 {
+	m_pResourceManager = pResourceManager;
 
 	////카메라
 	m_pCamera = new ThirdPersonCamera();
@@ -406,6 +410,10 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pDepthShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
 	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/Scene.bin","Model/Textures/scene/", pResourceManager);
 
+	m_BillShader = new BillboardShader();
+	m_BillShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_BillShader->AddRef();
+
 	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pResourceManager);
 	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
 	m_pCamera->SetPlayer(m_pPlayer);
@@ -434,8 +442,6 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pQuadTree = new QuadTree(pd3dDevice, pd3dCommandList, 0, OctreeCenter, OctreeScale);
 	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, QuadtreeDepth);
 
-
-	
 	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, CELL_SIZE, H_MAPSIZE_X, H_MAPSIZE_Y ,true);
 	//m_pNevMeshBaker->BakeNevMeshByCollision(pd3dDevice, pd3dCommandList,m_pCollisionManager->m_StaticObjects);
 	//m_pNevMeshBaker->SaveNevMesh();
@@ -444,11 +450,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPathFinder = new PathFinder();
 	m_pPathFinder->BuildGraphFromCell(m_pNevMeshBaker->m_Grid, m_pNevMeshBaker->m_WidthCount, m_pNevMeshBaker->m_HeightCount);
 
-
-
 	m_pskybox = new SkyBox(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pskybox->AddRef();
-
 
 	m_pPerceptionRangeMesh = new PerceptionRangeMesh(pd3dDevice, pd3dCommandList);
 	//Monster Create
@@ -473,15 +476,27 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		}
 	}
 	
-
 	m_pTestBox = new ShphereMesh(pd3dDevice, pd3dCommandList,20,20, PlayerRange);
 	
 
-	m_pResourceManager = pResourceManager;
+	//billboard test
+	m_pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer);
+	m_pBillObject->doAnimate = true;
+	m_pBillObject->SetAddPosition(XMFLOAT3(0.0f, 0.3f,0.0f));
+	m_pBillObject->SetRowNCol(7, 5);
+	m_pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(0.5, -0.5, -0.5, 0.5), 1.0f);
+	m_pBillObject->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+	m_pBillObject->SettedTimer = 0.01f;
+	m_pBillObject->doOnce = true;
+	m_pBillObject->AddRef();
 
-	
+	//billboard -> doAnimate,active,ownerObject,TickAddPosition 설정
 
-	
+
+
+
+
 
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
@@ -543,6 +558,10 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	}
 
 	m_pResourceManager->BringTexture("Model/Textures/UITexture/TimerBAR(T).dds", UI_TEXTURE, true);
+
+
+
+
 }
 
 void GamePlayScene::ReleaseObjects()
@@ -583,6 +602,9 @@ void GamePlayScene::ReleaseObjects()
 
 	if (m_pTestBox) m_pTestBox->Release();
 	if (m_pCollisionManager) delete m_pCollisionManager;
+	if (m_pBillObject) m_pBillObject->Release();
+
+	if (m_BillShader) m_BillShader->Release();
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -753,8 +775,14 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	m_pPlayer->Animate(fTimeElapsed);
 	
+	for (auto& GO : m_pBillObjects) {
+		if (GO->doAnimate) {
+			GO->Animate(fTimeElapsed);
+		}
+	}
 
-
+		m_pBillObject->Animate(fTimeElapsed);
+	
 }
 
 void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -930,12 +958,24 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 			GO->Render(pd3dCommandList);
 
 		}
-
-
 	}
 
 	if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
 
+
+	for (auto& GO : m_pBillObjects) {
+		if (GO->active) {
+			GO->Render(pd3dCommandList, m_pPlayer->GetCamera());
+		}
+	}
+
+
+
+	if (m_pBillObject->active) {
+		m_pBillObject->Render(pd3dCommandList, m_pPlayer->GetCamera());
+		//test = false;
+	}
+	
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

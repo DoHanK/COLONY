@@ -1401,3 +1401,97 @@ void SkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera,
 
 	GameObject::Render(pd3dCommandList, pCamera);
 }
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Billboard::Billboard(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, Texture* texture,BillboardShader*pShader,GameObject* ownerObject) : GameObject(1)
+{//material 1개로 통일
+	m_BillMesh = new BillBoardMesh(pd3dDevice, pd3dCommandList);
+	SetMesh(m_BillMesh);
+	m_BillMesh->AddRef();
+
+	BillboardMaterial = new Material(1);
+	BillboardMaterial->SetTexture(texture, 0);
+	BillboardMaterial->SetShader(pShader);
+
+	SetMaterial(0, BillboardMaterial);
+
+	m_ownerObject = ownerObject;
+}
+
+Billboard::~Billboard() {
+
+	if (m_BillMesh)m_BillMesh->Release();
+}
+
+void Billboard::Animate(float fTimeElapsed)
+{
+	m_BillMesh->UpdateUvCoord(UIRect{ m_row * (1.0f / m_rows) , (m_row + 1.0f) * (1.0f / m_rows) , m_col * (1.0f / m_cols), (m_col + 1.f) * (1.0f / m_cols) });
+	//m_BillMesh->UpdateUvCoord(UIRect{ 1 , 0 , 0, 1});
+		//top bottom left right
+
+	Timer += fTimeElapsed;
+	if (Timer > SettedTimer) {
+		Timer = 0;
+	}
+
+	if (Timer == 0) {
+		m_col++;
+		if (m_col == m_cols) {
+			m_row++;
+			m_col = 0;
+		}
+		if (m_row == m_rows) {
+			m_row = 0;
+			if (doOnce) {
+				//m_bActive = 0;
+				active = false;
+			}
+		}
+	}
+}
+
+void Billboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+{
+	if (m_ownerObject) {
+		SetPosition(
+			Vector3::Add(m_ownerObject->GetPosition(), Vector3::ScalarProduct(m_ownerObject->GetLook(),(5.0f),false)));
+		MoveStrafe(0.6f);
+		MoveUp(0.6f);
+	}
+
+	Update(pCamera->GetPosition(), XMFLOAT3(0, 1, 0));
+
+
+	if (m_nMaterials > 0)
+	{
+		for (int i = 0; i < m_nMaterials; i++)
+		{
+			if (m_ppMaterials[i])
+			{
+				if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+				m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+			}
+			//m_pMesh->Render(pd3dCommandList, i);
+		}
+	}
+
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+	if (m_BillMesh)
+		m_BillMesh->Render(pd3dCommandList);
+}
+
+void Billboard::Update(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
+{
+	XMFLOAT3 xmf3Position(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43);
+	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(xmf3Position, xmf3Target, xmf3Up);
+	m_xmf4x4World._11 = mtxLookAt._11; m_xmf4x4World._12 = mtxLookAt._21; m_xmf4x4World._13 = mtxLookAt._31;
+	m_xmf4x4World._21 = mtxLookAt._12; m_xmf4x4World._22 = mtxLookAt._22; m_xmf4x4World._23 = mtxLookAt._32;
+	m_xmf4x4World._31 = mtxLookAt._13; m_xmf4x4World._32 = mtxLookAt._23; m_xmf4x4World._33 = mtxLookAt._33;
+}
+

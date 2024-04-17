@@ -223,3 +223,20 @@ public:
 class DepthRenderingShader :public DepthSkinnedRenderingShader {
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
 };
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										 BillboardShader Class		  				    		   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+class BillboardShader :public BasicShader
+{
+public:
+	BillboardShader();
+	~BillboardShader();
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+};

@@ -178,7 +178,7 @@ protected:
 	//그림잠 쉐이더
 	DepthSkinnedRenderingShader*		m_pDepthSkinnedShader = NULL;
 	DepthRenderingShader*				m_pDepthShader = NULL;
-
+	BillboardShader*					m_BillShader=NULL;
 
 	bool								m_bBoundingRender = false;
 	int									m_DepthRender = 0;
@@ -200,4 +200,10 @@ protected:
 	UIInfo* h_TimerBar[5];
 	vector<Texture*> numTexture;
 	CollisionManager* m_pCollisionManager;
+
+
+	Billboard* m_pBillObject;
+	vector <Billboard*> m_pBillObjects;
+
+	bool test = false;
 };
