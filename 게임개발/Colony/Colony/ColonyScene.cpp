@@ -481,11 +481,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//billboard test
 	m_pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-		pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer);
+		pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer->m_SelectWeapon.FindFrame("Export"));
 	m_pBillObject->doAnimate = true;
 	m_pBillObject->SetAddPosition(XMFLOAT3(0.0f, 0.3f,0.0f));
 	m_pBillObject->SetRowNCol(7, 5);
-	m_pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(0.5, -0.5, -0.5, 0.5), 1.0f);
+	m_pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(0.1, -0.1, -0.1, 0.1), 1.0f);
 	m_pBillObject->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
 	m_pBillObject->SettedTimer = 0.01f;
 	m_pBillObject->doOnce = true;

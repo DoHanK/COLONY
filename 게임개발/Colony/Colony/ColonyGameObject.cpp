@@ -1456,10 +1456,14 @@ void Billboard::Animate(float fTimeElapsed)
 void Billboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
 	if (m_ownerObject) {
-		SetPosition(
-			Vector3::Add(m_ownerObject->GetPosition(), Vector3::ScalarProduct(m_ownerObject->GetLook(),(5.0f),false)));
-		MoveStrafe(0.6f);
-		MoveUp(0.6f);
+		/*SetPosition(
+			Vector3::Add(m_ownerObject->GetPosition(), Vector3::ScalarProduct(m_ownerObject->GetLook(),(5.0f),false)));*/
+	/*	MoveStrafe(0.6f);
+		MoveUp(0.6f);*/
+		XMFLOAT4X4 m = m_ownerObject->m_xmf4x4World;
+		XMFLOAT3 v = XMFLOAT3(m._41, m._42, m._43);
+		SetPosition(v);
+		//MoveForward(0.5f);
 	}
 
 	Update(pCamera->GetPosition(), XMFLOAT3(0, 1, 0));
