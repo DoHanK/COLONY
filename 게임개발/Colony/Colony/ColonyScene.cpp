@@ -246,7 +246,8 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 }
 
 #define LOD 0
-void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName, const char* TexFileName,ResourceManager* pResourceManager)
+void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName, const char* TexFileName,ResourceManager* pResourceManager
+,char* modelLocation)
 {
 	FILE* pFile = NULL;
 	::fopen_s(&pFile, pstrFileName, "rb");
@@ -325,11 +326,12 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 			if (!pMesh)
 			{
-
+				
 				FILE* pInFile = NULL;
 				char modelFilePath[256];
-				strcpy_s(modelFilePath, sizeof(modelFilePath), "Model/Meshes/");
-				strcpy_s(modelFilePath + 13, sizeof(modelFilePath) - 13 - 1, pstrGameObjectName);
+				size_t locSize = strlen(modelLocation);
+				strcpy_s(modelFilePath, sizeof(modelFilePath), modelLocation);
+				strcpy_s(modelFilePath + locSize, sizeof(modelFilePath) - locSize - 1, pstrGameObjectName);
 				strcat_s(modelFilePath, sizeof(modelFilePath), ".bin");
 
 				::fopen_s(&pInFile, modelFilePath, "rb");
@@ -408,7 +410,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pDepthSkinnedShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
 	m_pDepthShader = new DepthRenderingShader();
 	m_pDepthShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
-	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/Scene.bin","Model/Textures/scene/", pResourceManager);
+	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/MainScene.bin","Model/Textures/scene/", pResourceManager,"Model/MainSceneMeshes/");
+	//LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/SpaceStationScene.bin", "Model/Textures/scene/", pResourceManager, "Model/SpaceStationMeshes/");
+
 
 	m_BillShader = new BillboardShader();
 	m_BillShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -916,10 +920,6 @@ void GamePlayScene::UpdateUI() {
 			h_TimerBar[i-1]->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/UITexture/TimerBAR(T).dds", UI_TEXTURE, true);
 		}
 	}
-
-
-
-
 }
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
@@ -1064,7 +1064,6 @@ void GamePlayScene::PrepareDepthTexture(Camera* pCamera , int CameraIndex)
 			m_pToLightSpaces->m_pToLightSpaces[CameraIndex].m_xmf4Position.w = 0.0f;
 		}
 	}
-
 
 void GamePlayScene::ReleaseUploadBuffers()
 {
