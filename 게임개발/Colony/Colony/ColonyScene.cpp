@@ -430,7 +430,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		if ((strstr(GO->m_pstrFrameName, "SM_Mountain_A") == NULL
 			&& strstr(GO->m_pstrFrameName, "SM_Mountain_B") == NULL
 			&& strstr(GO->m_pstrFrameName, "SM_Plant_A") == NULL
-			&& strstr(GO->m_pstrFrameName, "SM_Plant_B") == NULL)) {
+			&& strstr(GO->m_pstrFrameName, "SM_Plant_B") == NULL
+			&& strstr(GO->m_pstrFrameName, "SM_LongGrass") == NULL)) {
 			m_pCollisionManager->EnrollObjectIntoBox(false, GO->m_BoundingBox.Center, GO->m_BoundingBox.Extents, GO);
 
 		}
