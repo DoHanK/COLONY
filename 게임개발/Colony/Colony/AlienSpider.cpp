@@ -88,9 +88,9 @@ void AlienSpider::Animate(float fTimeElapsed)
 	m_AniTime += fTimeElapsed;
 
 	//폐기되기전 기록 저장
-	if (m_AniTime > 0.08f) {
+	if (m_AniTime > 0.07f) {
 		((AlienSpiderAnimationController*)m_pSkinnedAnimationController)->SavePrevFrameInfo(m_ppcbxmf4x4MappedSkinningBoneTransforms , m_GhostNum);
-		m_AniTime = 0;
+		m_AniTime = (rand()/RAND_MAX)/10.f;
 	}
 	GameObject::Animate(fTimeElapsed);
 
@@ -141,8 +141,14 @@ void AlienSpider::SetGhostShader(GhostTraillerShader* pShader)
 
 void AlienSpider::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
-	GameObject::Render(pd3dCommandList);
+	RenderBindAlbedo(pd3dCommandList, NULL, m_pSpiderTex);
 
+	GhostTrailerRender(pd3dCommandList, NULL);
+
+}
+
+void AlienSpider::GhostTrailerRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+{
 	//GhostTrailer Effect
 	if (m_pSkinnedModel->m_pMesh) {
 
@@ -150,23 +156,22 @@ void AlienSpider::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCa
 		{
 			for (int i = 0; i < m_pSkinnedModel->m_nMaterials; i++)
 			{
-				if (m_pSkinnedModel->m_ppMaterials[i]){
-			   		
-					if (m_pGhostShader) m_pGhostShader->OnPrepareRender(pd3dCommandList, 0);
-					m_pSkinnedModel->m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
-				}
-				for (int j = TRAILER_COUNT-1; j > -1; --j) {
+				if (m_pSkinnedModel->m_ppMaterials[i]) {
 
-					//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1,  &m_GhostNum[j], 33);
-					//((SkinnedMesh*)m_pSkinnedModel->m_pMesh)->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[j];
-					//	m_pSkinnedModel->m_pMesh->Render(pd3dCommandList, 0);
+					if (m_pGhostShader) m_pGhostShader->OnPrepareRender(pd3dCommandList, 0);
+					//m_pSkinnedModel->m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+				}
+				for (int j = TRAILER_COUNT - 1; j > -1; --j) {
+
+					pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1,  &m_GhostNum[j], 33);
+					((SkinnedMesh*)m_pSkinnedModel->m_pMesh)->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[j];
+						m_pSkinnedModel->m_pMesh->Render(pd3dCommandList, 0);
 
 				}
 
 			}
 		}
 	}
-
 }
 
 void AlienSpider::PerceptionBindRender(ID3D12GraphicsCommandList* pd3dCommandList)

@@ -642,6 +642,36 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCam
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
+void GameObject::RenderBindAlbedo(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera,Texture* Albedo)
+{
+	//프레임으로 이뤄진 것이기에 필요가 없음
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
+
+	if (m_pMesh)
+	{
+		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+
+		if (m_nMaterials > 0)
+		{
+			for (int i = 0; i < m_nMaterials; i++)
+			{
+				if (m_ppMaterials[i])
+				{
+					if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+				}
+
+				if (Albedo)Albedo->UpdateShaderVariable(pd3dCommandList, 0);
+				m_pMesh->Render(pd3dCommandList, i);
+			}
+		}
+	}
+
+	if (m_pSibling) m_pSibling->RenderBindAlbedo(pd3dCommandList, pCamera, Albedo);
+	if (m_pChild) m_pChild->RenderBindAlbedo(pd3dCommandList, pCamera, Albedo);
+}
+
 void GameObject::DepthRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
 	//프레임으로 이뤄진 것이기에 필요가 없음

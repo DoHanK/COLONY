@@ -8,7 +8,7 @@
 #include "AIController.h"
 #include "PerceptionMesh.h"
 #include "Perception.h"
-#define TRAILER_COUNT 5
+#define TRAILER_COUNT 8
 class AlienSpiderAnimationController;
 
 class GoalThink;
@@ -42,7 +42,7 @@ public:
 	Perception*					m_pPerception = NULL;
 	Player*						m_pPlayer = NULL;
 
-	
+	Texture*					m_pSpiderTex = NULL;
 	
 public:
 	//¿Ãµø
@@ -71,6 +71,7 @@ public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
+	virtual void GhostTrailerRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
 
 	void PerceptionBindRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	void PerceptRangeRender(ID3D12GraphicsCommandList* pd3dCommandList);

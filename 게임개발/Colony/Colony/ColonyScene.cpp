@@ -460,8 +460,17 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pPerceptionRangeMesh = new PerceptionRangeMesh(pd3dDevice, pd3dCommandList);
 	//Monster Create
+	Texture* spiderColor[6];
+	int i = 0;
+	spiderColor[i++] = pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_Bone_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+	spiderColor[i++] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_DarkGreen_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+	spiderColor[i++] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_Green_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+	spiderColor[i++] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_purple_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+	spiderColor[i++] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_Red_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+	spiderColor[i] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_White_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 3; ++j) {
+	for (int j = 0; j < 30; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
@@ -476,6 +485,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
 			p->SetGhostShader(m_pGhostTraillerShader);
+			p->m_pSpiderTex = spiderColor[j % 6];
 			m_pGameObject.push_back(p);
 			m_pCollisionManager->EnrollEnemy(p);
 		}
@@ -770,7 +780,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	for (auto& GO : m_pGameObject) {
 
-		//((AlienSpider*)(GO))->Update(fTimeElapsed);
+		((AlienSpider*)(GO))->Update(fTimeElapsed);
 
 		((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
 		GO->Animate(fTimeElapsed);

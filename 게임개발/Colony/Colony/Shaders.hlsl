@@ -270,16 +270,33 @@ float4 PSGhostTrailler(VS_STANDARD_OUTPUT input) : SV_TARGET
     {
         normalW = normalize(input.normalW);
     }
-    //return cColor;
-	
-    //float4 cIllumination = Lighting(input.positionW, normalW);
-	//cColor = (lerp(cColor, cIllumination, 0.2f));
-    //cColor.rgb *= 1;
-    // cColor.r = 1-GhostTime;
-    cColor.a = 0.7f - (gfGhostNum/100);
-    cColor.rgb *= 0.7 * DOWNGRAY;
-    cColor.rgb *= (1.0f - (gfGhostNum / 5));
+    float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
+    
+    //cColor = lerp(cColor, cIllumination, LIGHTRATIO);
+   //cColor += cIllumination * LIGHTRATIO;
+
+    cColor *= cIllumination * LIGHTRATIO ;
+        
+  
+
+    cColor.a = 0.7f - (gfGhostNum/25);
+   cColor.rgb *= 1.4;
+    //cColor.b *= 1.2;
+    float uvalue = 2.0;
+    float dvalue = 0.4;
+    if (cIllumination.r < uvalue && cIllumination.g < uvalue && cIllumination.b < uvalue)
+    {
+        if (cIllumination.r > dvalue && cIllumination.g > dvalue && cIllumination.b > dvalue)
+        {
+            return cColor;
+        }
+
+
+        
+    }
+       discard;
     return cColor;
+    
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

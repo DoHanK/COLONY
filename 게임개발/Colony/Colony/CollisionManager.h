@@ -233,14 +233,14 @@ public:
 		m_Bodys[4].Radius = 0.4f; //DEF_TAIL
 		m_Bodys[5].Radius = 0.4f; //DEF_TAIL_001; 
 
-		m_legs[0].Radius = 0.15f; //DEF_SPINE_1
-		m_legs[1].Radius = 0.15f; //DEF_CHEST
-		m_legs[2].Radius = 0.15f; //DEF_NECK_1
-		m_legs[3].Radius = 0.15f; //DEF_HEAD
-		m_legs[4].Radius = 0.15f; //DEF_TAIL
-		m_legs[5].Radius = 0.15f; //DEF_TAIL_001; 
-		m_legs[6].Radius = 0.15f; //DEF_TAIL_001; 
-		m_legs[7].Radius = 0.15f; //DEF_TAIL_001; 
+		m_legs[0].Radius = 0.2f; //DEF_SPINE_1
+		m_legs[1].Radius = 0.2f; //DEF_CHEST
+		m_legs[2].Radius = 0.2f; //DEF_NECK_1
+		m_legs[3].Radius = 0.2f; //DEF_HEAD
+		m_legs[4].Radius = 0.2f; //DEF_TAIL
+		m_legs[5].Radius = 0.2f; //DEF_TAIL_001; 
+		m_legs[6].Radius = 0.2f; //DEF_TAIL_001; 
+		m_legs[7].Radius = 0.2f; //DEF_TAIL_001; 
 	}
 public:
 	BoundingSphere m_Entire; //DEF-Hip의 정보를 가져옴
@@ -254,7 +254,6 @@ public:
 		XMFLOAT3 pos;
 
 		pos = m_pOwner->FramePos[AlienboneIndex::DEF_HIPS];
-
 		m_Entire.Center = pos;
 
 	}
