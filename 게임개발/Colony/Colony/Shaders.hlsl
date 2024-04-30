@@ -279,8 +279,6 @@ float4 PSGhostTrailler(VS_STANDARD_OUTPUT input) : SV_TARGET
         
   
 
-    cColor.a = 0.7f - (gfGhostNum/25);
-   cColor.rgb *= 1.4;
     //cColor.b *= 1.2;
     float uvalue = 2.0;
     float dvalue = 0.4;
@@ -288,6 +286,9 @@ float4 PSGhostTrailler(VS_STANDARD_OUTPUT input) : SV_TARGET
     {
         if (cIllumination.r > dvalue && cIllumination.g > dvalue && cIllumination.b > dvalue)
         {
+            
+            cColor.a = 0.7f - (gfGhostNum / 50);
+            cColor.rgb *= 1.3;
             return cColor;
         }
 
