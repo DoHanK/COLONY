@@ -329,18 +329,18 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 public:
 	//position
-	XMFLOAT3* m_pcbMappedPositions = NULL;
+	XMFLOAT3*						m_pcbMappedPositions = NULL;
 	UINT							m_nVertexBufferViews;
-	D3D12_VERTEX_BUFFER_VIEW* m_pd3dVertexBufferViews;
+	D3D12_VERTEX_BUFFER_VIEW*		m_pd3dVertexBufferViews;
 	//normal
-	ID3D12Resource* m_pd3dNormalBuffer;
+	ID3D12Resource*					m_pd3dNormalBuffer;
 	UINT							m_nNormalBufferViews = 0;
-	D3D12_VERTEX_BUFFER_VIEW* m_pd3dNormalBufferViews;
-	ID3D12Resource* m_pd3dNormalUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW*		m_pd3dNormalBufferViews;
+	ID3D12Resource*					m_pd3dNormalUploadBuffer = NULL;
 	//uv
-	ID3D12Resource* m_pd3dUvBuffer;
+	ID3D12Resource*					m_pd3dUvBuffer;
 	UINT							m_nUvBufferViews = 0;
-	D3D12_VERTEX_BUFFER_VIEW* m_pd3dUvBufferViews;
-	ID3D12Resource* m_pd3dUvUploadBuffer = NULL;
-	XMFLOAT2* m_pcbMappedUvs = NULL;
+	D3D12_VERTEX_BUFFER_VIEW*		m_pd3dUvBufferViews;
+	ID3D12Resource*					m_pd3dUvUploadBuffer = NULL;
+	XMFLOAT2*						m_pcbMappedUvs = NULL;
 };

@@ -39,7 +39,7 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 	//인식
 	m_pPerception = new Perception(this);
 
-
+	FramePos = new XMFLOAT3[AlienboneIndex::End];
 
 	m_pHead = pSpider->m_pModelRootObject->FindFrame("DEF-HEAD");
 
@@ -79,6 +79,7 @@ AlienSpider::~AlienSpider()
 	if (m_ppd3dcbSkinningBoneTransforms) delete[] m_ppd3dcbSkinningBoneTransforms;
 	if (m_ppcbxmf4x4MappedSkinningBoneTransforms) delete[] m_ppcbxmf4x4MappedSkinningBoneTransforms;
 	
+	if (FramePos)  delete[] FramePos;
 
 }
 
@@ -92,6 +93,37 @@ void AlienSpider::Animate(float fTimeElapsed)
 		m_AniTime = 0;
 	}
 	GameObject::Animate(fTimeElapsed);
+
+	if(FramePos){
+
+		//몸통
+		UpdateFramePos(AlienboneIndex::DEF_HIPS);
+		UpdateFramePos(AlienboneIndex::DEF_SPINE_1);
+		UpdateFramePos(AlienboneIndex::DEF_CHEST);
+		UpdateFramePos(AlienboneIndex::DEF_NECK_1);
+		UpdateFramePos(AlienboneIndex::DEF_HEAD);
+		UpdateFramePos(AlienboneIndex::DEF_TAIL);
+		UpdateFramePos(AlienboneIndex::DEF_TAIL_001);
+
+		//다리
+		UpdateFramePos(AlienboneIndex::DEF_LEG_BACK_02_L);
+		UpdateFramePos(AlienboneIndex::DEF_LEG_BACK_02_R);
+		UpdateFramePos(AlienboneIndex::DEF_LEG_FRONT_02_L);
+		UpdateFramePos(AlienboneIndex::DEF_LEG_FRONT_02_R);
+		UpdateFramePos(AlienboneIndex::DEF_LEG_MIDDLE_02_L);
+		UpdateFramePos(AlienboneIndex::DEF_LEG_MIDDLE_02_R);
+		UpdateFramePos(AlienboneIndex::DEF_FORARM_L);
+		UpdateFramePos(AlienboneIndex::DEF_FORARM_R);
+	}
+}
+
+void AlienSpider::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+{
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4ToParent, *pxmf4x4Parent) : m_xmf4x4ToParent;
+
+	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
+	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
+
 }
 
 void AlienSpider::AddPostion(const XMFLOAT3& Pos)
@@ -263,6 +295,11 @@ void AlienSpiderAnimationController::AdvanceTime(float fElapsedTime, GameObject*
 				
 					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
 				}
+				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "DEF-HIPS") {
+					xmf4x4Transform._41 = 1.72889e-06;
+					xmf4x4Transform._42 = -0.0001055449;
+					xmf4x4Transform._43 = 0.007409086;
+				}
 			m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
 			}
 
@@ -274,3 +311,4 @@ void AlienSpiderAnimationController::AdvanceTime(float fElapsedTime, GameObject*
 
 
 }
+

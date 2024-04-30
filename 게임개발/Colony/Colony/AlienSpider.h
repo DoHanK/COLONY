@@ -17,6 +17,7 @@ class Perception;
 
 
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //										AlienSpider Class											//
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,6 +41,9 @@ public:
 	PerceptionRangeMesh*		m_pPerceptionRangeMesh = NULL;
 	Perception*					m_pPerception = NULL;
 	Player*						m_pPlayer = NULL;
+
+	
+	
 public:
 	//¿Ãµø
 	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -65,6 +69,7 @@ public:
 	void SetPerceptionRangeMesh(PerceptionRangeMesh* pPerceptMesh) { m_pPerceptionRangeMesh = pPerceptMesh; };
 	void SetGhostShader(GhostTraillerShader* pShader);
 	virtual void Animate(float fTimeElapsed);
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 
 	void PerceptionBindRender(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -96,4 +101,8 @@ public:
 	void ChangeAnimation(DWORD ChangeState);
 	bool isSameState(DWORD dwState);
 	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
+
+	
+
+
 };

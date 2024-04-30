@@ -370,6 +370,8 @@ public:
 	XMFLOAT4X4						m_xmf4x4World;
 
 	BoundingOrientedBox  m_BoundingBox = BoundingOrientedBox();
+	XMFLOAT3* FramePos = NULL;
+
 
 	GameObject* m_pParent = NULL;
 	GameObject* m_pChild = NULL;
@@ -383,8 +385,11 @@ public:
 
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 
+	
 	virtual void OnPrepareAnimate() { }
 	virtual void Animate(float fTimeElapsed);
+
+	virtual void UpdateFramePos(int idex);
 
 	virtual void UpdateMatrix() { }
 	virtual void UpdateBoundingBox();

@@ -249,6 +249,8 @@ void ThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		{
 			m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
 			m_xmf3Position.x = xmf3Position.x;
+	/*		m_xmf3Position.y = xmf3Position.y;
+			m_xmf3Position.z = xmf3Position.z;*/
 		}
 	}
 }

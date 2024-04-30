@@ -229,7 +229,7 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
-	m_pLights[2].m_bEnable = false;
+	m_pLights[2].m_bEnable = true;
 	m_pLights[2].m_nType = SPOT_LIGHT;
 	m_pLights[2].m_fRange = 200.0f;
 	m_pLights[2].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -461,7 +461,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPerceptionRangeMesh = new PerceptionRangeMesh(pd3dDevice, pd3dCommandList);
 	//Monster Create
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 1; ++j) {
+	for (int j = 0; j < 3; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
@@ -472,12 +472,12 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
 			//p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
-			p->SetPosition(0.f, 0.f, 0.f);
+			p->SetPosition(j*2, 0.f, 0.f);
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
-			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 20);
+			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
 			p->SetGhostShader(m_pGhostTraillerShader);
 			m_pGameObject.push_back(p);
-
+			m_pCollisionManager->EnrollEnemy(p);
 		}
 	}
 	
@@ -770,7 +770,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	for (auto& GO : m_pGameObject) {
 
-		((AlienSpider*)(GO))->Update(fTimeElapsed);
+		//((AlienSpider*)(GO))->Update(fTimeElapsed);
 
 		((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
 		GO->Animate(fTimeElapsed);

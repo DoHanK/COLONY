@@ -601,6 +601,17 @@ void GameObject::Animate(float fTimeElapsed)
 
 }
 
+void GameObject::UpdateFramePos(int idex)
+{
+	if (FramePos) {
+		if (m_pSkinnedAnimationController->m_pppAnimatedBoneFrameCaches[idex]) {
+			FramePos[idex].x = m_pSkinnedAnimationController->m_pppAnimatedBoneFrameCaches[idex][0]->m_xmf4x4World._41;
+			FramePos[idex].y = m_pSkinnedAnimationController->m_pppAnimatedBoneFrameCaches[idex][0]->m_xmf4x4World._42;
+			FramePos[idex].z = m_pSkinnedAnimationController->m_pppAnimatedBoneFrameCaches[idex][0]->m_xmf4x4World._43;
+		}
+	}
+}
+
 void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
 	//프레임으로 이뤄진 것이기에 필요가 없음

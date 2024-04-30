@@ -44,12 +44,61 @@ enum AlienAnimationName {
 	Walk_back,
 	Walk_left,
 	Walk_right,
-
+	EndAnimation,
 };
 enum AlienAnimationTrack {
 	NOW_TRACK,
 	PRE_TRACK
 };
+enum AlienboneIndex {
+	Alien_Spider
+	,polySurface10
+	,Root
+	,DEF_HIPS					//바운딩 ㅇ
+	,DEF_LEG_BACK_01_L
+	,DEF_LEG_BACK_02_L
+	,DEF_LEG_BACK_03_L
+	,DEF_LEG_BACK_01_R
+	,DEF_LEG_BACK_02_R
+	,DEF_LEG_BACK_03_R
+	,DEF_LEG_FRONT_01_L
+	,DEF_LEG_FRONT_02_L
+	,DEF_LEG_FRONT_03_L
+	,DEF_LEG_FRONT_01_R
+	,DEF_LEG_FRONT_02_R
+	,DEF_LEG_FRONT_03_R
+	,DEF_LEG_MIDDLE_01_L
+	,DEF_LEG_MIDDLE_02_L
+	,DEF_LEG_MIDDLE_03_L
+	,DEF_LEG_MIDDLE_01_R
+	,DEF_LEG_MIDDLE_02_R
+	,DEF_LEG_MIDDLE_03_R
+	,DEF_SPINE_1				//바운딩 ㅇ
+	,DEF_SPINE_2
+	,DEF_CHEST					//바운딩 ㅇ
+	,DEF_NECK_1				//바운딩 ㅇ
+	,DEF_NECK_2
+	,DEF_HEAD					//바운딩 ㅇ
+	,DEF_JAW
+	,DEF_TONGUE
+	,DEF_TONGUE_001
+	,DEF_TONGUE_002
+	,DEF_SHOLDER_L
+	,DEF_ARM_L
+	,DEF_FORARM_L
+	,DEF_HAND_L
+	,DEF_SHOLDER_R
+	,DEF_ARM_R
+	,DEF_FORARM_R
+	,DEF_HAND_R
+	,DEF_TAIL					//바운딩 ㅇ
+	,DEF_TAIL_001				//바운딩 ㅇ
+	,DEF_STING
+	,End
+};
+
+
+
 //이동 속도
 #define AlienAccel		3.0f
 #define AlienMaxXZSpeed 2.0f

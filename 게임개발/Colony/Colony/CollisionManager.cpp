@@ -70,6 +70,17 @@ XMFLOAT4X4 CollisionManager::GetSphereMatrix(BSphere* pSphere)
 	if (pSphere->m_pOwner) WM = pSphere->m_pOwner->m_xmf4x4World;
 	return Matrix4x4::Multiply(SM, WM);
 }
+
+XMFLOAT4X4 CollisionManager::GetSphereMatrix(const float& r , const XMFLOAT3& center)
+{
+	XMFLOAT4X4 SM = MakeScaleMatrix(r, r, r);
+	XMFLOAT4X4 WM = Matrix4x4::Identity();
+	WM._41 = center.x;
+	WM._42 = center.y;
+	WM._43 = center.z;
+	return Matrix4x4::Multiply(SM, WM);
+}
+
 XMFLOAT4X4 CollisionManager::GetSphereMatrix(BCapsule* pCapsule)
 {
 	float r = pCapsule->m_radius;
@@ -125,7 +136,7 @@ void CollisionManager::EnrollObjectIntoCapsule(bool isAccel, XMFLOAT3 center, fl
 	}
 
 }
-
+//캡슐 플레이어 등록
 void CollisionManager::EnrollPlayerIntoCapsule(XMFLOAT3 center, float radius, float tip, float base, GameObject* pOwner)
 {
 
@@ -133,8 +144,7 @@ void CollisionManager::EnrollPlayerIntoCapsule(XMFLOAT3 center, float radius, fl
 
 	m_pPlayer = pCapsule;
 }
-
-
+// 바운디 정보 불러오기
 void CollisionManager::LoadCollisionBoxInfo(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList ,const char* filename)
 {
 	std::ifstream is{ filename,std::ios::binary };
@@ -170,8 +180,15 @@ void CollisionManager::LoadCollisionBoxInfo(ID3D12Device* pd3dDevice, ID3D12Grap
 }
 
 
+void CollisionManager::EnrollEnemy(GameObject* pEnemy)
+{
+	if (pEnemy) {
+		AliensBoudingBox* m_pBounding = new AliensBoudingBox(pEnemy);
 
+		m_EnemyObjects.emplace_back(m_pBounding);
 
+	}
+}
 
 bool CollisionManager::CollisionPlayerToStaticObeject()
 {
@@ -250,9 +267,7 @@ bool CollisionManager::CollisionPlayerToStaticObeject()
 				}
 			}
 			// selectNum 0 뒷 , 1 앞 , 2 오른 ,3 왼 ,4 위 ,5  아래
-			if (selectNum == 4) {
-				((Player*)m_pPlayer->m_pOwner)->isJump = false;
-			}
+
 			//string tt = "";
 			//switch (selectNum) {
 			//case 0:
@@ -318,6 +333,16 @@ bool CollisionManager::CollisionPlayerToStaticObeject()
 	//temp += "\n";
 	//OutputDebugStringA(temp.c_str());
 			}
+
+			if (selectNum == 4) {
+				((Player*)m_pPlayer->m_pOwner)->isJump = false;
+				((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Position.y = PLANECENTER[4].y;
+				if (((Player*)m_pPlayer->m_pOwner)->m_xmf3Velocity.y < 0) {
+					((Player*)m_pPlayer->m_pOwner)->m_xmf3Velocity.y = 0;
+				((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity.y = 0;
+				}
+				//((Player*)m_pPlayer->m_pOwner)->m_xmf3Position.y = PLANECENTER[4].y;
+			}
 		}
 
 	}
@@ -325,6 +350,12 @@ bool CollisionManager::CollisionPlayerToStaticObeject()
 
 	
 	return true;
+}
+bool CollisionManager::CollsionBulletToEnemy()
+{
+
+
+	return false;
 }
 
 void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -355,6 +386,34 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 	if(m_psphere) m_psphere->Render(pd3dCommandList,0);
+
+	for ( auto& a : m_EnemyObjects) {
+		a->UpdateEntireBouding();
+		a->UpdateBodyBouding();
+		a->UPdateLegBounding();
+	}
+	//적의 바운디 박스
+	for (const auto& a : m_EnemyObjects) {
+		xmf4x4World = GetSphereMatrix(a->m_Entire.Radius, a->m_Entire.Center);
+		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+		if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
+		//세부 사항
+		for (int i = 0; i < 6; i++) {
+			xmf4x4World = GetSphereMatrix(a->m_Bodys[i].Radius, a->m_Bodys[i].Center);
+			XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+			if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
+		}
+
+		for (int i = 0; i < 8; i++) {
+			xmf4x4World = GetSphereMatrix(a->m_legs[i].Radius, a->m_legs[i].Center);
+			XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+			if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
+		}
+	}
+
 
 }
 

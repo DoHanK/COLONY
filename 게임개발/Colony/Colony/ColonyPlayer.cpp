@@ -130,7 +130,7 @@ void Player::AddPosition(const XMFLOAT3& xmf3Shift)
 //플레이어 위치 업데이트
 void Player::UpdatePosition(float fTimeElapsed)
 {
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
+	 m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
 	//마찰계수
 	float  fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 	float fMaxVelocityXZ = m_fMaxVelocityXZ;		
@@ -143,11 +143,11 @@ void Player::UpdatePosition(float fTimeElapsed)
 	}
 
 
-
-	float fMaxVelocityY = m_fMaxVelocityY;
-	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
-	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
-	
+	if (isJump) {
+		float fMaxVelocityY = m_fMaxVelocityY;
+		fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+		if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
+	}
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
 	m_xmfPre3Position = m_xmf3Position;
 	AddPosition(xmf3Velocity);

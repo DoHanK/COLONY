@@ -1006,19 +1006,30 @@ BillBoardMesh::BillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 BillBoardMesh::~BillBoardMesh()
 {
-	if (m_pd3dNormalBuffer) m_pd3dNormalBuffer->Release();
-	if (m_pd3dNormalUploadBuffer) m_pd3dNormalUploadBuffer->Release();
-	if (m_pcbMappedPositions) {
-		m_pd3dPositionBuffer->Unmap(0, NULL);
-		m_pd3dPositionBuffer->Release();
+	// 정점쉐이더는 베이직메쉬에서 삭제해줌
+
+	if (m_pd3dNormalBuffer){ 
+		m_pd3dNormalBuffer->Release();
 	}
+	if (m_pd3dNormalUploadBuffer) {
+		m_pd3dNormalUploadBuffer->Release();
+	}
+
 	if (m_pd3dUvBuffer) {
 		m_pd3dUvBuffer->Unmap(0, NULL);
 		m_pd3dUvBuffer->Release();
 	}
-	if (m_pd3dVertexBufferViews) delete[]m_pd3dVertexBufferViews;
-	if (m_pd3dNormalBufferViews) delete[]m_pd3dNormalBufferViews;
-	if (m_pd3dUvBufferViews) delete[]m_pd3dUvBufferViews;
+
+
+	if (m_pd3dVertexBufferViews) delete[] m_pd3dVertexBufferViews;
+		m_pd3dVertexBufferViews = NULL;
+
+	if (m_pd3dNormalBufferViews) delete[] m_pd3dNormalBufferViews;
+		m_pd3dNormalBufferViews = NULL;
+
+	if (m_pd3dUvBufferViews) delete[] m_pd3dUvBufferViews;
+		m_pd3dUvBufferViews = NULL;
+
 }
 
 void BillBoardMesh::UpdataVertexPosition(UIRect Rect, float z)

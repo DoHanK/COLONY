@@ -221,19 +221,123 @@ public:
 
 
 };
+//복합 콜리젼
+class AliensBoudingBox:public Collision {
+public:
+	AliensBoudingBox(GameObject* pOwner) :Collision(pOwner) {
+		m_Entire.Radius = 1.5f; 
+		m_Bodys[0].Radius = 0.3f; //DEF_SPINE_1
+		m_Bodys[1].Radius = 0.3f; //DEF_CHEST
+		m_Bodys[2].Radius = 0.2f; //DEF_NECK_1
+		m_Bodys[3].Radius = 0.2f; //DEF_HEAD
+		m_Bodys[4].Radius = 0.4f; //DEF_TAIL
+		m_Bodys[5].Radius = 0.4f; //DEF_TAIL_001; 
 
+		m_legs[0].Radius = 0.15f; //DEF_SPINE_1
+		m_legs[1].Radius = 0.15f; //DEF_CHEST
+		m_legs[2].Radius = 0.15f; //DEF_NECK_1
+		m_legs[3].Radius = 0.15f; //DEF_HEAD
+		m_legs[4].Radius = 0.15f; //DEF_TAIL
+		m_legs[5].Radius = 0.15f; //DEF_TAIL_001; 
+		m_legs[6].Radius = 0.15f; //DEF_TAIL_001; 
+		m_legs[7].Radius = 0.15f; //DEF_TAIL_001; 
+	}
+public:
+	BoundingSphere m_Entire; //DEF-Hip의 정보를 가져옴
+	BoundingSphere m_Bodys[6]; // DEF_SPINE_1 ,DEF_CHEST ,DEF_NECK_1 ,DEF_HEAD , DEF_TAIL ,DEF_TAIL_001
+	BoundingSphere m_legs[8]; // DEF_LEG_BACK_02_L			DEF_LEG_BACK_02_R		DEF_LEG_FRONT_02_L  
+							//DEF_LEG_FRONT_02_R		DEF_LEG_MIDDLE_02_L			DEF_LEG_MIDDLE_02_R
+							// DEF_FORARM_L   DEF_FORARM_R
+	void UpdateEntireBouding() {
+		
+		
+		XMFLOAT3 pos;
+
+		pos = m_pOwner->FramePos[AlienboneIndex::DEF_HIPS];
+
+		m_Entire.Center = pos;
+
+	}
+
+	void UpdateBodyBouding() {
+
+		for (int i = 0; i < 6; ++i) {
+			int AnimationIndex = 0;
+			switch (i) {
+			case 0:
+				AnimationIndex = AlienboneIndex::DEF_SPINE_1;
+				break;
+			case 1:
+				AnimationIndex = AlienboneIndex::DEF_CHEST;
+				break;
+			case 2:
+				AnimationIndex = AlienboneIndex::DEF_NECK_1;
+				break;
+			case 3:
+				AnimationIndex = AlienboneIndex::DEF_HEAD;
+				break;
+			case 4:
+				AnimationIndex = AlienboneIndex::DEF_TAIL;
+				break;
+			case 5:
+				AnimationIndex = AlienboneIndex::DEF_TAIL_001;
+				break;
+			}
+
+			m_Bodys[i].Center = m_pOwner->FramePos[AnimationIndex];
+		}
+	}
+
+	void UPdateLegBounding() {
+		for (int i = 0; i < 8; ++i) {
+			int AnimationIndex = 0;
+			switch (i) {
+			case 0:
+				AnimationIndex = AlienboneIndex::DEF_LEG_BACK_02_L;
+				break;
+			case 1:
+				AnimationIndex = AlienboneIndex::DEF_LEG_BACK_02_R;
+				break;
+			case 2:
+				AnimationIndex = AlienboneIndex::DEF_LEG_FRONT_02_L;
+				break;
+			case 3:
+				AnimationIndex = AlienboneIndex::DEF_LEG_FRONT_02_R;
+				break;
+			case 4:
+				AnimationIndex = AlienboneIndex::DEF_LEG_MIDDLE_02_L;
+				break;
+			case 5:
+				AnimationIndex = AlienboneIndex::DEF_LEG_MIDDLE_02_R;
+				break;
+			case 6:
+				AnimationIndex = AlienboneIndex::DEF_FORARM_L;
+				break;
+			case 7:
+				AnimationIndex = AlienboneIndex::DEF_FORARM_R;
+				break;
+			}
+			m_legs[i].Center = m_pOwner->FramePos[AnimationIndex];
+		}
+
+
+	}
+
+};
 
 class CollisionManager{
 public:
-	//
-	//boudingBox
-	//obstable Obeject 
+
 	std::vector<Collision*> m_StaticObjects;
-	//Enamic Obeject       Dynamic Size  -> list 
+	//Accel Obeject       Dynamic Size  -> list 
 	std::list<Collision*> m_AccelationObjects;
+
+	std::list<AliensBoudingBox*> m_EnemyObjects;
 
 	//Player 
 	Collision* m_pPlayer;
+	Camera* m_pCamera;
+
 
 	//Rendering
 	std::vector<BoundingBoxMesh*> m_BoundingBoxMeshes;
@@ -251,7 +355,7 @@ public:
 	XMFLOAT4X4 MakeScaleMatrix(float x , float y , float z);
 	XMFLOAT4X4 GetSphereMatrix(BSphere* pSphere);
 	XMFLOAT4X4 GetSphereMatrix(BCapsule* pSphere); //캡슐의 원
-
+	XMFLOAT4X4 GetSphereMatrix(const float& r, const XMFLOAT3& center);
 	//등록 박스
 	void EnrollObjectIntoBox(bool isAccel,XMFLOAT3 center, XMFLOAT3  extend, GameObject* pOwner);
 	//등록 구
@@ -261,11 +365,17 @@ public:
 
 	void EnrollPlayerIntoCapsule(XMFLOAT3 center, float radius, float tip, float base, GameObject* pOwner);
 
+	void EnrollEnemy(GameObject* pEnemy);
+
 	void LoadCollisionBoxInfo(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* filename);
+	
+	void EnrollBulletDir(Camera* pCamera) {m_pCamera = pCamera;}
 
 	//충돌 처리 함수들
 	bool CollisionPlayerToStaticObeject();
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList);
+	bool CollsionBulletToEnemy();
+
 
 	void ReleaseUploadBuffers();
 };
