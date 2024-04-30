@@ -1421,7 +1421,7 @@ Billboard::Billboard(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 {//material 1개로 통일
 	m_BillMesh = new BillBoardMesh(pd3dDevice, pd3dCommandList);
 	SetMesh(m_BillMesh);
-	m_BillMesh->AddRef();
+
 
 	BillboardMaterial = new Material(1);
 	BillboardMaterial->SetTexture(texture, 0);
@@ -1434,7 +1434,6 @@ Billboard::Billboard(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 Billboard::~Billboard() {
 
-	if (m_BillMesh)m_BillMesh->Release();
 }
 
 void Billboard::Animate(float fTimeElapsed)
