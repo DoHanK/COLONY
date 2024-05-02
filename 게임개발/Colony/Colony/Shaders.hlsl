@@ -288,7 +288,9 @@ float4 PSGhostTrailler(VS_STANDARD_OUTPUT input) : SV_TARGET
         {
             
             cColor.a = 0.7f - (gfGhostNum / 50);
-            cColor.rgb *= 1.3;
+            //cColor.rgb *= 1.3;
+            cColor.rgb *= (0.7 - (gfGhostNum / 25));
+            cColor.b *= 1.3;
             return cColor;
         }
 

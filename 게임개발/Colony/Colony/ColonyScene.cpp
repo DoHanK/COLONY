@@ -358,8 +358,8 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 			if (pGameObject->m_pMesh) {
 				pGameObject->m_BoundingBox.Center = pGameObject->m_pMesh->GetAABBCenter();
 				pGameObject->m_BoundingBox.Extents = pGameObject->m_pMesh->GetAABBExtend();
-				pGameObject->m_BoundingBox.Extents.x / 2;
-				pGameObject->m_BoundingBox.Extents.z / 2;
+				pGameObject->m_BoundingBox.Extents.x;
+				pGameObject->m_BoundingBox.Extents.z;
 				pGameObject->m_BoundingBox.Transform(pGameObject->m_BoundingBox, DirectX::XMLoadFloat4x4(&pGameObject->m_xmf4x4World));
 
 			}
@@ -470,7 +470,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[i] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_White_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 1; ++j) {
+	for (int j = 0; j < 30; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
