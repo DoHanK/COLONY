@@ -447,6 +447,12 @@ LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM 
 			m_pSceneManager->p->Option = UINT(TEXTUREUSE);
 		}
 		//키보드키입력
+	
+		if (wParam == VK_F9) {
+		
+			m_pDevice->ChangeSwapChainState();
+		}
+	
 		break;
 	}
 	return (0);
