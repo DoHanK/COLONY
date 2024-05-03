@@ -106,7 +106,7 @@ enum AlienboneIndex {
 #define friction		2.0f
 
 //AI 시각 범위
-#define AISIGHTRANGE	11.f
+#define AISIGHTRANGE	16.f
 #define AIFOV			60.f
 #define AIFOVHEIGHT		0.4f
 

@@ -270,7 +270,7 @@ float4 PSGhostTrailler(VS_STANDARD_OUTPUT input) : SV_TARGET
     {
         normalW = normalize(input.normalW);
     }
-    float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
+    float4 cIllumination = GhostLighting(input.positionW, normalW, false, input.uvs);
     
     //cColor = lerp(cColor, cIllumination, LIGHTRATIO);
    //cColor += cIllumination * LIGHTRATIO;
@@ -287,9 +287,9 @@ float4 PSGhostTrailler(VS_STANDARD_OUTPUT input) : SV_TARGET
         if (cIllumination.r > dvalue && cIllumination.g > dvalue && cIllumination.b > dvalue)
         {
             
-            cColor.a = 0.7f - (gfGhostNum / 50);
+            cColor.a = 1.0f - (gfGhostNum / 5);
             //cColor.rgb *= 1.3;
-            cColor.rgb *= (0.7 - (gfGhostNum / 25));
+            cColor.rgb *= (0.9 - (gfGhostNum / 6));
             cColor.b *= 1.3;
             return cColor;
         }

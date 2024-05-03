@@ -353,7 +353,7 @@ void SceneManager::CreateDepthTextureFromLight(ID3D12Device* pd3dDevice, ID3D12G
 
 void SceneManager::RenderDepthScene(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < MAX_DEPTH_TEXTURES; ++i) {
 		m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET, m_pDepthFromLightTexture[i]->GetTexture(0));
 		m_pD3Device->SetRtIntoDepthTexture(m_RtvDepthView[i], m_d3dDsvDescriptorCPUHandle);
 		if (!m_SceneStack.empty()) m_SceneStack.top()->BakeDepthTexture(pd3dCommandList,m_ppDepthRenderCameras[i], i);

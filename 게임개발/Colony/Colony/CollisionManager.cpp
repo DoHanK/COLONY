@@ -351,10 +351,43 @@ bool CollisionManager::CollisionPlayerToStaticObeject()
 	
 	return true;
 }
+
 bool CollisionManager::CollsionBulletToEnemy()
 {
+	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());
+	
+	FXMVECTOR BulletDir = XMLoadFloat3(&m_pCamera->GetLookVector());
+
+	for (auto& a : m_EnemyObjects) {
+		a->UpdateEntireBouding();
+		a->UpdateBodyBouding();
+		a->UPdateLegBounding();
+	}
 
 
+	float dis = 0;
+	for (auto enemy : m_EnemyObjects) {
+		if (enemy->m_Entire.Intersects(BulletPos, BulletDir, dis)) {
+			
+			for (int i = 0; i < 6; i++) {
+				if (enemy->m_Bodys[i].Intersects(BulletPos, BulletDir, dis)) {
+					string temp="个面倒 ";
+					temp += to_string(dis);
+					temp += "\n";
+					OutputDebugStringA(temp.c_str());
+				}
+			}
+
+			for (int i = 0; i < 8; i++) {
+				if (enemy->m_legs[i].Intersects(BulletPos, BulletDir, dis)) {
+					string temp = "促府面倒 ";
+					temp += to_string(dis);
+					temp += "\n";
+					OutputDebugStringA(temp.c_str());
+				}
+			}
+		}
+	}
 	return false;
 }
 

@@ -8,7 +8,8 @@
 #include "AIController.h"
 #include "PerceptionMesh.h"
 #include "Perception.h"
-#define TRAILER_COUNT 8
+#define TRAILER_COUNT 5
+
 class AlienSpiderAnimationController;
 
 class GoalThink;

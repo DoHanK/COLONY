@@ -131,6 +131,8 @@ public:
 
 	virtual void BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, int CameraIndex);
+	virtual void BakeDepthTextureForStatic(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BakeDepthTextureForDynamic(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void PrepareDepthTexture(Camera* pCamera, int CameraIndex);
 	virtual void ReleaseUploadBuffers();
 	virtual UINT GetType() { return GamePlay; };
@@ -175,16 +177,18 @@ protected:
 	NevMeshShader*						m_pNevMeshShader = NULL;
 	GhostTraillerShader*				m_pGhostTraillerShader =NULL;
 	BoundingShader*						m_pBoundigShader = NULL;
-	//그림잠 쉐이더
+	//그림자 쉐이더
 	DepthSkinnedRenderingShader*		m_pDepthSkinnedShader = NULL;
 	DepthRenderingShader*				m_pDepthShader = NULL;
 	BillboardShader*					m_BillShader=NULL;
 
+
 	bool								m_bBoundingRender = false;
 	int									m_DepthRender = 0;
 
-	PerceptionRangeMesh*					m_pPerceptionRangeMesh = NULL;
-	ShphereMesh*							m_pTestBox;
+
+	PerceptionRangeMesh*				m_pPerceptionRangeMesh = NULL;
+	ShphereMesh*						m_pTestBox;
 
 	ColonyTimer							m_PlayTimeTimer;
 

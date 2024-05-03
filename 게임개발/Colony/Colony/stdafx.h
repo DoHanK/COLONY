@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#define FRAME_BUFFER_WIDTH  1024
-#define FRAME_BUFFER_HEIGHT	800
+#define FRAME_BUFFER_WIDTH  1920
+#define FRAME_BUFFER_HEIGHT	1080
 #define WINDOWS_POS_X	 0
 #define WINDOWS_POS_Y	 0
 //자주 사용하지 않는 API의 일부를 제외하는 명령어

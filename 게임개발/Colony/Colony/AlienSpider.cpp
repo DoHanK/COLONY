@@ -43,9 +43,9 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 
 	m_pHead = pSpider->m_pModelRootObject->FindFrame("DEF-HEAD");
 
-	m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
-	m_pBoundingMesh->AddRef();
-	m_BoundingBox = pSpider->m_pModelRootObject->FindFrame("polySurface10")->m_BoundingBox;
+	//m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
+	//m_pBoundingMesh->AddRef();
+	//m_BoundingBox = pSpider->m_pModelRootObject->FindFrame("polySurface10")->m_BoundingBox;
 
 	//Ghost Effect
 	m_ppd3dcbSkinningBoneTransforms = new ID3D12Resource * [TRAILER_COUNT];

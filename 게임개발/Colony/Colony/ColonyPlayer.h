@@ -99,6 +99,9 @@ public:
 	char m_WeaponState = RIGHT_HAND;
 	
 	bool isJump = false;
+
+	float m_BaseReloadTime = 0.1f;
+	float m_ReloadTime = 0;
 	virtual void SetAnimator(PlayerAnimationController* animator);
 	void SetWeapon(GameObject* Weapon);
 

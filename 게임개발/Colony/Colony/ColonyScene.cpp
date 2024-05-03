@@ -111,8 +111,8 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			m_bBoundingRender = (m_bBoundingRender + 1) % 2;
 			break;
 		case 'Q':
-				if (m_pLights[1].m_bEnable)	m_pLights[1].m_bEnable = false;
-				else m_pLights[1].m_bEnable = true;
+				if (m_pLights[2].m_bEnable)	m_pLights[2].m_bEnable = false;
+				else m_pLights[2].m_bEnable = true;
 				break;
 		case 'M':
 					m_pPlayer->AddPosition(XMFLOAT3(0, 5.0F, 0));
@@ -139,14 +139,12 @@ void GamePlayScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphi
 
 void GamePlayScene::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
-	m_pLights[1].m_xmf3Position.y += 2.f;
-	m_pLights[1].m_xmf3Direction = m_pPlayer->GetCamera()->m_xmf3Look;
-
-
-
 	m_pLights[2].m_xmf3Position = m_pPlayer->GetPosition();
-	m_pLights[2].m_xmf3Position.y += 3.f;
+	m_pLights[2].m_xmf3Position.y += 2.f;
+	m_pLights[2].m_xmf3Direction = m_pPlayer->GetCamera()->m_xmf3Look;
+
+
+
 
 	//XMFLOAT3 dir = m_pPlayer->GetCamera()->m_xmf3Look;
 	//XMFLOAT3  against  = Vector3::ScalarProduct(m_pPlayer->GetCamera()->m_xmf3Look, -1, true);
@@ -204,47 +202,42 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_bEnable = true;
 	m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights[0].m_fRange = 2000.0f;
-	m_pLights[0].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	//m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	//m_pLights[0].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.35f, 0.35f, 0.35f, 1.0f);
+	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
 	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), _PLANE_HEIGHT, 0.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
 
 	
+
 	m_pLights[1].m_bEnable = true;
-	m_pLights[1].m_nType = SPOT_LIGHT;
-	m_pLights[1].m_fRange = 600.0f;
-	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.01f, 0.01f, 0.01f, 1.0f);
-	//m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.2f, 1.0f);
-	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.01f, 0.01f, 0.005f, 1.0f);
-	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.01f, 0.01f, 0.01f, 1.0f);
-	m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
-	m_pLights[1].m_xmf3Position.y += 10.0f;
-	m_pLights[1].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(0.01f, 0.01f, 0.01f);
-	m_pLights[1].m_fFalloff = 15.0f;
-	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
+	m_pLights[1].m_fRange = 2000.0f;
+	//m_pLights[1].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.35f, 0.35f, 0.35f, 1.0f);
+	//m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_pLights[1].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), _PLANE_HEIGHT, 0.0f);
+	m_pLights[1].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+
 
 	m_pLights[2].m_bEnable = true;
 	m_pLights[2].m_nType = SPOT_LIGHT;
-	m_pLights[2].m_fRange = 200.0f;
-	m_pLights[2].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.02f, 0.02f, 0.02f, 1.0f);
-	m_pLights[2].m_xmf4Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_pLights[2].m_fRange = 600.0f;
+	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.01f, 0.01f, 0.01f, 1.0f);
+	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.01f, 0.01f, 0.005f, 1.0f);
+	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.01f, 0.01f, 0.01f, 1.0f);
 	m_pLights[2].m_xmf3Position = m_pPlayer->GetPosition();
 	m_pLights[2].m_xmf3Position.y += 10.0f;
-	m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	m_pLights[2].m_xmf3Attenuation = XMFLOAT3(0.5f, 0.5f, 0.5f);
-	m_pLights[2].m_fFalloff = 20.0f;
+	m_pLights[2].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	m_pLights[2].m_xmf3Attenuation = XMFLOAT3(0.01f, 0.01f, 0.01f);
+	m_pLights[2].m_fFalloff = 15.0f;
 	m_pLights[2].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
-
 }
-
 #define LOD 0
 void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName, const char* TexFileName,ResourceManager* pResourceManager
 ,char* modelLocation)
@@ -410,6 +403,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pDepthSkinnedShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
 	m_pDepthShader = new DepthRenderingShader();
 	m_pDepthShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
+
 	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/MainScene.bin","Model/Textures/scene/", pResourceManager,"Model/MainSceneMeshes/");
 	//LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/SpaceStationScene.bin", "Model/Textures/scene/", pResourceManager, "Model/SpaceStationMeshes/");
 
@@ -425,6 +419,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pCollisionManager = new CollisionManager(pd3dDevice, pd3dCommandList);
 	m_pCollisionManager->LoadCollisionBoxInfo(pd3dDevice, pd3dCommandList, "boundinginfo.bin");
 	m_pCollisionManager->EnrollPlayerIntoCapsule(XMFLOAT3(EPSILON, 0.0, EPSILON), 0.3, 1.3, 0.3, m_pPlayer);
+	m_pCollisionManager->EnrollBulletDir(m_pCamera);
 	for (auto& GO : m_pSceneObject) {
 		GO->m_BoundingBox;
 		if ((strstr(GO->m_pstrFrameName, "SM_Mountain_A") == NULL
@@ -432,6 +427,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			&& strstr(GO->m_pstrFrameName, "SM_Plant_A") == NULL
 			&& strstr(GO->m_pstrFrameName, "SM_Plant_B") == NULL
 			&& strstr(GO->m_pstrFrameName, "SM_LongGrass") == NULL)) {
+
 			m_pCollisionManager->EnrollObjectIntoBox(false, GO->m_BoundingBox.Center, GO->m_BoundingBox.Extents, GO);
 
 		}
@@ -470,7 +466,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[i] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_White_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 30; ++j) {
+	for (int j = 0; j < 10; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
@@ -496,7 +492,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//billboard test
 	m_pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-		pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer->m_SelectWeapon.FindFrame("Export"));
+	pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer->m_SelectWeapon.FindFrame("Export"));
 	m_pBillObject->doAnimate = true;
 	m_pBillObject->SetAddPosition(XMFLOAT3(0.0f, 0.3f,0.0f));
 	m_pBillObject->SetRowNCol(7, 5);
@@ -715,9 +711,11 @@ void GamePlayScene::PlayerControlInput()
 			dwPlayerState |= STATE_SWITCH_WEAPON;
 		}
 		//총 쏘기
-		if (pKeysBuffer[L_MOUSE] & 0xF0) {
+		if (pKeysBuffer[L_MOUSE] & 0xF0 && m_pPlayer->m_BaseReloadTime < m_pPlayer->m_ReloadTime) {
 
-			dwPlayerState |= STATE_SHOOT;
+			dwPlayerState |= STATE_SHOOT; 
+			m_pCollisionManager->CollsionBulletToEnemy();
+			m_pPlayer->m_ReloadTime = 0;
 		}
 
 		//플레이어 애니메이션 적용
@@ -774,7 +772,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 
 	m_fElapsedTime = fTimeElapsed;
-
+	m_pPlayer->m_ReloadTime += fTimeElapsed;
 	PlayerControlInput();
 
 
@@ -786,6 +784,8 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 		GO->Animate(fTimeElapsed);
 
 	}
+
+
 	m_pCollisionManager->CollisionPlayerToStaticObeject();
 
 	m_pPlayer->Animate(fTimeElapsed);
@@ -967,7 +967,6 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 		for (auto& GO : m_pSceneObject) {
 			GO->Render(pd3dCommandList);
-
 		}
 	}
 
@@ -1006,12 +1005,50 @@ void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 void GamePlayScene::BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, int CameraIndex)
 {
-	PrepareDepthTexture(pCamera, CameraIndex);
+	static bool alreadyMaking = false;
 
 
+	//고정씬
+	if (CameraIndex == 0 && !alreadyMaking) {
+		PrepareDepthTexture(pCamera, CameraIndex);
+		pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		pCamera->UpdateShaderVariables(pd3dCommandList);
+
+		BakeDepthTextureForStatic(pd3dCommandList);
+		alreadyMaking = true;
+	}
+	else if (CameraIndex == 1) {
+		PrepareDepthTexture(pCamera, CameraIndex);
+		pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		pCamera->UpdateShaderVariables(pd3dCommandList);
+
+		BakeDepthTextureForDynamic(pd3dCommandList);
+	}
+	else if (CameraIndex == 2) {
+		PrepareDepthTexture(pCamera, CameraIndex);
+		pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		pCamera->UpdateShaderVariables(pd3dCommandList);
+		BakeDepthTextureForStatic(pd3dCommandList);
+		BakeDepthTextureForDynamic(pd3dCommandList);
+
+	}
 	
-	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+
+}
+
+void GamePlayScene::BakeDepthTextureForStatic(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+
+	m_pDepthShader->OnPrepareRender(pd3dCommandList);
+
+	for (auto& GO : m_pSceneObject) {
+		GO->DepthRender(pd3dCommandList);
+	}
+}
+
+void GamePlayScene::BakeDepthTextureForDynamic(ID3D12GraphicsCommandList* pd3dCommandList)
+{
 
 	m_pDepthSkinnedShader->OnPrepareRender(pd3dCommandList);
 
@@ -1021,11 +1058,6 @@ void GamePlayScene::BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList,
 		GO->DepthRender(pd3dCommandList);
 	}
 
-	m_pDepthShader->OnPrepareRender(pd3dCommandList);
-
-	for (auto& GO : m_pSceneObject) {
-		GO->DepthRender(pd3dCommandList);
-	}
 }
 
 void GamePlayScene::PrepareDepthTexture(Camera* pCamera , int CameraIndex)
