@@ -1468,26 +1468,29 @@ Billboard::~Billboard() {
 
 void Billboard::Animate(float fTimeElapsed)
 {
-	m_BillMesh->UpdateUvCoord(UIRect{ m_row * (1.0f / m_rows) , (m_row + 1.0f) * (1.0f / m_rows) , m_col * (1.0f / m_cols), (m_col + 1.f) * (1.0f / m_cols) });
-	//m_BillMesh->UpdateUvCoord(UIRect{ 1 , 0 , 0, 1});
-		//top bottom left right
+	if (active) {
+		m_BillMesh->UpdateUvCoord(UIRect{ m_row * (1.0f / m_rows) , (m_row + 1.0f) * (1.0f / m_rows) , m_col * (1.0f / m_cols), (m_col + 1.f) * (1.0f / m_cols) });
+		//m_BillMesh->UpdateUvCoord(UIRect{ 1 , 0 , 0, 1});
+			//top bottom left right
 
-	Timer += fTimeElapsed;
-	if (Timer > SettedTimer) {
-		Timer = 0;
-	}
-
-	if (Timer == 0) {
-		m_col++;
-		if (m_col == m_cols) {
-			m_row++;
-			m_col = 0;
+		Timer += fTimeElapsed;
+		if (Timer > SettedTimer) {
+			Timer = 0;
 		}
-		if (m_row == m_rows) {
-			m_row = 0;
-			if (doOnce) {
-				//m_bActive = 0;
-				active = false;
+
+		if (Timer == 0) {
+			m_col++;
+			if (m_col == m_cols) {
+				m_row++;
+				m_col = 0;
+			}
+
+			if (m_row == m_rows) {
+				m_row = 0;
+				if (active) {
+					//m_bActive = 0;
+					active = false;
+				}
 			}
 		}
 	}
@@ -1497,7 +1500,11 @@ void Billboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCame
 {
 	if (m_ownerObject) {
 		XMFLOAT4X4 m = m_ownerObject->m_xmf4x4World;
-		XMFLOAT3 v = XMFLOAT3(m._41, m._42, m._43);
+		XMFLOAT3 v = XMFLOAT3(m._41+m_OffsetPos.x, m._42 + m_OffsetPos.y, m._43 + m_OffsetPos.z);
+		SetPosition(v);
+	}
+	if (m_CrushObject) {
+		XMFLOAT3 v = XMFLOAT3(m_CrushObject->Center.x + m_OffsetPos.x, m_CrushObject->Center.y + m_OffsetPos.y, m_CrushObject->Center.z + m_OffsetPos.z);
 		SetPosition(v);
 	}
 

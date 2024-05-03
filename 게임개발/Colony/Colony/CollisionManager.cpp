@@ -352,7 +352,7 @@ bool CollisionManager::CollisionPlayerToStaticObeject()
 	return true;
 }
 
-bool CollisionManager::CollsionBulletToEnemy()
+bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard)
 {
 	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());
 	
@@ -367,38 +367,66 @@ bool CollisionManager::CollsionBulletToEnemy()
 
 	float dis = 0;
 	bool crush = false;
-	for (auto enemy : m_EnemyObjects) {
+	//1차 충돌 처리
+	std::list<pair<AliensBoudingBox*, float>> crushlist;
+	for (AliensBoudingBox* enemy : m_EnemyObjects) {
 		if (enemy->m_Entire.Intersects(BulletPos, BulletDir, dis)) {
-			string tmp = "\n\n\n\n ";
-		
-			OutputDebugStringA(tmp.c_str());
-			for (int i = 0; i < 6; i++) {
-				if (enemy->m_Bodys[i].Intersects(BulletPos, BulletDir, dis)) {
-					string temp="몸충돌 ";
-					temp += to_string(dis);
-					temp += "  번호 : ";
-					temp += to_string(i);
-					temp += "\n";
-					OutputDebugStringA(temp.c_str());
-					//crush = true;
 
-				}
-			}
+			crushlist.emplace_back(enemy, dis);
 
-			for (int i = 0; i < 8; i++) {
-				if (enemy->m_legs[i].Intersects(BulletPos, BulletDir, dis)) {
-					string temp = "다리충돌 ";
-					temp += to_string(dis);
-					temp += "  번호 : ";
-					temp +=  to_string(i);
-					temp += "\n";
-					OutputDebugStringA(temp.c_str());
-					//crush = true;
-				}
-			}
-			if (crush == true)
-				break;
 		}
+	}
+
+	crushlist.sort([](pair<AliensBoudingBox*, float>& a, pair<AliensBoudingBox*, float>& b) {
+		return a.first < b.first;});
+
+	for (auto& enemy : crushlist) {
+
+		if (crush == true)
+			break;
+
+		for (int i = 0; i < 6; i++) {
+			
+			if (enemy.first->m_Bodys[i].Intersects(BulletPos, BulletDir, dis)) {
+				
+				for (int i = 0; i < 5; ++i) {
+					 
+					 int idx = EffectIndex[rand() % 11];
+					for (auto& paticle : m_pBloodBillboard[idx]) {
+						if (!paticle->active) {
+							paticle->active = true;
+							//paticle->m_ownerObject = enemy.first->m_pOwner;
+							paticle->m_CrushObject = &enemy.first->m_Bodys[i];
+							break;
+						}
+					}
+				}
+				crush = true;
+				break;
+			}
+		}
+
+		for (int i = 0; i < 8; i++) {
+			if (enemy.first->m_legs[i].Intersects(BulletPos, BulletDir, dis)) {
+
+				for (int i = 0; i < 5; ++i) {
+					//int idx = rand() % 15;
+					int idx = EffectIndex[rand() % 11];
+					for (auto& paticle : m_pBloodBillboard[idx]) {
+						if (!paticle->active) {
+							paticle->active = true;
+							paticle->m_CrushObject = &enemy.first->m_legs[i];
+							break;
+						}
+					}
+				}
+				crush = true;
+				break;
+
+			}
+		}
+
+
 	}
 	return false;
 }

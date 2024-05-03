@@ -346,7 +346,7 @@ public:
 
 	CapsuleMesh* m_pPlayerCapsuleMesh=NULL;
 	XMFLOAT3 m_PlayerCapsulePos;
-
+	int EffectIndex[11] = { 0,1,2,5,8,9,10,11,12,13,16 };
 public:
 
 	CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -373,7 +373,7 @@ public:
 	//충돌 처리 함수들
 	bool CollisionPlayerToStaticObeject();
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList);
-	bool CollsionBulletToEnemy();
+	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard);
 
 
 	void ReleaseUploadBuffers();

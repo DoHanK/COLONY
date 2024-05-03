@@ -479,6 +479,7 @@ public:
 	~Billboard();
 	BillBoardMesh* m_BillMesh;
 	Material* BillboardMaterial;
+	XMFLOAT3 m_OffsetPos = XMFLOAT3(0,0,0);
 	// Set
 	float m_rows = 8;
 	float m_cols = 8;
@@ -491,6 +492,7 @@ public:
 	bool active = true;
 	bool doAnimate = false;
 	bool doOnce = false;
+	BoundingSphere* m_CrushObject = NULL;
 	XMFLOAT3 TickAddPosition =XMFLOAT3(0.0f, 0.0f, 0.0f);
 	GameObject* m_ownerObject;
 	void SetRowNCol(float row, float col) { m_rows = row; m_cols = col; }
@@ -498,4 +500,5 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
 	void Update(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up);
 	void SetAddPosition(XMFLOAT3 xmf3AddPosition) {TickAddPosition = xmf3AddPosition;}
+	void SetOffsetPos(const XMFLOAT3& Pos) { m_OffsetPos = Pos; };
 };

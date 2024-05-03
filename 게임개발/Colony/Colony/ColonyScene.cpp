@@ -72,6 +72,7 @@ bool GamePlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	{
 	case WM_LBUTTONDOWN:
 		m_pBillObject->active = true;
+
 		break;
 	case WM_KEYDOWN:
 		switch (wParam)
@@ -494,7 +495,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//billboard test
 	m_pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-	pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer->m_SelectWeapon.FindFrame("Export"));
+	pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer->FindFrame("Export"));
 	m_pBillObject->doAnimate = true;
 	m_pBillObject->SetAddPosition(XMFLOAT3(0.0f, 0.3f,0.0f));
 	m_pBillObject->SetRowNCol(7, 5);
@@ -505,10 +506,54 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillObject->AddRef();
 
 	//billboard -> doAnimate,active,ownerObject,TickAddPosition 설정
+	for (int i = 0; i < 29; i++) {
+
+		string file = "Model/Textures/BloodTexture/";
+		if (i < 15) {
+
+			file += "Front_";
+			file += to_string(i + 1);
+			file += ".dds";
+
+		}
+		else {
+			file += "Side_";
+			file += to_string(i - 14);
+			file += ".dds";
 
 
+		}
 
+		for (int j = 0; j < 10; ++j) {
 
+			
+			Billboard* pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+				pResourceManager->BringTexture(file.c_str(), BILLBOARD_TEXTURE, true), m_BillShader, NULL);
+			pBillObject->doAnimate = true;
+			pBillObject->SetAddPosition(XMFLOAT3(0.0f, 1.0f, 0.0f));
+			if (i == 5 || i == 9 || i == 11 || i == 28) {
+				pBillObject->SetRowNCol(8, 16);
+
+			}
+			else if (i == 15 || i == 16 || i == 17 || i == 19 || i == 20 || i == 21) {
+
+				pBillObject->SetRowNCol(16, 8);
+			}
+			else {
+				pBillObject->SetRowNCol(8, 8);
+			}
+
+			pBillObject->SetOffsetPos(XMFLOAT3(0, -0.1f, 0));
+
+		
+			pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(2.0, -2.0, -2.0, 2.0), 0.0f);
+			pBillObject->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+			pBillObject->SettedTimer = 0.001f;
+			pBillObject->AddRef();
+			m_pBloodBillboard[i].push_back(pBillObject);
+		}
+
+	}
 
 
 
@@ -716,8 +761,12 @@ void GamePlayScene::PlayerControlInput()
 		if (pKeysBuffer[L_MOUSE] & 0xF0 && m_pPlayer->m_BaseReloadTime < m_pPlayer->m_ReloadTime) {
 
 			dwPlayerState |= STATE_SHOOT; 
-			m_pCollisionManager->CollsionBulletToEnemy();
+			m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
 			m_pPlayer->m_ReloadTime = 0;
+			//if (!m_pBloodBillboard[0]->active) {
+			//	OutputDebugStringA("총발사 \n");
+			//	m_pBloodBillboard[0]->active = true;
+			//}
 		}
 
 		//플레이어 애니메이션 적용
@@ -799,7 +848,18 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	}
 
 		m_pBillObject->Animate(fTimeElapsed);
-	
+
+
+
+		for (int i = 0; i < 29; ++i) {
+			for (auto& B : m_pBloodBillboard[i]) {
+				if (B->doAnimate) {
+					B->Animate(fTimeElapsed);
+				}
+			}
+		}
+
+
 }
 
 void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -988,6 +1048,13 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 		//test = false;
 	}
 	
+	for (int i = 0; i < 29; ++i) {
+		for (auto& B : m_pBloodBillboard[i]) {
+			if (B->active) {
+				B->Render(pd3dCommandList, m_pPlayer->GetCamera());
+			}
+		}
+	}
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

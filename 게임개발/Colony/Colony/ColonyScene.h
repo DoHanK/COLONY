@@ -209,5 +209,7 @@ protected:
 	Billboard* m_pBillObject;
 	vector <Billboard*> m_pBillObjects;
 
+
+	vector<Billboard*> m_pBloodBillboard[29];
 	bool test = false;
 };
