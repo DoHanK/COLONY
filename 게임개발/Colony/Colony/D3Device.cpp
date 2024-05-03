@@ -333,6 +333,7 @@ void D3Device::WaitForGpuComplete()
 
 void D3Device::MoveToNextFrame()
 {
+
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 
 	UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];

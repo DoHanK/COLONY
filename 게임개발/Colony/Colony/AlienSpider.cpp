@@ -52,7 +52,7 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 	m_ppcbxmf4x4MappedSkinningBoneTransforms = new XMFLOAT4X4 * [TRAILER_COUNT];
 	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256의 배수
 	for (int i = 0; i < TRAILER_COUNT; ++i) {
-		m_GhostNum[i] = i;
+		m_GhostNum[i] = 0;
 		
 		m_ppd3dcbSkinningBoneTransforms[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 		m_ppd3dcbSkinningBoneTransforms[i]->Map(0, NULL, (void**)&m_ppcbxmf4x4MappedSkinningBoneTransforms[i]);
@@ -86,11 +86,23 @@ AlienSpider::~AlienSpider()
 void AlienSpider::Animate(float fTimeElapsed)
 {
 	m_AniTime += fTimeElapsed;
-
+	static int count = 0;
+	static int stdcount = 1;
 	//폐기되기전 기록 저장
-	if (m_AniTime > 0.07f) {
-		((AlienSpiderAnimationController*)m_pSkinnedAnimationController)->SavePrevFrameInfo(m_ppcbxmf4x4MappedSkinningBoneTransforms , m_GhostNum);
-		m_AniTime = (rand()/RAND_MAX)/10.f;
+	if (m_AniTime > m_AniCoolTime) {
+		m_GhostNum[0] = 0.f;
+		if (count > stdcount) {
+			((AlienSpiderAnimationController*)m_pSkinnedAnimationController)->SavePrevFrameInfo(m_ppcbxmf4x4MappedSkinningBoneTransforms, m_GhostNum);
+
+			count = 0;
+			stdcount = rand()%2+1;
+		}
+		for (int i = 0; i < TRAILER_COUNT; i++) {
+			m_GhostNum[i] += fTimeElapsed;
+		}
+		m_AniTime = 0;
+		m_AniCoolTime = (rand() / RAND_MAX)/100.f+0.05f ;
+		count++;
 	}
 	GameObject::Animate(fTimeElapsed);
 
@@ -160,6 +172,7 @@ void AlienSpider::GhostTrailerRender(ID3D12GraphicsCommandList* pd3dCommandList,
 
 					if (m_pGhostShader) m_pGhostShader->OnPrepareRender(pd3dCommandList, 0);
 					//m_pSkinnedModel->m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+					if(m_pGhostMaskTex) m_pGhostMaskTex->UpdateShaderVariable(pd3dCommandList, 0);
 				}
 				for (int j = TRAILER_COUNT - 1; j > -1; --j) {
 
@@ -228,7 +241,7 @@ void AlienSpiderAnimationController::SavePrevFrameInfo(XMFLOAT4X4** ppcbxmf4x4Ma
 	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256의 배수
 	for (int i = TRAILER_COUNT-1; 0 < i; --i) {
 		memcpy(ppcbxmf4x4MappedSkinningBoneTransforms[i], ppcbxmf4x4MappedSkinningBoneTransforms[i-1], ncbElementBytes);
-		//elapsedTime[i] = elapsedTime[i - 1];
+		elapsedTime[i] = elapsedTime[i - 1];
 	}
 
 	memcpy(ppcbxmf4x4MappedSkinningBoneTransforms[0], m_ppcbxmf4x4MappedSkinningBoneTransforms[1], ncbElementBytes);

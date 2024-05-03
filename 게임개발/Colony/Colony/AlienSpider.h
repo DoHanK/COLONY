@@ -44,6 +44,7 @@ public:
 	Player*						m_pPlayer = NULL;
 
 	Texture*					m_pSpiderTex = NULL;
+	Texture*					m_pGhostMaskTex = NULL;
 	
 public:
 	//¿Ãµø
@@ -64,7 +65,7 @@ public:
 	XMFLOAT4X4**		m_ppcbxmf4x4MappedSkinningBoneTransforms = NULL;
 	float m_GhostNum[TRAILER_COUNT];
 	float m_AniTime =0.0f;
-	
+	float m_AniCoolTime = 0.0f;
 	GhostTraillerShader* m_pGhostShader = NULL;
 public:
 	void SetPerceptionRangeMesh(PerceptionRangeMesh* pPerceptMesh) { m_pPerceptionRangeMesh = pPerceptMesh; };

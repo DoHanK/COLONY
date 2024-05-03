@@ -456,7 +456,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pPerceptionRangeMesh = new PerceptionRangeMesh(pd3dDevice, pd3dCommandList);
 	//Monster Create
-	Texture* spiderColor[6];
+	Texture* spiderColor[7];
 	int i = 0;
 	spiderColor[i++] = pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_Bone_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
 	spiderColor[i++] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_DarkGreen_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
@@ -464,6 +464,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[i++] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_purple_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
 	spiderColor[i++] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_Red_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
 	spiderColor[i] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_White_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
 	for (int j = 0; j < 10; ++j) {
@@ -482,6 +483,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
 			p->SetGhostShader(m_pGhostTraillerShader);
 			p->m_pSpiderTex = spiderColor[j % 6];
+			p->m_pGhostMaskTex = spiderColor[6];
 			m_pGameObject.push_back(p);
 			m_pCollisionManager->EnrollEnemy(p);
 		}
@@ -937,12 +939,12 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 {
 
 	//속도에 따른 블러링
-	//if(m_pPlayer.)
-	//XMFLOAT3 vel = m_pPlayer->GetVelocity();
-	//float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
-	//int	 velo = int(velocity);
+	//if (m_pPlayer) {
+	//	XMFLOAT3 vel = m_pPlayer->GetVelocity();
+	//	float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
+	//	int	 velo = int(velocity);
 	//	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
-
+	//}
 
 	//카메라 초기화
 	if (m_pCamera) {

@@ -366,15 +366,22 @@ bool CollisionManager::CollsionBulletToEnemy()
 
 
 	float dis = 0;
+	bool crush = false;
 	for (auto enemy : m_EnemyObjects) {
 		if (enemy->m_Entire.Intersects(BulletPos, BulletDir, dis)) {
-			
+			string tmp = "\n\n\n\n ";
+		
+			OutputDebugStringA(tmp.c_str());
 			for (int i = 0; i < 6; i++) {
 				if (enemy->m_Bodys[i].Intersects(BulletPos, BulletDir, dis)) {
 					string temp="몸충돌 ";
 					temp += to_string(dis);
+					temp += "  번호 : ";
+					temp += to_string(i);
 					temp += "\n";
 					OutputDebugStringA(temp.c_str());
+					//crush = true;
+
 				}
 			}
 
@@ -382,10 +389,15 @@ bool CollisionManager::CollsionBulletToEnemy()
 				if (enemy->m_legs[i].Intersects(BulletPos, BulletDir, dis)) {
 					string temp = "다리충돌 ";
 					temp += to_string(dis);
+					temp += "  번호 : ";
+					temp +=  to_string(i);
 					temp += "\n";
 					OutputDebugStringA(temp.c_str());
+					//crush = true;
 				}
 			}
+			if (crush == true)
+				break;
 		}
 	}
 	return false;
