@@ -1504,9 +1504,12 @@ void Billboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCame
 		SetPosition(v);
 	}
 	if (m_CrushObject) {
-		XMFLOAT3 v = XMFLOAT3(m_CrushObject->Center.x + m_OffsetPos.x, m_CrushObject->Center.y + m_OffsetPos.y, m_CrushObject->Center.z + m_OffsetPos.z);
+		XMFLOAT3 ReverseCameraV = Vector3::ScalarProduct(pCamera->GetLookVector(),-1);
+		
+		XMFLOAT3 v = XMFLOAT3(m_CrushObject->Center.x + m_OffsetPos.x* ReverseCameraV.x, m_CrushObject->Center.y + m_OffsetPos.y * ReverseCameraV.y, m_CrushObject->Center.z + m_OffsetPos.z* ReverseCameraV.z);
 		SetPosition(v);
 	}
+
 
 	Update(pCamera->GetPosition(), XMFLOAT3(0, 1, 0));
 

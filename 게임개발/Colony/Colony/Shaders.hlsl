@@ -277,24 +277,30 @@ float4 PSGhostTrailler(VS_STANDARD_OUTPUT input) : SV_TARGET
 
     cColor *= cIllumination * LIGHTRATIO ;
     
-    float2 newUV = input.uv * 100;
+    float2 newUV = input.uv * 70;
     newUV.x += gfGhostNum;
     float4 mask = gtxtDetailNormalTexture.Sample(gssWrap, newUV);
-    float timescale = 2;
+    float timescale = 4;
     float uvalue = 0.5f * (1 - gfGhostNum * timescale) + 0.22f * (1 - gfGhostNum * timescale);
     float dvalue = 0.5f * (1 - gfGhostNum * timescale);
-    if (mask.r < uvalue )
-    {
-        if (mask.r > dvalue )
-        {
-           
-            cColor.a = 1.0f - gfGhostNum * timescale;
+    
+    
 
-            cColor.rgb *= (0.3f * (1 - gfGhostNum * timescale) + 0.05f);
-            cColor.rgb += 0.10f;
-            return cColor;
+        
+        if (mask.r < uvalue)
+        {
+            if (mask.r > dvalue)
+            {
+           
+                cColor.a = 1.0f - gfGhostNum * timescale;
+
+                cColor.rgb *= (0.3f * (1 - gfGhostNum * timescale) + 0.05f);
+                cColor.rgb += 0.10f;
+                return cColor;
+            }
         }
-    }
+    
+
        discard;
   return cColor;
     

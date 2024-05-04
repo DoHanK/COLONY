@@ -164,6 +164,41 @@ void Camera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandL
 	pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
 }
 
+void Camera::Move(const XMFLOAT3& xmf3Shift)
+{
+	if (m_pPlayer) {
+		XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
+		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
+		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
+		XMFLOAT3 xmf3Look = m_pPlayer->GetLookVector();
+		xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
+		xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
+		xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
+
+		XMFLOAT3 xmf3ChangePos = Vector3::TransformCoord(xmf3Shift, xmf4x4Rotate);
+		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3ChangePos);
+
+	}
+
+}
+
+void Camera::ChangeMoveVector(XMFLOAT3& V)
+{
+
+	if (m_pPlayer) {
+		XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
+		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
+		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
+		XMFLOAT3 xmf3Look = m_pPlayer->GetLookVector();
+		xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
+		xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
+		xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
+
+		XMFLOAT3 V = Vector3::TransformCoord(V, xmf4x4Rotate);
+
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //										ThirdPersonCamera											//
@@ -185,6 +220,7 @@ ThirdPersonCamera::ThirdPersonCamera()
 	m_fTimeLag = 0.10f;
 	m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pPlayer = NULL;
+	m_recoiVector= XMFLOAT3(0.0f, 0.0f, 0.0f);
 }
 
 ThirdPersonCamera::~ThirdPersonCamera()
@@ -235,7 +271,7 @@ void ThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
 		xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
 
-		XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
+		XMFLOAT3 xmf3Offset = Vector3::TransformCoord(Vector3::Add(m_xmf3Offset, m_recoiVector), xmf4x4Rotate);
 		XMFLOAT3 xmf3Position = Vector3::Add(m_pPlayer->GetPosition(), xmf3Offset);
 	
 		XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
@@ -248,9 +284,7 @@ void ThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		if (fDistance > 0)
 		{
 			m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
-			m_xmf3Position.x = xmf3Position.x;
-	/*		m_xmf3Position.y = xmf3Position.y;
-			m_xmf3Position.z = xmf3Position.z;*/
+
 		}
 	}
 }

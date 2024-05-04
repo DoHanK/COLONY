@@ -75,8 +75,11 @@ bool GamePlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 
 		break;
 	case WM_KEYDOWN:
+	
+
 		switch (wParam)
 		{
+
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
@@ -121,7 +124,9 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		case 'N':
 			m_pPlayer->AddPosition(XMFLOAT3(0, -5.0F, 0));
 			break;
-			
+		case 'P':
+			m_pPlayer->isDance = (m_pPlayer->isDance + 1) % 2;
+			break;
 				
 		default:
 			break;
@@ -468,7 +473,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 10; ++j) {
+	for (int j = 0; j < 1; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
@@ -544,11 +549,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			}
 
 			pBillObject->SetOffsetPos(XMFLOAT3(0, -0.1f, 0));
-
+			pBillObject->m_OffsetPos = XMFLOAT3(2.0f, 1.7f, 2.0f);
 		
 			pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(2.0, -2.0, -2.0, 2.0), 0.0f);
 			pBillObject->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
-			pBillObject->SettedTimer = 0.001f;
+			pBillObject->SettedTimer = 0.005f;
 			pBillObject->AddRef();
 			m_pBloodBillboard[i].push_back(pBillObject);
 		}
@@ -663,6 +668,13 @@ void GamePlayScene::ReleaseObjects()
 	if (m_pBillObject) m_pBillObject->Release();
 
 	if (m_BillShader) m_BillShader->Release();
+
+		for (int i = 0; i < 29; ++i) {
+			for (auto& B : m_pBloodBillboard[i]) {
+				if (B) B->Release();
+			}
+		}
+	
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -679,6 +691,8 @@ void GamePlayScene::PlayerControlInput()
 		//Move
 		if (pKeysBuffer[W] & 0xF0)
 			dwDirection |= DIR_FORWARD;
+		
+			
 		if (m_pPlayer->m_WeaponState == RIGHT_HAND) {
 			if (pKeysBuffer[S] & 0xF0)
 				dwDirection |= DIR_BACKWARD;
@@ -758,15 +772,49 @@ void GamePlayScene::PlayerControlInput()
 			dwPlayerState |= STATE_SWITCH_WEAPON;
 		}
 		//총 쏘기
-		if (pKeysBuffer[L_MOUSE] & 0xF0 && m_pPlayer->m_BaseReloadTime < m_pPlayer->m_ReloadTime) {
+		if (m_pPlayer->m_BaseReloadTime < m_pPlayer->m_ReloadTime && m_pPlayer->m_WeaponState == RIGHT_HAND) {
+			static float AMP = 0.4f;
+			static int SignCount = 0;
+	
 
-			dwPlayerState |= STATE_SHOOT; 
-			m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
-			m_pPlayer->m_ReloadTime = 0;
-			//if (!m_pBloodBillboard[0]->active) {
-			//	OutputDebugStringA("총발사 \n");
-			//	m_pBloodBillboard[0]->active = true;
-			//}
+			if (pKeysBuffer[L_MOUSE] & 0xF0) {
+				AMP += 0.01f;
+				if (AMP > 0.6f) {
+					AMP = 0.6f;
+				}
+				float Sign = 0;
+				if (SignCount & 1) {
+					Sign = 1;
+				}
+				else {
+					Sign = -1;
+				}
+				float test = 1;
+				SignCount++;
+				XMFLOAT3 V = XMFLOAT3(Sign * rand() / RAND_MAX * AMP, Sign * rand() / RAND_MAX * AMP,  float(rand()) / RAND_MAX * AMP);
+				m_pCamera->m_recoiVector.x = V.x;
+				m_pCamera->m_recoiVector.y = V.y;
+				m_pCamera->m_recoiVector.z -= V.z;
+				
+				if (m_pCamera->m_recoiVector.z < -0.5f) {
+					m_pCamera->m_recoiVector.z = -0.5f;
+
+				}
+
+				dwPlayerState |= STATE_SHOOT;
+				m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
+	
+
+			}
+			else {
+				AMP = 0.4f;
+				m_pPlayer->m_ReloadTime = 0;
+				m_pCamera->m_recoiVector.x = 0;
+				m_pCamera->m_recoiVector.y = 0;
+				m_pCamera->m_recoiVector.z = 0.f;
+
+
+			}
 		}
 
 		//플레이어 애니메이션 적용
@@ -1055,6 +1103,7 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 			}
 		}
 	}
+
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

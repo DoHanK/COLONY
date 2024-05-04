@@ -378,7 +378,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 	}
 
 	crushlist.sort([](pair<AliensBoudingBox*, float>& a, pair<AliensBoudingBox*, float>& b) {
-		return a.first < b.first;});
+		return a.first > b.first;});
 
 	for (auto& enemy : crushlist) {
 

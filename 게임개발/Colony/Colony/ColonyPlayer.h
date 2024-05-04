@@ -19,6 +19,7 @@ class PlayerAnimationController;
 #define F 'F'
 #define T 'T'
 #define Q 'Q'
+#define P 'P'
 
 #define L_MOUSE		 0x01
 #define R_MOUSE		 0x02
@@ -99,6 +100,7 @@ public:
 	char m_WeaponState = RIGHT_HAND;
 	
 	bool isJump = false;
+	bool isDance = false;
 
 	float m_BaseReloadTime = 0.1f;
 	float m_ReloadTime = 0;
