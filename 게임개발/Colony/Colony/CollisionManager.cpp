@@ -396,7 +396,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 						if (!paticle->active) {
 							paticle->active = true;
 							//paticle->m_ownerObject = enemy.first->m_pOwner;
-							paticle->m_CrushObject = &enemy.first->m_Bodys[i];
+							paticle->m_CrashObject = &enemy.first->m_Bodys[i];
 							break;
 						}
 					}
@@ -415,7 +415,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 					for (auto& paticle : m_pBloodBillboard[idx]) {
 						if (!paticle->active) {
 							paticle->active = true;
-							paticle->m_CrushObject = &enemy.first->m_legs[i];
+							paticle->m_CrashObject = &enemy.first->m_legs[i];
 							break;
 						}
 					}

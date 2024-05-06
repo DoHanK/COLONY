@@ -492,7 +492,7 @@ public:
 	bool active = true;
 	bool doAnimate = false;
 	bool doOnce = false;
-	BoundingSphere* m_CrushObject = NULL;
+	BoundingSphere* m_CrashObject = NULL;
 	XMFLOAT3 TickAddPosition =XMFLOAT3(0.0f, 0.0f, 0.0f);
 	GameObject* m_ownerObject;
 	void SetRowNCol(float row, float col) { m_rows = row; m_cols = col; }

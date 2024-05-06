@@ -71,7 +71,7 @@ bool GamePlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		m_pBillObject->active = true;
+		
 
 		break;
 	case WM_KEYDOWN:
@@ -773,15 +773,17 @@ void GamePlayScene::PlayerControlInput()
 		}
 		//ÃÑ ½î±â
 		if (m_pPlayer->m_BaseReloadTime < m_pPlayer->m_ReloadTime && m_pPlayer->m_WeaponState == RIGHT_HAND) {
-			static float AMP = 0.4f;
+			static float AMP = 0.1f;
 			static int SignCount = 0;
-	
+			static float zRange = -0.5f;
+			static float yRange = -0.025f;
 
 			if (pKeysBuffer[L_MOUSE] & 0xF0) {
 				AMP += 0.01f;
-				if (AMP > 0.6f) {
-					AMP = 0.6f;
+				if (AMP > 0.2f) {
+					AMP = 0.2f;
 				}
+
 				float Sign = 0;
 				if (SignCount & 1) {
 					Sign = 1;
@@ -789,29 +791,31 @@ void GamePlayScene::PlayerControlInput()
 				else {
 					Sign = -1;
 				}
-				float test = 1;
+
 				SignCount++;
-				XMFLOAT3 V = XMFLOAT3(Sign * rand() / RAND_MAX * AMP, Sign * rand() / RAND_MAX * AMP,  float(rand()) / RAND_MAX * AMP);
-				m_pCamera->m_recoiVector.x = V.x;
-				m_pCamera->m_recoiVector.y = V.y;
-				m_pCamera->m_recoiVector.z -= V.z;
-				
-				if (m_pCamera->m_recoiVector.z < -0.5f) {
-					m_pCamera->m_recoiVector.z = -0.5f;
+				m_pPlayer->Rotate(-AMP*1.2f, Sign* AMP*3.0f, 0.0f);
+	
+				m_pCamera->m_recoiVector.z -= 0.05f;
+				m_pCamera->m_recoiVector.y -= 0.005f;
+
+				if (m_pCamera->m_recoiVector.z < zRange) {
+					m_pCamera->m_recoiVector.z = zRange;
+
+				}
+				if (m_pCamera->m_recoiVector.y < yRange) {
+					m_pCamera->m_recoiVector.y = yRange;
 
 				}
 
 				dwPlayerState |= STATE_SHOOT;
 				m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
-	
+				m_pBillObject->active = true;
 
 			}
 			else {
-				AMP = 0.4f;
-				m_pPlayer->m_ReloadTime = 0;
-				m_pCamera->m_recoiVector.x = 0;
-				m_pCamera->m_recoiVector.y = 0;
-				m_pCamera->m_recoiVector.z = 0.f;
+				AMP = 0.1f;
+				m_pCamera->m_recoiVector.z = 0.0f;
+				m_pCamera->m_recoiVector.y = 0.0f;
 
 
 			}
