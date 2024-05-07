@@ -200,16 +200,19 @@ protected:
 	UIInfo*								h_TImer2;
 	UIInfo*								h_TImer3;
 	UIInfo*								h_TImer4;
-	
-	UIInfo* h_TimerBar[5];
-	vector<Texture*> numTexture;
-	CollisionManager* m_pCollisionManager;
+	UIInfo*								h_weapon;
+	UIInfo*								h_TimerBar[5];
+	UIInfo*								h_HP[3];
 
+	vector<Texture*>					numTexture;
+	Texture*							m_TrifleGun;
+	Texture*							m_TmachineGun;
+	Texture*							m_TshotGun;
+
+	CollisionManager* m_pCollisionManager;
 
 	Billboard* m_pBillObject;
 	vector <Billboard*> m_pBillObjects;
-
-
 	vector<Billboard*> m_pBloodBillboard[29];
 	bool test = false;
 };

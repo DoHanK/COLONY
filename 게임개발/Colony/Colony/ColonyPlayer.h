@@ -51,7 +51,9 @@ class PlayerAnimationController;
 #define STATE_SWITCH_WEAPON			0x80
 
 
-
+#define HAVE_RIFLE					0
+#define HAVE_SHOTGUN				1
+#define HAVE_MACHINEGUN				2	
 
 
 
@@ -104,6 +106,14 @@ public:
 
 	float m_BaseReloadTime = 0.1f;
 	float m_ReloadTime = 0;
+
+	//ÃÑ¾Ë ¼ö
+	UINT m_gunType = HAVE_RIFLE;
+	int m_rifleBullet = 40;
+	int m_shotgunBullet = 20;
+	int m_machinegunBullet = 150;
+	
+
 	virtual void SetAnimator(PlayerAnimationController* animator);
 	void SetWeapon(GameObject* Weapon);
 

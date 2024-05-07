@@ -572,43 +572,51 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 {////UI
 
 	////Timer
-
-	pUImanager->CreateUINonNormalRect(0.95, 0.85, -0.09, 0.09, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
+	pUImanager->CreateUINonNormalRect(0.96, 0.88, -0.055, 0.055, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 	for (int i = 0; i < 5; i++) {
-		h_TimerBar[i] = pUImanager->CreateUINonNormalRect(0.82, 0.8, (-0.17) + 0.07 * i, (-0.11) + 0.07 * i, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
+		h_TimerBar[i] = pUImanager->CreateUINonNormalRect(0.86, 0.84, (-0.12) + 0.05 * i, (-0.08) + 0.05 * i, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
 			NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	}
 
 	// 시간 표시 layer 1
-	h_TImer1 = BringUINum(pUImanager, pResourceManager, 0.94, 0.86, -0.08, -0.05, 0, 1, GetType());
-	h_TImer2 = BringUINum(pUImanager, pResourceManager, 0.94, 0.86, -0.04, -0.01, 0, 1, GetType());
+	h_TImer1 = BringUINum(pUImanager, pResourceManager, 0.95, 0.89, -0.045, -0.03, 0, 1, GetType());
+	h_TImer2 = BringUINum(pUImanager, pResourceManager, 0.95, 0.89, -0.025, -0.01, 0, 1, GetType());
 
-	pUImanager->CreateUINonNormalRect(0.93, 0.87, -0.01, 0.01, pResourceManager->BringTexture("Model/Textures/UITexture/TimeDivide.dds", UI_TEXTURE, true),
+	pUImanager->CreateUINonNormalRect(0.95, 0.89, -0.01, 0.01, pResourceManager->BringTexture("Model/Textures/UITexture/TimeDivide.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
-	h_TImer3 = BringUINum(pUImanager, pResourceManager, 0.94, 0.86, 0.01, 0.04, 0, 1, GetType());
-	h_TImer4 = BringUINum(pUImanager, pResourceManager, 0.94, 0.86, 0.05, 0.08, 0, 1, GetType());
-
-
+	h_TImer3 = BringUINum(pUImanager, pResourceManager, 0.95, 0.89, 0.01, 0.025, 0, 1, GetType());
+	h_TImer4 = BringUINum(pUImanager, pResourceManager, 0.95, 0.89, 0.03, 0.045, 0, 1, GetType());
 
 
 	//Weapon
-	pUImanager->CreateUINonNormalRect(-0.7, -0.8, -0.75, -0.55, pResourceManager->BringTexture("Model/Textures/UITexture/Gun.dds", UI_TEXTURE, true),
-		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
-	//Item
+	m_TrifleGun = pResourceManager->BringTexture("Model/Textures/UITexture/rifle.dds", UI_TEXTURE, true);
+	m_TshotGun = pResourceManager->BringTexture("Model/Textures/UITexture/shotGun.dds", UI_TEXTURE, true);
+	m_TmachineGun = pResourceManager->BringTexture("Model/Textures/UITexture/machineGun.dds", UI_TEXTURE, true);
 
+	h_weapon=pUImanager->CreateUINonNormalRect(-0.7, -0.8, -0.8, -0.63, m_TrifleGun,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	//
+
+	//Item
+	pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.8, 0.86, pResourceManager->BringTexture("Model/Textures/UITexture/syringe.dds", UI_TEXTURE, true),
+		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
+	pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.9, 0.95, pResourceManager->BringTexture("Model/Textures/UITexture/eye.dds", UI_TEXTURE, true),
+		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	
+	
 	//HP
-	pUImanager->CreateUINonNormalRect(-0.7, -0.9, -0.955, -0.785, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE, true),
+	pUImanager->CreateUINonNormalRect(-0.7, -0.9, -0.97, -0.82, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	//HP (number) ***test
-	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.9, -0.88, 1, 1, GetType());
-	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.88, -0.86, 0, 1, GetType());
-	BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.86, -0.84, 0, 1, GetType());
+	h_HP[0]=BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.93, -0.91, 1, 1, GetType());
+	h_HP[1]=BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.91, -0.89, 0, 1, GetType());
+	h_HP[2]=BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.89, -0.87, 0, 1, GetType());
 
 	//Target
-	pUImanager->CreateUINonNormalRect(0.02, -0.02, -0.015, 0.015, pResourceManager->BringTexture("Model/Textures/UITexture/Target_01_a.dds", UI_TEXTURE, true),
+	pUImanager->CreateUINonNormalRect(0.02, -0.02, -0.013, 0.013, pResourceManager->BringTexture("Model/Textures/UITexture/Target_01_b.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
@@ -621,10 +629,6 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	}
 
 	m_pResourceManager->BringTexture("Model/Textures/UITexture/TimerBAR(T).dds", UI_TEXTURE, true);
-
-
-
-
 }
 
 void GamePlayScene::ReleaseObjects()
