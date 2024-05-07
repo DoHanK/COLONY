@@ -240,3 +240,29 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 };
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										 ParticleShader Class		  				    		   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+class ParticleShader :public BasicShader {
+public:
+	ParticleShader();
+	~ParticleShader();
+
+	D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+	D3D12_SHADER_BYTECODE CreateGeometryShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+	D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+
+	D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
+	D3D12_STREAM_OUTPUT_DESC CreateStreamOuputState(int nPipelineState);
+	D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
+	D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState);
+	void RenderShader(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, int nPipelineState);
+public:
+	UINT								m_nPipelineStates = 0;
+	ID3D12PipelineState** m_ppd3dPipelineStates = NULL;
+};

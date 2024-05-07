@@ -215,4 +215,7 @@ protected:
 	vector <Billboard*> m_pBillObjects;
 	vector<Billboard*> m_pBloodBillboard[29];
 	bool test = false;
+
+	ParticleShader*						m_pParticleShader=NULL;
+	ParticleObject*						m_pParticleObject=NULL;
 };

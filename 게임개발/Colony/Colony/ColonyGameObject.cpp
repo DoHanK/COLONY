@@ -1544,3 +1544,54 @@ void Billboard::Update(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
 	m_xmf4x4World._31 = mtxLookAt._13; m_xmf4x4World._32 = mtxLookAt._23; m_xmf4x4World._33 = mtxLookAt._33;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										ParticleObject Class									   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ParticleObject::ParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
+	Texture* pTexture, ParticleShader* pShader, XMFLOAT3 position, UINT type, XMFLOAT3 direction, XMFLOAT3 acc, float speed, float lifeTime, float age, float startTime, UINT nMaxParticles) :GameObject(1) {
+	// 텍스처, 메쉬정보
+	ParticleMesh* pMesh = new ParticleMesh(pd3dDevice, pd3dCommandList, position, type, direction, speed, lifeTime, age, startTime, acc, nMaxParticles);
+	SetMesh(pMesh);
+
+	Material* particleMaterial = new Material(1);
+	particleMaterial->SetShader(pShader);
+	particleMaterial->SetTexture(pTexture, 0);
+
+	SetMaterial(0, particleMaterial);
+	m_device = pd3dDevice;
+}
+
+ParticleObject::~ParticleObject()
+{
+}
+
+void ParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
+{
+	if (m_ppMaterials[0])
+	{
+		if (m_ppMaterials[0]->m_pShader) ((ParticleShader*)(m_ppMaterials[0]->m_pShader))->RenderShader(pd3dCommandList, pCamera, 0);
+		m_ppMaterials[0]->UpdateShaderVariable(pd3dCommandList);
+	}
+
+	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+
+	((ParticleMesh*)m_pMesh)->RenderStreamOutput(m_device, pd3dCommandList);
+
+	if (m_ppMaterials[0])
+	{
+		if (m_ppMaterials[0]->m_pShader) ((ParticleShader*)(m_ppMaterials[0]->m_pShader))->RenderShader(pd3dCommandList, pCamera, 1);
+		m_ppMaterials[0]->UpdateShaderVariable(pd3dCommandList);
+
+	}
+
+	((ParticleMesh*)m_pMesh)->RenderDrawBuffer(m_device, pd3dCommandList);
+}
+
+void ParticleObject::PostRender(int nPipelineState)
+{
+
+	((ParticleMesh*)m_pMesh)->PostRender(nPipelineState);
+}
+

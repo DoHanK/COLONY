@@ -562,6 +562,12 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 
+	//m_pParticleShader = new ParticleShader();
+	//m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
+	//m_pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/TestTexture.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
+	//	XMFLOAT3(0.0f, 0.0f, 0.0f), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 5.0f, 10.0f, 0.0f, 0.0f, 900000);
+
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
 	BuildDefaultLightsAndMaterials();
 	BuildDepthTexture(pd3dDevice, pd3dCommandList);
@@ -1111,6 +1117,9 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 			}
 		}
 	}
+
+
+	//m_pParticleObject->Render(pd3dCommandList);
 
 }
 

@@ -790,3 +790,107 @@ float4 PSBILLBOARD(VS_BILLBOARD_OUTPUT input) : SV_TARGET
 
     return (cColor);
 }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Particle StreamOutput
+struct VS_PARTICLE_INPUT
+{
+    float3 position : POSITION;
+    uint type : TYPE;
+    float3 direction : DIRECTION;
+    float3 acceleration : ACC;
+    float speed : SPEED;
+    float lifeTime : LIFETIME;
+    float age : AGE;
+    float startTime : STARTTIME;
+};
+
+VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
+{
+    return (input);
+}
+
+
+
+[maxvertexcount(64)]
+void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
+{
+    VS_PARTICLE_INPUT particle = input[0];
+    float startPos = 1.0;
+    //particle.lifeTime = 1.0f;
+    float age = frac(particle.age / particle.lifeTime) * particle.lifeTime;
+    //particle.position.y = startPos + age * particle.direction.y * particle.speed;
+    particle.position.x = input[0].position.x;
+    particle.position.y = input[0].position.y;
+    particle.position.z = startPos;
+    particle.age += 0.5f /*gfElapsedTime*/;
+    output.Append(particle);
+    
+    //particle.position.x += 5.0f;
+    //particle.position.y += 5.0f;
+    
+    //output.Append(particle);
+    
+    
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Particle Draw 
+struct VS_PARTICLE_OUTPUT
+{
+    float3 position : POSITION;
+    float4 color : COLOR;
+    float size : SIZE;
+};
+
+struct GS_PARTICLE_DRAW_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+    float2 uv : TEXTURE;
+};
+
+VS_PARTICLE_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
+{
+    VS_PARTICLE_OUTPUT output = (VS_PARTICLE_OUTPUT) 0;
+
+    output.position = input.position;
+    output.size = 1.0f;
+    output.color = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	
+    return (output);
+}
+
+static float3 gf3Positions[4] = { float3(-1.0f, +1.0f, 0.0f), float3(+1.0f, +1.0f, 0.0f), float3(-1.0f, -1.0f, 0.0f), float3(+1.0f, -1.0f, 0.0f) };
+static float2 gf2QuadUVs[4] = { float2(0.0f, 0.0f), float2(1.0f, 0.0f), float2(0.0f, 1.0f), float2(1.0f, 1.0f) };
+
+[maxvertexcount(64)]
+void GSParticleDraw(point VS_PARTICLE_OUTPUT input[1], inout TriangleStream<GS_PARTICLE_DRAW_OUTPUT> outputStream)
+{
+    GS_PARTICLE_DRAW_OUTPUT output = (GS_PARTICLE_DRAW_OUTPUT) 0;
+
+    output.color = input[0].color;
+
+    for (int i = 0; i < 4; i++)
+    {
+        float3 positionW = mul(gf3Positions[i] * input[0].size, (float3x3) gmtxGameObject) + input[0].position;
+        output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
+        output.uv = gf2QuadUVs[i];
+        
+        outputStream.Append(output);
+    }
+}
+
+
+Texture2D ParticleTexture : register(t21);
+float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
+{
+    float4 cColor = ParticleTexture.Sample(gssWrap, input.uv);
+    cColor *= input.color;
+    
+
+    return cColor;
+}
+

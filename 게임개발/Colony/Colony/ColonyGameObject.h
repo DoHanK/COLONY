@@ -502,3 +502,19 @@ public:
 	void SetAddPosition(XMFLOAT3 xmf3AddPosition) {TickAddPosition = xmf3AddPosition;}
 	void SetOffsetPos(const XMFLOAT3& Pos) { m_OffsetPos = Pos; };
 };
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										ParticleObject Class									   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+class ParticleShader;
+class ParticleObject :public GameObject {
+public:
+	ParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, Texture* pTexture, ParticleShader* pShader,
+		XMFLOAT3 position, UINT type, XMFLOAT3 direction, XMFLOAT3 acc, float speed, float lifeTime, float age, float startTime, UINT nMaxParticles);
+	virtual ~ParticleObject();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
+	virtual void PostRender(int nPipelineState);
+	ID3D12Device* m_device;
+};

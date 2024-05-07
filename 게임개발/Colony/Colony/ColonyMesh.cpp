@@ -1078,3 +1078,159 @@ void BillBoardMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										ParticleMesh Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ParticleMesh::ParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 position, UINT type, XMFLOAT3 direction, float speed, float lifeTime, float age, float startTime, XMFLOAT3 acceleration, UINT nMaxParticles) :BasicMesh(pd3dDevice, pd3dCommandList)
+{
+	CreateVertexBuffer(pd3dDevice, pd3dCommandList, position, type, direction, speed, lifeTime, age, startTime, acceleration);
+	CreateStreamOutputBuffer(pd3dDevice, pd3dCommandList, nMaxParticles);
+}
+
+ParticleMesh::~ParticleMesh() {
+
+	if (m_vertexBuffer) m_vertexBuffer->Release();
+	if (m_streamOutputBuffer) m_streamOutputBuffer->Release();
+	if (m_drawBuffer) m_drawBuffer->Release();
+	if (m_defaultBufferFileSize) m_defaultBufferFileSize->Release();
+	if (m_uploadBufferFileSize) {
+		m_uploadBufferFileSize->Unmap(0, NULL);
+		m_uploadBufferFileSize->Release();
+	}
+	if (m_readBackBufferFileSize) m_readBackBufferFileSize->Release();
+}
+
+void ParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 position, UINT type, XMFLOAT3 direction, float speed, float lifeTime, float age, float startTime, XMFLOAT3 acceleration) {
+
+	m_nVertices = 1;
+	m_nSlot = 0;
+	m_nStride = sizeof(ParticleVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+
+	ParticleVertex pVertices[1];
+
+	pVertices[0].m_f3position = position;
+	pVertices[0].m_type = type;
+	pVertices[0].m_f3direction = direction;
+	pVertices[0].m_f3acceleration = acceleration;
+	pVertices[0].m_speed = speed;
+	pVertices[0].m_lifeTime = lifeTime;
+	pVertices[0].m_age = age;
+	pVertices[0].m_startTime = startTime;
+
+	m_vertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_vertexUploadBuffer);
+
+	m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
+	m_vertexBufferView.StrideInBytes = m_nStride;
+	m_vertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+void ParticleMesh::CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nMaxParticles) {
+
+	m_nMaxParticles = nMaxParticles;
+
+	m_streamOutputBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, (m_nStride * m_nMaxParticles), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_STREAM_OUT, NULL);
+	m_drawBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, (m_nStride * m_nMaxParticles), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	UINT64 nBufferFilledSize = 0;
+	m_defaultBufferFileSize = ::CreateBufferResource(pd3dDevice, pd3dCommandList, &nBufferFilledSize, sizeof(UINT64), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_STREAM_OUT, NULL);
+
+	m_uploadBufferFileSize = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, sizeof(UINT64), D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+	m_uploadBufferFileSize->Map(0, NULL, (void**)&m_pUploadBufferFillSize);
+
+	m_readBackBufferFileSize = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, sizeof(UINT64), D3D12_HEAP_TYPE_READBACK, D3D12_RESOURCE_STATE_COPY_DEST, NULL);
+}
+
+void ParticleMesh::RenderStreamOutput(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {
+	// prerender
+	if (m_start) {
+		// 파티클 시작 시점에서 초기화
+		m_start = false;
+		m_nVertices = 1;
+
+		m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
+		m_vertexBufferView.StrideInBytes = m_nStride;
+		m_vertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+	}
+	else {
+
+		m_vertexBufferView.BufferLocation = m_drawBuffer->GetGPUVirtualAddress();
+		m_vertexBufferView.StrideInBytes = m_nStride;
+		m_vertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+	}
+
+	// streamoutput 준비
+	m_streamOutputBufferView.BufferLocation = m_streamOutputBuffer->GetGPUVirtualAddress();
+	m_streamOutputBufferView.SizeInBytes = m_nStride * m_nMaxParticles;
+	m_streamOutputBufferView.BufferFilledSizeLocation = m_defaultBufferFileSize->GetGPUVirtualAddress();
+
+	*m_pUploadBufferFillSize = 0; // 파일사이즈 0 으로 초기화 
+
+	::ResourceTransition(pd3dCommandList, m_defaultBufferFileSize, D3D12_RESOURCE_STATE_STREAM_OUT, D3D12_RESOURCE_STATE_COPY_DEST);
+	pd3dCommandList->CopyResource(m_defaultBufferFileSize, m_uploadBufferFileSize);
+	::ResourceTransition(pd3dCommandList, m_defaultBufferFileSize, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_STREAM_OUT);
+
+	D3D12_STREAM_OUTPUT_BUFFER_VIEW pStreamOutputBufferViews[1] = { m_streamOutputBufferView };
+	pd3dCommandList->SOSetTargets(0, 1, pStreamOutputBufferViews);
+
+	// renderz
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_vertexBufferView);
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+
+	::ResourceTransition(pd3dCommandList, m_defaultBufferFileSize, D3D12_RESOURCE_STATE_STREAM_OUT, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	pd3dCommandList->CopyResource(m_readBackBufferFileSize, m_defaultBufferFileSize);
+	::ResourceTransition(pd3dCommandList, m_defaultBufferFileSize, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_STREAM_OUT);
+
+}
+
+void ParticleMesh::RenderDrawBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {
+
+	::ResourceTransition(pd3dCommandList, m_streamOutputBuffer, D3D12_RESOURCE_STATE_STREAM_OUT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	::ResourceTransition(pd3dCommandList, m_drawBuffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_STREAM_OUT);
+	::SwapResourcePointer(&m_drawBuffer, &m_streamOutputBuffer);
+
+	m_vertexBufferView.BufferLocation = m_drawBuffer->GetGPUVirtualAddress();
+	m_vertexBufferView.StrideInBytes = m_nStride;
+	m_vertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	pd3dCommandList->SOSetTargets(0, 1, NULL);
+
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_vertexBufferView);
+	pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+}
+
+void ParticleMesh::PostRender(int nPipelineState)
+{
+	if (nPipelineState == 0)
+	{
+#ifdef _WITH_QUERY_DATA_SO_STATISTICS
+		D3D12_RANGE d3dReadRange = { 0, 0 };
+		UINT8* pBufferDataBegin = NULL;
+		m_pd3dSOQueryBuffer->Map(0, &d3dReadRange, (void**)&m_pd3dSOQueryDataStatistics);
+		if (m_pd3dSOQueryDataStatistics) m_nVertices = (UINT)m_pd3dSOQueryDataStatistics->NumPrimitivesWritten;
+		m_pd3dSOQueryBuffer->Unmap(0, NULL);
+#else
+		UINT64* pnReadBackBufferFilledSize = NULL;
+		m_readBackBufferFileSize->Map(0, NULL, (void**)&pnReadBackBufferFilledSize);
+		m_nVertices = UINT(*pnReadBackBufferFilledSize) / m_nStride; 
+		m_readBackBufferFileSize->Unmap(0, NULL);
+
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
+		OutputDebugString(pstrDebug);
+#endif
+
+		//::gnCurrentParticles = m_nVertices;
+#ifdef _WITH_DEBUG_STREAM_OUTPUT_VERTICES
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
+		OutputDebugString(pstrDebug);
+#endif
+		//if ((m_nVertices == 0) || (m_nVertices >= m_nMaxParticles)) m_start = true;
+	}
+
+}

@@ -344,3 +344,55 @@ public:
 	ID3D12Resource*					m_pd3dUvUploadBuffer = NULL;
 	XMFLOAT2*						m_pcbMappedUvs = NULL;
 };
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										ParticleMesh Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class ParticleVertex {
+public:
+	XMFLOAT3		m_f3position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	UINT			m_type = 0;
+	XMFLOAT3		m_f3direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3		m_f3acceleration = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	float			m_speed = 0.0f;
+	float			m_lifeTime = 0.0f;
+	float			m_age = 0.0f;
+	float			m_startTime = 0.0f;
+public:
+	ParticleVertex() {}
+	~ParticleVertex() {}
+};
+
+class ParticleMesh : public BasicMesh {
+public:
+	ParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		XMFLOAT3 position, UINT type, XMFLOAT3 direction, float speed, float lifeTime, float age, float startTime, XMFLOAT3 acceleration, UINT nMaxParticles);
+	virtual ~ParticleMesh();
+
+	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 position, UINT type, XMFLOAT3 direction, float speed, float lifeTime, float age, float startTime, XMFLOAT3 acceleration);
+	void CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nMaxParticles);
+
+	void RenderStreamOutput(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList); // 1st ·»´õ¸µ (stream output)
+	void RenderDrawBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);   // 2nd ·»´õ¸µ 
+	void PostRender(int nPipelineState);
+public:
+	UINT								m_nStride = 0;
+	ID3D12Resource* m_vertexBuffer;
+	ID3D12Resource* m_vertexUploadBuffer;
+	D3D12_VERTEX_BUFFER_VIEW			m_vertexBufferView;
+
+	UINT								m_nMaxParticles = 0;
+	ID3D12Resource* m_streamOutputBuffer;
+	D3D12_STREAM_OUTPUT_BUFFER_VIEW		m_streamOutputBufferView;
+	ID3D12Resource* m_drawBuffer;
+	ID3D12Resource* m_defaultBufferFileSize;
+	ID3D12Resource* m_uploadBufferFileSize;
+	ID3D12Resource* m_readBackBufferFileSize;
+	UINT64* m_pUploadBufferFillSize;
+
+	bool								m_start = true;
+};
