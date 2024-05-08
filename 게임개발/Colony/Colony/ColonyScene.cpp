@@ -562,17 +562,36 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 
-	//m_pParticleShader = new ParticleShader();
-	//m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pParticleShader = new ParticleShader();
+	m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
-	//m_pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/TestTexture.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
-	//	XMFLOAT3(0.0f, 0.0f, 0.0f), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 5.0f, 10.0f, 0.0f, 0.0f, 900000);
+	for (int i = 0; i < 10; i < i++) {
+		ParticleObject* pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/pointLight.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
+			XMFLOAT3(GetRandomFloatInRange(0.0f,800.0f,i), 0.0f, 0), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 3.0f, 10.0f, 0.0f, 0.0f, 900000);
+		m_pParticleObjects.push_back(pParticleObject);
+	}
+
+	
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
 	BuildDefaultLightsAndMaterials();
 	BuildDepthTexture(pd3dDevice, pd3dCommandList);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
+
+float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal, UINT seed)
+{
+
+	srand(static_cast<unsigned int>(seed));
+
+	float random01 = static_cast<double>(rand()) / RAND_MAX; // 0.0부터 1.0 사이의 랜덤 값
+
+	// 범위를 조절하여 원하는 범위 내의 랜덤 값 생성
+	float randomInRange = minVal + random01 * (maxVal - minVal);
+
+	return randomInRange;
+}
+
 
 void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
 {////UI
@@ -1118,8 +1137,9 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 		}
 	}
 
-
-	//m_pParticleObject->Render(pd3dCommandList);
+	for (auto& ParticleObject : m_pParticleObjects) {
+		ParticleObject->Render(pd3dCommandList);
+	}
 
 }
 

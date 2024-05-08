@@ -140,6 +140,8 @@ public:
 	virtual void TestCameraRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
 	virtual void UpdateUI();
 
+	float GetRandomFloatInRange(float minVal, float maxVal, UINT seed);
+
 protected:
 
 	float								m_fElapsedTime = 0.0f;
@@ -217,5 +219,6 @@ protected:
 	bool test = false;
 
 	ParticleShader*						m_pParticleShader=NULL;
+	vector< ParticleObject*>			m_pParticleObjects;
 	ParticleObject*						m_pParticleObject=NULL;
 };

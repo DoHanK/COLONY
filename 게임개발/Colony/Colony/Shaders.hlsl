@@ -813,26 +813,16 @@ VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
 
 
 
-[maxvertexcount(64)]
+[maxvertexcount(1)]
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
     VS_PARTICLE_INPUT particle = input[0];
-    float startPos = 1.0;
+    float startPos = 30.0;
     //particle.lifeTime = 1.0f;
     float age = frac(particle.age / particle.lifeTime) * particle.lifeTime;
-    //particle.position.y = startPos + age * particle.direction.y * particle.speed;
-    particle.position.x = input[0].position.x;
-    particle.position.y = input[0].position.y;
-    particle.position.z = startPos;
-    particle.age += 0.5f /*gfElapsedTime*/;
+    particle.position.y = startPos + age * particle.direction.y * particle.speed;
+    particle.age += 0.1f /*gfElapsedTime*/;
     output.Append(particle);
-    
-    //particle.position.x += 5.0f;
-    //particle.position.y += 5.0f;
-    
-    //output.Append(particle);
-    
-    
 }
 
 
@@ -857,7 +847,7 @@ VS_PARTICLE_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
     VS_PARTICLE_OUTPUT output = (VS_PARTICLE_OUTPUT) 0;
 
     output.position = input.position;
-    output.size = 1.0f;
+    output.size = 0.2f;
     output.color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	
     return (output);
@@ -866,16 +856,31 @@ VS_PARTICLE_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 static float3 gf3Positions[4] = { float3(-1.0f, +1.0f, 0.0f), float3(+1.0f, +1.0f, 0.0f), float3(-1.0f, -1.0f, 0.0f), float3(+1.0f, -1.0f, 0.0f) };
 static float2 gf2QuadUVs[4] = { float2(0.0f, 0.0f), float2(1.0f, 0.0f), float2(0.0f, 1.0f), float2(1.0f, 1.0f) };
 
-[maxvertexcount(64)]
+[maxvertexcount(4)]
 void GSParticleDraw(point VS_PARTICLE_OUTPUT input[1], inout TriangleStream<GS_PARTICLE_DRAW_OUTPUT> outputStream)
 {
     GS_PARTICLE_DRAW_OUTPUT output = (GS_PARTICLE_DRAW_OUTPUT) 0;
 
     output.color = input[0].color;
 
+    // Calculate billboard matrix
+    float3 particlePos = input[0].position;
+    float3 cameraPos = gmtxView[3].xyz; // Extract camera position from view matrix
+    float3 look = normalize(cameraPos - particlePos);
+    float3 right = normalize(cross(float3(0, 1, 0), look)); // Assume Y-axis is up
+    float3 up = cross(look, right);
+
+    // Construct billboard matrix
+    float4x4 billboardMatrix = float4x4(
+        right.x, right.y, right.z, 0,
+        up.x, up.y, up.z, 0,
+        look.x, look.y, look.z, 0,
+        particlePos.x, particlePos.y, particlePos.z, 1
+    );
+
     for (int i = 0; i < 4; i++)
     {
-        float3 positionW = mul(gf3Positions[i] * input[0].size, (float3x3) gmtxGameObject) + input[0].position;
+        float3 positionW = mul(gf3Positions[i] * input[0].size, (float3x3) billboardMatrix) + input[0].position;
         output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
         output.uv = gf2QuadUVs[i];
         
