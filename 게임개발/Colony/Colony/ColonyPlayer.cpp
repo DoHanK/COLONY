@@ -16,7 +16,9 @@
 Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager)
 {
 	CLoadedModelInfo* PlayerModelInfo = pResourceManager->BringModelInfo("Model/JU_Mannequin.bin", "Model/Textures/PlayerTexture/");
-	CLoadedModelInfo* WeaponModelInfo = pResourceManager->BringModelInfo("Model/UMP5.bin", "Model/Textures/UMP5Texture/");
+	CLoadedModelInfo* UMP5ModelInfo = pResourceManager->BringModelInfo("Model/Weapon/UMP5.bin", "Model/Textures/UMP5Texture/");
+	CLoadedModelInfo* shotgunModelInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* machinegunModelInfo = pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/");
 
 
 	if (PlayerModelInfo) {
@@ -27,9 +29,15 @@ Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	}
 	SetAnimator(new PlayerAnimationController(pd3dDevice, pd3dCommandList, 4, PlayerModelInfo));
 
-	GameObject* Weapon = new GameObject();
-	Weapon->SetChild(WeaponModelInfo->m_pModelRootObject);
-	SetWeapon(Weapon);
+	m_UMP5Object = new GameObject();
+	m_UMP5Object->SetChild(UMP5ModelInfo->m_pModelRootObject);
+	m_shotgunObject = new GameObject();
+	m_shotgunObject->SetChild(shotgunModelInfo->m_pModelRootObject);
+	m_machinegunObject = new GameObject();
+	m_machinegunObject->SetChild(machinegunModelInfo->m_pModelRootObject);
+	
+	// 플레이어 초기 Weapon 상태는 UMP5(rifle)
+	SetWeapon(m_UMP5Object);
 
 	m_pCamera = NULL;
 

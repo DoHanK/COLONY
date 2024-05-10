@@ -817,8 +817,7 @@ VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
     VS_PARTICLE_INPUT particle = input[0];
-    float startPos = 30.0;
-    //particle.lifeTime = 1.0f;
+    float startPos = 40.0;
     float age = frac(particle.age / particle.lifeTime) * particle.lifeTime;
     particle.position.y = startPos + age * particle.direction.y * particle.speed;
     particle.age += 0.1f /*gfElapsedTime*/;
@@ -880,7 +879,7 @@ void GSParticleDraw(point VS_PARTICLE_OUTPUT input[1], inout TriangleStream<GS_P
 
     for (int i = 0; i < 4; i++)
     {
-        float3 positionW = mul(gf3Positions[i] * input[0].size, (float3x3) billboardMatrix) + input[0].position;
+        float3 positionW = mul(gf3Positions[i] * input[0].size, (float3x3) gmtxGameObject) + input[0].position;
         output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
         output.uv = gf2QuadUVs[i];
         

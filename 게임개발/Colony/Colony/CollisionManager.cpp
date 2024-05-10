@@ -21,7 +21,7 @@ float DistancePointToPlane(XMFLOAT3 point, XMFLOAT3 planeNormal, XMFLOAT3 planeP
 CollisionManager::CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	
-	for (int i = 0; i < 500; ++i) {
+	for (int i = 0; i < 700; ++i) {
 		BoundingBoxMesh* pBounding = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
 		m_BoundingBoxMeshes.push_back(pBounding);
 	}
@@ -422,13 +422,10 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 				}
 				crush = true;
 				break;
-
 			}
 		}
-
-
 	}
-	return false;
+	return crush;
 }
 
 void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList)

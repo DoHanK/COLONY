@@ -392,7 +392,7 @@ public:
 	virtual void UpdateFramePos(int idex);
 
 	virtual void UpdateMatrix() { }
-	virtual void UpdateBoundingBox();
+	virtual void UpdateBoundingBox(ID3D12Device* pd3dDevice=NULL, ID3D12GraphicsCommandList* pd3dCommandList=NULL);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 	virtual void RenderBindAlbedo(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, Texture* Albedo);
 	virtual void DepthRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
@@ -517,4 +517,15 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 	virtual void PostRender(int nPipelineState);
 	ID3D12Device* m_device;
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										ItemObject Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+class ItemObject :public GameObject {
+public:
+	ItemObject(){}
+	virtual ~ItemObject(){}
+public:
+	bool m_bActive = false;
 };

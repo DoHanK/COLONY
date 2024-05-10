@@ -404,6 +404,10 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPlaneShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pPlaneShader->AddRef();
 
+	m_BillShader = new BillboardShader();
+	m_BillShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_BillShader->AddRef();
+
 	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
 	m_pDepthSkinnedShader = new DepthSkinnedRenderingShader();
 	m_pDepthSkinnedShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
@@ -412,11 +416,6 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/MainScene.bin","Model/Textures/scene/", pResourceManager,"Model/MainSceneMeshes/");
 	//LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/SpaceStationScene.bin", "Model/Textures/scene/", pResourceManager, "Model/SpaceStationMeshes/");
-
-
-	m_BillShader = new BillboardShader();
-	m_BillShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	m_BillShader->AddRef();
 
 	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pResourceManager);
 	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
@@ -557,20 +556,41 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			pBillObject->AddRef();
 			m_pBloodBillboard[i].push_back(pBillObject);
 		}
-
 	}
 
 
-
+	// particles
 	m_pParticleShader = new ParticleShader();
 	m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pParticleShader->AddRef();
 
-	for (int i = 0; i < 10; i < i++) {
+	for (int i = 0; i <100; i < i++) {
 		ParticleObject* pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/pointLight.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
-			XMFLOAT3(GetRandomFloatInRange(0.0f,800.0f,i), 0.0f, 0), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 3.0f, 10.0f, 0.0f, 0.0f, 900000);
+			XMFLOAT3(GetRandomFloatInRange(0.0f,30.0f), 0.0f, GetRandomFloatInRange(0.0f, 20.0f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(0.0f, 3.0f), GetRandomFloatInRange(20.0f, 40.0f), 0.0f, 0.0f, 900000);
 		m_pParticleObjects.push_back(pParticleObject);
 	}
 
+
+	// item
+	CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Item/shotgun.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Item/machinegun.bin", "Model/Textures/Item/");
+	//CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");
+
+	m_nItemBox = 10; // 아이템박스 10개
+	for (int i = 0; i < 10; i++){
+		GameObject* pitemBox = new ItemObject();
+
+
+	}
+	itemBox = new GameObject();
+	itemBox=machinegunInfo->m_pModelRootObject;
+	itemBox->SetScale(1.0f, 1.0f, 1.0f); 
+	itemBox->SetPosition(20.0f, 0.0f, 0.0f);
+	itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
+	m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->FindFrame("M82")->m_BoundingBox.Center, itemBox->FindFrame("M82")->m_BoundingBox.Extents, itemBox);
 	
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
@@ -579,10 +599,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal, UINT seed)
+float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal)
 {
-
-	srand(static_cast<unsigned int>(seed));
 
 	float random01 = static_cast<double>(rand()) / RAND_MAX; // 0.0부터 1.0 사이의 랜덤 값
 
@@ -591,7 +609,6 @@ float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal, UINT seed
 
 	return randomInRange;
 }
-
 
 void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
 {////UI
@@ -622,7 +639,7 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_TmachineGun = pResourceManager->BringTexture("Model/Textures/UITexture/machineGun.dds", UI_TEXTURE, true);
 
 	h_weapon=pUImanager->CreateUINonNormalRect(-0.7, -0.8, -0.8, -0.63, m_TrifleGun,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
-	//
+	
 
 	//Item
 	pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.8, 0.86, pResourceManager->BringTexture("Model/Textures/UITexture/syringe.dds", UI_TEXTURE, true),
@@ -632,18 +649,36 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	
 	
-	//HP
-	pUImanager->CreateUINonNormalRect(-0.7, -0.9, -0.97, -0.82, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE, true),
+	// HP
+	pUImanager->CreateUINonNormalRect(-0.67, -0.9, -0.98, -0.83, pResourceManager->BringTexture("Model/Textures/UITexture/HPBackground.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	//HP (number) ***test
-	h_HP[0]=BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.93, -0.91, 1, 1, GetType());
-	h_HP[1]=BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.91, -0.89, 0, 1, GetType());
-	h_HP[2]=BringUINum(pUImanager, pResourceManager, -0.77, -0.83, -0.89, -0.87, 0, 1, GetType());
+	h_HP[0]=BringUINum(pUImanager, pResourceManager, -0.75, -0.81, -0.94, -0.92, 1, 1, GetType());
+	h_HP[1]=BringUINum(pUImanager, pResourceManager, -0.75, -0.81, -0.92, -0.90, 0, 1, GetType());
+	h_HP[2]=BringUINum(pUImanager, pResourceManager, -0.75, -0.81, -0.90, -0.88, 0, 1, GetType());
+
 
 	//Target
-	pUImanager->CreateUINonNormalRect(0.02, -0.02, -0.013, 0.013, pResourceManager->BringTexture("Model/Textures/UITexture/Target_01_b.dds", UI_TEXTURE, true),
+	// rifle
+	pUImanager->CreateUINonNormalRect(0.03, -0.03, -0.02, 0.02, pResourceManager->BringTexture("Model/Textures/UITexture/TargetRifleGreen.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
+	m_TCrashOk = pResourceManager->BringTexture("Model/Textures/UITexture/crashOk3.dds", UI_TEXTURE, true);
+	m_TNone= pResourceManager->BringTexture("Model/Textures/None.dds", UI_TEXTURE, true);
+	h_crashOk=pUImanager->CreateUINonNormalRect(0.032, -0.035, -0.02, 0.02, m_TNone,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	
+
+	//pUImanager->CreateUINonNormalRect(0.045, -0.045, -0.03, 0.03, pResourceManager->BringTexture("Model/Textures/UITexture/TargetRifle2.dds", UI_TEXTURE, true),
+	//	NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
+	//shotgun
+	//pUImanager->CreateUINonNormalRect(0.05, -0.05, -0.03, 0.03, pResourceManager->BringTexture("Model/Textures/UITexture/TargetShotgun.dds", UI_TEXTURE, true),
+	//NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
+
+	//// machinegun
+	//pUImanager->CreateUINonNormalRect(0.025, -0.025, -0.015, 0.015, pResourceManager->BringTexture("Model/Textures/UITexture/TargetMachinegun.dds", UI_TEXTURE, true),
+	//	NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
 
@@ -704,6 +739,16 @@ void GamePlayScene::ReleaseObjects()
 			}
 		}
 	
+		for (auto& GO : m_pParticleObjects) {
+			GO->Release();
+		}
+
+	if (m_pParticleShader) m_pParticleShader->Release();
+	/*for (auto& GO : m_pParticleObjects) {
+		if (GO) {
+			GO->Release();
+		}
+	}*/
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -837,7 +882,7 @@ void GamePlayScene::PlayerControlInput()
 				}
 
 				dwPlayerState |= STATE_SHOOT;
-				m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
+				m_bcrashOk=m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
 				m_pBillObject->active = true;
 
 			}
@@ -932,13 +977,23 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 
 
-		for (int i = 0; i < 29; ++i) {
-			for (auto& B : m_pBloodBillboard[i]) {
-				if (B->doAnimate) {
-					B->Animate(fTimeElapsed);
-				}
+	for (int i = 0; i < 29; ++i) {
+		for (auto& B : m_pBloodBillboard[i]) {
+			if (B->doAnimate) {
+				B->Animate(fTimeElapsed);
 			}
 		}
+	}
+
+	//crashUIAnimation
+	if (m_bcrashOk) {
+		m_crashAnimation += fTimeElapsed;
+		if (m_crashAnimation > 0.3f) {
+			m_bcrashOk = false;
+			m_crashAnimation = 0.0f;
+		}
+	}
+	
 
 
 }
@@ -1074,6 +1129,23 @@ void GamePlayScene::UpdateUI() {
 			h_TimerBar[i-1]->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/UITexture/TimerBAR(T).dds", UI_TEXTURE, true);
 		}
 	}
+
+	// Weapon 상태 업데이트
+	if (m_pPlayer->m_gunType == HAVE_RIFLE) {
+		h_weapon->RenderTexture = m_TrifleGun;}
+	else if(m_pPlayer->m_gunType == HAVE_SHOTGUN) {
+		h_weapon->RenderTexture = m_TshotGun; }
+	else if (m_pPlayer->m_gunType == HAVE_MACHINEGUN) {
+		h_weapon->RenderTexture = m_TmachineGun;}
+
+
+	if (m_bcrashOk) {
+		h_crashOk->RenderTexture = m_TCrashOk;
+	}
+	else {
+		h_crashOk->RenderTexture = m_TNone;
+	}
+
 }
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
@@ -1141,6 +1213,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 		ParticleObject->Render(pd3dCommandList);
 	}
 
+
+	itemBox->Render(pd3dCommandList);
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

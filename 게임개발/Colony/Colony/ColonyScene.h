@@ -140,7 +140,7 @@ public:
 	virtual void TestCameraRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
 	virtual void UpdateUI();
 
-	float GetRandomFloatInRange(float minVal, float maxVal, UINT seed);
+	float GetRandomFloatInRange(float minVal, float maxVal);
 
 protected:
 
@@ -211,14 +211,35 @@ protected:
 	Texture*							m_TmachineGun;
 	Texture*							m_TshotGun;
 
-	CollisionManager* m_pCollisionManager;
+	CollisionManager*					m_pCollisionManager;
 
-	Billboard* m_pBillObject;
-	vector <Billboard*> m_pBillObjects;
-	vector<Billboard*> m_pBloodBillboard[29];
-	bool test = false;
+	// Billboard
+	Billboard*							m_pBillObject;
+	vector <Billboard*>					m_pBillObjects;
+	vector<Billboard*>					m_pBloodBillboard[29];
+	bool								test = false;
 
+	// Particle
 	ParticleShader*						m_pParticleShader=NULL;
 	vector< ParticleObject*>			m_pParticleObjects;
-	ParticleObject*						m_pParticleObject=NULL;
+	
+
+	//Item
+	UINT m_nItemBox = 0; 
+	vector<GameObject*>m_itemBoxes;
+	vector<GameObject*>m_rifles;
+	vector<GameObject*>m_shotguns;
+	vector<GameObject*>m_machineguns;
+	vector<GameObject*>m_syrings;
+	vector<GameObject*>m_eyes;
+
+	GameObject* itemBox = NULL;
+
+
+	//crashUIAnimation
+	UIInfo* h_crashOk;
+	Texture* m_TCrashOk=NULL;
+	Texture* m_TNone = NULL;
+	bool	m_bcrashOk = false;
+	float m_crashAnimation = 0.0f;
 };
