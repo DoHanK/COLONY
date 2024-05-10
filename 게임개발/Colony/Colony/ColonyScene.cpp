@@ -565,8 +565,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pParticleShader->AddRef();
 
 	for (int i = 0; i <100; i < i++) {
-		ParticleObject* pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/pointLight.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
-			XMFLOAT3(GetRandomFloatInRange(0.0f,30.0f), 0.0f, GetRandomFloatInRange(0.0f, 20.0f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(0.0f, 3.0f), GetRandomFloatInRange(20.0f, 40.0f), 0.0f, 0.0f, 1);
+		ParticleObject* pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/Raindrop2.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
+			XMFLOAT3(GetRandomFloatInRange(0.0f,30.0f), 0.0f, GetRandomFloatInRange(0.0f, 30.0f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(5.0f, 10.0f), GetRandomFloatInRange(5.0f, 10.0f), 0.0f, 0.0f, 1);
 		m_pParticleObjects.push_back(pParticleObject);
 	}
 
