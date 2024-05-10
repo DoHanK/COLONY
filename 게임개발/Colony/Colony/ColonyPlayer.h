@@ -121,8 +121,7 @@ public:
 
 
 	virtual void SetAnimator(PlayerAnimationController* animator);
-	void SetWeapon(GameObject* Weapon);
-
+	void SetWeapon(GameObject* Weapon, int WeaponType);
 
 	//입력 받은 방향키로부터 가속도 계산
 	void SetPosition(const XMFLOAT3& Position);
@@ -146,6 +145,9 @@ public:
 	void SetRightVector(const XMFLOAT3& RightVector) { m_xmf3Right = RightVector; }
 	void SetCamera(ThirdPersonCamera* pCamera);
 	void RollbackPosition() { m_xmf3Position = m_xmfPre3Position; }
+	void ChangeShotgun();
+	void ChangeRifle();
+	void Chagnemachinegun();
 	ThirdPersonCamera* GetCamera() { return m_pCamera; }
 
 	virtual void ReleaseUploadBuffers();

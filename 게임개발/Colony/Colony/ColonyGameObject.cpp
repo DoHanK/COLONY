@@ -732,24 +732,20 @@ void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList
 
 void GameObject::UpdateBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	if (m_pMesh) {
-		m_pMesh->GetBoundingBox().Transform(m_BoundingBox, DirectX::XMLoadFloat4x4(&m_xmf4x4World));
 
-		((BoundingBoxMesh*)m_pBoundingMesh)->UpdateVertexPosition(&m_BoundingBox);
-	}
-	/*else {
-		BoundingOrientedBox	BoundingBox = BoundingOrientedBox();
-		BoundingBox.Center = XMFLOAT3(0.f,0.f, 0.f);
-		BoundingBox.Extents =XMFLOAT3(1.f,1.f,1.f);
+			//BoundingOrientedBox	BoundingBox = BoundingOrientedBox();
+			//BoundingBox.Center = XMFLOAT3(0.f,0.f, 0.f);
+			//BoundingBox.Extents =XMFLOAT3(1.f,1.f,1.f);
 
-		BoundingBox.Transform(BoundingBox, DirectX::XMLoadFloat4x4(&m_xmf4x4World));
+			//BoundingBox.Transform(BoundingBox, DirectX::XMLoadFloat4x4(&m_xmf4x4World));
 
-		m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
-		m_pBoundingMesh->AddRef();
+			//m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
+			//m_pBoundingMesh->AddRef();
 
-		((BoundingBoxMesh*)m_pBoundingMesh)->UpdateVertexPosition(&BoundingBox);
-		m_BoundingBox = BoundingBox;
-	}*/
+			//((BoundingBoxMesh*)m_pBoundingMesh)->UpdateVertexPosition(&BoundingBox);
+
+
+			m_BoundingBox.Transform(m_BoundingBox, DirectX::XMLoadFloat4x4(&m_xmf4x4World));
 
 
 	if (m_pSibling) m_pSibling->UpdateBoundingBox();

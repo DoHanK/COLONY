@@ -574,9 +574,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//// item
 	//CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
-	//CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/");
-	CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
+	//CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");
 	
 	//m_nItemBox = 10; // 아이템박스 10개
@@ -586,11 +586,12 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	}
 	itemBox = new GameObject();
-	itemBox->SetChild(syringeInfo->m_pModelRootObject,true);
+	itemBox->SetChild(shotgunInfo->m_pModelRootObject, true);
+	itemBox->m_BoundingBox = shotgunInfo->m_pModelRootObject->m_pMesh->GetBoundingBox();
 	itemBox->SetScale(3.0f, 3.0f, 3.0f); 
 	itemBox->SetPosition(20.0f, 0.0f, 0.0f);
 	itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
-	//m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->FindFrame("M82")->m_BoundingBox.Center, itemBox->FindFrame("M82")->m_BoundingBox.Extents, itemBox);
+	m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->m_BoundingBox.Center, itemBox->m_BoundingBox.Extents, itemBox);
 	
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);

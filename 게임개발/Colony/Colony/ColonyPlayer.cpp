@@ -37,7 +37,7 @@ Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	m_machinegunObject->SetChild(machinegunModelInfo->m_pModelRootObject);
 	
 	// 플레이어 초기 Weapon 상태는 UMP5(rifle)
-	SetWeapon(m_UMP5Object);
+	ChangeRifle();
 
 	m_pCamera = NULL;
 
@@ -77,24 +77,56 @@ void Player::SetAnimator(PlayerAnimationController* animator)
 	animator->m_player = this;
 }
 
-void Player::SetWeapon(GameObject* Weapon)
+void Player::SetWeapon(GameObject* Weapon, int WeaponType)
 {
 	m_SelectWeapon.SetChild(Weapon, false);
 	m_SelectWeapon.m_pChild->m_xmf4x4World = Matrix4x4::Identity();
 	m_SelectWeapon.m_pChild->m_xmf4x4ToParent = Matrix4x4::Identity();
-	//오른쪽 손
-	XMFLOAT3 temp;
-	temp = XMFLOAT3(0, 0, 1);
-	m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
-	temp = XMFLOAT3(0, 1, 0);
-	m_SelectWeapon.m_pChild->Rotate(&temp, -8.f);
-	temp = XMFLOAT3(1, 0, 0);
-	
-	m_SelectWeapon.m_pChild->MoveStrafe(0.35f);
-	m_SelectWeapon.m_pChild->MoveUp(0.07f); // 0.1f
-	m_WeaponState = RIGHT_HAND;
-	((PlayerAnimationController*)m_pSkinnedAnimationController)->m_WeaponState = RIGHT_HAND;
+	if (WeaponType == HAVE_RIFLE) {
+		//오른쪽 손
+		XMFLOAT3 temp;
+		temp = XMFLOAT3(0, 0, 1);
+		m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
+		temp = XMFLOAT3(0, 1, 0);
+		m_SelectWeapon.m_pChild->Rotate(&temp, -8.f);
+		temp = XMFLOAT3(1, 0, 0);
 
+		m_SelectWeapon.m_pChild->MoveStrafe(0.35f);
+		m_SelectWeapon.m_pChild->MoveUp(0.07f); // 0.1f
+
+		m_gunType = HAVE_RIFLE;
+	}
+	else if (WeaponType == HAVE_SHOTGUN) {
+		XMFLOAT3 temp;
+		temp = XMFLOAT3(0, 1, 0);
+		m_SelectWeapon.m_pChild->Rotate(&temp, 110.f);
+		temp = XMFLOAT3(1, 0, 0);
+		m_SelectWeapon.m_pChild->Rotate(&temp, 90.f);
+		temp = XMFLOAT3(0, 0, 1);
+		m_SelectWeapon.m_pChild->Rotate(&temp, 180.f);
+		m_SelectWeapon.m_pChild->MoveStrafe(0.05f);
+		m_SelectWeapon.m_pChild->MoveUp(0.08f); // 0.1f
+		m_SelectWeapon.m_pChild->MoveForward(-0.3f);
+
+		m_gunType = HAVE_SHOTGUN;
+	} 
+	else if (WeaponType == HAVE_MACHINEGUN) {
+		XMFLOAT3 temp;
+		temp = XMFLOAT3(0, 0, 1);
+		m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
+		temp = XMFLOAT3(0, 1, 0);
+		m_SelectWeapon.m_pChild->Rotate(&temp, 80.f);
+		temp = XMFLOAT3(1, 0, 0);
+		m_SelectWeapon.m_pChild->MoveForward(0.3f);
+		m_SelectWeapon.m_pChild->MoveUp(0.08f); // 0.1f
+
+
+
+		m_gunType = HAVE_MACHINEGUN;
+	
+	}
+		m_WeaponState = RIGHT_HAND;
+		((PlayerAnimationController*)m_pSkinnedAnimationController)->m_WeaponState = RIGHT_HAND;
 }
 
 void Player::SetPosition(const XMFLOAT3& Position)
@@ -237,6 +269,22 @@ void Player::SetCamera(ThirdPersonCamera* pCamera)
 		m_pCamera = pCamera;
 		m_pCamera->AddRef();
 	}
+}
+
+void Player::ChangeShotgun()
+{
+	SetWeapon(m_shotgunObject, HAVE_SHOTGUN);
+}
+
+void Player::ChangeRifle()
+{
+	SetWeapon(m_UMP5Object, HAVE_RIFLE);
+}
+
+void Player::Chagnemachinegun()
+{
+	
+	SetWeapon(m_machinegunObject, HAVE_MACHINEGUN);
 }
 
 void Player::ReleaseUploadBuffers()
@@ -504,16 +552,48 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 				if (isAnimationPlayProgress(TRUE, WEAPON_SWITCH_BACK, 0.3) && m_player->m_WeaponState != m_WeaponState) {
 					//총의 계층을 바꿔주기
 					if (m_player->m_WeaponState == RIGHT_HAND) {
+
 						if (m_player->m_SelectWeapon.m_pChild) {
+
+
+
 							m_player->m_SelectWeapon.m_pChild->m_xmf4x4World = Matrix4x4::Identity();
 							m_player->m_SelectWeapon.m_pChild->m_xmf4x4ToParent = Matrix4x4::Identity();
 
-							XMFLOAT3 temp;
-							temp = XMFLOAT3(0, 0, 1);
-							m_player->m_SelectWeapon.m_pChild->Rotate(&temp, -110.f);
+							if (m_player->m_gunType == HAVE_RIFLE) {
+								//오른쪽 손
+								XMFLOAT3 temp;
+								temp = XMFLOAT3(0, 0, 1);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, -110.f);
 
-							m_player->m_SelectWeapon.m_pChild->MoveStrafe(-0.3f);
-							m_player->m_SelectWeapon.m_pChild->MoveForward(-0.3f);
+								m_player->m_SelectWeapon.m_pChild->MoveStrafe(-0.3f);
+								m_player->m_SelectWeapon.m_pChild->MoveForward(-0.3f);
+							}
+							else if (m_player->m_gunType == HAVE_SHOTGUN) {
+								XMFLOAT3 temp;
+								temp = XMFLOAT3(0, 1, 0);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 90.f);
+								temp = XMFLOAT3(1, 0, 0);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, -60.f);
+								m_player->m_SelectWeapon.m_pChild->MoveStrafe(0.3f);
+								m_player->m_SelectWeapon.m_pChild->MoveForward(0.7f);
+							}
+							else if (m_player->m_gunType == HAVE_MACHINEGUN) {
+
+
+								XMFLOAT3 temp;
+								temp = XMFLOAT3(0, 1, 0);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
+								temp = XMFLOAT3(1, 0, 0);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, -50.f);
+
+								m_player->m_SelectWeapon.m_pChild->MoveStrafe(0.3f);
+								m_player->m_SelectWeapon.m_pChild->MoveForward(0.2f);
+
+							}
+
+
+
 						}
 						m_player->m_WeaponState = SPINE_BACK;
 					}
@@ -524,14 +604,45 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 							m_player->m_SelectWeapon.m_pChild->m_xmf4x4World = Matrix4x4::Identity();
 							m_player->m_SelectWeapon.m_pChild->m_xmf4x4ToParent = Matrix4x4::Identity();
 
-							XMFLOAT3 temp;
-							temp = XMFLOAT3(0, 0, 1);
-							m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
-							temp = XMFLOAT3(0, 1, 0);
-							m_player->m_SelectWeapon.m_pChild->Rotate(&temp, -8.f);
+							if (m_player->m_gunType == HAVE_RIFLE) {
+								//오른쪽 손
+								XMFLOAT3 temp;
+								temp = XMFLOAT3(0, 0, 1);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
+								temp = XMFLOAT3(0, 1, 0);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, -8.f);
+								temp = XMFLOAT3(1, 0, 0);
 
-							m_player->m_SelectWeapon.m_pChild->MoveStrafe(0.35f);
-							m_player->m_SelectWeapon.m_pChild->MoveUp(-0.07f);
+								m_player->m_SelectWeapon.m_pChild->MoveStrafe(0.35f);
+								m_player->m_SelectWeapon.m_pChild->MoveUp(0.07f); // 0.1f
+							}
+							else if (m_player->m_gunType == HAVE_SHOTGUN) {
+								XMFLOAT3 temp;
+								temp = XMFLOAT3(0, 1, 0);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 110.f);
+								temp = XMFLOAT3(1, 0, 0);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 90.f);
+								temp = XMFLOAT3(0, 0, 1);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 180.f);
+								m_player->m_SelectWeapon.m_pChild->MoveStrafe(0.05f);
+								m_player->m_SelectWeapon.m_pChild->MoveUp(0.08f); // 0.1f
+								m_player->m_SelectWeapon.m_pChild->MoveForward(-0.3f);
+
+							}
+							else if (m_player->m_gunType == HAVE_MACHINEGUN) {
+								XMFLOAT3 temp;
+								temp = XMFLOAT3(0, 0, 1);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
+								temp = XMFLOAT3(0, 1, 0);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 80.f);
+								temp = XMFLOAT3(1, 0, 0);
+								m_player->m_SelectWeapon.m_pChild->MoveForward(0.3f);
+								m_player->m_SelectWeapon.m_pChild->MoveUp(0.08f); // 0.1f
+
+
+
+
+							}
 
 
 						}
