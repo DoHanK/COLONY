@@ -66,7 +66,8 @@ Player::~Player()
 		delete m_pCamera;
 	}
 
-	m_SelectWeapon.m_pChild->Release();
+
+
 }
 
 void Player::SetAnimator(PlayerAnimationController* animator)
@@ -78,7 +79,7 @@ void Player::SetAnimator(PlayerAnimationController* animator)
 
 void Player::SetWeapon(GameObject* Weapon)
 {
-	m_SelectWeapon.SetChild(Weapon, true);
+	m_SelectWeapon.SetChild(Weapon, false);
 	m_SelectWeapon.m_pChild->m_xmf4x4World = Matrix4x4::Identity();
 	m_SelectWeapon.m_pChild->m_xmf4x4ToParent = Matrix4x4::Identity();
 	//오른쪽 손
@@ -241,7 +242,9 @@ void Player::SetCamera(ThirdPersonCamera* pCamera)
 void Player::ReleaseUploadBuffers()
 {
 	GameObject::ReleaseUploadBuffers();
-	m_SelectWeapon.ReleaseUploadBuffers();
+	m_UMP5Object->ReleaseUploadBuffers();
+	m_shotgunObject->ReleaseUploadBuffers();
+	m_machinegunObject->ReleaseUploadBuffers();
 }
 
 void Player::Animate(float fTimeElapsed)
