@@ -560,38 +560,38 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 	//// particles
-	//m_pParticleShader = new ParticleShader();
-	//m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	//m_pParticleShader->AddRef();
+	m_pParticleShader = new ParticleShader();
+	m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pParticleShader->AddRef();
 
-	//for (int i = 0; i <100; i < i++) {
-	//	ParticleObject* pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/pointLight.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
-	//		XMFLOAT3(GetRandomFloatInRange(0.0f,30.0f), 0.0f, GetRandomFloatInRange(0.0f, 20.0f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(0.0f, 3.0f), GetRandomFloatInRange(20.0f, 40.0f), 0.0f, 0.0f, 900000);
-	//	m_pParticleObjects.push_back(pParticleObject);
-	//}
+	for (int i = 0; i <1; i < i++) {
+		ParticleObject* pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/pointLight.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
+			XMFLOAT3(GetRandomFloatInRange(0.0f,30.0f), 0.0f, GetRandomFloatInRange(0.0f, 20.0f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(0.0f, 3.0f), GetRandomFloatInRange(20.0f, 40.0f), 0.0f, 0.0f, 900000);
+		m_pParticleObjects.push_back(pParticleObject);
+	}
 
 
 	//// item
 	//CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
-	//CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
+	////CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Item/shotgun.bin", "Model/Textures/Item/");
-	//CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Item/machinegun.bin", "Model/Textures/Item/");
-	////CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Item/machinegun.bin", "Model/Textures/Item/");
+	//CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");
-
+	
 	//m_nItemBox = 10; // 아이템박스 10개
-	//for (int i = 0; i < 10; i++){
-	//	GameObject* pitemBox = new ItemObject();
+	for (int i = 0; i < 10; i++){
+		GameObject* pitemBox = new ItemObject();
 
 
-	//}
-	//itemBox = new GameObject();
-	//itemBox=machinegunInfo->m_pModelRootObject;
-	//itemBox->SetScale(1.0f, 1.0f, 1.0f); 
-	//itemBox->SetPosition(20.0f, 0.0f, 0.0f);
-	//itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
-	//m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->FindFrame("M82")->m_BoundingBox.Center, itemBox->FindFrame("M82")->m_BoundingBox.Extents, itemBox);
-	//
+	}
+	itemBox = new GameObject();
+	itemBox=machinegunInfo->m_pModelRootObject;
+	itemBox->SetScale(1.0f, 1.0f, 1.0f); 
+	itemBox->SetPosition(20.0f, 0.0f, 0.0f);
+	itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
+	m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->FindFrame("M82")->m_BoundingBox.Center, itemBox->FindFrame("M82")->m_BoundingBox.Extents, itemBox);
+	
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
 	BuildDefaultLightsAndMaterials();
@@ -700,6 +700,7 @@ void GamePlayScene::ReleaseObjects()
 	if (m_pLights) delete[] m_pLights;
 
 	if (m_pGhostTraillerShader) m_pGhostTraillerShader->Release();
+
 	if(m_pBoundigShader) m_pBoundigShader->Release();
 
 	if (m_pPlaneShader) m_pPlaneShader->Release();
@@ -739,16 +740,14 @@ void GamePlayScene::ReleaseObjects()
 			}
 		}
 	
-		for (auto& GO : m_pParticleObjects) {
-			GO->Release();
-		}
 
 	if (m_pParticleShader) m_pParticleShader->Release();
-	/*for (auto& GO : m_pParticleObjects) {
+
+	for (auto& GO : m_pParticleObjects) {
 		if (GO) {
 			GO->Release();
 		}
-	}*/
+	}
 }
 
 void GamePlayScene::PlayerControlInput()

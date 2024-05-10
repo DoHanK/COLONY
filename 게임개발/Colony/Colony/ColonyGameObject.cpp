@@ -1580,6 +1580,8 @@ ParticleObject::ParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 ParticleObject::~ParticleObject()
 {
+
+
 }
 
 void ParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
@@ -1591,8 +1593,7 @@ void ParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* 
 	}
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-
-	((ParticleMesh*)m_pMesh)->RenderStreamOutput(m_device, pd3dCommandList);
+	if(m_pMesh) ((ParticleMesh*)m_pMesh)->RenderStreamOutput(m_device, pd3dCommandList);
 
 	if (m_ppMaterials[0])
 	{
@@ -1601,12 +1602,12 @@ void ParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* 
 
 	}
 
-	((ParticleMesh*)m_pMesh)->RenderDrawBuffer(m_device, pd3dCommandList);
+	if (m_pMesh)	((ParticleMesh*)m_pMesh)->RenderDrawBuffer(m_device, pd3dCommandList);
 }
 
 void ParticleObject::PostRender(int nPipelineState)
 {
 
-	((ParticleMesh*)m_pMesh)->PostRender(nPipelineState);
+	if (m_pMesh) ((ParticleMesh*)m_pMesh)->PostRender(nPipelineState);
 }
 

@@ -1092,14 +1092,20 @@ ParticleMesh::ParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 ParticleMesh::~ParticleMesh() {
 
 	if (m_vertexBuffer) m_vertexBuffer->Release();
+	if (m_vertexUploadBuffer)m_vertexUploadBuffer->Release();
 	if (m_streamOutputBuffer) m_streamOutputBuffer->Release();
+
 	if (m_drawBuffer) m_drawBuffer->Release();
+
 	if (m_defaultBufferFileSize) m_defaultBufferFileSize->Release();
+
 	if (m_uploadBufferFileSize) {
 		m_uploadBufferFileSize->Unmap(0, NULL);
 		m_uploadBufferFileSize->Release();
 	}
+
 	if (m_readBackBufferFileSize) m_readBackBufferFileSize->Release();
+
 }
 
 void ParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 position, UINT type, XMFLOAT3 direction, float speed, float lifeTime, float age, float startTime, XMFLOAT3 acceleration) {
