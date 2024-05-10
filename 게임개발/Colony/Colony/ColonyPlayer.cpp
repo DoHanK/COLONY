@@ -16,7 +16,7 @@
 Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager)
 {
 	CLoadedModelInfo* PlayerModelInfo = pResourceManager->BringModelInfo("Model/JU_Mannequin.bin", "Model/Textures/PlayerTexture/");
-	CLoadedModelInfo* UMP5ModelInfo = pResourceManager->BringModelInfo("Model/Weapon/UMP5.bin", "Model/Textures/UMP5Texture/");
+	CLoadedModelInfo* UMP5ModelInfo = pResourceManager->BringModelInfo("Model/Weapon/rifle.bin", "Model/Textures/UMP5Texture/");
 	CLoadedModelInfo* shotgunModelInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
 	CLoadedModelInfo* machinegunModelInfo = pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/");
 

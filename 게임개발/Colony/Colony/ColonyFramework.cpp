@@ -404,6 +404,11 @@ void ColonyFramework::ColonyGameLoop()
 	m_pDevice->CloseResourceBarrier();
 	m_pDevice->CloseCommandAndPushQueue();
 	m_pDevice->WaitForGpuComplete();
+
+	if (m_pSceneManager) {
+		m_pSceneManager->m_SceneStack.top()->PostRender(0);
+	}
+
 	m_pDevice->PresentScreen();
 	m_pDevice->MoveToNextFrame();
 

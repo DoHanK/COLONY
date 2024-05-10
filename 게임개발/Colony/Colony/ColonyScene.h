@@ -82,6 +82,7 @@ public:
 	virtual void ReleaseObjects() {};
 	virtual void ReleaseUploadBuffers() {};
 	virtual void AnimateObjects(float fTimeElapsed) {};
+	virtual void PostRender(int nPipelineState) {};
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL) {};
 
 	virtual void BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, int CameraIndex) {};

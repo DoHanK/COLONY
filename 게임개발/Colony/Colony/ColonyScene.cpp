@@ -573,9 +573,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//// item
 	//CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
-	////CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
-	//CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Item/shotgun.bin", "Model/Textures/Item/");
-	CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Item/machinegun.bin", "Model/Textures/Item/");
+	//CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
+	//CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
+	//CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/");
 	CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");
 	
@@ -586,7 +586,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	}
 	itemBox = new GameObject();
-	itemBox= syringeInfo->m_pModelRootObject;
+	itemBox->SetChild(syringeInfo->m_pModelRootObject,true);
 	itemBox->SetScale(3.0f, 3.0f, 3.0f); 
 	itemBox->SetPosition(20.0f, 0.0f, 0.0f);
 	itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
@@ -748,6 +748,10 @@ void GamePlayScene::ReleaseObjects()
 			GO->Release();
 		}
 	}
+
+
+
+	if(itemBox)itemBox->Release();
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -1369,6 +1373,8 @@ void GamePlayScene::ReleaseUploadBuffers()
 	if (m_pTestBox) m_pTestBox->ReleaseUploadBuffers();
 
 	if (m_pCollisionManager) m_pCollisionManager->ReleaseUploadBuffers();
+
+	if (itemBox)itemBox->ReleaseUploadBuffers();
 }
 
 void GamePlayScene::TestCameraRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
