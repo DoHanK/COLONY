@@ -850,6 +850,7 @@ void GamePlayScene::PlayerControlInput()
 			static int SignCount = 0;
 			static float zRange = -0.5f;
 			static float yRange = -0.025f;
+			static float XRange = 0.1f;
 
 			if (pKeysBuffer[L_MOUSE] & 0xF0) {
 				AMP += 0.01f;
@@ -866,10 +867,18 @@ void GamePlayScene::PlayerControlInput()
 				}
 
 				SignCount++;
-				m_pPlayer->Rotate(-AMP*1.2f, Sign* AMP*3.0f, 0.0f);
-	
+				m_pPlayer->Rotate(-AMP*1.2f, Sign* AMP, 0.0f);
+				
 				m_pCamera->m_recoiVector.z -= 0.05f;
 				m_pCamera->m_recoiVector.y -= 0.005f;
+
+				m_pCamera->m_recoiVector.x += floatSignDis(gen)/10;
+				OutputDebugStringA(to_string(m_pCamera->m_recoiVector.x).c_str());
+				OutputDebugStringA("\n ");
+
+				if (abs(m_pCamera->m_recoiVector.x) > XRange) {
+					m_pCamera->m_recoiVector.x = XRange * (m_pCamera->m_recoiVector.x / abs(m_pCamera->m_recoiVector.x));
+				}
 
 				if (m_pCamera->m_recoiVector.z < zRange) {
 					m_pCamera->m_recoiVector.z = zRange;
@@ -887,8 +896,9 @@ void GamePlayScene::PlayerControlInput()
 			}
 			else {
 				AMP = 0.1f;
-				m_pCamera->m_recoiVector.z = 0.0f;
+				m_pCamera->m_recoiVector.x = 0.0f;
 				m_pCamera->m_recoiVector.y = 0.0f;
+				m_pCamera->m_recoiVector.z = 0.0f;
 
 
 			}
