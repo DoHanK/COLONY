@@ -564,9 +564,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pParticleShader->AddRef();
 
-	for (int i = 0; i <1; i < i++) {
+	for (int i = 0; i <100; i < i++) {
 		ParticleObject* pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/pointLight.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
-			XMFLOAT3(GetRandomFloatInRange(0.0f,30.0f), 0.0f, GetRandomFloatInRange(0.0f, 20.0f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(0.0f, 3.0f), GetRandomFloatInRange(20.0f, 40.0f), 0.0f, 0.0f, 900000);
+			XMFLOAT3(GetRandomFloatInRange(0.0f,30.0f), 0.0f, GetRandomFloatInRange(0.0f, 20.0f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(0.0f, 3.0f), GetRandomFloatInRange(20.0f, 40.0f), 0.0f, 0.0f, 1);
 		m_pParticleObjects.push_back(pParticleObject);
 	}
 
@@ -659,10 +659,9 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	h_HP[2]=BringUINum(pUImanager, pResourceManager, -0.75, -0.81, -0.90, -0.88, 0, 1, GetType());
 
 	// crash -> Hit
-
 	m_TCrashOk = pResourceManager->BringTexture("Model/Textures/UITexture/crashOk3.dds", UI_TEXTURE, true);
 	m_TNone = pResourceManager->BringTexture("Model/Textures/None.dds", UI_TEXTURE, true);
-	h_crashOk = pUImanager->CreateUINonNormalRect(0.032, -0.035, -0.02, 0.02, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	h_crashOk = pUImanager->CreateUINonNormalRect(0.042, -0.047, -0.03, 0.03, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
 
@@ -682,7 +681,7 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	h_TargetShotgun=pUImanager->CreateUINonNormalRect(0.05, -0.05, -0.03, 0.03, m_TNone,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 	// machinegun
-	h_TargetMachineGun=pUImanager->CreateUINonNormalRect(0.025, -0.025, -0.015, 0.015, m_TNone,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	h_TargetMachineGun=pUImanager->CreateUINonNormalRect(0.055, -0.055, -0.035, 0.035, m_TNone,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
 
@@ -1161,7 +1160,7 @@ void GamePlayScene::UpdateUI() {
 		h_weapon->RenderTexture = m_TshotGun;
 
 		h_TargetRifle->RenderTexture = m_TNone;
-		h_TargetShotgun->RenderTexture = m_TshotGun;
+		h_TargetShotgun->RenderTexture = m_Ttargetshotgun;
 		h_TargetMachineGun->RenderTexture = m_TNone;
 	}
 	else if (m_pPlayer->m_gunType == HAVE_MACHINEGUN) {
@@ -1169,7 +1168,7 @@ void GamePlayScene::UpdateUI() {
 
 		h_TargetRifle->RenderTexture = m_TNone;
 		h_TargetShotgun->RenderTexture = m_TNone;
-		h_TargetMachineGun->RenderTexture = m_TmachineGun;
+		h_TargetMachineGun->RenderTexture = m_Ttargetmachinegun;
 	}
 
 
