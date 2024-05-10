@@ -599,6 +599,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
+
 float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal)
 {
 
@@ -657,28 +658,33 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	h_HP[1]=BringUINum(pUImanager, pResourceManager, -0.75, -0.81, -0.92, -0.90, 0, 1, GetType());
 	h_HP[2]=BringUINum(pUImanager, pResourceManager, -0.75, -0.81, -0.90, -0.88, 0, 1, GetType());
 
-
-	//Target
-	// rifle
-	pUImanager->CreateUINonNormalRect(0.03, -0.03, -0.02, 0.02, pResourceManager->BringTexture("Model/Textures/UITexture/TargetRifleGreen.dds", UI_TEXTURE, true),
-		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	// crash -> Hit
 
 	m_TCrashOk = pResourceManager->BringTexture("Model/Textures/UITexture/crashOk3.dds", UI_TEXTURE, true);
-	m_TNone= pResourceManager->BringTexture("Model/Textures/None.dds", UI_TEXTURE, true);
-	h_crashOk=pUImanager->CreateUINonNormalRect(0.032, -0.035, -0.02, 0.02, m_TNone,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
-	
+	m_TNone = pResourceManager->BringTexture("Model/Textures/None.dds", UI_TEXTURE, true);
+	h_crashOk = pUImanager->CreateUINonNormalRect(0.032, -0.035, -0.02, 0.02, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
+
+
+	//Target
+	m_TtargetRifle= pResourceManager->BringTexture("Model/Textures/UITexture/TargetRifleGreen.dds", UI_TEXTURE, true);
+	m_Ttargetshotgun = pResourceManager->BringTexture("Model/Textures/UITexture/TargetShotgun.dds", UI_TEXTURE, true);
+	m_Ttargetmachinegun= pResourceManager->BringTexture("Model/Textures/UITexture/TargetMachinegun.dds", UI_TEXTURE, true);
+
+	// rifle
+	h_TargetRifle=pUImanager->CreateUINonNormalRect(0.03, -0.03, -0.02, 0.02, pResourceManager->BringTexture("Model/Textures/UITexture/TargetRifleGreen.dds", UI_TEXTURE, true),
+		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 	//pUImanager->CreateUINonNormalRect(0.045, -0.045, -0.03, 0.03, pResourceManager->BringTexture("Model/Textures/UITexture/TargetRifle2.dds", UI_TEXTURE, true),
 	//	NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 	//shotgun
-	//pUImanager->CreateUINonNormalRect(0.05, -0.05, -0.03, 0.03, pResourceManager->BringTexture("Model/Textures/UITexture/TargetShotgun.dds", UI_TEXTURE, true),
-	//NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	h_TargetShotgun=pUImanager->CreateUINonNormalRect(0.05, -0.05, -0.03, 0.03, m_TNone,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
+	// machinegun
+	h_TargetMachineGun=pUImanager->CreateUINonNormalRect(0.025, -0.025, -0.015, 0.015, m_TNone,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
-	//// machinegun
-	//pUImanager->CreateUINonNormalRect(0.025, -0.025, -0.015, 0.015, pResourceManager->BringTexture("Model/Textures/UITexture/TargetMachinegun.dds", UI_TEXTURE, true),
-	//	NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
 
@@ -1145,11 +1151,26 @@ void GamePlayScene::UpdateUI() {
 
 	// Weapon 상태 업데이트
 	if (m_pPlayer->m_gunType == HAVE_RIFLE) {
-		h_weapon->RenderTexture = m_TrifleGun;}
+		h_weapon->RenderTexture = m_TrifleGun;
+
+		h_TargetRifle->RenderTexture = m_TtargetRifle;
+		h_TargetShotgun->RenderTexture = m_TNone;
+		h_TargetMachineGun->RenderTexture = m_TNone;
+	}
 	else if(m_pPlayer->m_gunType == HAVE_SHOTGUN) {
-		h_weapon->RenderTexture = m_TshotGun; }
+		h_weapon->RenderTexture = m_TshotGun;
+
+		h_TargetRifle->RenderTexture = m_TNone;
+		h_TargetShotgun->RenderTexture = m_TshotGun;
+		h_TargetMachineGun->RenderTexture = m_TNone;
+	}
 	else if (m_pPlayer->m_gunType == HAVE_MACHINEGUN) {
-		h_weapon->RenderTexture = m_TmachineGun;}
+		h_weapon->RenderTexture = m_TmachineGun;
+
+		h_TargetRifle->RenderTexture = m_TNone;
+		h_TargetShotgun->RenderTexture = m_TNone;
+		h_TargetMachineGun->RenderTexture = m_TmachineGun;
+	}
 
 
 	if (m_bcrashOk) {

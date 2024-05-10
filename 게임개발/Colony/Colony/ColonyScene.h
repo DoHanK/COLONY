@@ -206,11 +206,19 @@ protected:
 	UIInfo*								h_weapon;
 	UIInfo*								h_TimerBar[5];
 	UIInfo*								h_HP[3];
+	UIInfo* h_TargetRifle;
+	UIInfo* h_TargetShotgun;
+	UIInfo* h_TargetMachineGun;
 
 	vector<Texture*>					numTexture;
 	Texture*							m_TrifleGun;
 	Texture*							m_TmachineGun;
 	Texture*							m_TshotGun;
+	Texture* m_TtargetRifle;
+	Texture* m_Ttargetshotgun;
+	Texture* m_Ttargetmachinegun;
+
+
 
 	CollisionManager*					m_pCollisionManager;
 
