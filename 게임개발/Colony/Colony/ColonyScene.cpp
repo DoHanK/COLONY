@@ -576,7 +576,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	////CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Item/shotgun.bin", "Model/Textures/Item/");
 	CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Item/machinegun.bin", "Model/Textures/Item/");
-	//CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");
 	
 	//m_nItemBox = 10; // 아이템박스 10개
@@ -586,11 +586,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	}
 	itemBox = new GameObject();
-	itemBox=machinegunInfo->m_pModelRootObject;
-	itemBox->SetScale(1.0f, 1.0f, 1.0f); 
+	itemBox= syringeInfo->m_pModelRootObject;
+	itemBox->SetScale(3.0f, 3.0f, 3.0f); 
 	itemBox->SetPosition(20.0f, 0.0f, 0.0f);
 	itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
-	m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->FindFrame("M82")->m_BoundingBox.Center, itemBox->FindFrame("M82")->m_BoundingBox.Extents, itemBox);
+	//m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->FindFrame("M82")->m_BoundingBox.Center, itemBox->FindFrame("M82")->m_BoundingBox.Extents, itemBox);
 	
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
