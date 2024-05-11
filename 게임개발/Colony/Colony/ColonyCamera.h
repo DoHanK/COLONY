@@ -123,4 +123,5 @@ public:
 	virtual void Rotate(float fPitch, float fYaw, float fRoll);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt);
+
 };

@@ -501,7 +501,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
 	pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer->FindFrame("Export"));
 	m_pBillObject->doAnimate = true;
-	m_pBillObject->SetAddPosition(XMFLOAT3(0.0f, 0.3f,0.0f));
+	//m_pBillObject->SetAddPosition(XMFLOAT3(0.0f, 0.3f,0.0f));
+	m_pBillObject->m_OffsetPos = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pBillObject->SetRowNCol(7, 5);
 	m_pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(0.1, -0.1, -0.1, 0.1), 1.0f);
 	m_pBillObject->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
@@ -514,23 +515,17 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 		string file = "Model/Textures/BloodTexture/";
 		if (i < 15) {
-
 			file += "Front_";
 			file += to_string(i + 1);
 			file += ".dds";
-
 		}
 		else {
 			file += "Side_";
 			file += to_string(i - 14);
 			file += ".dds";
-
-
 		}
 
 		for (int j = 0; j < 10; ++j) {
-
-			
 			Billboard* pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
 				pResourceManager->BringTexture(file.c_str(), BILLBOARD_TEXTURE, true), m_BillShader, NULL);
 			pBillObject->doAnimate = true;
@@ -615,6 +610,13 @@ float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal)
 void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
 {////UI
 
+	// None
+	m_TNone = pResourceManager->BringTexture("Model/Textures/None.dds", UI_TEXTURE, true);
+
+	//Scope
+	m_TscopeShoot = m_pResourceManager->BringTexture("Model/Textures/UITexture/ScopeShoot.dds", UI_TEXTURE, true);
+	h_scopeMode = pUImanager->CreateUINonNormalRect(1.0, -1.0,-1.0, 1.0, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
 	////Timer
 	pUImanager->CreateUINonNormalRect(0.96, 0.88, -0.055, 0.055, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
@@ -661,7 +663,6 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	// crash -> Hit
 	m_TCrashOk = pResourceManager->BringTexture("Model/Textures/UITexture/crashOk3.dds", UI_TEXTURE, true);
-	m_TNone = pResourceManager->BringTexture("Model/Textures/None.dds", UI_TEXTURE, true);
 	h_crashOk = pUImanager->CreateUINonNormalRect(0.042, -0.047, -0.03, 0.03, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
@@ -694,6 +695,11 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	}
 
 	m_pResourceManager->BringTexture("Model/Textures/UITexture/TimerBAR(T).dds", UI_TEXTURE, true);
+
+
+
+
+	
 }
 
 void GamePlayScene::ReleaseObjects()
@@ -935,6 +941,13 @@ void GamePlayScene::PlayerControlInput()
 			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+
+			m_bScopeMode = true;
+			m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.15f, 2.4f, 10.0f));
+		}
+		else {
+			m_bScopeMode = false;
+			m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.15f, 2.4f, -1.7f));
 		}
 
 
@@ -1170,6 +1183,19 @@ void GamePlayScene::UpdateUI() {
 		h_TargetShotgun->RenderTexture = m_TNone;
 		h_TargetMachineGun->RenderTexture = m_Ttargetmachinegun;
 	}
+
+	if (m_bScopeMode) {
+		h_scopeMode->RenderTexture = m_TscopeShoot;
+
+		h_TargetRifle->RenderTexture = m_TNone;
+		h_TargetShotgun->RenderTexture = m_TNone;
+		h_TargetMachineGun->RenderTexture = m_TNone;
+	}
+	else {
+		h_scopeMode->RenderTexture = m_TNone;
+	}
+
+
 
 
 	if (m_bcrashOk) {

@@ -217,7 +217,7 @@ protected:
 	Texture* m_TtargetRifle;
 	Texture* m_Ttargetshotgun;
 	Texture* m_Ttargetmachinegun;
-
+	Texture* m_TscopeShoot;
 
 
 	CollisionManager*					m_pCollisionManager;
@@ -251,4 +251,8 @@ protected:
 	Texture* m_TNone = NULL;
 	bool	m_bcrashOk = false;
 	float m_crashAnimation = 0.0f;
+
+	//scope mode
+	bool m_bScopeMode = false;
+	UIInfo* h_scopeMode;
 };
