@@ -667,13 +667,12 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 
 	//Target
-	m_TtargetRifle= pResourceManager->BringTexture("Model/Textures/UITexture/TargetRifleGreen.dds", UI_TEXTURE, true);
+	m_TtargetRifle= pResourceManager->BringTexture("Model/Textures/UITexture/TargetRifle2.dds", UI_TEXTURE, true);
 	m_Ttargetshotgun = pResourceManager->BringTexture("Model/Textures/UITexture/TargetShotgun.dds", UI_TEXTURE, true);
 	m_Ttargetmachinegun= pResourceManager->BringTexture("Model/Textures/UITexture/TargetMachinegun.dds", UI_TEXTURE, true);
 
 	// rifle
-	h_TargetRifle=pUImanager->CreateUINonNormalRect(0.03, -0.03, -0.02, 0.02, pResourceManager->BringTexture("Model/Textures/UITexture/TargetRifleGreen.dds", UI_TEXTURE, true),
-		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	h_TargetRifle=pUImanager->CreateUINonNormalRect(0.04, -0.04, -0.025, 0.025, m_TtargetRifle,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 	//pUImanager->CreateUINonNormalRect(0.045, -0.045, -0.03, 0.03, pResourceManager->BringTexture("Model/Textures/UITexture/TargetRifle2.dds", UI_TEXTURE, true),
 	//	NULL, NULL, 0, TEXTUREUSE, GetType(), true);
