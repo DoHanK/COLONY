@@ -472,7 +472,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 1; ++j) {
+	for (int j = 0; j < 5; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex;
 			do {
@@ -499,7 +499,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//billboard test
 	m_pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-	pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer->FindFrame("Export"));
+	pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer->m_SelectWeapon.FindFrame("Export"));
 	m_pBillObject->doAnimate = true;
 	//m_pBillObject->SetAddPosition(XMFLOAT3(0.0f, 0.3f,0.0f));
 	m_pBillObject->m_OffsetPos = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -582,7 +582,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 	itemBox = new GameObject();
 	itemBox->SetChild(shotgunInfo->m_pModelRootObject, true);
-	itemBox->m_BoundingBox = shotgunInfo->m_pModelRootObject->m_pMesh->GetBoundingBox();
+	//itemBox->m_BoundingBox = itemBoxInfo->m_pModelRootObject->FindFrame("Box")->m_pMesh->GetBoundingBox();
 	itemBox->SetScale(3.0f, 3.0f, 3.0f); 
 	itemBox->SetPosition(20.0f, 0.0f, 0.0f);
 	itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);

@@ -113,12 +113,12 @@ void Player::SetWeapon(GameObject* Weapon, int WeaponType)
 	else if (WeaponType == HAVE_MACHINEGUN) {
 		XMFLOAT3 temp;
 		temp = XMFLOAT3(0, 0, 1);
-		m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
+		m_SelectWeapon.m_pChild->Rotate(&temp, 180.f);
 		temp = XMFLOAT3(0, 1, 0);
-		m_SelectWeapon.m_pChild->Rotate(&temp, 80.f);
+		m_SelectWeapon.m_pChild->Rotate(&temp, -110.f);
 		temp = XMFLOAT3(1, 0, 0);
-		m_SelectWeapon.m_pChild->MoveForward(0.3f);
-		m_SelectWeapon.m_pChild->MoveUp(0.08f); // 0.1f
+		m_SelectWeapon.m_pChild->Rotate(&temp, 10.f);
+		m_SelectWeapon.m_pChild->MoveUp(-1.4f); // 0.1f
 
 
 
@@ -585,7 +585,7 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 								temp = XMFLOAT3(0, 1, 0);
 								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
 								temp = XMFLOAT3(1, 0, 0);
-								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, -50.f);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 30.f);
 
 								m_player->m_SelectWeapon.m_pChild->MoveStrafe(0.3f);
 								m_player->m_SelectWeapon.m_pChild->MoveForward(0.2f);
@@ -632,12 +632,12 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 							else if (m_player->m_gunType == HAVE_MACHINEGUN) {
 								XMFLOAT3 temp;
 								temp = XMFLOAT3(0, 0, 1);
-								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 100.f);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 180.f);
 								temp = XMFLOAT3(0, 1, 0);
-								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 80.f);
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, -110.f);
 								temp = XMFLOAT3(1, 0, 0);
-								m_player->m_SelectWeapon.m_pChild->MoveForward(0.3f);
-								m_player->m_SelectWeapon.m_pChild->MoveUp(0.08f); // 0.1f
+								m_player->m_SelectWeapon.m_pChild->Rotate(&temp, 10.f);
+								m_player->m_SelectWeapon.m_pChild->MoveUp(-1.4f); // 0.1f
 
 
 
