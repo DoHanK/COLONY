@@ -79,7 +79,7 @@ void Player::SetAnimator(PlayerAnimationController* animator)
 
 void Player::SetWeapon(GameObject* Weapon, int WeaponType)
 {
-	m_SelectWeapon.SetChild(Weapon, false);
+	m_SelectWeapon.m_pChild = Weapon;
 	m_SelectWeapon.m_pChild->m_xmf4x4World = Matrix4x4::Identity();
 	m_SelectWeapon.m_pChild->m_xmf4x4ToParent = Matrix4x4::Identity();
 	if (WeaponType == HAVE_RIFLE) {

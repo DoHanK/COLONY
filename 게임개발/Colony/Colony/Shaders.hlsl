@@ -10,7 +10,8 @@ cbuffer cbCameraInfo : register(b1)
 {
 	matrix					gmtxView : packoffset(c0);
 	matrix					gmtxProjection : packoffset(c4);
-	float3					gvCameraPosition : packoffset(c8);
+    matrix                  gmtxInverseView : packoffset(c8);
+    float3                  gvCameraPosition : packoffset(c12);
     
 };
 
@@ -879,7 +880,7 @@ void GSParticleDraw(point VS_PARTICLE_OUTPUT input[1], inout TriangleStream<GS_P
 
     for (int i = 0; i < 4; i++)
     {
-        float3 positionW = mul(gf3Positions[i] * input[0].size, (float3x3) gmtxGameObject) + input[0].position;
+        float3 positionW = mul(gf3Positions[i] * input[0].size, (float3x3) gmtxInverseView) + input[0].position;
         output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
         output.uv = gf2QuadUVs[i];
         

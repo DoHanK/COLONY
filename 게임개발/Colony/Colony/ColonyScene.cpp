@@ -545,7 +545,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			pBillObject->SetOffsetPos(XMFLOAT3(0, -0.1f, 0));
 			pBillObject->m_OffsetPos = XMFLOAT3(2.0f, 1.7f, 2.0f);
 		
-			pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(2.0, -2.0, -2.0, 2.0), 0.0f);
+			pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(1.0, -1.5, -2.0, 2.0), 0.0f);
 			pBillObject->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
 			pBillObject->SettedTimer = 0.005f;
 			pBillObject->AddRef();
@@ -561,7 +561,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	for (int i = 0; i <100; i < i++) {
 		ParticleObject* pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/Raindrop2.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
-			XMFLOAT3(GetRandomFloatInRange(0.0f,30.0f), 0.0f, GetRandomFloatInRange(0.0f, 30.0f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(5.0f, 10.0f), GetRandomFloatInRange(5.0f, 10.0f), 0.0f, 0.0f, 1);
+			XMFLOAT3(GetRandomFloatInRange(-250.f,250.f), 0.0f, GetRandomFloatInRange(-250.0f, 250.0f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(5.0f, 10.0f), GetRandomFloatInRange(5.0f, 10.0f), 0.0f, 0.0f, 100);
 		m_pParticleObjects.push_back(pParticleObject);
 	}
 
@@ -828,7 +828,19 @@ void GamePlayScene::PlayerControlInput()
 			}
 		}
 
+		if (pKeysBuffer['1'] & 0xF0) {
+
+			m_pPlayer->ChangeRifle();
+		}
 		
+		if (pKeysBuffer['2'] & 0xF0) {
+
+			m_pPlayer->ChangeShotgun();
+		}
+		if (pKeysBuffer['3'] & 0xF0) {
+
+			m_pPlayer->Chagnemachinegun();
+		}
 	
 		//JUMP
 		if (!m_pPlayer->isJump && pKeysBuffer[SPACE_BAR] & 0xF0) {
@@ -858,6 +870,9 @@ void GamePlayScene::PlayerControlInput()
 
 			// ÇÃ·¹ÀÌ¾î »óÅÂ
 			dwPlayerState |= STATE_SWITCH_WEAPON;
+
+		
+			
 		}
 		//ÃÑ ½î±â
 		if (m_pPlayer->m_BaseReloadTime < m_pPlayer->m_ReloadTime && m_pPlayer->m_WeaponState == RIGHT_HAND) {
@@ -882,7 +897,7 @@ void GamePlayScene::PlayerControlInput()
 				}
 
 				SignCount++;
-				m_pPlayer->Rotate(-AMP*1.2f, Sign* AMP, 0.0f);
+				m_pPlayer->Rotate(-AMP*0.8f, Sign* AMP, 0.0f);
 				
 				m_pCamera->m_recoiVector.z -= 0.05f;
 				m_pCamera->m_recoiVector.y -= 0.005f;
@@ -925,6 +940,7 @@ void GamePlayScene::PlayerControlInput()
 
 
 
+
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
 		static POINT m_ptOldCursorPos = { WINDOWS_POS_X + FRAME_BUFFER_WIDTH / 2 , WINDOWS_POS_Y + FRAME_BUFFER_WIDTH / 2 };
@@ -941,9 +957,10 @@ void GamePlayScene::PlayerControlInput()
 			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-
-			m_bScopeMode = true;
-			m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.15f, 2.4f, 10.0f));
+			if (m_pPlayer->m_WeaponState == RIGHT_HAND) {
+				m_bScopeMode = true;
+				m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.15f, 2.4f, 10.0f));
+			}
 		}
 		else {
 			m_bScopeMode = false;
@@ -962,6 +979,18 @@ void GamePlayScene::PlayerControlInput()
 		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
 		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+
+		if (pKeysBuffer[R_MOUSE] & 0xF0 && m_pPlayer->m_WeaponState == RIGHT_HAND) {
+
+
+			m_bScopeMode = true;
+			m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.15f, 2.4f, 10.0f));
+		}
+		else {
+			m_bScopeMode = false;
+			m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.15f, 2.4f, -1.7f));
+		}
+
 #endif
 
 		if (m_pPlayer)
