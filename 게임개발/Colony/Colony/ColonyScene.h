@@ -218,6 +218,7 @@ protected:
 	Texture* m_Ttargetshotgun;
 	Texture* m_Ttargetmachinegun;
 	Texture* m_TscopeShoot;
+	Texture* m_TscopeShoot2;
 
 
 	CollisionManager*					m_pCollisionManager;
