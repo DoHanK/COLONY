@@ -294,11 +294,11 @@ void AlienSpiderAnimationController::AdvanceTime(float fElapsedTime, GameObject*
 			//if (m_nowAnimationWeight == 1 && (i == NOW_TRACK || i == PRE_TRACK)) {
 				m_pAnimationTracks[i].m_fPosition += (fElapsedTime * m_pAnimationTracks[i].m_fSpeed);
 			//}
-				OutputDebugStringA(to_string(m_pAnimationTracks[i].m_fSpeed).c_str());
-				OutputDebugStringA("   ");
+				//OutputDebugStringA(to_string(m_pAnimationTracks[i].m_fSpeed).c_str());
+				//OutputDebugStringA("   ");
 	
 		}
-		OutputDebugStringA("  \n ");
+		//OutputDebugStringA("  \n ");
 		for (int i = 0; i < m_nSkinnedMeshes; i++)
 		{
 			for (int j = 0; j < m_pnAnimatedBoneFrames[i]; j++)
