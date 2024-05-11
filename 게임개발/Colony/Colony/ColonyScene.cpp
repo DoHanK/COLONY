@@ -496,20 +496,6 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 	m_pTestBox = new ShphereMesh(pd3dDevice, pd3dCommandList,20,20, PlayerRange);
 	
-
-	//billboard test
-	m_pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-	pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer->m_SelectWeapon.FindFrame("Export"));
-	m_pBillObject->doAnimate = true;
-	//m_pBillObject->SetAddPosition(XMFLOAT3(0.0f, 0.3f,0.0f));
-	m_pBillObject->m_OffsetPos = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_pBillObject->SetRowNCol(7, 5);
-	m_pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(0.1, -0.1, -0.1, 0.1), 1.0f);
-	m_pBillObject->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
-	m_pBillObject->SettedTimer = 0.01f;
-	m_pBillObject->doOnce = true;
-	m_pBillObject->AddRef();
-
 	//billboard -> doAnimate,active,ownerObject,TickAddPosition ¼³Á¤
 	for (int i = 0; i < 29; i++) {
 
@@ -544,7 +530,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 			pBillObject->SetOffsetPos(XMFLOAT3(0, -0.1f, 0));
 			pBillObject->m_OffsetPos = XMFLOAT3(2.0f, 1.7f, 2.0f);
-		
+
 			pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(1.0, -1.5, -2.0, 2.0), 0.0f);
 			pBillObject->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
 			pBillObject->SettedTimer = 0.005f;
@@ -554,18 +540,34 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 
 
+	//billboard test
+	m_pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+	pResourceManager->BringTexture("Model/Textures/shootEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer->m_SelectWeapon.FindFrame("Export"));
+	m_pBillObject->doAnimate = true;
+	//m_pBillObject->SetAddPosition(XMFLOAT3(0.0f, 0.3f,0.0f));
+	m_pBillObject->m_OffsetPos = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pBillObject->SetRowNCol(7, 5);
+	m_pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(0.1, -0.1, -0.1, 0.1), 1.0f);
+	m_pBillObject->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+	m_pBillObject->SettedTimer = 0.01f;
+	m_pBillObject->doOnce = true;
+	m_pBillObject->AddRef();
+
+	
+
+
 	//// particles
 	m_pParticleShader = new ParticleShader();
 	m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pParticleShader->AddRef();
 
-	for (int i = 0; i <100; i < i++) {
+	for (int i = 0; i <150; i < i++) {
 		ParticleObject* pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/Raindrop2.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
-			XMFLOAT3(GetRandomFloatInRange(-250.f,250.f), 0.0f, GetRandomFloatInRange(-250.0f, 250.0f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(5.0f, 10.0f), GetRandomFloatInRange(5.0f, 10.0f), 0.0f, 0.0f, 100);
+			XMFLOAT3(GetRandomFloatInRange(-50.f,100.f), 0.0f, GetRandomFloatInRange(-140.0f, -20.0f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(5.0f, 10.0f), GetRandomFloatInRange(5.0f, 10.0f), 0.0f, 0.0f, 100);
 		m_pParticleObjects.push_back(pParticleObject);
 	}
 
-
+	
 	//// item
 	//CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
