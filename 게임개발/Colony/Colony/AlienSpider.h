@@ -56,6 +56,7 @@ public:
 	float						m_WaitCoolTime = 0;
 	float						m_EndureLevel;
 
+
 	//ÀÎ½Ä
 	GameObject*		m_pHead = NULL;
 public:

@@ -14,22 +14,22 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 		if (!m_pAnimationControl->isSameState(AlienAnimationName::Run_2)) {
 			m_pAnimationControl->ChangeAnimation(Run_2);
 		}
-	
+
 		//연산
 		ExecuteFollowPath(fTimeElapsed);
 	}
 	//멍때리기
 	else if (m_pBody->m_GoalType == Wait_Goal) {
 
-		
-			if ((!m_pAnimationControl->isSameState(AlienAnimationName::Idle_1))&&
-				(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_2))&&
-				(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_3))&&
-				(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_4))&&
-				(!m_pAnimationControl->isSameState(AlienAnimationName::Range_1))&&
-				(!m_pAnimationControl->isSameState(AlienAnimationName::Range_2))) {
-				m_pAnimationControl->ChangeAnimation(Idle_1 + IdleRandom(gen));
-			}
+
+		if ((!m_pAnimationControl->isSameState(AlienAnimationName::Idle_1)) &&
+			(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_2)) &&
+			(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_3)) &&
+			(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_4)) &&
+			(!m_pAnimationControl->isSameState(AlienAnimationName::Range_1)) &&
+			(!m_pAnimationControl->isSameState(AlienAnimationName::Range_2))) {
+			m_pAnimationControl->ChangeAnimation(Idle_1 + IdleRandom(gen));
+		}
 
 		ExecuteWait(fTimeElapsed);
 	}
@@ -39,6 +39,14 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 			m_pAnimationControl->ChangeAnimation(Run_2);
 		}
 		MoveDest(fTimeElapsed);
+	}
+	else if (m_pBody->m_GoalType == Hitted_Goal) {
+		if (!m_pAnimationControl->isSameState(AlienAnimationName::Hit)) {
+			m_pAnimationControl->ChangeAnimation(Hit);
+			m_pAnimationControl->SetTrackSpeed(NOW_TRACK, 3.0f);
+			m_pAnimationControl->SetTrackSpeed(PRE_TRACK, 3.0f);
+		}
+		m_pBody->m_WaitingTime += fTimeElapsed;
 	}
 
 

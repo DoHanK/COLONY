@@ -13,3 +13,16 @@ public:
 	int  Process();
 	void Terminate();
 };
+
+
+class HittedGoal :public Goal<AlienSpider> {
+
+public:
+	HittedGoal(AlienSpider* pOwner, float WaitingTime);
+	~HittedGoal();
+	float m_time;
+	//the usual suspects
+	void Activate();
+	int  Process();
+	void Terminate();
+};

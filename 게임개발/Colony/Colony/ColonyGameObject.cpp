@@ -587,6 +587,26 @@ void GameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition)
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->SetTrackPosition(nAnimationTrack, fPosition);
 }
 
+void GameObject::MergehierarchyBoundingBox(BoundingOrientedBox& outBox)
+{
+	if (m_pMesh) {
+		BoundingBox out;
+		out.Center = outBox.Center;
+		out.Extents = outBox.Extents;
+		BoundingBox in;
+		in.Center = m_pMesh->GetBoundingBox().Center;
+		in.Extents = m_pMesh->GetBoundingBox().Extents;
+		BoundingBox::CreateMerged(out, out, in);
+		outBox.Center = out.Center;
+		outBox.Extents = out.Extents;
+	}
+
+
+	if(m_pSibling)m_pSibling->MergehierarchyBoundingBox(outBox);
+	if(m_pChild) m_pChild->MergehierarchyBoundingBox(outBox);
+
+}
+
 void GameObject::Animate(float fTimeElapsed)
 {
 	UpdateMatrix();

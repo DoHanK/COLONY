@@ -41,6 +41,11 @@ int GoalThink::Process()
 
 	int SubgoalStatus = ProcessSubGoals();
 
+	if (m_pOwner->m_bHitted) {
+		AddSubgoal(new HittedGoal(m_pOwner,0.5f));
+		m_pOwner->m_bHitted = false;
+	}
+
 	if (SubgoalStatus == completed || SubgoalStatus == failed)
 	{
 	

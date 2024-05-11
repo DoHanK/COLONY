@@ -401,6 +401,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 						}
 					}
 				}
+				enemy.first->m_pOwner->m_bHitted = true;
 				crush = true;
 				break;
 			}
@@ -420,11 +421,14 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 						}
 					}
 				}
+				enemy.first->m_pOwner->m_bHitted = true;
 				crush = true;
 				break;
 			}
 		}
 	}
+
+
 	return crush;
 }
 

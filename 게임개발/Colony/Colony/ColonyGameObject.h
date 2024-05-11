@@ -377,6 +377,8 @@ public:
 	GameObject* m_pChild = NULL;
 	GameObject* m_pSibling = NULL;
 
+	bool						m_bHitted = false;
+
 	void SetMesh(BasicMesh* pMesh);
 	void SetBoundingMesh(DynamicMesh* pMesh);
 	void SetMaterial(int nMaterial, Material* pMaterial);
@@ -385,7 +387,7 @@ public:
 
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 
-	
+	virtual void MergehierarchyBoundingBox(BoundingOrientedBox& outBox);
 	virtual void OnPrepareAnimate() { }
 	virtual void Animate(float fTimeElapsed);
 
