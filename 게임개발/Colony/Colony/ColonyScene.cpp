@@ -614,7 +614,7 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_TNone = pResourceManager->BringTexture("Model/Textures/None.dds", UI_TEXTURE, true);
 
 	//Scope
-	m_TscopeShoot = m_pResourceManager->BringTexture("Model/Textures/UITexture/ScopeShoot.dds", UI_TEXTURE, true);
+	m_TscopeShoot = m_pResourceManager->BringTexture("Model/Textures/UITexture/ScopeShoot2.dds", UI_TEXTURE, true);
 	h_scopeMode = pUImanager->CreateUINonNormalRect(1.0, -1.0,-1.0, 1.0, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 	////Timer
@@ -1302,7 +1302,12 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	}
 
 
-	if(itemBox) itemBox->Render(pd3dCommandList);
+	if (itemBox) {
+
+		itemBox->UpdateTransform(NULL); 
+		itemBox->Render(pd3dCommandList);
+
+	}
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
