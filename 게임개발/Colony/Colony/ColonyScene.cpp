@@ -36,20 +36,40 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	//pUImanager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true), NULL, NULL, 0,  TEXTUREUSE , GetType());
 
 	UIEffectInfo EffectInfo;
-	EffectInfo.ColNum = 6;
-	EffectInfo.RowNum = 6;
+	EffectInfo.ColNum = 7;
+	EffectInfo.RowNum = 7;
 	EffectInfo.SetTime = 0.1f;
-	pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
-	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, NULL, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
+	pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/StartScreen.dds", UI_TEXTURE, true),
+	pResourceManager->BringTexture("Model/Textures/Smoke45Frames.dds", UI_MASK_TEXTURE, true), EffectInfo, NULL, 0, (MASKUSE | TEXTUREUSE), GetType(),false);
+
+	m_TbuttonF = pResourceManager->BringTexture("Model/Textures/buttonF.dds", UI_TEXTURE, true);
+	m_TbuttonT = pResourceManager->BringTexture("Model/Textures/buttonT.dds", UI_TEXTURE, true);
+	// 게임 스타트
+	h_gameButton=pUImanager->CreateUINonNormalRect(-0.2, -0.3, -0.2, 0.2, m_TbuttonF,NULL, NULL, 1, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.2, -0.3, -0.2, 0.2, pResourceManager->BringTexture("Model/Textures/GAMESTART.dds", UI_TEXTURE, true),NULL, NULL, 2, TEXTUREUSE, GetType(), true);
+
+	// 세팅
+	h_settingButton=pUImanager->CreateUINonNormalRect(-0.35, -0.45, -0.2, 0.2, m_TbuttonF,NULL, NULL, 1, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.35, -0.45, -0.2, 0.2, pResourceManager->BringTexture("Model/Textures/SETTINGS.dds", UI_TEXTURE, true),NULL, NULL, 2, TEXTUREUSE, GetType(), true);
+
+	// 나가기
+	h_quitButton=pUImanager->CreateUINonNormalRect(-0.5, -0.6, -0.2, 0.2, m_TbuttonF,NULL, NULL, 1, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.5, -0.6, -0.2, 0.2, pResourceManager->BringTexture("Model/Textures/QUIT.dds", UI_TEXTURE, true),NULL, NULL, 2, TEXTUREUSE, GetType(), true);
+
+
 
 	// -1 ~ 1 사이로
-	pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT/2, 0, FRAME_BUFFER_WIDTH/2, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
-		pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, &UIControlHelper::TestFunc, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
+	//pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT/2, 0, FRAME_BUFFER_WIDTH/2, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
+	//	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, &UIControlHelper::TestFunc, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
 
 
 }
 
+void AnimateObjects(float fTimeElapsed) {
+	POINT ptCursorPos;
+	GetCursorPos(&ptCursorPos);
 
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
