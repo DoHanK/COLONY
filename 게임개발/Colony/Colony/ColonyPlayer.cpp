@@ -70,6 +70,145 @@ Player::~Player()
 
 }
 
+float Player::GetShootingCoolTime()
+{
+	if (m_gunType == HAVE_RIFLE) {
+
+		return 0.33f;
+	}
+	else if (m_gunType == HAVE_SHOTGUN) {
+
+		return 1.0f;
+	}
+	else if (m_gunType == HAVE_MACHINEGUN) {
+
+		return 0.1f;
+	}
+}
+
+float Player::GetAmp()
+{
+	if (m_gunType == HAVE_RIFLE) {
+
+		return 0.33f;
+	}
+	else if (m_gunType == HAVE_SHOTGUN) {
+
+		return 0.8f;
+	}
+	else if (m_gunType == HAVE_MACHINEGUN) {
+
+		return 0.1f;
+	}
+}
+
+float Player::GetzRange(bool bStand)
+{
+	if ( bStand) {
+
+		if (m_gunType == HAVE_RIFLE) {
+
+			return 0.33f;
+		}
+		else if (m_gunType == HAVE_SHOTGUN) {
+
+			return 1.5f;
+		}
+		else if (m_gunType == HAVE_MACHINEGUN) {
+
+			return 0.05f;
+		}
+
+	}
+	else {
+
+		if (m_gunType == HAVE_RIFLE) {
+
+			return 0.33f;
+		}
+		else if (m_gunType == HAVE_SHOTGUN) {
+
+			return 0.7f;
+		}
+		else if (m_gunType == HAVE_MACHINEGUN) {
+
+			return 0.05f;
+		}
+	}
+}
+
+float Player::GetyRange(bool bStand)
+{
+
+	if (bStand) {
+
+		if (m_gunType == HAVE_RIFLE) {
+
+			return 0.33f;
+		}
+		else if (m_gunType == HAVE_SHOTGUN) {
+
+			return 1.0f;
+		}
+		else if (m_gunType == HAVE_MACHINEGUN) {
+
+			return 0.005f;
+		}
+
+	}
+	else {
+
+		if (m_gunType == HAVE_RIFLE) {
+
+			return 0.33f;
+		}
+		else if (m_gunType == HAVE_SHOTGUN) {
+
+			return 1.0f;
+		}
+		else if (m_gunType == HAVE_MACHINEGUN) {
+
+			return 0.005f;
+		}
+
+	}
+}
+
+float Player::GetxRange(bool bStand)
+{
+
+	if (bStand) {
+
+		if (m_gunType == HAVE_RIFLE) {
+
+			return floatSignDis(gen) / 10;
+		}
+		else if (m_gunType == HAVE_SHOTGUN) {
+
+			return floatSignDis(gen) / 10;
+		}
+		else if (m_gunType == HAVE_MACHINEGUN) {
+
+			return floatSignDis(gen) / 10;
+		}
+
+	}
+	else {
+		if (m_gunType == HAVE_RIFLE) {
+
+			return floatSignDis(gen) / 10;
+		}
+		else if (m_gunType == HAVE_SHOTGUN) {
+
+			return floatSignDis(gen) / 10;
+		}
+		else if (m_gunType == HAVE_MACHINEGUN) {
+
+			return floatSignDis(gen) / 10;
+		}
+	}
+}
+
 void Player::SetAnimator(PlayerAnimationController* animator)
 {
 	GameObject::SetAnimator(animator);

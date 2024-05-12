@@ -476,9 +476,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, QuadtreeDepth);
 
 	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, CELL_SIZE, H_MAPSIZE_X, H_MAPSIZE_Y ,true);
-	//m_pNevMeshBaker->BakeNevMeshByCollision(pd3dDevice, pd3dCommandList,m_pCollisionManager->m_StaticObjects);
+	m_pNevMeshBaker->BakeNevMeshByCollision(pd3dDevice, pd3dCommandList,m_pCollisionManager->m_StaticObjects);
 	//m_pNevMeshBaker->SaveNevMesh();
-	//m_pNevMeshBaker->LoadNevMesh();
+	m_pNevMeshBaker->LoadNevMesh();
 
 	m_pPathFinder = new PathFinder();
 	m_pPathFinder->BuildGraphFromCell(m_pNevMeshBaker->m_Grid, m_pNevMeshBaker->m_WidthCount, m_pNevMeshBaker->m_HeightCount);
@@ -905,17 +905,11 @@ void GamePlayScene::PlayerControlInput()
 			
 		}
 		//총 쏘기
-		if (m_pPlayer->m_BaseReloadTime < m_pPlayer->m_ReloadTime && m_pPlayer->m_WeaponState == RIGHT_HAND) {
-			static float AMP = 0.1f;
+		if (m_pPlayer->GetShootingCoolTime() < m_pPlayer->m_ReloadTime && m_pPlayer->m_WeaponState == RIGHT_HAND) {
 			static int SignCount = 0;
-			static float zRange = -0.5f;
-			static float yRange = -0.025f;
-			static float XRange = 0.1f;
+
 			if (pKeysBuffer[L_MOUSE] & 0xF0) {
-				AMP += 0.01f;
-				if (AMP > 0.2f) {
-					AMP = 0.2f;
-				}
+				
 
 				float Sign = 0;
 				if (SignCount & 1) {
@@ -924,43 +918,33 @@ void GamePlayScene::PlayerControlInput()
 				else {
 					Sign = -1;
 				}
-
+				;
 				SignCount++;
-				m_pPlayer->Rotate(-AMP*0.8f, Sign* AMP, 0.0f);
+				float AMP = m_pPlayer->GetAmp();
+				m_pPlayer->Rotate(-AMP, Sign* AMP*0.5, 0.0f);
 				
-				m_pCamera->m_recoiVector.z -= 0.05f;
-				m_pCamera->m_recoiVector.y -= 0.005f;
+				m_pCamera->m_recoiVector.z -= m_pPlayer->GetzRange(false);
+				if (m_pPlayer->GetzRange(false) < m_pCamera->m_recoiVector.z)
+					m_pCamera->m_recoiVector.z = m_pPlayer->GetzRange(true);
 
-				m_pCamera->m_recoiVector.x += floatSignDis(gen)/10;
-				OutputDebugStringA(to_string(m_pCamera->m_recoiVector.x).c_str());
-				OutputDebugStringA("\n ");
-
-				if (abs(m_pCamera->m_recoiVector.x) > XRange) {
-					m_pCamera->m_recoiVector.x = XRange * (m_pCamera->m_recoiVector.x / abs(m_pCamera->m_recoiVector.x));
-				}
-
-				if (m_pCamera->m_recoiVector.z < zRange) {
-					m_pCamera->m_recoiVector.z = zRange;
-
-				}
-				if (m_pCamera->m_recoiVector.y < yRange) {
-					m_pCamera->m_recoiVector.y = yRange;
-
-				}
 
 				dwPlayerState |= STATE_SHOOT;
-				m_bcrashOk=m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
+				m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
 				m_pBillObject->active = true;
 				m_pPlayer->m_ReloadTime = 0;
 			}
 			else {
-				AMP = 0.1f;
+				
 				m_pCamera->m_recoiVector.x = 0.0f;
 				m_pCamera->m_recoiVector.y = 0.0f;
-				m_pCamera->m_recoiVector.z = 0.0f;
-
+				
+		
 
 			}
+		}
+		else {
+			m_pCamera->m_recoiVector.z += 0.1f;
+			if (m_pCamera->m_recoiVector.z > 0) m_pCamera->m_recoiVector.z = 0;
 		}
 
 		//플레이어 애니메이션 적용
@@ -1005,6 +989,19 @@ void GamePlayScene::PlayerControlInput()
 		}
 
 #else
+
+		if (pKeysBuffer['P'] & 0xF0) {
+			for (const auto& game : m_pGameObject) {
+				((AlienSpider*)game)->m_pBrain->SetInactive();
+			}
+
+		}
+
+		if (pKeysBuffer['X'] & 0xF0) {
+
+			m_pPlayer->SetMaxXZVelocity(50.0f);
+			AddAcel += 40;
+		}
 		GetCursorPos(&ptCursorPos);
 		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
 		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;

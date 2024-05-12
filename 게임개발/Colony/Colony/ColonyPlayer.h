@@ -105,7 +105,6 @@ public:
 	bool isJump = false;
 	bool isDance = false;
 
-	float m_BaseReloadTime = 1.0f;
 	float m_ReloadTime = 0;
 
 
@@ -120,6 +119,11 @@ public:
 	int m_shotgunBullet = 20;
 	int m_machinegunBullet = 150;
 
+	float GetShootingCoolTime();
+	float GetAmp();
+	float GetzRange(bool bStand);
+	float GetyRange(bool bStand);
+	float GetxRange(bool bStand);
 
 	virtual void SetAnimator(PlayerAnimationController* animator);
 	void SetWeapon(GameObject* Weapon, int WeaponType);
