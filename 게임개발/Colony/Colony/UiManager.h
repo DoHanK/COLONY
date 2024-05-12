@@ -24,6 +24,7 @@ struct UIInfo {
 	UIEffectInfo* EffectInfo;
 	Texture* RenderTexture = NULL;
 	Texture* MaskTexture = NULL;
+	bool selected = false;
 };
 
 #define	TEXTURE_LAYER 3
