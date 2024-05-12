@@ -45,7 +45,7 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_TbuttonF = pResourceManager->BringTexture("Model/Textures/buttonF.dds", UI_TEXTURE, true);
 	m_TbuttonT = pResourceManager->BringTexture("Model/Textures/buttonT.dds", UI_TEXTURE, true);
 	// 게임 스타트
-	h_gameButton=pUImanager->CreateUINonNormalRect(-0.2, -0.3, -0.2, 0.2, m_TbuttonF,NULL, NULL, 1, TEXTUREUSE, GetType(), true);
+	h_gameButton=pUImanager->CreateUINonNormalRect(-0.2, -0.3, -0.2, 0.2, m_TbuttonF,NULL, &UIControlHelper::GameStart, 1, TEXTUREUSE, GetType(), true);
 	pUImanager->CreateUINonNormalRect(-0.2, -0.3, -0.2, 0.2, pResourceManager->BringTexture("Model/Textures/GAMESTART.dds", UI_TEXTURE, true),NULL, NULL, 2, TEXTUREUSE, GetType(), true);
 
 	// 세팅

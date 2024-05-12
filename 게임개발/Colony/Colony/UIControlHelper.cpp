@@ -1,6 +1,6 @@
 #include "UIControlHelper.h"
 
-void UIControlHelper::TestFunc()
+void UIControlHelper::GameStart()
 {
 
 	m_pSceneManger->ChangeScene(new GamePlayScene);

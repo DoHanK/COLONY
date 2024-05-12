@@ -12,6 +12,6 @@ public:
 	SceneManager* m_pSceneManger;
 
 public:
-	void TestFunc();
+	void GameStart();
 };
 
