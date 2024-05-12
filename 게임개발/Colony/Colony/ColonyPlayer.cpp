@@ -82,6 +82,7 @@ void Player::SetWeapon(GameObject* Weapon, int WeaponType)
 	m_SelectWeapon.m_pChild = Weapon;
 	m_SelectWeapon.m_pChild->m_xmf4x4World = Matrix4x4::Identity();
 	m_SelectWeapon.m_pChild->m_xmf4x4ToParent = Matrix4x4::Identity();
+	if(m_pExportEffect) m_pExportEffect->m_ownerObject = m_SelectWeapon.FindFrame("Export");
 	if (WeaponType == HAVE_RIFLE) {
 		//오른쪽 손
 		XMFLOAT3 temp;

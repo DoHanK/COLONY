@@ -101,6 +101,7 @@ public:
 	GameObject m_SelectWeapon;
 	char m_WeaponState = RIGHT_HAND;
 	
+	Billboard* m_pExportEffect = NULL;
 	bool isJump = false;
 	bool isDance = false;
 
