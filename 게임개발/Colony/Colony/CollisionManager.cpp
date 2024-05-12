@@ -387,7 +387,9 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 			break;
 
 		for (int i = 0; i < 6; i++) {
-			
+			if (crush == true)
+				break;
+
 			if (enemy.first->m_Bodys[i].Intersects(BulletPos, BulletDir, dis)) {
 				
 				for (int i = 0; i < 5; ++i) {
@@ -413,6 +415,8 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 		}
 
 		for (int i = 0; i < 8; i++) {
+			if (crush == true)
+				break;
 			if (enemy.first->m_legs[i].Intersects(BulletPos, BulletDir, dis)) {
 
 				for (int i = 0; i < 5; ++i) {

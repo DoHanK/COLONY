@@ -261,10 +261,10 @@ void Player::UpdateMatrix()
 
 int Player::GetBulletDamage()
 {
-	if (HAVE_SHOTGUN) {
+	if (m_gunType == HAVE_SHOTGUN) {
 		return 100;
 	}
-	else if (HAVE_RIFLE) {
+	else if (m_gunType == HAVE_RIFLE) {
 
 		return 40;
 	}

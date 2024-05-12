@@ -587,24 +587,24 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//// item
 	//CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
-	CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
+	//CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");
 	
 	//m_nItemBox = 10; // 아이템박스 10개
-	for (int i = 0; i < 10; i++){
-		GameObject* pitemBox = new ItemObject();
+	//for (int i = 0; i < 10; i++){
+	//	GameObject* pitemBox = new ItemObject();
 
 
-	}
-	itemBox = new GameObject();
-	itemBox->SetChild(shotgunInfo->m_pModelRootObject, true);
-	//itemBox->m_BoundingBox = itemBoxInfo->m_pModelRootObject->FindFrame("Box")->m_pMesh->GetBoundingBox();
-	itemBox->SetScale(3.0f, 3.0f, 3.0f); 
-	itemBox->SetPosition(20.0f, 0.0f, 0.0f);
-	itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
-	m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->m_BoundingBox.Center, itemBox->m_BoundingBox.Extents, itemBox);
+	//}
+	//itemBox = new GameObject();
+	//itemBox->SetChild(shotgunInfo->m_pModelRootObject, true);
+	////itemBox->m_BoundingBox = itemBoxInfo->m_pModelRootObject->FindFrame("Box")->m_pMesh->GetBoundingBox();
+	//itemBox->SetScale(3.0f, 3.0f, 3.0f); 
+	//itemBox->SetPosition(20.0f, 0.0f, 0.0f);
+	//itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
+	//m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->m_BoundingBox.Center, itemBox->m_BoundingBox.Extents, itemBox);
 	
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
@@ -900,7 +900,6 @@ void GamePlayScene::PlayerControlInput()
 			static float zRange = -0.5f;
 			static float yRange = -0.025f;
 			static float XRange = 0.1f;
-
 			if (pKeysBuffer[L_MOUSE] & 0xF0) {
 				AMP += 0.01f;
 				if (AMP > 0.2f) {
@@ -941,7 +940,7 @@ void GamePlayScene::PlayerControlInput()
 				dwPlayerState |= STATE_SHOOT;
 				m_bcrashOk=m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
 				m_pBillObject->active = true;
-
+				m_pPlayer->m_ReloadTime = 0;
 			}
 			else {
 				AMP = 0.1f;
@@ -1034,11 +1033,12 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	for (auto& GO : m_pGameObject) {
 
-		((AlienSpider*)(GO))->Update(fTimeElapsed);
+		if (GO->m_bActive) {
+			((AlienSpider*)(GO))->Update(fTimeElapsed);
 
-		((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
-		GO->Animate(fTimeElapsed);
-
+			((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
+			GO->Animate(fTimeElapsed);
+		}
 	}
 
 
@@ -1287,7 +1287,7 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 		m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
 
 		for (auto& GO : m_pGameObject) {
-			GO->Render(pd3dCommandList);
+			if (GO->m_bActive) GO->Render(pd3dCommandList);
 		}
 
 		m_pPlayer->Render(pd3dCommandList);
@@ -1401,7 +1401,7 @@ void GamePlayScene::BakeDepthTextureForDynamic(ID3D12GraphicsCommandList* pd3dCo
 	m_pPlayer->DepthRender(pd3dCommandList);
 
 	for (auto& GO : m_pGameObject) {
-		GO->DepthRender(pd3dCommandList);
+		if (GO->m_bActive) GO->DepthRender(pd3dCommandList);
 	}
 
 }

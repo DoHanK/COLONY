@@ -105,7 +105,7 @@ public:
 	bool isJump = false;
 	bool isDance = false;
 
-	float m_BaseReloadTime = 0.1f;
+	float m_BaseReloadTime = 1.0f;
 	float m_ReloadTime = 0;
 
 
