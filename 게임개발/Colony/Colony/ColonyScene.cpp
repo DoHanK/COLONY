@@ -65,11 +65,6 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 }
 
-void AnimateObjects(float fTimeElapsed) {
-	POINT ptCursorPos;
-	GetCursorPos(&ptCursorPos);
-
-}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

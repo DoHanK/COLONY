@@ -100,7 +100,7 @@ public:
 
 	virtual void  BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager);
 	virtual UINT GetType() { return GameLobby; };
-	virtual void AnimateObjects(float fTimeElapsed);
+	
 
 	Texture* m_TbuttonF; // 커서가 버튼 위에 없을 때
 	Texture* m_TbuttonT; // 커서가 버튼 위에 있을 때 
