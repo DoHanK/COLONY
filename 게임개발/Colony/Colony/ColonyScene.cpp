@@ -476,9 +476,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, QuadtreeDepth);
 
 	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, CELL_SIZE, H_MAPSIZE_X, H_MAPSIZE_Y ,true);
-	m_pNevMeshBaker->BakeNevMeshByCollision(pd3dDevice, pd3dCommandList,m_pCollisionManager->m_StaticObjects);
+	//m_pNevMeshBaker->BakeNevMeshByCollision(pd3dDevice, pd3dCommandList,m_pCollisionManager->m_StaticObjects);
 	//m_pNevMeshBaker->SaveNevMesh();
-	m_pNevMeshBaker->LoadNevMesh();
+	//m_pNevMeshBaker->LoadNevMesh();
 
 	m_pPathFinder = new PathFinder();
 	m_pPathFinder->BuildGraphFromCell(m_pNevMeshBaker->m_Grid, m_pNevMeshBaker->m_WidthCount, m_pNevMeshBaker->m_HeightCount);
@@ -499,15 +499,17 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
+	int idxnode[10] = { 41, 18467, 26500, 15724, 11478, 5705, 491, 2995, 4827, 32391 };
 	for (int j = 0; j < 10; ++j) {
 		for (int i = 0; i < 1; i++) {
-			int idex;
-			do {
+			int idex =idxnode[j];
+		/*	do {
 				idex = rand() % 90000;
 				
 
-			} while (m_pPathFinder->ValidNode(idex));
-
+			} while (m_pPathFinder->ValidNode(idex));*/
+			OutputDebugStringA(to_string(idex).c_str());
+			OutputDebugStringA("  z");
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
 			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
 			//p->SetPosition(j*2, 0.f, 0.f);
