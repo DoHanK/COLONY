@@ -46,6 +46,10 @@ int GoalThink::Process()
 		m_pOwner->m_bHitted = false;
 	}
 
+	if (m_pOwner->m_HP < 1 && m_SubGoals.front()->GetGoalType() != Deaded_Goal) {
+		AddSubgoal(new DeadedGoal(m_pOwner, 1.5f));
+	}
+
 	if (SubgoalStatus == completed || SubgoalStatus == failed)
 	{
 	

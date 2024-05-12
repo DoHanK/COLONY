@@ -15,6 +15,7 @@ public class HierarchicalSceneExporter : MonoBehaviour
 
     private BinaryWriter sceneBinaryWriter=null;
     private BinaryWriter binaryWriter = null; //게임오브젝트 binary file
+    private BinaryWriter BoundingWriter = null;
     private List<string> gameObjectNames = new List<string>();
     private List<string> m_pTextureNamesListForCounting = new List<string>();
     private List<string> m_pTextureNamesListForWriting = new List<string>();
@@ -476,7 +477,7 @@ public class HierarchicalSceneExporter : MonoBehaviour
            
         }
    }
-    
+
 
     int GetRootGameObjectsCount()
     {
@@ -486,6 +487,59 @@ public class HierarchicalSceneExporter : MonoBehaviour
         GameObject[] rootGameObjects = scene.GetRootGameObjects();
         
         return (rootGameObjects.Length);
+    }
+
+    void WriteBounding(Transform child)
+    {
+        BoundingWriter = new BinaryWriter(File.Open("boundinginfo.bin", FileMode.Create));
+
+
+        if (child.childCount > 0)
+        {
+            print(child.childCount);
+            int BoundCount = 0 ;
+            //메쉬 갯수 세기
+             for (int i = 0; i < child.childCount; i++)
+             {
+                Transform BoundingInfo = child.GetChild(i);
+                BoundCount += BoundingInfo.childCount;
+             }
+             //Bounding자식들 더해주기
+            BoundCount += child.childCount;
+                BoundingWriter.Write(BoundCount);
+            
+
+            for (int i  = 0;  i < child.childCount; i++)
+            {
+                Transform BoundingInfo = child.GetChild(i);
+
+                Matrix4x4 matrix = Matrix4x4.identity;
+                matrix = BoundingInfo.localToWorldMatrix;
+                WriteMatrix(matrix, BoundingWriter);
+                WriteVector(BoundingInfo.GetComponent<BoxCollider>().size , BoundingWriter);
+               
+                for (int j = 0; j < BoundingInfo.childCount; j++)
+                {
+                    Transform childeBoundingInfo = BoundingInfo.GetChild(j);
+
+                    matrix = Matrix4x4.identity;
+                    matrix = childeBoundingInfo.localToWorldMatrix;
+                    WriteMatrix(matrix, BoundingWriter);
+                    WriteVector(childeBoundingInfo.GetComponent<BoxCollider>().size, BoundingWriter);
+
+                }
+              
+
+
+
+
+            }
+
+
+        }
+        BoundingWriter.Flush();
+        BoundingWriter.Close();
+
     }
 
 
@@ -501,8 +555,20 @@ public class HierarchicalSceneExporter : MonoBehaviour
         GameObject[] rootGameObjects = scene.GetRootGameObjects();
 
 
-        foreach (GameObject gameObject in rootGameObjects) WriteFrameHierarchyInfo(gameObject.transform);
-
+        foreach (GameObject gameObject in rootGameObjects)
+        {
+           
+            if (gameObject.name == "Bounding")
+            {
+          
+                WriteBounding(gameObject.transform);
+            }
+            else
+            {
+               // WriteFrameHierarchyInfo(gameObject.transform);
+            }
+           // print("ㅎㅇ \n");
+        }
         sceneBinaryWriter.Write("</GameObjects>");
 
         sceneBinaryWriter.Flush();

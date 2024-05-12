@@ -380,6 +380,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 	crushlist.sort([](pair<AliensBoudingBox*, float>& a, pair<AliensBoudingBox*, float>& b) {
 		return a.first > b.first;});
 
+
 	for (auto& enemy : crushlist) {
 
 		if (crush == true)
@@ -402,6 +403,10 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 					}
 				}
 				enemy.first->m_pOwner->m_bHitted = true;
+				enemy.first->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage();
+				if (enemy.first->m_pOwner->m_HP < 1) {
+					m_EnemyObjects.remove(enemy.first);
+				}
 				crush = true;
 				break;
 			}
@@ -422,6 +427,10 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 					}
 				}
 				enemy.first->m_pOwner->m_bHitted = true;
+				enemy.first->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage();
+				if (enemy.first->m_pOwner->m_HP < 1) {
+					m_EnemyObjects.remove(enemy.first);
+				}
 				crush = true;
 				break;
 			}

@@ -134,6 +134,7 @@ public:
 	//입력받은 회전 처리
 	void Rotate(float x, float y, float z);
 	virtual void UpdateMatrix();
+	int GetBulletDamage();
 public:
 	void SetMaxXZVelocity(const float& veclocity) {m_fMaxVelocityXZ = veclocity;}
 public:

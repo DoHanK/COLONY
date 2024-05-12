@@ -10,6 +10,7 @@ enum AIBehaviorState {
 	FollowPath_Goal,
 	Trace_Goal,
 	Hitted_Goal,
+	Deaded_Goal,
 	//복합 목적
 	Think_Goal,
 	Explore_Goal,

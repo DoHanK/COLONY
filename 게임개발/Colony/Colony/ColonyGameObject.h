@@ -376,8 +376,10 @@ public:
 	GameObject* m_pParent = NULL;
 	GameObject* m_pChild = NULL;
 	GameObject* m_pSibling = NULL;
-
+public:
+	bool						m_bActive = true;
 	bool						m_bHitted = false;
+	int							m_HP = 100;
 
 	void SetMesh(BasicMesh* pMesh);
 	void SetBoundingMesh(DynamicMesh* pMesh);

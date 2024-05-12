@@ -60,6 +60,8 @@ public:
 	//인식
 	GameObject*		m_pHead = NULL;
 public:
+
+public:
 	//GhostTrailEffect를 위한 변수들
 	GameObject*			m_pSkinnedModel;
 	ID3D12Resource**	m_ppd3dcbSkinningBoneTransforms = NULL; //[SkinnedMeshes]

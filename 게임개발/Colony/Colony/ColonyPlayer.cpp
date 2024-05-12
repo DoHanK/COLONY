@@ -259,6 +259,22 @@ void Player::UpdateMatrix()
 	m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4ToParent);
 }
 
+int Player::GetBulletDamage()
+{
+	if (HAVE_SHOTGUN) {
+		return 100;
+	}
+	else if (HAVE_RIFLE) {
+
+		return 40;
+	}
+	else {
+		return 30;
+	}
+
+	return 0;
+}
+
 void Player::SetCamera(ThirdPersonCamera* pCamera)
 {
 	if (m_pCamera) {

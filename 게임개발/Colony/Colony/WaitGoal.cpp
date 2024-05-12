@@ -67,3 +67,38 @@ void HittedGoal::Terminate()
 	m_pOwner->m_pSkinnedAnimationController->SetTrackSpeed(NOW_TRACK, 1.0f);
 	m_pOwner->m_pSkinnedAnimationController->SetTrackSpeed(PRE_TRACK, 1.0f);
 }
+
+DeadedGoal::DeadedGoal(AlienSpider* pOwner, float WaitingTime) : Goal(pOwner, Deaded_Goal), m_time(WaitingTime)
+{
+
+}
+
+DeadedGoal::~DeadedGoal()
+{
+}
+
+void DeadedGoal::Activate()
+{
+	m_pOwner->m_WaitingTime = 0.f;
+	m_iStatus = active;
+}
+
+int DeadedGoal::Process()
+{
+	ActivateIfInactive();
+	PushGoalType();
+
+	if (m_time < m_pOwner->m_WaitingTime) {
+
+		m_iStatus = completed;
+	}
+
+	return m_iStatus;
+}
+
+void DeadedGoal::Terminate()
+{
+	m_pOwner->m_bActive = false;
+	m_pOwner->m_pSkinnedAnimationController->SetTrackSpeed(NOW_TRACK, 1.0f);
+	m_pOwner->m_pSkinnedAnimationController->SetTrackSpeed(PRE_TRACK, 1.0f);
+}

@@ -48,6 +48,15 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 		}
 		m_pBody->m_WaitingTime += fTimeElapsed;
 	}
+	else if (m_pBody->m_GoalType == Deaded_Goal) {
+		if (!m_pAnimationControl->isSameState(AlienAnimationName::Death_1)
+			) {
+			m_pAnimationControl->ChangeAnimation(Death_1);
+			m_pAnimationControl->SetTrackSpeed(NOW_TRACK, 1.0f);
+			m_pAnimationControl->SetTrackSpeed(PRE_TRACK, 1.0f);
+		}
+		m_pBody->m_WaitingTime += fTimeElapsed;
+	}
 
 
 
