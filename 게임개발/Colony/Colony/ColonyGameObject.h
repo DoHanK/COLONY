@@ -521,6 +521,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 	virtual void PostRender(int nPipelineState);
 	ID3D12Device* m_device;
+	bool m_bActive = true;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

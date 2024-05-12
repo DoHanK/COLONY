@@ -143,6 +143,17 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			m_pPlayer->isDance = (m_pPlayer->isDance + 1) % 2;
 			break;
 				
+		case 'L':
+			for (auto& particleObject : m_pParticleObjects) {
+				if (particleObject->m_bActive) {
+					particleObject->m_bActive = false;
+				}
+				else {
+					particleObject->m_bActive = true;
+				}
+			}
+			break;
+
 		default:
 			break;
 		}
@@ -992,6 +1003,7 @@ void GamePlayScene::PlayerControlInput()
 			}
 
 		}
+
 #else
 		GetCursorPos(&ptCursorPos);
 		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
@@ -1322,7 +1334,9 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	}
 
 	for (auto& ParticleObject : m_pParticleObjects) {
-		ParticleObject->Render(pd3dCommandList);
+		if (ParticleObject->m_bActive) {
+			ParticleObject->Render(pd3dCommandList);
+		}
 	}
 
 
