@@ -111,30 +111,32 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     float4 cAlbedoColor = gMaterial.m_cDiffuse;
     if (gnTexturesMask & MATERIAL_ALBEDO_MAP)
     {
-        float4 texColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
-        cAlbedoColor.rgb *= texColor.rgb; 
-        cAlbedoColor.a *= texColor.a; 
+        cAlbedoColor *= pow(gtxtAlbedoTexture.Sample(gssWrap, input.uv), 2.2);
+
+    }
+    float4 cSpecularColor = gMaterial.m_cSpecular;
+    if (gnTexturesMask & MATERIAL_SPECULAR_MAP)
+    {
+        cSpecularColor *= pow(gtxtSpecularTexture.Sample(gssWrap, input.uv), 2.2);
     }
     
-    float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-    if (gnTexturesMask & MATERIAL_SPECULAR_MAP)
-        cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
     float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
     if (gnTexturesMask & MATERIAL_NORMAL_MAP)
-        cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
+        cNormalColor = pow(gtxtNormalTexture.Sample(gssWrap, input.uv),2.2);
+    
     float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
     if (gnTexturesMask & MATERIAL_METALLIC_MAP)
-        cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
-    
+        cMetallicColor = pow(gtxtMetallicTexture.Sample(gssWrap, input.uv), 2.2);
+ 
     float4 cEmissionColor = gMaterial.m_cEmissive;
     if (gnTexturesMask & MATERIAL_EMISSION_MAP)
     {
-        float4 texColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
+        float4 texColor = pow(gtxtEmissionTexture.Sample(gssWrap, input.uv), 2.2);
         cEmissionColor.rgb *= texColor.rgb; 
         cEmissionColor.a *= texColor.a; 
     }
-        float3 normalW;
-        float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
+     float3 normalW;
+    float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
         if (gnTexturesMask & MATERIAL_NORMAL_MAP)
         {
             float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
@@ -145,17 +147,15 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
         {
             normalW = normalize(input.normalW);
         }
-    //cColor.xyz *= DOWNGRAY;
-    //cColor.xyz *= DOWNGRAY;
+
+    cColor = pow(cColor, 1 / 2.2);
+    float4 cIllumination =  Lighting(input.positionW, normalW, true, input.uvs);
     
-    float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
-    
-    //cColor = lerp(cColor, cIllumination, LIGHTRATIO);
-   //cColor += cIllumination * LIGHTRATIO;
+
     cColor *= cIllumination * LIGHTRATIO;
 
-        return cColor;
-    }
+    return cColor;
+}
 
 // AABBBouding ·£´õ¸µ
 struct VS_BOUNDINGBOX_INPUT
@@ -639,28 +639,31 @@ float4 PSPlane(VS_STANDARD_OUTPUT input) : SV_TARGET
     input.uv.x *= RepeatCount;
     input.uv.y *= RepeatCount;
     
+        
     float4 cAlbedoColor = gMaterial.m_cDiffuse;
     if (gnTexturesMask & MATERIAL_ALBEDO_MAP)
     {
-        float4 texColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
-        cAlbedoColor.rgb *= texColor.rgb;
-        cAlbedoColor.a *= texColor.a;
+        cAlbedoColor *= pow(gtxtAlbedoTexture.Sample(gssWrap, input.uv), 2.2);
+
+    }
+    float4 cSpecularColor = gMaterial.m_cSpecular;
+    if (gnTexturesMask & MATERIAL_SPECULAR_MAP)
+    {
+        cSpecularColor *= pow(gtxtSpecularTexture.Sample(gssWrap, input.uv), 2.2);
     }
     
-    float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-    if (gnTexturesMask & MATERIAL_SPECULAR_MAP)
-        cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
     float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
     if (gnTexturesMask & MATERIAL_NORMAL_MAP)
-        cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
+        cNormalColor = pow(gtxtNormalTexture.Sample(gssWrap, input.uv), 2.2);
+    
     float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
     if (gnTexturesMask & MATERIAL_METALLIC_MAP)
-        cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
-    
+        cMetallicColor = pow(gtxtMetallicTexture.Sample(gssWrap, input.uv), 2.2);
+ 
     float4 cEmissionColor = gMaterial.m_cEmissive;
     if (gnTexturesMask & MATERIAL_EMISSION_MAP)
     {
-        float4 texColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
+        float4 texColor = pow(gtxtEmissionTexture.Sample(gssWrap, input.uv), 2.2);
         cEmissionColor.rgb *= texColor.rgb;
         cEmissionColor.a *= texColor.a;
     }
@@ -676,14 +679,15 @@ float4 PSPlane(VS_STANDARD_OUTPUT input) : SV_TARGET
     {
         normalW = normalize(input.normalW);
     }
-    cColor.xyz *= DOWNGRAY;
+
+    cColor = pow(cColor, 1 / 2.2);
     float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
     
-    //cColor = lerp(cColor, cIllumination, LIGHTRATIO);
-   //cColor += cIllumination * LIGHTRATIO;
+
     cColor *= cIllumination * LIGHTRATIO;
 
     return cColor;
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

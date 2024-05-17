@@ -230,15 +230,19 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
+	
+	float m_DirectDiffuse = 0.15f;
+	float m_DirectAmbient = 0.15f;
+	float m_DirectSqercular = 0.05f;
 
 	m_pLights[0].m_bEnable = true;
 	m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights[0].m_fRange = 2000.0f;
 	//m_pLights[0].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.35f, 0.35f, 0.35f, 1.0f);
+	m_pLights[0].m_xmf4Ambient = XMFLOAT4(m_DirectAmbient, m_DirectAmbient, m_DirectAmbient, 1.0f);
+	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(m_DirectDiffuse, m_DirectDiffuse, m_DirectDiffuse, 1.0f);
 	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_pLights[0].m_xmf4Specular = XMFLOAT4(m_DirectSqercular, m_DirectSqercular, m_DirectSqercular, 1.0f);
 	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), _PLANE_HEIGHT, 0.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
 
@@ -248,10 +252,10 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights[1].m_fRange = 2000.0f;
 	//m_pLights[1].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.35f, 0.35f, 0.35f, 1.0f);
+	m_pLights[1].m_xmf4Ambient = XMFLOAT4(m_DirectAmbient, m_DirectAmbient, m_DirectAmbient, 1.0f);
+	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(m_DirectDiffuse, m_DirectDiffuse, m_DirectDiffuse, 1.0f);
 	//m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_pLights[1].m_xmf4Specular = XMFLOAT4(m_DirectSqercular, m_DirectSqercular, m_DirectSqercular, 1.0f);
 	m_pLights[1].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), _PLANE_HEIGHT, 0.0f);
 	m_pLights[1].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
 

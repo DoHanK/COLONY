@@ -299,7 +299,7 @@ void D3Device::ChangeSwapChainState()
 	m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
 
 	DXGI_MODE_DESC dxgiTargetParameters;
-	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	dxgiTargetParameters.Format = DXGI_FORMAT_R16G16B16A16_SNORM;
 	dxgiTargetParameters.Width = m_nWndClientWidth;
 	dxgiTargetParameters.Height = m_nWndClientHeight;
 	dxgiTargetParameters.RefreshRate.Numerator = 60;

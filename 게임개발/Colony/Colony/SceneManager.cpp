@@ -223,11 +223,11 @@ void SceneManager::SetRootSignature(ID3D12RootSignature* pd3dGraphicsRootSignatu
 
 void SceneManager::CreateSceneTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.125f , 0.3f , 1.0f } };
+	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R16G16B16A16_SNORM, { 0.0f, 0.125f , 0.3f , 1.0f } };
 
 	//Create Memory in Gpu
 	for (int i = 0; i < TEXTURE_SCENE_NUM; ++i) {
-		m_TextureScene[i]->SetTexture(0,CreateTexture2DResource(pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 1, 1, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue));
+		m_TextureScene[i]->SetTexture(0,CreateTexture2DResource(pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 1, 1, DXGI_FORMAT_R16G16B16A16_SNORM, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue));
 		ResourceManager::CreateShaderResourceViews(pd3dDevice, m_TextureScene[i], UI_TEXTURE, FALSE);
 	}
 
@@ -249,7 +249,7 @@ void SceneManager::CreateSceneTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	for (int i = 0; i < TEXTURE_SCENE_NUM; ++i) {
 		//·£´õÅ¸°Ù ºä¿¡ ´ëÇÑ ¼³¸í
 		D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc{};
-		d3dRenderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		d3dRenderTargetViewDesc.Format = DXGI_FORMAT_R16G16B16A16_SNORM;
 		d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 		d3dRenderTargetViewDesc.Texture2D.MipSlice = 0;
 		d3dRenderTargetViewDesc.Texture2D.PlaneSlice = 0;
