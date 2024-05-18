@@ -379,6 +379,7 @@ public:
 public:
 	bool						m_bActive = true;
 	bool						m_bHitted = false;
+	bool						m_bVisible = true;
 	int							m_HP = 100;
 
 	void SetMesh(BasicMesh* pMesh);

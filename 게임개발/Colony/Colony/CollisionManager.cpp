@@ -352,6 +352,15 @@ bool CollisionManager::CollisionPlayerToStaticObeject()
 	return true;
 }
 
+void CollisionManager::CheckVisiableEnemy()
+{
+	for (auto& a : m_EnemyObjects) {
+		a->UpdateEntireBouding();
+		if (m_pCamera->IsInFrustum(a->m_Entire)) a->m_pOwner->m_bVisible = true;
+		else a->m_pOwner->m_bVisible = false;
+	}
+}
+
 bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard)
 {
 	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());

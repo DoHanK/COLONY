@@ -503,27 +503,18 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	int idxnode[10] = { 41, 18467, 26500, 15724, 11478, 5705, 491, 2995, 4827, 32391 };
-	for (int j = 0; j < 10; ++j) {
+	for (int j = 0; j < 100; ++j) {
 		for (int i = 0; i < 1; i++) {
-			int idex =idxnode[j];
-		/*	do {
-				idex = rand() % 90000;
-				
-
-			} while (m_pPathFinder->ValidNode(idex));*/
-			OutputDebugStringA(to_string(idex).c_str());
-			OutputDebugStringA("  z");
+			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
 			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
-			//p->SetPosition(j*2, 0.f, 0.f);
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
 			p->SetGhostShader(m_pGhostTraillerShader);
 			p->m_pSpiderTex = spiderColor[j % 6];
 			p->m_pGhostMaskTex = spiderColor[6];
-			m_pGameObject.push_back(p);
 			m_pCollisionManager->EnrollEnemy(p);
+			m_pGameObject.push_back(p);
 		}
 	}
 	
@@ -1088,7 +1079,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 		}
 	}
 	
-
+	m_pCollisionManager->CheckVisiableEnemy();
 
 }
 
@@ -1300,16 +1291,19 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 	if (true) {
 		m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
-
+	
 		for (auto& GO : m_pGameObject) {
-			if (GO->m_bActive) GO->Render(pd3dCommandList);
+			if (GO->m_bActive) {
+				if(GO->m_bVisible) GO->Render(pd3dCommandList);
+			}
 		}
-
 		m_pPlayer->Render(pd3dCommandList);
+		
 
 		for (auto& GO : m_pSceneObject) {
-			GO->Render(pd3dCommandList);
+			if (m_pCamera->IsInFrustum(GO->m_BoundingBox)) GO->Render(pd3dCommandList);
 		}
+
 	}
 
 	if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
@@ -1325,7 +1319,6 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 	if (m_pBillObject->active) {
 		m_pBillObject->Render(pd3dCommandList, m_pPlayer->GetCamera());
-		//test = false;
 	}
 	
 	for (int i = 0; i < 29; ++i) {
@@ -1418,7 +1411,9 @@ void GamePlayScene::BakeDepthTextureForDynamic(ID3D12GraphicsCommandList* pd3dCo
 	m_pPlayer->DepthRender(pd3dCommandList);
 
 	for (auto& GO : m_pGameObject) {
-		if (GO->m_bActive) GO->DepthRender(pd3dCommandList);
+		if (GO->m_bActive) 
+			if (GO->m_bVisible)
+			GO->DepthRender(pd3dCommandList);
 	}
 
 }

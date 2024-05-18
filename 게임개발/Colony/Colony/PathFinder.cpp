@@ -11,14 +11,17 @@ void PathFinder::BuildGraphFromCell(std::vector<Cell>& pCell, int WidthCount, in
 	m_HeightCount = HeightCount;
 	m_Cell = pCell;
 	m_Edge.resize(m_widthCount * m_HeightCount);
+	m_InvalidNodes.reserve(m_widthCount * m_HeightCount);
 	for (int y = 0; y < HeightCount; y++) {
 		
 		for (int x = 0; x < WidthCount; x++) {
 
 			m_Node.push_back({ pCell[x + WidthCount * y].m_BoundingBox.Center.x, pCell[x + WidthCount * y].m_BoundingBox.Center.z });
 
-			if(pCell[x + WidthCount * y].m_Pass) addAdjacentNodes(&pCell[0], x, y);
-
+			if (pCell[x + WidthCount * y].m_Pass) {
+				addAdjacentNodes(&pCell[0], x, y);
+				m_InvalidNodes.push_back(x + WidthCount * y);
+			}
 		}
 	}
 
@@ -65,6 +68,12 @@ float PathFinder::CalDistance(XMFLOAT2 a, XMFLOAT2 b)
 	return sqrt((a.x -b.x) * (a.x - b.x)+ (a.y - b.y) * (a.y - b.y));
 }
 
+int PathFinder::GetInvalidNode()
+{
+	std::uniform_int_distribution<> dis(0, m_InvalidNodes.size()-1);
+	return m_InvalidNodes[dis(rd)];
+}
+
 bool PathFinder::ValidAdjacnet(int x, int y)
 {
 	return !((x < 0) || (x >= m_widthCount) || (y < 0) || (y >= m_HeightCount));
@@ -81,12 +90,12 @@ int PathFinder::BringIndexCell(const XMFLOAT3& pos)
 std::list<XMFLOAT2> PathFinder::QueryPath(XMFLOAT3 ObjectPos)
 {
 
-	std::uniform_int_distribution<> dis(0, m_Node.size());
+	std::uniform_int_distribution<> dis(0, m_Node.size()-1);
 	
 	int DestIndex = dis(gen);
 
 	int StartIndex = BringIndexCell(ObjectPos);
-	
+
 	float Min = FLT_MAX;
 	//시작 지점이 유효하지 않을때
 	if (!ValidNode(StartIndex)) {
@@ -110,11 +119,12 @@ std::list<XMFLOAT2> PathFinder::QueryPath(XMFLOAT3 ObjectPos)
 
 	}
 
+
 	std::list<int> path;
 	while (true) {
-		while (!ValidNode(DestIndex)) {
-			DestIndex = dis(gen);
-		}
+
+		DestIndex = GetInvalidNode();
+		
 
 		AStarAlgoritm Astar(this, StartIndex, DestIndex);
 		 path = Astar.GetPathToTarget();
@@ -123,7 +133,6 @@ std::list<XMFLOAT2> PathFinder::QueryPath(XMFLOAT3 ObjectPos)
 		}
 		DestIndex = -1;
 	}
-
 	std::list<XMFLOAT2> XMPath;
 	for (const auto& nodeIndex : path) {
 		XMFLOAT2 Coord = XMFLOAT2(m_Cell[nodeIndex].m_BoundingBox.Center.x, m_Cell[nodeIndex].m_BoundingBox.Center.z);
@@ -132,6 +141,7 @@ std::list<XMFLOAT2> PathFinder::QueryPath(XMFLOAT3 ObjectPos)
 		XMPath.push_back(Coord);
 	}
 
+	OutputDebugStringA("길찾기 끝. \n");
 	return XMPath;
 }
 

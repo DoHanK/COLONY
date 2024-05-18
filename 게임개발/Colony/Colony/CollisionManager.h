@@ -370,6 +370,8 @@ public:
 	
 	void EnrollBulletDir(Camera* pCamera) {m_pCamera = pCamera;}
 
+	void CheckVisiableEnemy();
+
 	//충돌 처리 함수들
 	bool CollisionPlayerToStaticObeject();
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList);

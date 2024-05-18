@@ -47,7 +47,7 @@ Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Gravity = XMFLOAT3(0.0f, -0.5f, 0.0f);
+	m_xmf3Gravity = XMFLOAT3(0.0f, -35.0f, 0.0f);
 	m_fMaxVelocityXZ = 5.5f;
 	m_fMaxVelocityY = 15.5f;
 	m_fFriction = 17.0f;
@@ -311,7 +311,8 @@ void Player::AddPosition(const XMFLOAT3& xmf3Shift)
 //플레이어 위치 업데이트
 void Player::UpdatePosition(float fTimeElapsed)
 {
-	 m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
+	
+	 m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Gravity, fTimeElapsed, false));
 	//마찰계수
 	float  fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 	float fMaxVelocityXZ = m_fMaxVelocityXZ;		

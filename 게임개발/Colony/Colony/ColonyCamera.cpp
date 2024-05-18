@@ -108,7 +108,11 @@ void Camera::GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFL
 
 void Camera::GenerateViewMatrix()
 {
+	
 	m_xmf4x4View = Matrix4x4::LookAtLH(m_xmf3Position, m_xmf3LookAtWorld, m_xmf3Up);
+
+
+
 }
 
 void Camera::RegenerateViewMatrix()
@@ -123,6 +127,15 @@ void Camera::RegenerateViewMatrix()
 	m_xmf4x4View._41 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Right);
 	m_xmf4x4View._42 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Up);
 	m_xmf4x4View._43 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Look);
+	GenerateFrustum();
+}
+
+void Camera::GenerateFrustum(){
+
+	//절투체 컬링
+	m_FrustumCamera.CreateFromMatrix(m_FrustumCamera, XMLoadFloat4x4(&m_xmf4x4Projection));
+	XMMATRIX xmmtxInversView = XMMatrixInverse(NULL, XMLoadFloat4x4(&m_xmf4x4View));
+	m_FrustumCamera.Transform(m_FrustumCamera, xmmtxInversView);
 }
 
 void Camera::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -197,6 +210,16 @@ void Camera::ChangeMoveVector(XMFLOAT3& V)
 		XMFLOAT3 V = Vector3::TransformCoord(V, xmf4x4Rotate);
 
 	}
+}
+
+bool Camera::IsInFrustum(BoundingOrientedBox& xmBoundingBox)
+{
+	return m_FrustumCamera.Intersects(xmBoundingBox);
+}
+
+bool Camera::IsInFrustum(BoundingSphere& xmBoundingShere)
+{
+	return m_FrustumCamera.Intersects(xmBoundingShere);
 }
 
 

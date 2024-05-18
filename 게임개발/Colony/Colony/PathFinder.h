@@ -21,14 +21,15 @@ public:
 	int m_widthCount;
 	int m_HeightCount;
 	std::vector<Cell> m_Cell;
-
+	std::vector<int> m_InvalidNodes;
+	
 
 public:
 	void BuildGraphFromCell(std::vector<Cell>& pCell, int WidthCount, int HeightCount);
 	void addAdjacentNodes(Cell* pCell,int col ,int row);
 	bool ValidAdjacnet(int x, int y);
 	float CalDistance(XMFLOAT2 a, XMFLOAT2 b);
-	
+	int GetInvalidNode();
 	int BringIndexCell(const XMFLOAT3& pos);
 	
 	std::list<XMFLOAT2> QueryPath(XMFLOAT3 ObjectPos);
