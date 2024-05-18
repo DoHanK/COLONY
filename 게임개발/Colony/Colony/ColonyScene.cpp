@@ -231,9 +231,9 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
 	
-	float m_DirectDiffuse = 0.15f;
-	float m_DirectAmbient = 0.15f;
-	float m_DirectSqercular = 0.05f;
+	float m_DirectDiffuse = 0.35f;
+	float m_DirectAmbient = 0.35f;
+	float m_DirectSqercular = 0.25f;
 
 	m_pLights[0].m_bEnable = true;
 	m_pLights[0].m_nType = DIRECTIONAL_LIGHT;

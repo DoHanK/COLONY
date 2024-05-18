@@ -121,7 +121,7 @@ void D3Device::CreateDirect3DDevice()
 	m_nDsvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS d3dMsaaQualityLevels;
-	d3dMsaaQualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	d3dMsaaQualityLevels.Format = DXGI_FORMAT_R16G16B16A16_UNORM;
 	d3dMsaaQualityLevels.SampleCount = 4;
 	d3dMsaaQualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
 	d3dMsaaQualityLevels.NumQualityLevels = 0;
@@ -299,7 +299,7 @@ void D3Device::ChangeSwapChainState()
 	m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
 
 	DXGI_MODE_DESC dxgiTargetParameters;
-	dxgiTargetParameters.Format = DXGI_FORMAT_R16G16B16A16_SNORM;
+	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	dxgiTargetParameters.Width = m_nWndClientWidth;
 	dxgiTargetParameters.Height = m_nWndClientHeight;
 	dxgiTargetParameters.RefreshRate.Numerator = 60;
