@@ -84,15 +84,14 @@ protected:
 
 	ThirdPersonCamera* m_pCamera = NULL;
 public:
-	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3					m_xmfPre3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3					m_xmfPre3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+
 
 public:
 	Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,ResourceManager* pResourceManager);
 	~Player();
 
+	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	//Body
 	GameObject* m_RightHand;
@@ -143,6 +142,7 @@ public:
 	void SetMaxXZVelocity(const float& veclocity) {m_fMaxVelocityXZ = veclocity;}
 public:
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
+	void RollbackPosition() { m_xmf3Position = m_xmfPre3Position; }
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
 	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
 	XMFLOAT3 GetRightVector() { return(m_xmf3Right); }
@@ -150,7 +150,7 @@ public:
 	void SetUpVector(const XMFLOAT3& UpVector) { m_xmf3Up = UpVector; }
 	void SetRightVector(const XMFLOAT3& RightVector) { m_xmf3Right = RightVector; }
 	void SetCamera(ThirdPersonCamera* pCamera);
-	void RollbackPosition() { m_xmf3Position = m_xmfPre3Position; }
+
 	void ChangeShotgun();
 	void ChangeRifle();
 	void Chagnemachinegun();

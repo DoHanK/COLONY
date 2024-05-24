@@ -18,12 +18,13 @@ int WanderForPlayerGoal::Process()
 
 		if (m_SubGoals.front()->GetGoalType() == WanderAndWait_Goal) {
 			RemoveAllSubgoals();
-			AddSubgoal(new TraceGoal(m_pOwner));
+			AddSubgoal(new TraceAndAttack(m_pOwner));
 		}
+
 	}
 	else {
 
-		if (m_SubGoals.front()->GetGoalType() == Trace_Goal) {
+		if (m_SubGoals.front()->GetGoalType() == TraceAndAttack_Goal) {
 			RemoveAllSubgoals();
 			AddSubgoal(new WanderAndWaitGoal(m_pOwner));
 		}

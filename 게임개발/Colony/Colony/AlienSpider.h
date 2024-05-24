@@ -42,14 +42,12 @@ public:
 	PerceptionRangeMesh*		m_pPerceptionRangeMesh = NULL;
 	Perception*					m_pPerception = NULL;
 	Player*						m_pPlayer = NULL;
-
+	float						m_fPAangle = 0.0f;
 	Texture*					m_pSpiderTex = NULL;
 	Texture*					m_pGhostMaskTex = NULL;
 	
 public:
-	//이동
-	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	float           			m_fMaxVelocityXZ = 0.0f;
+	float           			m_fMaxVelocityXZ = 3.0f;
 	void AddPostion(const XMFLOAT3& Pos);
 	//idle 기다리기
 	float						m_WaitingTime = 0;
@@ -83,7 +81,7 @@ public:
 	void RouteRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, bool isUpdateBounding = true, Camera* pCamera = NULL);
 	void Update(float fTimeElapsed);
-
+	void UpdatePosition(float fTimeElapsed);
 };
 
 
@@ -107,8 +105,8 @@ public:
 	void ChangeAnimation(DWORD ChangeState);
 	bool isSameState(DWORD dwState);
 	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
-
-	
+	bool isAnimationPlayProgress(DWORD dwState, float progress);
+	void SetAnimationPlayPos(DWORD dwState, float progress);
 
 
 };

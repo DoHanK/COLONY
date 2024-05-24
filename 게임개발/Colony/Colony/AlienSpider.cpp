@@ -219,10 +219,44 @@ void AlienSpider::BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, b
 
 void AlienSpider::Update(float fTimeElapsed)
 {
+	//판단	
 	m_pBrain->Process();
-
+	//실행
 	m_pSoul->ExecuteGoal(fTimeElapsed);
+	//위치 변경
+	UpdatePosition(fTimeElapsed);
 
+}
+
+void AlienSpider::UpdatePosition(float fTimeElapsed)
+{
+	XMFLOAT3 xmf3Gravity = XMFLOAT3(0, -9.8f, 0);
+
+
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(xmf3Gravity, fTimeElapsed, false));
+	// 
+	//마찰계수
+	float  fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ = 10.f;
+
+	if (fLength > fMaxVelocityXZ)
+	{
+		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+
+	}
+
+
+
+	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+
+	
+	XMFLOAT3 PrePos = XMFLOAT3(m_xmf4x4ToParent._41, m_xmf4x4ToParent._42, m_xmf4x4ToParent._43);
+	m_xmfPre3Position = PrePos;
+	AddPostion(xmf3Velocity);
+	m_xmfPre3Velocity = xmf3Velocity;
+
+	
 
 }
 
@@ -332,3 +366,20 @@ void AlienSpiderAnimationController::AdvanceTime(float fElapsedTime, GameObject*
 
 }
 
+bool AlienSpiderAnimationController::isAnimationPlayProgress(DWORD dwState, float progress)
+{
+	if(m_pAnimationTracks[NOW_TRACK].m_nAnimationSet == dwState)
+	if (m_pAnimationTracks[NOW_TRACK].m_fPosition / m_ppAnimationSets[0]->m_ppAnimationSets[dwState]->m_fLength >= progress) {
+		return true;
+	}
+	
+
+	return false;
+}
+
+void AlienSpiderAnimationController::SetAnimationPlayPos(DWORD dwState, float progress)
+{
+	m_pAnimationTracks[NOW_TRACK].m_fPosition = progress * m_ppAnimationSets[0]->m_ppAnimationSets[dwState]->m_fLength;
+	
+
+}

@@ -11,18 +11,21 @@ enum AIBehaviorState {
 	Trace_Goal,
 	Hitted_Goal,
 	Deaded_Goal,
+	Attack_Goal,
+	Jump_Goal,
 	//복합 목적
 	Think_Goal,
 	Explore_Goal,
 	WanderAndWait_Goal,
 	ExploreForPlayer_Goal,
-	Wander_Player_Goal
+	Wander_Player_Goal,
+	TraceAndAttack_Goal,
 };
 
 //애니메이션 번호 정의
 enum AlienAnimationName {
-	Attack_1,
-	Attack_2,
+	Attack_1, //내려찍기
+	Attack_2, //냥냥펀지 2번씩
 	Attack_3,
 	Attack_4,
 	Attack_5,
@@ -98,14 +101,22 @@ enum AlienboneIndex {
 	,DEF_STING
 	,End
 };
-
+enum AlienJumpState {
+	JUMP_PREPARE,
+	JUMPING,
+	JUMP_LANDING,
+	JUMP_END
+};
 
 
 //이동 속도
 #define AlienAccel		3.0f
 #define AlienMaxXZSpeed 2.0f
-#define AlienSpinSpeed  1.0f
+#define AlienSpinSpeed  180.0f
 #define friction		2.0f
+
+#define AlienJumpAccel	5.0f
+#define AlienMaxJumpXZSpeed 20.0f
 
 //AI 시각 범위
 #define AISIGHTRANGE	15.f

@@ -25,6 +25,8 @@ void GoalThink::Arbitrate()
 	else {
 		AddSubgoal(new WanderForPlayerGoal(m_pOwner));
 	}
+
+
 }
 
 void GoalThink::Activate()
@@ -38,25 +40,31 @@ void GoalThink::Activate()
 int GoalThink::Process()
 {
 	ActivateIfInactive();
-
+	static int a = 0;
 	int SubgoalStatus = ProcessSubGoals();
 
+
+
+	//타격 받았을때
 	if (m_pOwner->m_bHitted) {
 		AddSubgoal(new HittedGoal(m_pOwner,0.5f));
 		m_pOwner->m_bHitted = false;
 	}
 
-	if (m_pOwner->m_HP < 1 && m_SubGoals.front()->GetGoalType() != Deaded_Goal) {
+	// 죽었을때
+	else if (m_pOwner->m_HP < 1 && m_SubGoals.front()->GetGoalType() != Deaded_Goal) {
 		AddSubgoal(new DeadedGoal(m_pOwner, 3.0f));
 	}
 
-	if (SubgoalStatus == completed || SubgoalStatus == failed)
-	{
+
+
+
+
+	if (SubgoalStatus == completed || SubgoalStatus == failed){
 	
 		m_iStatus = inactive;
 		
 	}
-
 
 	return m_iStatus;
 }

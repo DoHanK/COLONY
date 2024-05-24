@@ -180,7 +180,7 @@
     <ClInclude Include="AIController.h">
       <Filter>GameHeader\GameAiHeader</Filter>
     </ClInclude>
-    <ClInclude Include="WaitGoal.h">
+    <ClInclude Include="UtilityGoal.h">
       <Filter>GameHeader\GameAiHeader\GoalHeader\SingleGoalHeader</Filter>
     </ClInclude>
     <ClInclude Include="WanderGoal.h">
@@ -206,6 +206,9 @@
     </ClInclude>
     <ClInclude Include="CollisionManager.h">
       <Filter>GameHeader\GameManagerHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="TraceAndAttackGoal.h">
+      <Filter>GameHeader\GameAiHeader\GoalHeader\CompositeGoalHeader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -290,7 +293,7 @@
     <ClCompile Include="AIController.cpp">
       <Filter>GameCpp\GameAiCpp</Filter>
     </ClCompile>
-    <ClCompile Include="WaitGoal.cpp">
+    <ClCompile Include="UtilityGoal.cpp">
       <Filter>GameCpp\GameAiCpp\GoalCpp\SingleGoalCpp</Filter>
     </ClCompile>
     <ClCompile Include="WanderGoal.cpp">
@@ -316,6 +319,9 @@
     </ClCompile>
     <ClCompile Include="CollisionManager.cpp">
       <Filter>GameCpp\GameManagerCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="TraceAndAttackGoal.cpp">
+      <Filter>GameCpp\GameAiCpp\GoalCpp\CompositeGoalCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

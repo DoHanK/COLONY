@@ -16,7 +16,7 @@ public:
 public:
 	AIController(GoalThink* pBrain, AlienSpider* pBody);
 	~AIController() {};
-
+	XMFLOAT3 m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
 
 	//이동관련
 	XMFLOAT2  m_dest;
@@ -26,6 +26,7 @@ public:
 	XMFLOAT3	  m_CrossBetween;
 	//Animation
 	int		  m_AnimationName;
+	int			m_JumpStep;
 public:
 	bool ExecuteGoal(float fTimeElapsed);
 private:
@@ -33,5 +34,8 @@ private:
 	void ExecuteWait(float fTimeElapsed);
 	void ExecuteWanderPath(float fTimeElapsed);
 	void MoveDest(float fTimeElapsed);
+	void JumpDest(float fTimeElapsed);
+
+	void UpdatePosition();
 };
 

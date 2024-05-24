@@ -141,7 +141,6 @@ std::list<XMFLOAT2> PathFinder::QueryPath(XMFLOAT3 ObjectPos)
 		XMPath.push_back(Coord);
 	}
 
-	OutputDebugStringA("길찾기 끝. \n");
 	return XMPath;
 }
 

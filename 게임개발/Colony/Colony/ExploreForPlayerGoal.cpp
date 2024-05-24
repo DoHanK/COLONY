@@ -18,12 +18,12 @@ int ExploreForPlayerGoal::Process()
 
 		if (m_SubGoals.front()->GetGoalType() == Explore_Goal) {
 			RemoveAllSubgoals();
-			AddSubgoal(new TraceGoal(m_pOwner));
+			AddSubgoal(new TraceAndAttack(m_pOwner));
 		}
 	}
 	else {
 
-		if (m_SubGoals.front()->GetGoalType() == Trace_Goal) {
+		if (m_SubGoals.front()->GetGoalType() == TraceAndAttack_Goal) {
 			RemoveAllSubgoals();
 			AddSubgoal(new ExploreGoal(m_pOwner));
 		}

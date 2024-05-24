@@ -143,6 +143,32 @@ enum RootSignatureNum{
 	PARTICLE_TEXTURE
 };
 
+namespace DebugValue {
+
+	inline void PrintVector3(const XMFLOAT3& v) {
+		OutputDebugStringA("x: ");
+		OutputDebugStringA(to_string(v.x).c_str());
+		OutputDebugStringA("y: ");
+		OutputDebugStringA(to_string(v.y).c_str());
+		OutputDebugStringA("z: ");
+		OutputDebugStringA(to_string(v.z).c_str());
+		OutputDebugStringA("  \n ");
+		
+	}
+
+	inline void PrintVector3(const char str[], const XMFLOAT3& v) {
+		OutputDebugStringA(str);
+		OutputDebugStringA("x: ");
+		OutputDebugStringA(to_string(v.x).c_str());
+		OutputDebugStringA("y: ");
+		OutputDebugStringA(to_string(v.y).c_str());
+		OutputDebugStringA("z: ");
+		OutputDebugStringA(to_string(v.z).c_str());
+		OutputDebugStringA("  \n ");
+
+	}
+}
+
 
 //Direct 관련 함수들
 namespace Vector3

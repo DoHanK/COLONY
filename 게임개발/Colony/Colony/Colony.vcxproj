@@ -173,11 +173,12 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TraceAndAttackGoal.h" />
     <ClInclude Include="TraceGoal.h" />
     <ClInclude Include="UIControlHelper.h" />
     <ClInclude Include="UiManager.h" />
     <ClInclude Include="UserDefineType.h" />
-    <ClInclude Include="WaitGoal.h" />
+    <ClInclude Include="UtilityGoal.h" />
     <ClInclude Include="WanderAndWaitGoal.h" />
     <ClInclude Include="WanderForPlayerGoal.h" />
     <ClInclude Include="WanderGoal.h" />
@@ -212,10 +213,11 @@
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TraceAndAttackGoal.cpp" />
     <ClCompile Include="TraceGoal.cpp" />
     <ClCompile Include="UIControlHelper.cpp" />
     <ClCompile Include="UiManager.cpp" />
-    <ClCompile Include="WaitGoal.cpp" />
+    <ClCompile Include="UtilityGoal.cpp" />
     <ClCompile Include="WanderAndWaitGoal.cpp" />
     <ClCompile Include="WanderForPlayerGoal.cpp" />
     <ClCompile Include="WanderGoal.cpp" />

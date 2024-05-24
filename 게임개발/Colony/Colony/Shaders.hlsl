@@ -231,7 +231,6 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
     cColor.rgb *= cIllumination ;
 
-    
    return cColor;
  }
 
@@ -862,7 +861,7 @@ VS_BILLBOARD_OUTPUT VSBILLBOARD(VS_BILLBOARD_INPUT input)
 
 float4 PSBILLBOARD(VS_BILLBOARD_OUTPUT input) : SV_TARGET
 {
-    float4 cColor = BillboardTexture.Sample(gssWrap, input.uv);
+    float4 cColor = pow(BillboardTexture.Sample(gssWrap, input.uv), gammaCorrection);
 
     return (cColor);
 }

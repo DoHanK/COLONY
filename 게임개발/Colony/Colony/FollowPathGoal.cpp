@@ -25,7 +25,6 @@ int FollowPathGoal::Process(){
 
 	if (m_pOwner->m_Path.size() == 0) {
 		m_iStatus = completed;
-		OutputDebugStringA("FollowPathGoal completed");
 	}
 
 	return m_iStatus;

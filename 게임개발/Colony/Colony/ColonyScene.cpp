@@ -231,7 +231,7 @@ void GamePlayScene::BuildDefaultLightsAndMaterials()
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
 	
-	float m_DirectDiffuse = 0.35f;
+	float m_DirectDiffuse = 0.5f;
 	float m_DirectAmbient = 0.35f;
 	float m_DirectSqercular = 0.25f;
 
@@ -503,11 +503,12 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 100; ++j) {
+	for (int j = 0; j < 1; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
-			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
+			//p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
+			p->SetPosition(j, 0.f, 0.f);
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
 			p->SetGhostShader(m_pGhostTraillerShader);
@@ -1042,11 +1043,15 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 		if (GO->m_bActive) {
 			((AlienSpider*)(GO))->Update(fTimeElapsed);
 
-			((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
+			if(((AlienSpider*)(GO))->m_GoalType !=Jump_Goal)
+				((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
+			else if(((AlienSpider*)(GO))->m_pSoul->m_JumpStep >= JUMP_LANDING)
+				((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
 			GO->Animate(fTimeElapsed);
+			
 		}
 	}
-
+	m_pCollisionManager->CollisionEnemyToStaticObeject();
 
 	m_pCollisionManager->CollisionPlayerToStaticObeject();
 
@@ -1096,41 +1101,42 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 	
 	for (auto& GO : m_pGameObject) {
 
-		if (((AlienSpider*)(GO))->m_pPlayer != NULL) {
+		if (GO->m_bActive) {
+			if (((AlienSpider*)(GO))->m_pPlayer != NULL) {
 
-			XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
-			xmfloat3 = XMFLOAT3(0.0f, 1.0, 0.0f);
+				XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+				xmfloat3 = XMFLOAT3(0.0f, 1.0, 0.0f);
+				pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+				XMFLOAT3 POS(m_pPlayer->m_xmf4x4World._41, m_pPlayer->m_xmf4x4World._42 + AISIGHTHEIGHT, m_pPlayer->m_xmf4x4World._43);
+				xmf4x4World._41 = POS.x;
+				xmf4x4World._42 = POS.y;
+				xmf4x4World._43 = POS.z;
+
+				XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+				pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+				m_pTestBox->Render(pd3dCommandList, 0);
+			}
+
+			xmfloat3 = XMFLOAT3(0.0f, 0.0, 1.0f);
 			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-			XMFLOAT3 POS(m_pPlayer->m_xmf4x4World._41, m_pPlayer->m_xmf4x4World._42 + AISIGHTHEIGHT, m_pPlayer->m_xmf4x4World._43);
-			xmf4x4World._41 = POS.x;
-			xmf4x4World._42 = POS.y;
-			xmf4x4World._43 = POS.z;
 
+			xmf4x4World = GO->m_xmf4x4World;
+			xmf4x4World._42 = AISIGHTHEIGHT;
 			XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
 			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-			m_pTestBox->Render(pd3dCommandList,0);
+			GO->PerceptRangeRender(pd3dCommandList);
+
+			xmfloat3 = XMFLOAT3(1.0f, 0.0, 0.0f);
+			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+			//传 饭捞历
+			((AlienSpider*)(GO))->PerceptionBindRender(pd3dCommandList);
+
+			xmfloat3 = XMFLOAT3(1.0f, 0.0, 0.0f);
+			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+			XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+			GO->BoudingBoxRender(pd3dCommandList, true);
 		}
-
-		xmfloat3 = XMFLOAT3(0.0f, 0.0, 1.0f);
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-
-		xmf4x4World = GO->m_xmf4x4World;
-		xmf4x4World._42 = AISIGHTHEIGHT;
-		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-		GO->PerceptRangeRender(pd3dCommandList);
-
-		xmfloat3 = XMFLOAT3(1.0f, 0.0, 0.0f);
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-		//传 饭捞历
-		((AlienSpider*)(GO))->PerceptionBindRender(pd3dCommandList);
-
-		 xmfloat3=XMFLOAT3(1.0f, 0.0, 0.0f);
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-		XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-		GO->BoudingBoxRender(pd3dCommandList, true);
-		
 	}
 
 	if (true) {
@@ -1143,8 +1149,9 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
 		for (auto& GO : m_pGameObject) {
 
-
-			((AlienSpider*)(GO))->RouteRender(pd3dCommandList);
+			if (GO->m_bActive) {
+				((AlienSpider*)(GO))->RouteRender(pd3dCommandList);
+			}
 		}
 
 
@@ -1522,4 +1529,3 @@ void GamePlayScene::TestCameraRender(ID3D12GraphicsCommandList* pd3dCommandList,
 	
 
 }
-

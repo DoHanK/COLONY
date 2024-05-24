@@ -1,6 +1,6 @@
 #include "ExploreGoal.h"
 #include "FollowPathGoal.h"
-#include "WaitGoal.h"
+#include "UtilityGoal.h"
 void ExploreGoal::Activate()
 {
 

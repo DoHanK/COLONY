@@ -377,6 +377,9 @@ public:
 	GameObject* m_pChild = NULL;
 	GameObject* m_pSibling = NULL;
 public:
+	XMFLOAT3					m_xmfPre3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3					m_xmfPre3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	bool						m_bActive = true;
 	bool						m_bHitted = false;
 	bool						m_bVisible = true;
@@ -389,7 +392,7 @@ public:
 	void SetChild(GameObject* pChild, bool bReferenceUpdate = false);
 
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
-
+	virtual void RollbackPosition();
 	virtual void MergehierarchyBoundingBox(BoundingOrientedBox& outBox);
 	virtual void OnPrepareAnimate() { }
 	virtual void Animate(float fTimeElapsed);
@@ -426,6 +429,7 @@ public:
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
 	void MoveForward(float fDistance = 1.0f);
+	void AddPostion(const XMFLOAT3& Pos);
 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);

@@ -28,6 +28,7 @@ int TraceGoal::Process()
 
 		m_pOwner->m_pSoul->m_dest = XMFLOAT2(PlayerPos.x, PlayerPos.z);
 
+
 	}
 	else { // 플레이어를 보지 못함.
 		m_iStatus = failed;

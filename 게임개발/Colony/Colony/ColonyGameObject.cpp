@@ -587,6 +587,13 @@ void GameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition)
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->SetTrackPosition(nAnimationTrack, fPosition);
 }
 
+void GameObject::RollbackPosition()
+{
+	m_xmf4x4ToParent._41 = m_xmfPre3Position.x;
+	m_xmf4x4ToParent._42 = m_xmfPre3Position.y;
+	m_xmf4x4ToParent._43 = m_xmfPre3Position.z;
+}
+
 void GameObject::MergehierarchyBoundingBox(BoundingOrientedBox& outBox)
 {
 	if (m_pMesh) {
@@ -864,6 +871,13 @@ void GameObject::MoveForward(float fDistance)
 	XMFLOAT3 xmf3Look = GetLook();
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fDistance);
 	GameObject::SetPosition(xmf3Position);
+}
+
+void GameObject::AddPostion(const XMFLOAT3& Pos)
+{
+		m_xmf4x4ToParent._41 += Pos.x;
+		m_xmf4x4ToParent._42 += Pos.y;
+		m_xmf4x4ToParent._43 += Pos.z;
 }
 
 void GameObject::Rotate(float fPitch, float fYaw, float fRoll)

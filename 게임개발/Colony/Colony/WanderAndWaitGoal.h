@@ -1,6 +1,6 @@
 #pragma once
 #include "CompositeGoal.h"
-#include  "WaitGoal.h"
+#include  "UtilityGoal.h"
 #include "WanderGoal.h"
 #include "AlienSpider.h"
 

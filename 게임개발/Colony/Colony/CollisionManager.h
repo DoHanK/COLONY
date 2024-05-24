@@ -255,7 +255,7 @@ public:
 
 		pos = m_pOwner->FramePos[AlienboneIndex::DEF_HIPS];
 		m_Entire.Center = pos;
-
+		m_Entire.Center.y += 0.75f;
 	}
 
 	void UpdateBodyBouding() {
@@ -346,6 +346,7 @@ public:
 
 	CapsuleMesh* m_pPlayerCapsuleMesh=NULL;
 	XMFLOAT3 m_PlayerCapsulePos;
+
 	int EffectIndex[11] = { 0,1,2,5,8,9,10,11,12,13,16 };
 public:
 
@@ -372,10 +373,12 @@ public:
 
 	void CheckVisiableEnemy();
 
+
 	//충돌 처리 함수들
 	bool CollisionPlayerToStaticObeject();
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList);
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard);
+	void CollisionEnemyToStaticObeject();    
 
 
 	void ReleaseUploadBuffers();

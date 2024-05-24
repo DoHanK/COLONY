@@ -5,6 +5,8 @@
 #include "CompositeGoal.h"
 #include "ExploreGoal.h"
 #include "TraceGoal.h"
+#include "TraceAndAttackGoal.h"
+
 class AlienSpider;
 
 class ExploreForPlayerGoal : public CompositeGoal<AlienSpider> {
