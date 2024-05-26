@@ -13,13 +13,14 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 		//애니메이션
 		if (!m_pAnimationControl->isSameState(AlienAnimationName::Run_2)) {
 			m_pAnimationControl->ChangeAnimation(Run_2);
+			m_pAnimationControl->SetTrackSpeed(NOW_TRACK, 2.0f);
+			m_pAnimationControl->SetTrackSpeed(PRE_TRACK, 2.0f);
 		}
 
 		//연산
 		ExecuteFollowPath(fTimeElapsed);
 	}
 	else if (m_pBody->m_GoalType == Wait_Goal) {
-
 
 		if ((!m_pAnimationControl->isSameState(AlienAnimationName::Idle_1)) &&
 			(!m_pAnimationControl->isSameState(AlienAnimationName::Idle_2)) &&
@@ -39,6 +40,8 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 		//애니메이션
 		if (!m_pAnimationControl->isSameState(AlienAnimationName::Run_2)) {
 			m_pAnimationControl->ChangeAnimation(Run_2);
+			m_pAnimationControl->SetTrackSpeed(NOW_TRACK, 2.0f);
+			m_pAnimationControl->SetTrackSpeed(PRE_TRACK, 2.0f);
 		}
 		MoveDest(fTimeElapsed);
 	}
@@ -114,13 +117,12 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 
 
 		}
-		else if (m_pAnimationControl->isAnimationPlayProgress(Jump, 0.7f) && m_JumpStep == JUMP_LANDING) {
-			m_JumpStep++;
+		else if (m_pAnimationControl->isAnimationPlayProgress(AlienAnimationName::Jump, 0.7f) && m_JumpStep == JUMP_LANDING) {
+			m_JumpStep = JUMP_END;
 
 		}
 
 		if(m_JumpStep < JUMP_LANDING) JumpDest(fTimeElapsed);
-		m_pBody->m_WaitingTime += fTimeElapsed;
 
 	}
 
@@ -132,6 +134,7 @@ void AIController::ExecuteFollowPath(float fTimeElapsed)
 {
 	if (m_pBody) {
 
+		m_pBody->m_StuckTime += fTimeElapsed; 
 		m_pBody->m_WaitCoolTime += fTimeElapsed;
 
 		XMFLOAT2 ObjectPos{ m_pBody->GetPosition().x , m_pBody->GetPosition().z };
@@ -148,7 +151,7 @@ void AIController::ExecuteFollowPath(float fTimeElapsed)
 				m_dest = m_pBody->m_Path.front();
 				m_pBody->m_Path.pop_front();
 			}
-
+			m_pBody->m_StuckTime = 0.f;
 
 		}
 
@@ -216,14 +219,16 @@ void AIController::MoveDest(float fTimeElapsed){
 		else
 			m_pBody->m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(0.0f), XMConvertToRadians(-Rotation), 0.0f), m_pBody->m_xmf4x4ToParent);
 	}
-	m_pBody->m_xmf3Velocity.x = 0;
-	m_pBody->m_xmf3Velocity.z = 0;
+
 	if (angle < 30) {
+		m_pBody->m_xmf3Velocity.x = 0;
+		m_pBody->m_xmf3Velocity.z = 0;
 		//이동
 		Distance = XM2CalDis(m_dest, ObjectPos);
-
+		m_pBody->m_xmf3Velocity.x += Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false).x;
+		m_pBody->m_xmf3Velocity.z += Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false).z;
 		//속력 = 시간 * 가속도
-		m_pBody->m_xmf3Velocity = Vector3::Add(m_pBody->m_xmf3Velocity, Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false));
+		//m_pBody->m_xmf3Velocity = Vector3::Add(m_pBody->m_xmf3Velocity, Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false));
 	}
 	
 
@@ -234,16 +239,34 @@ void AIController::JumpDest(float fTimeElapsed)
 {
 
 	// 객체의 이동 및 회전
-	XMFLOAT2 ObjectPos{ m_pBody->GetPosition().x , m_pBody->GetPosition().z };
-	float Distance = XM2CalDis(m_dest, ObjectPos);
+	XMFLOAT2 ObjectPos;
+	float Distance ;
 
-	XMFLOAT3 XM3ObjectPos = m_pBody->GetPosition();
-	XMFLOAT3 XM3DestPos{ m_dest.x,0,m_dest.y };
+	XMFLOAT3 XM3ObjectPos;
+	XMFLOAT3 XM3DestPos;
+	if (m_pBody->m_pPlayer) {
+		 ObjectPos = XMFLOAT2{ m_pBody->GetPosition().x , m_pBody->GetPosition().z };
+		 Distance = XM2CalDis(m_dest, ObjectPos);
 
-	//목적지로 가야하는 방향
-	m_dir = Vector3::Subtract(XM3DestPos, XM3ObjectPos);
-	m_dir = Vector3::Normalize(m_dir);
+		 XM3ObjectPos = m_pBody->GetPosition();
+		 XM3DestPos= XMFLOAT3{ m_dest.x,0,m_dest.y };
 
+		//목적지로 가야하는 방향
+		m_dir = Vector3::Subtract(XM3DestPos, XM3ObjectPos);
+		m_dir = Vector3::Normalize(m_dir);
+	}
+	else {
+	
+		ObjectPos = XMFLOAT2{ m_pBody->GetPosition().x , m_pBody->GetPosition().z };
+		Distance = XM2CalDis(m_dest, ObjectPos);
+
+		XM3ObjectPos = m_pBody->GetPosition();
+		XM3DestPos = XMFLOAT3{ m_dest.x,0,m_dest.y };
+		XM3ObjectPos.y = 0;
+		//목적지로 가야하는 방향
+		m_dir = Vector3::Subtract(XM3DestPos, XM3ObjectPos);
+		m_dir = Vector3::Normalize(m_dir);
+	}
 
 	//회전
 	XMFLOAT3 ObjectDir = XMFLOAT3(m_pBody->GetLook());
@@ -296,7 +319,6 @@ void AIController::JumpDest(float fTimeElapsed)
 		m_pBody->m_xmf3Velocity.x += Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false).x;
 		m_pBody->m_xmf3Velocity.z += Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false).z;
 
-		DebugValue::PrintVector3("속력 측정", m_pBody->m_xmf3Velocity);
 
 
 

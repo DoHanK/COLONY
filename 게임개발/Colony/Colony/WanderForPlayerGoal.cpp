@@ -37,6 +37,6 @@ int WanderForPlayerGoal::Process()
 
 void WanderForPlayerGoal::Terminate()
 {
-
+	RemoveAllSubgoals();
 
 }

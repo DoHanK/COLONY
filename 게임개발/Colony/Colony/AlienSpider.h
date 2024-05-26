@@ -53,7 +53,7 @@ public:
 	float						m_WaitingTime = 0;
 	float						m_WaitCoolTime = 0;
 	float						m_EndureLevel;
-
+	float						m_StuckTime = 0.0f;
 
 	//ÀÎ½Ä
 	GameObject*		m_pHead = NULL;

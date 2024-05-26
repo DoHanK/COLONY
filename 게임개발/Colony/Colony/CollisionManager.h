@@ -225,7 +225,8 @@ public:
 class AliensBoudingBox:public Collision {
 public:
 	AliensBoudingBox(GameObject* pOwner) :Collision(pOwner) {
-		m_Entire.Radius = 1.5f; 
+		m_Obstable.Radius = 0.8f;
+		m_Entire.Radius = 1.5f;
 		m_Bodys[0].Radius = 0.3f; //DEF_SPINE_1
 		m_Bodys[1].Radius = 0.3f; //DEF_CHEST
 		m_Bodys[2].Radius = 0.2f; //DEF_NECK_1
@@ -243,6 +244,7 @@ public:
 		m_legs[7].Radius = 0.2f; //DEF_TAIL_001; 
 	}
 public:
+	BoundingSphere m_Obstable; 
 	BoundingSphere m_Entire; //DEF-Hip의 정보를 가져옴
 	BoundingSphere m_Bodys[6]; // DEF_SPINE_1 ,DEF_CHEST ,DEF_NECK_1 ,DEF_HEAD , DEF_TAIL ,DEF_TAIL_001
 	BoundingSphere m_legs[8]; // DEF_LEG_BACK_02_L			DEF_LEG_BACK_02_R		DEF_LEG_FRONT_02_L  
@@ -256,6 +258,16 @@ public:
 		pos = m_pOwner->FramePos[AlienboneIndex::DEF_HIPS];
 		m_Entire.Center = pos;
 		m_Entire.Center.y += 0.75f;
+	}
+
+	void UpdateCollisionDetectBouding() {
+
+
+		XMFLOAT3 pos;
+
+		pos = m_pOwner->FramePos[AlienboneIndex::DEF_HIPS];
+		m_Obstable.Center = pos;
+	
 	}
 
 	void UpdateBodyBouding() {

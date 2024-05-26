@@ -103,6 +103,7 @@ void DeadedGoal::Terminate()
 	m_pOwner->m_pSkinnedAnimationController->SetTrackSpeed(PRE_TRACK, 1.0f);
 }
 
+
 AttackGoal::AttackGoal(AlienSpider* pOwner, float WaitingTime) : Goal(pOwner, Attack_Goal), m_time(WaitingTime)
 {
 
@@ -137,11 +138,11 @@ void AttackGoal::Terminate()
 
 }
 
+
 JumpGoal::JumpGoal(AlienSpider* pOwner, float WaitingTime) : Goal(pOwner, Jump_Goal), m_time(WaitingTime) {
 
 
 }
-
 
 JumpGoal::~JumpGoal()
 {
@@ -153,6 +154,8 @@ void JumpGoal::Activate()
 	m_iStatus = active;
 	m_pOwner->m_pSoul->m_JumpStep = 0;
 	m_pOwner->m_xmf3Velocity.y += 10.f;
+	m_pOwner->m_pBrain->m_bJump = true;
+
 }
 
 int JumpGoal::Process()
@@ -166,17 +169,21 @@ int JumpGoal::Process()
 
 		m_pOwner->m_pSoul->m_dest = XMFLOAT2(PlayerPos.x, PlayerPos.z);
 
-		if (m_pOwner->m_pSoul->m_JumpStep == JUMP_END) {
-
-			m_iStatus = completed;
-		}
+	} 
+	else {
+		m_iStatus = completed;
 	}
 
+	if (m_pOwner->m_pSoul->m_JumpStep == JUMP_END) {
+		m_iStatus = completed;
+	}
 	return m_iStatus;
 }
 
  
 void JumpGoal::Terminate()
 {
-
+	m_pOwner->m_pBrain->m_bJump = false;
 }
+
+

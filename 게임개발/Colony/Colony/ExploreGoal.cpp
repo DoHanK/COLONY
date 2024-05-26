@@ -29,6 +29,6 @@ int ExploreGoal::Process()
 
 void ExploreGoal::Terminate()
 {
-
+	RemoveAllSubgoals();
 	
 }

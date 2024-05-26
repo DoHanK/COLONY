@@ -37,6 +37,6 @@ int ExploreForPlayerGoal::Process()
 void ExploreForPlayerGoal::Terminate()
 {
 
-
+	RemoveAllSubgoals();
 }
 

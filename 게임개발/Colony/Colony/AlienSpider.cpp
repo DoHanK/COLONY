@@ -237,7 +237,7 @@ void AlienSpider::UpdatePosition(float fTimeElapsed)
 	// 
 	//¸¶Âû°è¼ö
 	float  fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	float fMaxVelocityXZ = 10.f;
+	float fMaxVelocityXZ = 5.f;
 
 	if (fLength > fMaxVelocityXZ)
 	{

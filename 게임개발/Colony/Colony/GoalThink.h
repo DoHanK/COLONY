@@ -11,7 +11,7 @@
 #include "WanderAndWaitGoal.h"
 #include "ExploreForPlayerGoal.h"
 #include "WanderForPlayerGoal.h"
-
+#include "UtilityGoal.h"
 class AlienSpider;
 
 
@@ -27,6 +27,9 @@ class GoalThink :public CompositeGoal<AlienSpider>{
 private:
 	std::vector<GoalEvalutor*>  m_GoalEvalutors;
 public:
+	bool		m_NeedJump = false;
+	bool		m_bJump = false;
+
 	GoalThink(AlienSpider* pOwner);
 	virtual ~GoalThink();
 

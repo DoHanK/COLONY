@@ -38,4 +38,5 @@ int WanderAndWaitGoal::Process()
 
 void WanderAndWaitGoal::Terminate()
 {
+	RemoveAllSubgoals();
 }

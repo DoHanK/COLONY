@@ -220,6 +220,73 @@ std::list<XMFLOAT2> PathFinder::QueryClosePath(XMFLOAT3 ObjectPos)
 	
 }
 
+XMFLOAT2 PathFinder::QueryCloseRandomPos(XMFLOAT3 ObjectPos)
+{
+	float Min = FLT_MAX;
+	//시작 지점이 유효하지 않을때
+
+	int StartIndex = BringIndexCell(ObjectPos);
+	int nodeX = 0;
+	int nodeY = 0;
+
+
+
+		XMFLOAT2  StartCoord = XMFLOAT2(ObjectPos.x, ObjectPos.z);
+
+		for(auto& indedx : m_InvalidNodes){
+			if (m_Cell[indedx].m_Pass) {
+
+				XMFLOAT2  DestCoord = XMFLOAT2(m_Cell[indedx].m_BoundingBox.Center.x, m_Cell[indedx].m_BoundingBox.Center.z);
+
+				float fmin = XM2CalDis(StartCoord, DestCoord);
+
+				if (fmin < Min) {
+					Min = fmin;
+					StartIndex = indedx;
+
+				}
+
+			}
+		}
+
+	
+	nodeX = StartIndex % m_widthCount;
+	nodeY = StartIndex / m_widthCount;
+
+
+
+	//전방 0~ 1.6 * range수만큼의 유효셀 찾기
+	std::list<XMFLOAT2> XMPath;
+	for (int range = 1; range < 8 ; ++range) {
+
+		for (int i = -1; i < 2; ++i)
+		{
+			for (int j = -1; j < 2; ++j)
+			{
+				if ((i == 0) && (j == 0)) continue;
+
+				int X = nodeX + j * range;
+				int Y = nodeY + i * range;
+
+				if (ValidAdjacnet(X, Y)) { //유효하면
+					int index = X + Y * m_widthCount;
+					if (m_Cell[index].m_Pass) {
+						XMPath.push_back(XMFLOAT2(m_Cell[index].m_BoundingBox.Center.x, m_Cell[index].m_BoundingBox.Center.z));
+					}
+
+				}
+
+
+			}
+		}
+
+	}
+
+	 XMFLOAT2 tempPos = XMPath.back();	
+	 return tempPos;
+
+}
+
 
 void AStarAlgoritm::Search()
 {

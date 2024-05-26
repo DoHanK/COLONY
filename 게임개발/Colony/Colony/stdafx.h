@@ -167,6 +167,20 @@ namespace DebugValue {
 		OutputDebugStringA("  \n ");
 
 	}
+	inline void Printfloat (const char str[], const float& f) {
+		OutputDebugStringA(str);
+		OutputDebugStringA("실수값: ");
+		OutputDebugStringA(to_string(f).c_str());
+		OutputDebugStringA("\n ");
+
+	}
+	inline void Printfloat (const float& f) {
+
+		OutputDebugStringA("실수값: ");
+		OutputDebugStringA(to_string(f).c_str());
+		OutputDebugStringA("\n ");
+
+	}
 }
 
 

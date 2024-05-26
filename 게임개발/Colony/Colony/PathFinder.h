@@ -34,7 +34,7 @@ public:
 	
 	std::list<XMFLOAT2> QueryPath(XMFLOAT3 ObjectPos);
 	std::list<XMFLOAT2> QueryClosePath(XMFLOAT3 ObjectPos);
-
+	XMFLOAT2 QueryCloseRandomPos(XMFLOAT3 ObjectPos);
 	
 	bool ValidNode(int ind) { 
 		if (ind == -1) return false;

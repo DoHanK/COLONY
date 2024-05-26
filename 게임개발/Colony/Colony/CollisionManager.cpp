@@ -363,9 +363,9 @@ void CollisionManager::CollisionEnemyToStaticObeject() {
 		int inputcount = 0;
 	for (const auto& a : m_StaticObjects) {
 			//전체 바운딩박스 이동
-			E->UpdateEntireBouding();
-
-			if (E->m_Entire.Intersects(((BOBBox*)a)->m_boundingbox)) {
+		E->UpdateCollisionDetectBouding();
+			
+			if (E->m_Obstable.Intersects(((BOBBox*)a)->m_boundingbox)) {
 				XMFLOAT3 m_EnemyPos = E->m_Entire.Center;
 
 				//충돌면 구하기
@@ -430,60 +430,57 @@ void CollisionManager::CollisionEnemyToStaticObeject() {
 					}
 				}
 
-				//살아있을때만 적용
-				if (E->m_pOwner->m_bActive == true) {
-					float dotProduct = Vector3::DotProduct(E->m_pOwner->m_xmfPre3Velocity, PLANENORMAL[selectNum]);
-					if (dotProduct <= EPSILON) {
-						XMFLOAT3 slidingVector = Vector3::Subtract(E->m_pOwner->m_xmfPre3Velocity, { PLANENORMAL[selectNum].x * dotProduct, PLANENORMAL[selectNum].y * dotProduct, PLANENORMAL[selectNum].z * dotProduct });
-						(E->m_pOwner)->RollbackPosition();
-						XMFLOAT3 TempPos = XMFLOAT3(E->m_pOwner->m_xmf4x4ToParent._41, E->m_pOwner->m_xmf4x4ToParent._42, E->m_pOwner->m_xmf4x4ToParent._43);
-						(E->m_pOwner)->m_xmfPre3Position = TempPos;
-						(E->m_pOwner)->m_xmfPre3Velocity = slidingVector;
-						(E->m_pOwner)->AddPostion(slidingVector);
+				if ((((AlienSpider*)E->m_pOwner)->m_GoalType != Wander_Goal)&& 
+					(((AlienSpider*)E->m_pOwner)->m_GoalType != FollowPath_Goal) 
+					) {
+					//살아있을때만 적용
+					if (E->m_pOwner->m_bActive == true) {
+						float dotProduct = Vector3::DotProduct(E->m_pOwner->m_xmfPre3Velocity, PLANENORMAL[selectNum]);
+						if (dotProduct <= EPSILON) {
+							XMFLOAT3 slidingVector = Vector3::Subtract(E->m_pOwner->m_xmfPre3Velocity, { PLANENORMAL[selectNum].x * dotProduct, PLANENORMAL[selectNum].y * dotProduct, PLANENORMAL[selectNum].z * dotProduct });
+							(E->m_pOwner)->RollbackPosition();
+							XMFLOAT3 TempPos = XMFLOAT3(E->m_pOwner->m_xmf4x4ToParent._41, E->m_pOwner->m_xmf4x4ToParent._42, E->m_pOwner->m_xmf4x4ToParent._43);
+							(E->m_pOwner)->m_xmfPre3Position = TempPos;
+							(E->m_pOwner)->m_xmfPre3Velocity = slidingVector;
+							(E->m_pOwner)->AddPostion(slidingVector);
 
+						}
 					}
-				}
-	
 
+				}
 				if (selectNum == 4) {
 
-					DebugValue::PrintVector3("체킹 포지션", XMFLOAT3(E->m_pOwner->m_xmf4x4ToParent._41,
-						E->m_pOwner->m_xmf4x4ToParent._42,
-						E->m_pOwner->m_xmf4x4ToParent._43));
 				
-					if (((AlienSpider*)E->m_pOwner)->m_pSoul->m_JumpStep == JUMPING && E->m_pOwner->m_xmf3Velocity.y < 0) {
 				
-						
-		
+					if (((AlienSpider*)E->m_pOwner)->m_pSoul->m_JumpStep == JUMPING &&
+					((AlienSpider*)E->m_pOwner)->m_pSoul->m_JumpStep != JUMP_LANDING &&
+					((AlienSpider*)E->m_pOwner)->m_pSoul->m_JumpStep != JUMP_END &&
+						 E->m_pOwner->m_xmf3Velocity.y < 0) {
+
 						((AlienSpider*)E->m_pOwner)->m_pSoul->m_JumpStep = JUMP_LANDING;
 
 					}
 
 					if (((AlienSpider*)E->m_pOwner)->m_GoalType != Jump_Goal) {
-						(E->m_pOwner)->m_xmfPre3Position.y = PLANECENTER[4].y;
-						if (E->m_pOwner->m_xmf3Velocity.y < 0) {
-							(E->m_pOwner)->m_xmf3Velocity.y = 0;
-							(E->m_pOwner)->m_xmfPre3Velocity.y = 0;
-
+	
+						if (PLANECENTER[4].y > 0.5f) {
+							((AlienSpider*)E->m_pOwner)->m_pBrain->m_NeedJump = true;
+							OutputDebugStringA("점프가 필요하다 \n");
 						}
-
-						(E->m_pOwner)->m_xmf4x4ToParent._42 = PLANECENTER[4].y;
-				
 					}
 					else {
 						if (((AlienSpider*)E->m_pOwner)->m_pSoul->m_JumpStep == JUMP_LANDING) {
 
-							(E->m_pOwner)->m_xmfPre3Position.y = PLANECENTER[4].y;
-							if (E->m_pOwner->m_xmf3Velocity.y < 0) {
-								(E->m_pOwner)->m_xmf3Velocity.y = 0;
-								(E->m_pOwner)->m_xmfPre3Velocity.y = 0;
-
-							}
-
 						}
-							(E->m_pOwner)->m_xmf4x4ToParent._42 = PLANECENTER[4].y;
+							
 					}
+					(E->m_pOwner)->m_xmfPre3Position.y = PLANECENTER[4].y;
+					if (E->m_pOwner->m_xmf3Velocity.y < 0) {
+						(E->m_pOwner)->m_xmf3Velocity.y = 0;
+						(E->m_pOwner)->m_xmfPre3Velocity.y = 0;
 
+					}
+					(E->m_pOwner)->m_xmf4x4ToParent._42 = PLANECENTER[4].y;
 					if (E->m_pOwner->m_bActive == false && inputcount == 0 ) {
 						inputcount++;
 						m_RemoveObjects.push_back(E);
@@ -527,10 +524,12 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 	//1차 충돌 처리
 	std::list<pair<AliensBoudingBox*, float>> crushlist;
 	for (AliensBoudingBox* enemy : m_EnemyObjects) {
-		if (enemy->m_Entire.Intersects(BulletPos, BulletDir, dis)) {
+		if (((AlienSpider*)enemy->m_pOwner)->m_GoalType != Deaded_Goal) {
+			if (enemy->m_Entire.Intersects(BulletPos, BulletDir, dis)) {
 
-			crushlist.emplace_back(enemy, dis);
+				crushlist.emplace_back(enemy, dis);
 
+			}
 		}
 	}
 
@@ -620,24 +619,40 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 
 
 	if (m_pPlayerCapsuleMesh) m_pPlayerCapsuleMesh->Render(pd3dCommandList, 0);
-	XMFLOAT3 xmfloat3 = XMFLOAT3(0, 1, 0);
+	 XMFLOAT3 xmfloat3 = XMFLOAT3(0, 1, 0);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
 	xmf4x4World = GetSphereMatrix((BCapsule*)m_pPlayer);
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 	if(m_psphere) m_psphere->Render(pd3dCommandList,0);
 
+
+
 	for ( auto& a : m_EnemyObjects) {
+
+		a->UpdateCollisionDetectBouding();
 		a->UpdateEntireBouding();
 		a->UpdateBodyBouding();
 		a->UPdateLegBounding();
 	}
 	//적의 바운디 박스
 	for (const auto& a : m_EnemyObjects) {
+		xmfloat3 = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+
+		xmf4x4World = GetSphereMatrix(a->m_Obstable.Radius, a->m_Obstable.Center);
+		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+		if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
+
+		xmfloat3 = XMFLOAT3(1.0f, 0.0f, 0.0f);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+
 		xmf4x4World = GetSphereMatrix(a->m_Entire.Radius, a->m_Entire.Center);
 		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
 		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 		if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
+
 		//세부 사항
 		for (int i = 0; i < 6; i++) {
 			xmf4x4World = GetSphereMatrix(a->m_Bodys[i].Radius, a->m_Bodys[i].Center);

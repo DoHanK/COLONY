@@ -44,19 +44,29 @@ int GoalThink::Process()
 	int SubgoalStatus = ProcessSubGoals();
 
 
+	if (m_SubGoals.size() > 0) {
+		//타격 받았을때
+		if (m_pOwner->m_bHitted) {
+			AddSubgoal(new HittedGoal(m_pOwner, 0.5f));
+			m_pOwner->m_bHitted = false;
+		}
 
-	//타격 받았을때
-	if (m_pOwner->m_bHitted) {
-		AddSubgoal(new HittedGoal(m_pOwner,0.5f));
-		m_pOwner->m_bHitted = false;
+		// 죽었을때
+		else if (m_pOwner->m_HP < 1 && m_SubGoals.front()->GetGoalType() != Deaded_Goal) {
+			AddSubgoal(new DeadedGoal(m_pOwner, 3.0f));
+		}
+		if (m_NeedJump && m_SubGoals.front()->GetGoalType() != Deaded_Goal
+			&& m_SubGoals.front()->GetGoalType() != Jump_Goal
+			&& m_bJump == false
+			&& m_pOwner->m_StuckTime > 2.0f)
+		{
+			m_pOwner->m_WaitCoolTime = 0;
+			m_pOwner->m_pSoul->m_dest = m_pOwner->m_pPathFinder->QueryCloseRandomPos(m_pOwner->GetPosition());
+			AddSubgoal(new JumpGoal(m_pOwner, 0.0f));
+			m_NeedJump = false;
+		}
+
 	}
-
-	// 죽었을때
-	else if (m_pOwner->m_HP < 1 && m_SubGoals.front()->GetGoalType() != Deaded_Goal) {
-		AddSubgoal(new DeadedGoal(m_pOwner, 3.0f));
-	}
-
-
 
 
 

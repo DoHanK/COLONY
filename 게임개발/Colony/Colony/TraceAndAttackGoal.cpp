@@ -41,7 +41,7 @@ int TraceAndAttack::Process()
 
 void TraceAndAttack::Terminate()
 {
-
+	RemoveAllSubgoals();
 }
 
 
