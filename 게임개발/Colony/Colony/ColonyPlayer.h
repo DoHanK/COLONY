@@ -92,6 +92,7 @@ public:
 	~Player();
 
 	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3					m_xmf3FinalPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	//Body
 	GameObject* m_RightHand;

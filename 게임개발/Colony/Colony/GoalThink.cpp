@@ -44,6 +44,8 @@ int GoalThink::Process()
 	int SubgoalStatus = ProcessSubGoals();
 
 
+	
+
 	if (m_SubGoals.size() > 0) {
 		//타격 받았을때
 		if (m_pOwner->m_bHitted) {
@@ -55,6 +57,9 @@ int GoalThink::Process()
 		else if (m_pOwner->m_HP < 1 && m_SubGoals.front()->GetGoalType() != Deaded_Goal) {
 			AddSubgoal(new DeadedGoal(m_pOwner, 3.0f));
 		}
+
+
+
 		if (m_NeedJump && m_SubGoals.front()->GetGoalType() != Deaded_Goal
 			&& m_SubGoals.front()->GetGoalType() != Jump_Goal
 			&& m_bJump == false
@@ -65,6 +70,7 @@ int GoalThink::Process()
 			AddSubgoal(new JumpGoal(m_pOwner, 0.0f));
 			m_NeedJump = false;
 		}
+
 
 	}
 

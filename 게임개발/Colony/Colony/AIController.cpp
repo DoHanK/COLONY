@@ -82,12 +82,14 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 		m_pBody->m_WaitingTime += fTimeElapsed;
 	}
 	else if (m_pBody->m_GoalType == Attack_Goal) {
-		if (!m_pAnimationControl->isSameState(AlienAnimationName::Attack_8)
+
+		if (!m_pAnimationControl->isSameState(AlienAnimationName::Attack_2)
 			) {
-			m_pAnimationControl->ChangeAnimation(Attack_8);
+			m_pAnimationControl->ChangeAnimation(Attack_2);
 			m_pAnimationControl->SetTrackSpeed(NOW_TRACK, 1.0f);
 			m_pAnimationControl->SetTrackSpeed(PRE_TRACK, 1.0f);
 		}
+
 		m_pBody->m_WaitingTime += fTimeElapsed;
 
 	}
@@ -96,7 +98,6 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 		//점프
 		if (!m_pAnimationControl->isSameState(AlienAnimationName::Jump) && m_JumpStep == JUMP_PREPARE) {
 			m_pAnimationControl->ChangeAnimation(AlienAnimationName::Jump);
-			OutputDebugStringA("점프시작\n");
 			m_JumpStep = JUMPING;
 			m_pAnimationControl->SetTrackSpeed(NOW_TRACK, 2.0f);
 			m_pAnimationControl->SetTrackSpeed(PRE_TRACK, 2.0f);
@@ -115,16 +116,15 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 			m_pAnimationControl->ChangeAnimation(AlienAnimationName::Jump);
 			m_pAnimationControl->SetAnimationPlayPos(Jump, 0.6f);
 
-
 		}
 		else if (m_pAnimationControl->isAnimationPlayProgress(AlienAnimationName::Jump, 0.7f) && m_JumpStep == JUMP_LANDING) {
 			m_JumpStep = JUMP_END;
-
 		}
 
 		if(m_JumpStep < JUMP_LANDING) JumpDest(fTimeElapsed);
 
 	}
+
 
 
 	return true;

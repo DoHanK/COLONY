@@ -170,9 +170,9 @@ int JumpGoal::Process()
 		m_pOwner->m_pSoul->m_dest = XMFLOAT2(PlayerPos.x, PlayerPos.z);
 
 	} 
-	else {
-		m_iStatus = completed;
-	}
+	//else {
+	//	//m_iStatus = completed;
+	//}
 
 	if (m_pOwner->m_pSoul->m_JumpStep == JUMP_END) {
 		m_iStatus = completed;

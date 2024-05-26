@@ -100,7 +100,7 @@ public:
 	BoundingSphere& GetCapsuleBounding(const XMFLOAT3& OtherCeter){
 		
 		//위치 담기
-		XMFLOAT3 m_pos = XMFLOAT3(m_pOwner->m_xmf4x4World._41 + m_center.x, m_pOwner->m_xmf4x4World._42 + m_center.y, m_pOwner->m_xmf4x4World._43 + m_center.z);
+		XMFLOAT3 m_pos = XMFLOAT3(((Player*)m_pOwner)->m_xmf3Position.x + m_center.x, ((Player*)m_pOwner)->m_xmf3Position.y+ m_center.y, ((Player*)m_pOwner)->m_xmf3Position.z + m_center.z);
 		//밑
 		XMFLOAT3 xm3A = XMFLOAT3(m_pos.x, m_pos.y + m_base, m_pos.z);
 		//위
@@ -206,6 +206,8 @@ public:
 		return boundingsphere;
 	}
 	
+
+
 };
 
 class CapsuleMesh : public BasicMesh
@@ -266,8 +268,12 @@ public:
 		XMFLOAT3 pos;
 
 		pos = m_pOwner->FramePos[AlienboneIndex::DEF_HIPS];
+		XMFLOAT3 offset = XMFLOAT3(0.0, 0.0, 1.0f);
 		m_Obstable.Center = pos;
-	
+		XMFLOAT3 LookVector = m_pOwner->GetLook();
+		LookVector = Vector3::ScalarProduct(LookVector, 2.0f, true);
+		m_Obstable.Center = Vector3::Add(m_Obstable.Center, LookVector);
+
 	}
 
 	void UpdateBodyBouding() {
@@ -391,7 +397,8 @@ public:
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList);
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard);
 	void CollisionEnemyToStaticObeject();    
-
+	void CollisionPlayerToEnemy();
+	void CollisionEnemyToPlayer();
 
 	void ReleaseUploadBuffers();
 };

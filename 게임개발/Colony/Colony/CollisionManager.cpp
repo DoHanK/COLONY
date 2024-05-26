@@ -360,6 +360,7 @@ void CollisionManager::CollisionEnemyToStaticObeject() {
 	int count = 0;
 	std::list<AliensBoudingBox*> m_RemoveObjects;
 	for (auto& E : m_EnemyObjects) {
+
 		int inputcount = 0;
 	for (const auto& a : m_StaticObjects) {
 			//전체 바운딩박스 이동
@@ -448,6 +449,7 @@ void CollisionManager::CollisionEnemyToStaticObeject() {
 					}
 
 				}
+
 				if (selectNum == 4) {
 
 				
@@ -465,7 +467,6 @@ void CollisionManager::CollisionEnemyToStaticObeject() {
 	
 						if (PLANECENTER[4].y > 0.5f) {
 							((AlienSpider*)E->m_pOwner)->m_pBrain->m_NeedJump = true;
-							OutputDebugStringA("점프가 필요하다 \n");
 						}
 					}
 					else {
@@ -497,6 +498,45 @@ void CollisionManager::CollisionEnemyToStaticObeject() {
 	}
 
 }
+
+void CollisionManager::CollisionPlayerToEnemy() {
+
+	for (const auto& a : m_EnemyObjects) {
+		if (a->m_pOwner->m_HP > 0) {
+			a->UpdateEntireBouding();
+			BoundingSphere boundingsphere = ((BCapsule*)m_pPlayer)->GetCapsuleBounding(a->m_Entire.Center);
+			if (boundingsphere.Intersects(a->m_Entire)) {
+
+				((Player*)m_pPlayer->m_pOwner)->isJump = false;
+				((Player*)m_pPlayer->m_pOwner)->m_xmf3Position = ((Player*)m_pPlayer->m_pOwner)->m_xmf3FinalPosition;
+			}
+		}
+	}
+}
+
+void CollisionManager::CollisionEnemyToPlayer() {
+	for (const auto& a : m_EnemyObjects) {
+		if (a->m_pOwner->m_HP > 0) {
+			a->UpdateEntireBouding();
+			BoundingSphere boundingsphere = ((BCapsule*)m_pPlayer)->GetCapsuleBounding(a->m_Entire.Center);
+			if (boundingsphere.Intersects(a->m_Entire)) {
+
+
+
+				XMFLOAT3 BackDir = Vector3::Subtract(a->m_Entire.Center, boundingsphere.Center);
+				float CapDis = boundingsphere.Radius + a->m_Entire.Radius;
+				float RealDis = XM3CalDis(boundingsphere.Center, a->m_Entire.Center);
+				float MoveDis = CapDis - RealDis;
+
+				BackDir = Vector3::ScalarProduct(BackDir, MoveDis, true);
+				BackDir.x *= 5.0f;
+				BackDir.z *= 5.0f;
+				a->m_pOwner->AddPostion(BackDir);
+			}
+		}
+	}
+}
+
 void CollisionManager::CheckVisiableEnemy()
 {
 	for (auto& a : m_EnemyObjects) {

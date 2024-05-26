@@ -18,17 +18,18 @@ int TraceAndAttack::Process()
 		XMFLOAT3 PlayerPos = m_pOwner->m_pPlayer->GetPosition();
 
 		float dis = XM3CalDis(AlienPos, PlayerPos);
-		//if (dis < 2.0f && m_pOwner->m_fPAangle <10.0f &&
-		//	m_SubGoals.front()->GetGoalType() != Attack_Goal) {
-		//	AddSubgoal(new AttackGoal(m_pOwner,4.0f));
-		//}
+		if (m_pOwner->m_pPlayer) {
 
-		if (m_SubGoals.front()->GetGoalType() != Jump_Goal) {
-			OutputDebugStringA(to_string(m_SubGoals.size()).c_str());
-			AddSubgoal(new JumpGoal(m_pOwner, 1.0f));
-
+			float Dis = XM3CalDis(m_pOwner->m_pPlayer->m_xmf3FinalPosition, m_pOwner->GetPosition());
+			if (Dis < 2.0f && m_SubGoals.front()->GetGoalType() != Attack_Goal) {
+				AddSubgoal(new AttackGoal(m_pOwner, 1.0f));
+			}
 		}
-
+		if (m_SubGoals.size() < 3) {
+			if (m_SubGoals.front()->GetGoalType() != Jump_Goal && m_pOwner->m_HP != 100) {
+				AddSubgoal(new JumpGoal(m_pOwner, 1.0f));
+			}
+		}
 	}
 
 
