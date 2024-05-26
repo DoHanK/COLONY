@@ -647,10 +647,12 @@ float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
             texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);
         }
     }
+    
+    
     if (input.Mask & SELECTUI)
     {
-        texColor.r+= 0.2f;
-        texColor.g+= 0.2f;
+        texColor.r+= 1.0f;
+        texColor.g =0.0f;
         texColor.b+= 1.0f;
     }
     
