@@ -370,6 +370,13 @@ void ColonyFramework::AnimationGameObjects()
 
 void ColonyFramework::ColonyGameLoop()
 {
+
+POINT p;
+if (GetCursorPos(&p)) {
+	if (ScreenToClient(m_hWnd, &p)) {
+		m_pUIManager->SelectUI(p.x, p.y);
+	}
+}
 	m_GameTimer.Tick(0.0f);
 	if (!m_functionQueue.empty()) {
 		for (auto& fun : m_functionQueue)
@@ -377,7 +384,6 @@ void ColonyFramework::ColonyGameLoop()
 
 		m_functionQueue.clear();
 	}
-
 
 	//애니메이션
 	AnimationGameObjects();
@@ -441,6 +447,7 @@ LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM 
 	case WM_RBUTTONUP:
 		break;
 	case WM_MOUSEMOVE:
+	
 		//마우스 키입력
 		break;
 	case WM_KEYDOWN:

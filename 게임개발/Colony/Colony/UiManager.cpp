@@ -312,4 +312,31 @@ void UIManager::ClickUI(float x, float y)
 
 }
 
+void UIManager::SelectUI(float x, float y)
+{
+
+	float NomalizeY = 1 - ((y * 2) / FRAME_BUFFER_HEIGHT);
+	float  NomalizeX = -1 + ((x * 2) / FRAME_BUFFER_WIDTH);
+	//Rander Order 0 -> 1 -> 2
+	for (int i = 0; i < TEXTURE_LAYER; ++i) {
+
+		for (pair<UIInfo, std::function<void(UIControlHelper&)>>& info : m_RenderUIList[i]) {
+			if (info.first.Rect.bottom < NomalizeY && NomalizeY < info.first.Rect.top) {
+				if (info.first.Rect.left < NomalizeX && NomalizeX < info.first.Rect.right) {
+
+					if (info.second != nullptr) {
+						info.first.Option |= SELECTUI;
+					}
+
+
+				}
+			}
+			else {
+				info.first.Option &= ~SELECTUI;
+			}
+		}
+	}
+
+}
+
 

@@ -33,6 +33,7 @@ struct UIInfo {
 #define MASKUSE 0x01 //마스크 텍스쳐 사용 여부
 #define TEXTUREUSE 0x02 // 텍스쳐 사용 여부
 #define AMPLIFIER 0x04
+#define SELECTUI 0x08
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //											UIManager Class										   //
@@ -62,5 +63,7 @@ public:
 	void DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList, int SceneType);
 
 	void ClickUI(float x, float y);
+	
+	void SelectUI(float x, float y);
 };
 

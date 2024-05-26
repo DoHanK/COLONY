@@ -421,6 +421,7 @@ VS_UIRECT_OUTPUT VSUiRect(VS_UIRECT_INPUT input)
 #define MASKUSE 0x01 //마스크 텍스쳐 사용 여부
 #define TEXTUREUSE 0x02 // 텍스쳐 사용 여부
 #define AMPLIFIER 0x04
+#define SELECTUI 0x08
 
 float4 Blur(int size, float2 uv)
 {
@@ -646,6 +647,13 @@ float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
             texColor = gtxtUiTexture.Sample(gssWrap, input.TexC);
         }
     }
+    if (input.Mask & SELECTUI)
+    {
+        texColor.r+= 0.2f;
+        texColor.g+= 0.2f;
+        texColor.b+= 1.0f;
+    }
+    
 
     return texColor;
 }

@@ -94,6 +94,8 @@ public:
 
 	void PresentScreen() { m_pdxgiSwapChain->Present(0, 0); }
 
+
+	HWND GetHWND() { return m_hWnd; }
 };
 
 
