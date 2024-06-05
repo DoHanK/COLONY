@@ -539,3 +539,16 @@ public:
 public:
 	bool m_bActive = false;
 };
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										RedZone Class											   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+class RedZone : public GameObject {
+public:
+	RedZone(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, BasicShader* pShader, const char* TexFileName, ResourceManager* pResourceManager);
+	virtual ~RedZone();
+public:
+	CLoadedModelInfo* RedZoneObjectInfo=NULL;
+
+};
