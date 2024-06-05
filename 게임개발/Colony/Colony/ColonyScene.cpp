@@ -504,7 +504,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pGameObject.reserve(400);
 	for (int j = 0; j < 1; ++j) {
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 10; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
 		p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
@@ -593,7 +593,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 
 	
-	//// item
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//item
 	//CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
 	//CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
@@ -604,8 +605,6 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//m_nItemBox = 10; // 아이템박스 10개
 	//for (int i = 0; i < 10; i++){
 	//	GameObject* pitemBox = new ItemObject();
-
-
 	//}
 	//itemBox = new GameObject();
 	//itemBox->SetChild(shotgunInfo->m_pModelRootObject, true);
@@ -614,7 +613,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//itemBox->SetPosition(20.0f, 0.0f, 0.0f);
 	//itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
 	//m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->m_BoundingBox.Center, itemBox->m_BoundingBox.Extents, itemBox);
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	m_RedZond = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone.bin", NULL, NULL,pResourceManager);
 	
+
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
 	BuildDefaultLightsAndMaterials();
@@ -791,6 +794,8 @@ void GamePlayScene::ReleaseObjects()
 
 
 	if(itemBox)itemBox->Release();
+
+	if (m_RedZond) m_RedZond->Release();
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -1176,7 +1181,6 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 }
 
 void GamePlayScene::UpdateUI() {	
-	int TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
 	int minute, second;
 	if (TotalPlayTime >= 10 * 60) {
 		//10분경과 -> 게임종료
@@ -1268,6 +1272,8 @@ void GamePlayScene::UpdateUI() {
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
+	TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
+	m_currentMinute = static_cast<int>(TotalPlayTime / 10.f);
 
 	//속도에 따른 블러링
 	//if (m_pPlayer) {
@@ -1341,6 +1347,16 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 		itemBox->UpdateTransform(NULL); 
 		itemBox->Render(pd3dCommandList);
 
+	}
+
+
+	if (m_RedZond) {
+		if (m_currentMinute>m_LastMinute) {
+			int RandomPosition=GetRandomFloatInRange(-200.f, 200.f);
+			m_RedZond->RedZoneObjectInfo->m_pModelRootObject->SetPosition(RandomPosition,0, RandomPosition);
+			m_LastMinute = m_currentMinute;
+		}
+		m_RedZond->Render(pd3dCommandList);
 	}
 }
 

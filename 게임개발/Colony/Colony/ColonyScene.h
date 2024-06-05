@@ -264,4 +264,13 @@ protected:
 	//scope mode
 	bool m_bScopeMode = false;
 	UIInfo* h_scopeMode;
+
+
+	//Red zone
+	RedZone* m_RedZond = NULL;
+	int m_LastMinute = 0;
+	int m_currentMinute = 0;
+
+	//total time
+	int TotalPlayTime = 0;
 };

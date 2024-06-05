@@ -1609,8 +1609,7 @@ ParticleObject::ParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 }
 
 ParticleObject::~ParticleObject()
-{
-
+{ 
 
 }
 
@@ -1641,3 +1640,18 @@ void ParticleObject::PostRender(int nPipelineState)
 	if (m_pMesh) ((ParticleMesh*)m_pMesh)->PostRender(nPipelineState);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										RedZone Class											   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+RedZone::RedZone(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, BasicShader* pShader, const char* TexFileName, ResourceManager* pResourceManager):GameObject(1)
+{
+	RedZoneObjectInfo = LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pstrFileName, pShader, TexFileName, pResourceManager);
+	RedZoneObjectInfo->m_pModelRootObject->SetPosition(0.0f, 0.0f, 0.0f);
+	SetChild(RedZoneObjectInfo->m_pModelRootObject, true);
+	
+
+}
+
+RedZone::~RedZone()
+{
+}
