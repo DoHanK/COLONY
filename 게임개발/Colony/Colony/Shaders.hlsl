@@ -65,6 +65,10 @@ Texture2D gtxtDetailNormalTexture : register(t12);
 SamplerState gssWrap : register(s0);
 
 #define gammaCorrection  2.2f
+#define FogStart 0.0f
+#define FogEnd 150.f
+
+
 
 struct VS_STANDARD_INPUT
 {
@@ -167,6 +171,8 @@ float3 aces_fitted(float3 v)
 
 }
 
+
+
 VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 {
 	VS_STANDARD_OUTPUT output;
@@ -229,8 +235,25 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
     cColor.rgb = reinhard_extended_luminance(cColor.rgb * cIllumination.rgb,1.0f);
 
-    cColor.rgb *= cIllumination ;
+    cColor.rgb *= cIllumination;
+    float4 fogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+    
 
+
+        float3 camerapos;
+        camerapos.x = input.positionW.x - gvCameraPosition.x;
+        camerapos.y = input.positionW.y - gvCameraPosition.y;
+        camerapos.z = input.positionW.z - gvCameraPosition.z;
+        float dis = length(camerapos);
+   
+       float FF = saturate((dis - FogStart) / (FogEnd - FogStart));
+    cColor = (1.0f - FF) * cColor +  FF * fogColor;
+
+    
+    //float FF = MakeFogFactor(input.normalW);
+
+
+     
    return cColor;
  }
 
@@ -693,6 +716,7 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtSkyCubeTexture.Sample(gssClamp, input.positionL);
     cColor.xyz *= 0.6;
+    return float4(0.5f, 0.5f, 0.5f, 1.0f);
 	return(cColor);
 }
 
