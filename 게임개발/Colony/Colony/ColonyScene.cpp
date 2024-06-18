@@ -615,7 +615,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->m_BoundingBox.Center, itemBox->m_BoundingBox.Extents, itemBox);
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	m_RedZond = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone.bin", NULL, NULL,pResourceManager);
+	m_RedZone = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone.bin", NULL, NULL,pResourceManager);
 	
 
 
@@ -795,7 +795,7 @@ void GamePlayScene::ReleaseObjects()
 
 	if(itemBox)itemBox->Release();
 
-	if (m_RedZond) m_RedZond->Release();
+	if (m_RedZone) m_RedZone->Release();
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -1350,13 +1350,13 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	}
 
 
-	if (m_RedZond) {
+	if (m_RedZone) {
 		if (m_currentMinute>m_LastMinute) {
 			int RandomPosition=GetRandomFloatInRange(-200.f, 200.f);
-			m_RedZond->RedZoneObjectInfo->m_pModelRootObject->SetPosition(RandomPosition,0, RandomPosition);
+			m_RedZone->RedZoneObjectInfo->m_pModelRootObject->SetPosition(RandomPosition,0, RandomPosition);
 			m_LastMinute = m_currentMinute;
 		}
-		m_RedZond->Render(pd3dCommandList);
+		m_RedZone->Render(pd3dCommandList);
 	}
 }
 

@@ -267,7 +267,7 @@ protected:
 
 
 	//Red zone
-	RedZone* m_RedZond = NULL;
+	RedZone* m_RedZone = NULL;
 	int m_LastMinute = 0;
 	int m_currentMinute = 0;
 
