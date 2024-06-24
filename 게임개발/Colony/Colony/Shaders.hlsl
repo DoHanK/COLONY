@@ -791,6 +791,16 @@ float4 PSPlane(VS_STANDARD_OUTPUT input) : SV_TARGET
     cColor.rgb = reinhard_extended_luminance(cColor.rgb * cIllumination.rgb, 1.0f);
     cColor.rgb *= cIllumination;
     
+    float4 fogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+    float3 camerapos;
+    camerapos.x = input.positionW.x - gvCameraPosition.x;
+    camerapos.y = input.positionW.y - gvCameraPosition.y;
+    camerapos.z = input.positionW.z - gvCameraPosition.z;
+    float dis = length(camerapos);
+   
+    float FF = saturate((dis - FogStart) / (FogEnd - FogStart));
+    cColor = (1.0f - FF) * cColor + FF * fogColor;
+    
     return cColor;
 }
 
