@@ -348,8 +348,9 @@ public:
 	std::vector<Collision*> m_StaticObjects;
 	//Accel Obeject       Dynamic Size  -> list 
 	std::list<Collision*> m_AccelationObjects;
-
 	std::list<AliensBoudingBox*> m_EnemyObjects;
+
+	BSphere* m_pRedZoneCollision;
 
 	//Player 
 	Collision* m_pPlayer;
@@ -389,6 +390,8 @@ public:
 	
 	void EnrollBulletDir(Camera* pCamera) {m_pCamera = pCamera;}
 
+	void EnrollRedZoneIntoSphere(XMFLOAT3 center, float radius, GameObject* pOwner);
+
 	void CheckVisiableEnemy();
 
 
@@ -399,6 +402,7 @@ public:
 	void CollisionEnemyToStaticObeject();    
 	void CollisionPlayerToEnemy();
 	void CollisionEnemyToPlayer();
+	bool CollisionPlayerToRedZone();
 
 	void ReleaseUploadBuffers();
 };

@@ -192,6 +192,7 @@ void CollisionManager::EnrollEnemy(GameObject* pEnemy)
 	}
 }
 
+
 bool CollisionManager::CollisionPlayerToStaticObeject()
 {
 
@@ -537,6 +538,27 @@ void CollisionManager::CollisionEnemyToPlayer() {
 	}
 }
 
+
+void CollisionManager::EnrollRedZoneIntoSphere(XMFLOAT3 center, float radius, GameObject* pOwner)
+{
+	BSphere* psphere = new BSphere(center, radius, pOwner);
+
+	m_pRedZoneCollision = psphere;
+}
+
+bool CollisionManager::CollisionPlayerToRedZone()
+{
+	m_pRedZoneCollision->UpdateCollision();
+	BoundingSphere boundingsphere = ((BCapsule*)m_pPlayer)->GetCapsuleBounding(m_pRedZoneCollision->m_center);
+	if (boundingsphere.Intersects(m_pRedZoneCollision->m_boundingshpere)) {
+
+		return true;
+	}
+	return false;
+}
+
+
+
 void CollisionManager::CheckVisiableEnemy()
 {
 	for (auto& a : m_EnemyObjects) {
@@ -551,7 +573,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());
 	
 	FXMVECTOR BulletDir = XMLoadFloat3(&m_pCamera->GetLookVector());
-
+	 
 	for (auto& a : m_EnemyObjects) {
 		a->UpdateEntireBouding();
 		a->UpdateBodyBouding();
@@ -708,6 +730,13 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 			if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
 		}
 	}
+
+	m_pRedZoneCollision->UpdateCollision();
+	xmf4x4World = GetSphereMatrix(m_pRedZoneCollision->m_radius, m_pRedZoneCollision->m_center);
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	m_psphere->Render(pd3dCommandList, 0);
+
 
 
 }

@@ -181,6 +181,9 @@ namespace DebugValue {
 		OutputDebugStringA("\n ");
 
 	}
+	inline void Printbool(const bool& b) {
+		OutputDebugStringA(to_string(b).c_str());
+	}
 }
 
 

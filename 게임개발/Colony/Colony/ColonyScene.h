@@ -270,6 +270,7 @@ protected:
 	RedZone* m_RedZone = NULL;
 	int m_LastMinute = 0;
 	int m_currentMinute = 0;
+	bool m_bCrashRedZone = false;
 
 	//total time
 	int TotalPlayTime = 0;

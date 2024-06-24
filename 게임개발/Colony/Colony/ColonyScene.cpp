@@ -504,7 +504,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pGameObject.reserve(400);
 	for (int j = 0; j < 1; ++j) {
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
 		p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
@@ -581,7 +581,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 
 
-	//// particles
+	//// particle
 	m_pParticleShader = new ParticleShader();
 	m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pParticleShader->AddRef();
@@ -616,7 +616,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	m_RedZone = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone.bin", NULL, NULL,pResourceManager);
-	
+	m_pCollisionManager->EnrollRedZoneIntoSphere(m_RedZone->GetPosition(), 1000000000, m_RedZone);
 
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
@@ -1060,8 +1060,9 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	}
 	m_pCollisionManager->CollisionEnemyToStaticObeject();
 	m_pCollisionManager->CollisionEnemyToPlayer();
-
-
+	m_bCrashRedZone=m_pCollisionManager->CollisionPlayerToRedZone();
+		DebugValue::Printbool(m_bCrashRedZone);
+	
 	m_pPlayer->Animate(fTimeElapsed);
 	
 	for (auto& GO : m_pBillObjects) {
@@ -1273,7 +1274,7 @@ void GamePlayScene::UpdateUI() {
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
 	TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
-	m_currentMinute = static_cast<int>(TotalPlayTime / 10.f);
+	m_currentMinute = static_cast<int>(TotalPlayTime / 5.f);
 
 	//속도에 따른 블러링
 	//if (m_pPlayer) {
@@ -1353,7 +1354,7 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	if (m_RedZone) {
 		if (m_currentMinute>m_LastMinute) {
 			int RandomPosition=GetRandomFloatInRange(-200.f, 200.f);
-			m_RedZone->RedZoneObjectInfo->m_pModelRootObject->SetPosition(RandomPosition,0, RandomPosition);
+			//m_RedZone->RedZoneObjectInfo->m_pModelRootObject->SetPosition(RandomPosition,0, RandomPosition);
 			m_LastMinute = m_currentMinute;
 		}
 		m_RedZone->Render(pd3dCommandList);
