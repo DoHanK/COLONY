@@ -616,7 +616,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	m_RedZone = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone.bin", NULL, NULL,pResourceManager);
-	m_pCollisionManager->EnrollRedZoneIntoSphere(m_RedZone->GetPosition(), 1000000000, m_RedZone);
+	m_pCollisionManager->EnrollRedZoneIntoSphere(m_RedZone->GetPosition(), 50.f, m_RedZone);
 
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
@@ -1061,7 +1061,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	m_pCollisionManager->CollisionEnemyToStaticObeject();
 	m_pCollisionManager->CollisionEnemyToPlayer();
 	m_bCrashRedZone=m_pCollisionManager->CollisionPlayerToRedZone();
-		DebugValue::Printbool(m_bCrashRedZone);
+	
 	
 	m_pPlayer->Animate(fTimeElapsed);
 	
@@ -1508,6 +1508,8 @@ void GamePlayScene::ReleaseUploadBuffers()
 	if (m_pCollisionManager) m_pCollisionManager->ReleaseUploadBuffers();
 
 	if (itemBox)itemBox->ReleaseUploadBuffers();
+
+	if (m_RedZone) m_RedZone->ReleaseUploadBuffers();
 }
 
 void GamePlayScene::TestCameraRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)

@@ -59,6 +59,8 @@ public:
 	BSphere(XMFLOAT3 center ,float radius, GameObject* pOwner) :Collision(pOwner) {
 		m_center = center;
 		m_radius = radius;
+		m_boundingshpere.Radius = m_radius;
+		m_boundingshpere.Center = m_center;
 	}
 
 	virtual void UpdateCollision() {

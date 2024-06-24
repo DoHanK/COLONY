@@ -544,14 +544,15 @@ void CollisionManager::EnrollRedZoneIntoSphere(XMFLOAT3 center, float radius, Ga
 	BSphere* psphere = new BSphere(center, radius, pOwner);
 
 	m_pRedZoneCollision = psphere;
+
 }
 
 bool CollisionManager::CollisionPlayerToRedZone()
 {
 	m_pRedZoneCollision->UpdateCollision();
 	BoundingSphere boundingsphere = ((BCapsule*)m_pPlayer)->GetCapsuleBounding(m_pRedZoneCollision->m_center);
-	if (boundingsphere.Intersects(m_pRedZoneCollision->m_boundingshpere)) {
 
+	if (boundingsphere.Intersects(m_pRedZoneCollision->m_boundingshpere)) {
 		return true;
 	}
 	return false;
@@ -731,10 +732,14 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 		}
 	}
 
+	
+	xmfloat3 = XMFLOAT3(0.0f, 0.0, 1.0f);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
 	m_pRedZoneCollision->UpdateCollision();
 	xmf4x4World = GetSphereMatrix(m_pRedZoneCollision->m_radius, m_pRedZoneCollision->m_center);
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
 	m_psphere->Render(pd3dCommandList, 0);
 
 
