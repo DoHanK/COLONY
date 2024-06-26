@@ -121,7 +121,7 @@ public:
 class ThirdPersonCamera :public Camera{
 public:
 	ThirdPersonCamera();
-	ThirdPersonCamera(Camera* pCamera);
+	ThirdPersonCamera(Camera* pCamera) {};
 	~ThirdPersonCamera();
 	 
 	XMFLOAT3 m_recoiVector;

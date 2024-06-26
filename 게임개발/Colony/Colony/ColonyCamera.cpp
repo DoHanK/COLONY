@@ -239,11 +239,13 @@ ThirdPersonCamera::ThirdPersonCamera()
 	m_fPitch = 0.0f;
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
-	m_xmf3Offset = XMFLOAT3(0.15f, 2.4f, -1.7f);
+	m_xmf3Offset = XMFLOAT3(0.35f, 2.4f, -1.7f);
 	m_fTimeLag = 0.10f;
 	m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pPlayer = NULL;
 	m_recoiVector= XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+
 }
 
 ThirdPersonCamera::~ThirdPersonCamera()
@@ -296,7 +298,7 @@ void ThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 
 		XMFLOAT3 xmf3Offset = Vector3::TransformCoord(Vector3::Add(m_xmf3Offset, m_recoiVector), xmf4x4Rotate);
 		XMFLOAT3 xmf3Position = Vector3::Add(m_pPlayer->GetPosition(), xmf3Offset);
-	
+
 		XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
 		float fLength = Vector3::Length(xmf3Direction);
 		xmf3Direction = Vector3::Normalize(xmf3Direction);

@@ -928,7 +928,7 @@ void GamePlayScene::PlayerControlInput()
 				
 				m_pCamera->m_recoiVector.z -= m_pPlayer->GetzRange(false);
 				if (m_pPlayer->GetzRange(false) < m_pCamera->m_recoiVector.z)
-					m_pCamera->m_recoiVector.z = m_pPlayer->GetzRange(true);
+					m_pCamera->m_recoiVector.z = -m_pPlayer->GetzRange(true);
 
 
 				dwPlayerState |= STATE_SHOOT;
@@ -1014,17 +1014,18 @@ void GamePlayScene::PlayerControlInput()
 
 
 			m_bScopeMode = true;
-			m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.15f, 2.4f, 10.0f));
+			m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.35f, 2.4f, 10.0f));
 		}
 		else {
 			m_bScopeMode = false;
-			m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.15f, 2.4f, -1.7f));
+			m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.35f, 2.4f, -1.7f));
 		}
 
 #endif
 
 		if (m_pPlayer)
 		m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+
 
 		if (dwDirection) if (m_pPlayer)
 			m_pPlayer->CalVelocityFromInput(dwDirection, AddAcel, m_fElapsedTime);

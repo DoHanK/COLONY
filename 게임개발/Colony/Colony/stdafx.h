@@ -184,6 +184,10 @@ namespace DebugValue {
 	inline void Printbool(const bool& b) {
 		OutputDebugStringA(to_string(b).c_str());
 	}
+
+	inline void PrintStr(const char str[]) {
+		OutputDebugStringA(str);
+	}
 }
 
 
