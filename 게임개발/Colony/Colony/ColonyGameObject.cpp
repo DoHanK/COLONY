@@ -1658,3 +1658,45 @@ RedZone::~RedZone()
 {
 
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										BulletCasing Class										   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void BulletCasing::Update(float fTimeElapsed)
+{
+
+
+	if (m_bcrushed != true) {
+		XMFLOAT3 xmf3Gravity = XMFLOAT3(0, -9.8f, 0);
+
+
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(xmf3Gravity, fTimeElapsed, false));
+		// 
+		//마찰계수
+		float  fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+		float fMaxVelocityXZ = 1.f;
+
+		if (fLength > fMaxVelocityXZ)
+		{
+			m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+			m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+
+		}
+
+
+
+		XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+		AddPostion(xmf3Velocity);
+	}
+	else { //충돌후 1초이상 유지
+		m_postCollisionSurvivalTime += fTimeElapsed;
+
+		if (m_postCollisionSurvivalTime > 5.0f) {
+
+			m_bActive = false;
+		}
+	}
+
+
+}

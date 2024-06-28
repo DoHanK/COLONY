@@ -156,6 +156,49 @@ namespace DebugValue {
 		
 	}
 
+	inline void Print4x4float(const char str[], const XMFLOAT4X4 m) {
+
+		OutputDebugStringA(str);
+		OutputDebugStringA("<행렬값> \n");
+		OutputDebugStringA(to_string(m._11).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._12).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._13).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._14).c_str());
+		OutputDebugStringA("  \n");
+
+		OutputDebugStringA(to_string(m._21).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._22).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._23).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._24).c_str());
+		OutputDebugStringA("  \n");
+
+		OutputDebugStringA(to_string(m._31).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._32).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._33).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._34).c_str());
+		OutputDebugStringA("  \n");
+
+		OutputDebugStringA(to_string(m._41).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._42).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._43).c_str());
+		OutputDebugStringA(" , ");
+		OutputDebugStringA(to_string(m._44).c_str());
+		OutputDebugStringA("  \n");
+
+
+	}
+
 	inline void PrintVector3(const char str[], const XMFLOAT3& v) {
 		OutputDebugStringA(str);
 		OutputDebugStringA("x: ");

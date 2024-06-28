@@ -112,6 +112,49 @@ void CollisionManager::EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOA
 	}
 
 }
+//행렬을 이용해서 바운딩 박스 크기
+void CollisionManager::EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend,XMFLOAT4X4 Transform, GameObject* pOwner)
+{
+	XMFLOAT3 EXTEND = extend;
+	EXTEND.x *= Transform._11;
+	EXTEND.y *= Transform._22;
+	EXTEND.z *= Transform._33;
+
+	BOBBox* pBox = new BOBBox(center, EXTEND, pOwner);
+
+	if (isAccel) {
+		m_AccelationObjects.push_back(pBox);
+
+	}
+	else {
+
+		m_StaticObjects.push_back(pBox);
+		m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);
+
+	}
+
+}
+// 휴리스틱하게 바운딩 박스를 맞출때 사용..
+void CollisionManager::EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT3 extendscale, GameObject* pOwner)
+{
+	XMFLOAT3 EXTEND = extend;
+	EXTEND.x *= extendscale.x;
+	EXTEND.y *= extendscale.y;
+	EXTEND.z *= extendscale.z;
+
+
+	BOBBox* pBox = new BOBBox(center, extend, pOwner);
+	if (isAccel) {
+		m_AccelationObjects.push_back(pBox);
+
+	}
+	else {
+		m_StaticObjects.push_back(pBox);
+		m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);
+	}
+
+}
+
 //구 등록
 void CollisionManager::EnrollObjectIntoSphere(bool isAccel, XMFLOAT3 center, float radius, GameObject* pOwner)
 {
@@ -146,6 +189,21 @@ void CollisionManager::EnrollPlayerIntoCapsule(XMFLOAT3 center, float radius, fl
 
 	m_pPlayer = pCapsule;
 }
+// 총알 등록
+void CollisionManager::EnrollbulletIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT4X4 Transform, GameObject* pOwner)
+{
+	XMFLOAT3 EXTEND = extend;
+	EXTEND.x *= Transform._11;
+	EXTEND.y *= Transform._22;
+	EXTEND.z *= Transform._33;
+
+	BOBBox* pBox = new BOBBox(center, EXTEND, pOwner);
+
+	m_bullets.push_back(pBox);
+	m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);
+
+	
+}
 // 바운디 정보 불러오기
 void CollisionManager::LoadCollisionBoxInfo(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList ,const char* filename)
 {
@@ -168,7 +226,7 @@ void CollisionManager::LoadCollisionBoxInfo(ID3D12Device* pd3dDevice, ID3D12Grap
 		BOBBox* bxinfo = new BOBBox(XMFLOAT3(0, 0, 0), Extend, NULL);
 		bxinfo->mxf4x4Position = mxf4x4Position;
 		bxinfo->m_boundingbox.Transform(bxinfo->m_boundingbox, DirectX::XMLoadFloat4x4(&mxf4x4Position));
-
+		bxinfo->m_Transformboudingbox = bxinfo->m_boundingbox;
 		m_StaticObjects.push_back(bxinfo);
 
 		
@@ -191,7 +249,6 @@ void CollisionManager::EnrollEnemy(GameObject* pEnemy)
 
 	}
 }
-
 
 bool CollisionManager::CollisionPlayerToStaticObeject()
 {
@@ -558,6 +615,30 @@ bool CollisionManager::CollisionPlayerToRedZone()
 	return false;
 }
 
+void CollisionManager::CollisionBulletToObject()
+{
+	//콜리전 위치 이동
+	int count = 0;
+	for (auto& b : m_bullets) {
+
+		if (b->m_pOwner->m_bActive == true && ((BulletCasing*)b->m_pOwner)->m_bcrushed == false) {
+			((BOBBox*)b)->UpdateCollision();
+
+
+			for (auto& o : m_StaticObjects) {
+
+				if (((BOBBox*)o)->m_boundingbox.Intersects(((BOBBox*)b)->m_Transformboudingbox)) {
+				
+					((BulletCasing*)b->m_pOwner)->m_bcrushed = true;
+					((BulletCasing*)b->m_pOwner)->m_postCollisionSurvivalTime = 0.0f;
+
+				}
+			}
+		}
+	}
+
+}
+
 
 
 void CollisionManager::CheckVisiableEnemy()
@@ -669,9 +750,20 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 
 
-	for (int i = 0; i < boundingcur; ++i) {
+	for (int i = 0; i < m_StaticObjects.size(); ++i) {
 		m_BoundingBoxMeshes[i]->Render(pd3dCommandList);
 	}
+
+	int bulletcount = 0;
+	//총알만 업데이트
+	for (int i = m_StaticObjects.size(); i < boundingcur; ++i) {
+
+		if (((BOBBox*)m_bullets[bulletcount])->m_pOwner->m_bActive) {
+			m_BoundingBoxMeshes[i]->UpdateVertexPosition(&((BOBBox*)m_bullets[bulletcount++])->m_Transformboudingbox);
+			m_BoundingBoxMeshes[i]->Render(pd3dCommandList);
+		}
+	}
+
 	 xmf4x4World = m_pPlayer->m_pOwner->m_xmf4x4World;
 	 xmf4x4World._41 += ((BCapsule*)(m_pPlayer))->m_center.x;
 	 xmf4x4World._42 += ((BCapsule*)(m_pPlayer))->m_center.y;
@@ -741,6 +833,7 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 
 	m_psphere->Render(pd3dCommandList, 0);
+
 
 
 

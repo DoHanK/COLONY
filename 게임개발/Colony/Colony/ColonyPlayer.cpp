@@ -25,6 +25,7 @@ Player::Player(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 		SetChild(PlayerModelInfo->m_pModelRootObject,true);
 		PlayerModelInfo->m_pModelRootObject;
 		m_RightHand = PlayerModelInfo->m_pModelRootObject->FindFrame("RightHand");
+		m_LeftHand = PlayerModelInfo->m_pModelRootObject->FindFrame("LeftHand");
 		m_Spine = PlayerModelInfo->m_pModelRootObject->FindFrame("Spine1");
 	}
 	SetAnimator(new PlayerAnimationController(pd3dDevice, pd3dCommandList, 4, PlayerModelInfo));

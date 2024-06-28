@@ -29,6 +29,8 @@ public:
 class BOBBox :public Collision {
 public:
 	BoundingOrientedBox m_boundingbox{};
+	BoundingOrientedBox m_Transformboudingbox{};
+
 	XMFLOAT3 m_center{};
 	XMFLOAT4X4 mxf4x4Position{};
 public:
@@ -43,8 +45,8 @@ public:
 		xmatrix._41 += m_center.x;
 		xmatrix._42 += m_center.y;
 		xmatrix._43 += m_center.z;
-
-		m_boundingbox.Transform(m_boundingbox, DirectX::XMLoadFloat4x4(&xmatrix));
+		
+		m_boundingbox.Transform(m_Transformboudingbox, DirectX::XMLoadFloat4x4(&xmatrix));
 	}
 
 
@@ -352,6 +354,9 @@ public:
 	std::list<Collision*> m_AccelationObjects;
 	std::list<AliensBoudingBox*> m_EnemyObjects;
 
+	std::vector<Collision*> m_bullets;
+
+
 	BSphere* m_pRedZoneCollision;
 
 	//Player 
@@ -379,6 +384,9 @@ public:
 	XMFLOAT4X4 GetSphereMatrix(const float& r, const XMFLOAT3& center);
 	//등록 박스
 	void EnrollObjectIntoBox(bool isAccel,XMFLOAT3 center, XMFLOAT3  extend, GameObject* pOwner);
+	void EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT4X4 Transform, GameObject* pOwner);
+	void EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT3 extendscale, GameObject* pOwner);
+
 	//등록 구
 	void EnrollObjectIntoSphere(bool isAccel, XMFLOAT3 center,float radius, GameObject* pOwner);
 
@@ -387,6 +395,10 @@ public:
 	void EnrollPlayerIntoCapsule(XMFLOAT3 center, float radius, float tip, float base, GameObject* pOwner);
 
 	void EnrollEnemy(GameObject* pEnemy);
+
+	//총알 등록
+
+	void EnrollbulletIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT4X4 Transform, GameObject* pOwner);
 
 	void LoadCollisionBoxInfo(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* filename);
 	
@@ -405,6 +417,7 @@ public:
 	void CollisionPlayerToEnemy();
 	void CollisionEnemyToPlayer();
 	bool CollisionPlayerToRedZone();
+	void CollisionBulletToObject();
 
 	void ReleaseUploadBuffers();
 };

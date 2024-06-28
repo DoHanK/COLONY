@@ -614,6 +614,19 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
 	//m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->m_BoundingBox.Center, itemBox->m_BoundingBox.Extents, itemBox);
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	CLoadedModelInfo*  bullet = pResourceManager->BringModelInfo("Model/weapon/BulletCasing.bin", NULL);
+	bulletcasings.reserve(30); 
+	for (int i = 0; i < 30; i++) {
+		BulletCasing* pbulletcasing = new BulletCasing;
+		pbulletcasing->m_bActive = false;
+		pbulletcasing->SetChild(bullet->m_pModelRootObject, true);
+		m_pCollisionManager->EnrollbulletIntoBox(false, pbulletcasing->GetPosition(),
+			bullet->m_pModelRootObject->m_pMesh->GetAABBExtend(), bullet->m_pModelRootObject->m_xmf4x4ToParent, pbulletcasing);
+
+		bulletcasings.push_back(pbulletcasing);
+	}
+
 
 	m_RedZone = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone.bin", NULL, NULL,pResourceManager);
 	m_pCollisionManager->EnrollRedZoneIntoSphere(m_RedZone->GetPosition(), 50.f, m_RedZone);
@@ -796,6 +809,10 @@ void GamePlayScene::ReleaseObjects()
 	if(itemBox)itemBox->Release();
 
 	if (m_RedZone) m_RedZone->Release();
+	//총알
+	for (auto& b : bulletcasings) {
+		b->Release();
+	}
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -913,6 +930,23 @@ void GamePlayScene::PlayerControlInput()
 
 			if (pKeysBuffer[L_MOUSE] & 0xF0) {
 				
+				for (auto& b : bulletcasings) {
+					if (b->m_bActive == false) {
+						b->m_bActive = true;
+						b->m_bcrushed = false;
+						b->m_xmf4x4ToParent = m_pPlayer->m_xmf4x4ToParent;
+						
+						XMFLOAT3 pos = XMFLOAT3(
+							m_pPlayer->m_LeftHand->m_xmf4x4World._41,
+							m_pPlayer->m_LeftHand->m_xmf4x4World._42,
+							m_pPlayer->m_LeftHand->m_xmf4x4World._43);
+						b->SetPosition(pos);
+						b->m_xmf3Velocity = m_pPlayer->GetRight();
+						b->m_xmf3Velocity.y = 0;
+						break;
+					}
+				}
+
 
 				float Sign = 0;
 				if (SignCount & 1) {
@@ -1045,7 +1079,6 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	m_pCollisionManager->CollisionPlayerToStaticObeject();
 	m_pCollisionManager->CollisionPlayerToEnemy();
 
-
 	for (auto& GO : m_pGameObject) {
 
 		if (GO->m_bActive) {
@@ -1072,8 +1105,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 		}
 	}
 
-		m_pBillObject->Animate(fTimeElapsed);
-
+	m_pBillObject->Animate(fTimeElapsed);
 
 
 	for (int i = 0; i < 29; ++i) {
@@ -1083,7 +1115,6 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 			}
 		}
 	}
-
 	//crashUIAnimation
 	if (m_bcrashOk) {
 		m_crashAnimation += fTimeElapsed;
@@ -1092,7 +1123,16 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 			m_crashAnimation = 0.0f;
 		}
 	}
-	
+	// 총알 
+	for (auto& b : bulletcasings) {
+		if (b->m_bActive)
+			b->Update(fTimeElapsed);
+	}
+
+	m_pCollisionManager->CollisionBulletToObject();
+
+
+	//절두체 컬링
 	m_pCollisionManager->CheckVisiableEnemy();
 	m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
 }
@@ -1316,6 +1356,13 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 	if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
 
+	for ( auto& b : bulletcasings) {
+		if (b->m_bActive) {
+			b->UpdateTransform();
+			b->Render(pd3dCommandList);
+
+		}
+	}
 
 	for (auto& GO : m_pBillObjects) {
 		if (GO->active) {
@@ -1342,6 +1389,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 			ParticleObject->Render(pd3dCommandList);
 		}
 	}
+
+
 
 
 	if (itemBox) {
@@ -1494,6 +1543,11 @@ void GamePlayScene::ReleaseUploadBuffers()
 
 	for (int i = 0; i < m_pSceneObject.size(); ++i) {
 		m_pSceneObject[i]->ReleaseUploadBuffers();
+	}
+
+	for (auto& b : bulletcasings) {
+		b->ReleaseUploadBuffers();
+		break;// 어쳐피 공유 인스턴싱이기 때문에 한번만. 
 	}
 
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();

@@ -254,6 +254,8 @@ protected:
 	GameObject* itemBox = NULL;
 
 
+	vector<BulletCasing*> bulletcasings;
+
 	//crashUIAnimation
 	UIInfo* h_crashOk;
 	Texture* m_TCrashOk=NULL;

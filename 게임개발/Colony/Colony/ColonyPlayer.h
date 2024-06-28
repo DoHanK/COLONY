@@ -96,6 +96,7 @@ public:
 
 	//Body
 	GameObject* m_RightHand;
+	GameObject* m_LeftHand;
 	GameObject* m_Spine;
 
 	GameObject m_SelectWeapon;

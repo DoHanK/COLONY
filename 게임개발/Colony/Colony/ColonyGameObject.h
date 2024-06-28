@@ -552,3 +552,18 @@ public:
 	CLoadedModelInfo* RedZoneObjectInfo=NULL;
 
 };
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										 BulletCasing Class											//
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+class BulletCasing : public GameObject {
+public:
+	BulletCasing() {};
+	~BulletCasing() {};
+	bool m_bcrushed;
+	float m_postCollisionSurvivalTime;
+
+	void Update(float fTimeElapsed);
+
+};
