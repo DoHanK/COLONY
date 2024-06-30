@@ -630,7 +630,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 	m_RedZone = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone.bin", NULL, NULL,pResourceManager);
-	m_pCollisionManager->EnrollRedZoneIntoSphere(m_RedZone->RedZoneObjectInfo->m_pModelRootObject->GetPosition(), 50.f, m_RedZone->RedZoneObjectInfo->m_pModelRootObject);
+	m_pCollisionManager->EnrollRedZoneIntoSphere(m_RedZone->RedZoneObjectInfo->m_pModelRootObject->GetPosition(), 50.f, m_RedZone);
 
 	//RedZondEffect
 	m_pRedZoneEffect = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
@@ -1118,6 +1118,8 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	m_pCollisionManager->CollisionEnemyToPlayer();
 	m_bCrashRedZone=m_pCollisionManager->CollisionPlayerToRedZone();
 	
+
+
 	m_RedZoneHurt += fTimeElapsed;
 	if (m_RedZoneHurt > 5.0f) {
 		m_RedZoneHurt = 0.0f;
@@ -1375,14 +1377,21 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 {
 	TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
 	m_currentMinute = static_cast<int>(TotalPlayTime / 10.f);
-
+	//쉐이더로 전체 시간 보내기
+	float totaltime = m_PlayTimeTimer.GetTotalTime();
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &totaltime, 41);
+	float bredzone = m_bCrashRedZone;
+	// 플레이어 방사능에 있는지 여부...
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &bredzone, 40);
 	//속도에 따른 블러링
+	
 	//if (m_pPlayer) {
 	//	XMFLOAT3 vel = m_pPlayer->GetVelocity();
 	//	float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
 	//	int	 velo = int(velocity);
 	//	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
 	//}
+	//
 
 	//카메라 초기화
 	if (m_pCamera) {
@@ -1415,7 +1424,7 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 	if(m_bBoundingRender) BoudingRendering(pd3dCommandList);
 
-	for ( auto& b : bulletcasings) {
+	for (auto& b : bulletcasings) {
 		if (b->m_bActive) {
 			b->UpdateTransform();
 			b->Render(pd3dCommandList);
@@ -1428,7 +1437,6 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 			GO->Render(pd3dCommandList, m_pPlayer->GetCamera());
 		}
 	}
-
 
 
 	if (m_pBillObject->active) {
@@ -1454,25 +1462,37 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 
 	if (itemBox) {
-
 		itemBox->UpdateTransform(NULL); 
 		itemBox->Render(pd3dCommandList);
-
 	}
-
-
 	if (m_RedZone) {
-		if (m_currentMinute>m_LastMinute) {
-			int RandomPosition=GetRandomFloatInRange(-200.f, 200.f);
-			m_RedZone->RedZoneObjectInfo->m_pModelRootObject->SetPosition(RandomPosition,0, RandomPosition);
+
+		if (m_currentMinute > m_LastMinute) {
+
+			m_pRedZoneEffect->SetPosition(m_RedZone->GetPosition());
+			m_RedZone->m_xmf4x4ToParent = Matrix4x4::Identity();
+			int RandomPosition = GetRandomFloatInRange(-200.f, 200.f);
+			m_RedZone->SetPosition(RandomPosition, 0, RandomPosition);
+			m_RedZone->m_prexmf4x4ToParent = m_RedZone->m_xmf4x4ToParent;
 			m_LastMinute = m_currentMinute;
 			m_pRedZoneEffect->active = true;
+
 		}
+
+		if (TotalPlayTime %10 == 9) {
+
+			m_RedZone->m_xmf4x4ToParent = m_RedZone->m_prexmf4x4ToParent;
+			float size = m_PlayTimeTimer.GetTotalTime()- int(m_PlayTimeTimer.GetTotalTime());
+			size = 1.0f - size;
+			m_RedZone->SetScale(size, size, size);
+
+		}
+
 		m_RedZone->Render(pd3dCommandList);
 	}
 
 	if (m_pRedZoneEffect->active) {
-		m_pRedZoneEffect->Render(pd3dCommandList, m_pPlayer->GetCamera());
+		m_pRedZoneEffect->NoSetPositionRender(pd3dCommandList, m_pPlayer->GetCamera());
 	}
 
 }

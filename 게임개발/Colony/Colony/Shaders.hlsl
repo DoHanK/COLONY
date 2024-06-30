@@ -16,13 +16,15 @@ cbuffer cbCameraInfo : register(b1)
 };
 
 cbuffer cbGameObjectInfo : register(b2)
-{
+{   
 	matrix					gmtxGameObject : packoffset(c0);
 	MATERIAL				gMaterial : packoffset(c4);
 	uint					gnTexturesMask : packoffset(c8.x);
     float                   gfGhostNum : packoffset(c8.y);
     float3                  BoundingColor : packoffset(c9);
     int                     PlayerVelocityScalar : packoffset(c9.w);
+    bool                     IsPlayerInRadiation : packoffset(c10.x);
+    float                   ElapsedTime : packoffset(c10.y);
 };
 
 struct CB_TOOBJECTSPACE
@@ -43,8 +45,8 @@ cbuffer cbToLightSpace : register(b3)
 //#define _WITH_VERTEX_LIGHTING
 #define DOWNGRAY 1.0f
 #define LIGHTRATIO 1.0f
-#define SCENE_SIZE_Dx     1.0f/1024.f
-#define SCENE_SIZE_Dy     1.0f/800.f
+#define SCENE_SIZE_Dx     1.0f/1920.f
+#define SCENE_SIZE_Dy     1.0f/1080.f
 
 #define MATERIAL_ALBEDO_MAP			0x01
 #define MATERIAL_SPECULAR_MAP		0x02
@@ -237,7 +239,8 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
     cColor.rgb *= cIllumination;
     float4 fogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
-    
+    if (IsPlayerInRadiation)
+        fogColor = float4(0.5f, 0.0f, 0.0f, 1.0f);
 
 
         float3 camerapos;
@@ -716,6 +719,8 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtSkyCubeTexture.Sample(gssClamp, input.positionL);
     cColor.xyz *= 0.6;
+    if (IsPlayerInRadiation)
+     return float4(0.5f, 0.0f, 0.0f, 1.0f);
     return float4(0.5f, 0.5f, 0.5f, 1.0f);
 	return(cColor);
 }
@@ -792,6 +797,10 @@ float4 PSPlane(VS_STANDARD_OUTPUT input) : SV_TARGET
     cColor.rgb *= cIllumination;
     
     float4 fogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+    if (IsPlayerInRadiation)
+        fogColor = float4(0.5f, 0.0f, 0.0f, 1.0f);
+    
+    
     float3 camerapos;
     camerapos.x = input.positionW.x - gvCameraPosition.x;
     camerapos.y = input.positionW.y - gvCameraPosition.y;
@@ -800,6 +809,8 @@ float4 PSPlane(VS_STANDARD_OUTPUT input) : SV_TARGET
    
     float FF = saturate((dis - FogStart) / (FogEnd - FogStart));
     cColor = (1.0f - FF) * cColor + FF * fogColor;
+    
+    
     
     return cColor;
 }

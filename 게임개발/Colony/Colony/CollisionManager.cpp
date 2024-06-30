@@ -828,7 +828,7 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 	xmfloat3 = XMFLOAT3(0.0f, 0.0, 1.0f);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
 	m_pRedZoneCollision->UpdateCollision();
-	xmf4x4World = GetSphereMatrix(m_pRedZoneCollision->m_radius, m_pRedZoneCollision->m_center);
+	xmf4x4World = GetSphereMatrix(m_pRedZoneCollision->m_boundingshpere.Radius, m_pRedZoneCollision->m_boundingshpere.Center);
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 

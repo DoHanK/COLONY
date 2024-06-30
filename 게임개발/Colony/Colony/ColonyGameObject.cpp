@@ -1580,6 +1580,35 @@ void Billboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCame
 		m_BillMesh->Render(pd3dCommandList);
 }
 
+
+void Billboard::NoSetPositionRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera){
+
+
+	Update(pCamera->GetPosition(), XMFLOAT3(0, 1, 0));
+
+
+	if (m_nMaterials > 0)
+	{
+		for (int i = 0; i < m_nMaterials; i++)
+		{
+			if (m_ppMaterials[i])
+			{
+				if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+				m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+			}
+			//m_pMesh->Render(pd3dCommandList, i);
+		}
+	}
+
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+	if (m_BillMesh)
+		m_BillMesh->Render(pd3dCommandList);
+}
+
+
 void Billboard::Update(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
 {
 	XMFLOAT3 xmf3Position(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43);

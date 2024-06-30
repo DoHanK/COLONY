@@ -507,6 +507,7 @@ public:
 	void SetRowNCol(float row, float col) { m_rows = row; m_cols = col; }
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
+	virtual void NoSetPositionRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
 	void Update(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up);
 	void SetAddPosition(XMFLOAT3 xmf3AddPosition) {TickAddPosition = xmf3AddPosition;}
 	void SetOffsetPos(const XMFLOAT3& Pos) { m_OffsetPos = Pos; };
@@ -548,8 +549,9 @@ class RedZone : public GameObject {
 public:
 	RedZone(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, BasicShader* pShader, const char* TexFileName, ResourceManager* pResourceManager);
 	virtual ~RedZone();
+	XMFLOAT4X4						m_prexmf4x4ToParent = Matrix4x4::Identity();
 public:
-	CLoadedModelInfo* RedZoneObjectInfo=NULL;
+	CLoadedModelInfo* RedZoneObjectInfo = NULL;
 
 };
 
