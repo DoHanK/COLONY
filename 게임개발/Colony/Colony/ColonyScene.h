@@ -217,6 +217,8 @@ protected:
 	UIInfo* h_TargetRifle;
 	UIInfo* h_TargetShotgun;
 	UIInfo* h_TargetMachineGun;
+	UIInfo* h_HurtState;
+	
 
 	vector<Texture*>					numTexture;
 	Texture*							m_TrifleGun;
@@ -227,7 +229,7 @@ protected:
 	Texture* m_Ttargetmachinegun;
 	Texture* m_TscopeShoot;
 	Texture* m_TscopeShoot2;
-
+	Texture* m_TbloodScreen;
 
 	CollisionManager*					m_pCollisionManager;
 
@@ -236,6 +238,8 @@ protected:
 	vector <Billboard*>					m_pBillObjects;
 	vector<Billboard*>					m_pBloodBillboard[29];
 	bool								test = false;
+	Billboard*							m_pRedZoneEffect;
+
 
 	// Particle
 	ParticleShader*						m_pParticleShader=NULL;
@@ -273,7 +277,12 @@ protected:
 	int m_LastMinute = 0;
 	int m_currentMinute = 0;
 	bool m_bCrashRedZone = false;
+	float m_RedZoneHurt = 0.0f;
 
 	//total time
 	int TotalPlayTime = 0;
+
+	//hurtUI
+	bool m_isHurt = false;
+	float m_hurtAnimation = 0.0f;
 };

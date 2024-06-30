@@ -581,6 +581,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 
 
+
 	//// particle
 	m_pParticleShader = new ParticleShader();
 	m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -629,7 +630,20 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 	m_RedZone = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone.bin", NULL, NULL,pResourceManager);
-	m_pCollisionManager->EnrollRedZoneIntoSphere(m_RedZone->GetPosition(), 50.f, m_RedZone);
+	m_pCollisionManager->EnrollRedZoneIntoSphere(m_RedZone->RedZoneObjectInfo->m_pModelRootObject->GetPosition(), 50.f, m_RedZone->RedZoneObjectInfo->m_pModelRootObject);
+
+	//RedZondEffect
+	m_pRedZoneEffect = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		pResourceManager->BringTexture("Model/Textures/RedZoneExplosion.dds", BILLBOARD_TEXTURE, true), m_BillShader, m_RedZone->RedZoneObjectInfo->m_pModelRootObject);
+	m_pRedZoneEffect->doAnimate = true;
+	m_pRedZoneEffect->active = false;
+	m_pRedZoneEffect->SetRowNCol(8, 8);
+	m_pRedZoneEffect->m_BillMesh->UpdataVertexPosition(UIRect(50.0, -50.0, -50.0, 50.0), 1.0f);
+	m_pRedZoneEffect->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+	m_pRedZoneEffect->SettedTimer = 0.01f;
+	m_pRedZoneEffect->doOnce = true;
+	m_pRedZoneEffect->AddRef();
+
 
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
@@ -660,6 +674,13 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_TscopeShoot = m_pResourceManager->BringTexture("Model/Textures/UITexture/ScopeShoot.dds", UI_TEXTURE, true);
 	m_TscopeShoot2 = m_pResourceManager->BringTexture("Model/Textures/UITexture/ScopeShoot2.dds", UI_TEXTURE, true);
 	h_scopeMode = pUImanager->CreateUINonNormalRect(1.0, -1.0,-1.0, 1.0, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
+	//BloodScreen
+	m_TbloodScreen = pResourceManager->BringTexture("Model/Textures/UITexture/BloodScreen.dds", UI_TEXTURE, true);
+	h_HurtState = pUImanager->CreateUINonNormalRect(1.0, -1.0, -1.0, 1.0, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	
+
+
 
 	////Timer
 	pUImanager->CreateUINonNormalRect(0.96, 0.88, -0.055, 0.055, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true),
@@ -786,6 +807,7 @@ void GamePlayScene::ReleaseObjects()
 	if (m_pTestBox) m_pTestBox->Release();
 	if (m_pCollisionManager) delete m_pCollisionManager;
 	if (m_pBillObject) m_pBillObject->Release();
+	if (m_pRedZoneEffect) m_pRedZoneEffect->Release();
 
 	if (m_BillShader) m_BillShader->Release();
 
@@ -1096,7 +1118,26 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	m_pCollisionManager->CollisionEnemyToPlayer();
 	m_bCrashRedZone=m_pCollisionManager->CollisionPlayerToRedZone();
 	
-	
+	m_RedZoneHurt += fTimeElapsed;
+	if (m_RedZoneHurt > 5.0f) {
+		m_RedZoneHurt = 0.0f;
+		if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
+			m_pPlayer->m_HP -= 1;
+			m_isHurt = true;
+		}
+	}
+
+
+
+	if (m_isHurt) {
+		m_hurtAnimation += fTimeElapsed;
+		if (m_hurtAnimation > 0.2f) {
+			m_isHurt = false;
+			m_hurtAnimation = 0.0f;
+		}
+	}
+
+
 	m_pPlayer->Animate(fTimeElapsed);
 	
 	for (auto& GO : m_pBillObjects) {
@@ -1107,6 +1148,9 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	m_pBillObject->Animate(fTimeElapsed);
 
+	if (m_pRedZoneEffect->doAnimate) {
+		m_pRedZoneEffect->Animate(fTimeElapsed);
+	}
 
 	for (int i = 0; i < 29; ++i) {
 		for (auto& B : m_pBloodBillboard[i]) {
@@ -1310,12 +1354,27 @@ void GamePlayScene::UpdateUI() {
 		h_crashOk->RenderTexture = m_TNone;
 	}
 
+	if (m_pPlayer->m_HP<100) {
+		h_HP[0]->RenderTexture = m_TNone;
+		h_HP[1]->RenderTexture = numTexture[m_pPlayer->m_HP / 10];
+		h_HP[2]->RenderTexture = numTexture[m_pPlayer->m_HP % 10];
+
+	}
+
+
+	if (m_isHurt) {
+		h_HurtState->RenderTexture = m_TbloodScreen;
+	}
+	else {
+		h_HurtState->RenderTexture = m_TNone;
+	}
+	
 }
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
 	TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
-	m_currentMinute = static_cast<int>(TotalPlayTime / 5.f);
+	m_currentMinute = static_cast<int>(TotalPlayTime / 10.f);
 
 	//속도에 따른 블러링
 	//if (m_pPlayer) {
@@ -1375,7 +1434,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	if (m_pBillObject->active) {
 		m_pBillObject->Render(pd3dCommandList, m_pPlayer->GetCamera());
 	}
-	
+
+
 	for (int i = 0; i < 29; ++i) {
 		for (auto& B : m_pBloodBillboard[i]) {
 			if (B->active) {
@@ -1404,11 +1464,17 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	if (m_RedZone) {
 		if (m_currentMinute>m_LastMinute) {
 			int RandomPosition=GetRandomFloatInRange(-200.f, 200.f);
-			//m_RedZone->RedZoneObjectInfo->m_pModelRootObject->SetPosition(RandomPosition,0, RandomPosition);
+			m_RedZone->RedZoneObjectInfo->m_pModelRootObject->SetPosition(RandomPosition,0, RandomPosition);
 			m_LastMinute = m_currentMinute;
+			m_pRedZoneEffect->active = true;
 		}
 		m_RedZone->Render(pd3dCommandList);
 	}
+
+	if (m_pRedZoneEffect->active) {
+		m_pRedZoneEffect->Render(pd3dCommandList, m_pPlayer->GetCamera());
+	}
+
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

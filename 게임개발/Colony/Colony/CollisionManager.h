@@ -71,7 +71,8 @@ public:
 		xmatrix._42 += m_center.y;
 		xmatrix._43 += m_center.z;
 
-		m_boundingshpere.Transform(m_boundingshpere, DirectX::XMLoadFloat4x4(&xmatrix));
+		m_center = XMFLOAT3(xmatrix._41, xmatrix._42, xmatrix._43);
+		//m_boundingshpere.Transform(m_boundingshpere, DirectX::XMLoadFloat4x4(&xmatrix));
 	}
 };
 // Ä¸½¶ 
