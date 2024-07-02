@@ -155,6 +155,15 @@ void CollisionManager::EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOA
 
 }
 
+void CollisionManager::EnrollItemIntoBox( XMFLOAT3 center, XMFLOAT3 extend, GameObject* pOwner)
+{
+	BOBBox* pBox = new BOBBox(center, extend, pOwner);
+
+	m_ItemBoxes.push_back(pBox);
+	m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);
+	
+}
+
 //±¸ µî·Ï
 void CollisionManager::EnrollObjectIntoSphere(bool isAccel, XMFLOAT3 center, float radius, GameObject* pOwner)
 {

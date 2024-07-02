@@ -596,24 +596,24 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//item
-	//CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
-	//CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
-	//CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
-	//CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/");
-	//CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
-	//CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
+	/*CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");*/
 	
-	//m_nItemBox = 10; // 아이템박스 10개
-	//for (int i = 0; i < 10; i++){
-	//	GameObject* pitemBox = new ItemObject();
-	//}
-	//itemBox = new GameObject();
-	//itemBox->SetChild(shotgunInfo->m_pModelRootObject, true);
-	////itemBox->m_BoundingBox = itemBoxInfo->m_pModelRootObject->FindFrame("Box")->m_pMesh->GetBoundingBox();
-	//itemBox->SetScale(3.0f, 3.0f, 3.0f); 
-	//itemBox->SetPosition(20.0f, 0.0f, 0.0f);
-	//itemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
-	//m_pCollisionManager->EnrollObjectIntoBox(false, itemBox->m_BoundingBox.Center, itemBox->m_BoundingBox.Extents, itemBox);
+	for (int i = 0; i < 20; i++){
+		GameObject* pitemBox = new ItemObject();
+		pitemBox->SetChild(itemBoxInfo->m_pModelRootObject, true);
+		int index = m_pPathFinder->GetInvalidNode();
+		pitemBox->Rotate(-90.0f, GetRandomFloatInRange(-90.0f,90.0f), 0.0f);
+		pitemBox->SetPosition(m_pPathFinder->m_Cell[index].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[index].m_BoundingBox.Center.z);
+		pitemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
+		m_pCollisionManager->EnrollItemIntoBox(pitemBox->m_BoundingBox.Center, pitemBox->m_BoundingBox.Extents, pitemBox);
+		m_itemBoxes.push_back(pitemBox);
+	}
+	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	CLoadedModelInfo*  bullet = pResourceManager->BringModelInfo("Model/weapon/BulletCasing.bin", NULL);
@@ -827,8 +827,11 @@ void GamePlayScene::ReleaseObjects()
 	}
 
 
-
-	if(itemBox)itemBox->Release();
+	for (auto& GO : m_itemBoxes) {
+		if (GO) {
+			GO->Release();
+		}
+	}
 
 	if (m_RedZone) m_RedZone->Release();
 	//총알
@@ -1031,7 +1034,7 @@ void GamePlayScene::PlayerControlInput()
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 			if (m_pPlayer->m_WeaponState == RIGHT_HAND) {
 				m_bScopeMode = true;
-				m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.15f, 2.4f, 10.0f));
+				m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.15f, 2.4f, 20.0f));
 			}
 		}
 		else {
@@ -1375,8 +1378,9 @@ void GamePlayScene::UpdateUI() {
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
+	float LifeTime = 20.0f;
 	TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
-	m_currentMinute = static_cast<int>(TotalPlayTime / 10.f);
+	m_currentMinute = static_cast<int>(TotalPlayTime / LifeTime);
 	//쉐이더로 전체 시간 보내기
 	float totaltime = m_PlayTimeTimer.GetTotalTime();
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &totaltime, 41);
@@ -1459,12 +1463,6 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	}
 
 
-
-
-	if (itemBox) {
-		itemBox->UpdateTransform(NULL); 
-		itemBox->Render(pd3dCommandList);
-	}
 	if (m_RedZone) {
 
 		if (m_currentMinute > m_LastMinute) {
@@ -1479,7 +1477,7 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 		}
 
-		if (TotalPlayTime %10 == 9) {
+		if (TotalPlayTime % int(LifeTime) == int(LifeTime-1)) {
 
 			m_RedZone->m_xmf4x4ToParent = m_RedZone->m_prexmf4x4ToParent;
 			float size = m_PlayTimeTimer.GetTotalTime()- int(m_PlayTimeTimer.GetTotalTime());
@@ -1495,6 +1493,13 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 		m_pRedZoneEffect->NoSetPositionRender(pd3dCommandList, m_pPlayer->GetCamera());
 	}
 
+
+	for (auto& GO : m_itemBoxes) {
+		if (GO) {
+			GO->UpdateTransform(NULL);
+			GO->Render(pd3dCommandList);
+		}
+	}
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1651,6 +1656,12 @@ void GamePlayScene::ReleaseUploadBuffers()
 	if (itemBox)itemBox->ReleaseUploadBuffers();
 
 	if (m_RedZone) m_RedZone->ReleaseUploadBuffers();
+
+	for (auto& b : m_itemBoxes) {
+		b->ReleaseUploadBuffers();
+		break;// 어쳐피 공유 인스턴싱이기 때문에 한번만. 
+	}
+
 }
 
 void GamePlayScene::TestCameraRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)

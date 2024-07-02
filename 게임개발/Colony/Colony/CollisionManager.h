@@ -350,6 +350,7 @@ class CollisionManager{
 public:
 
 	std::vector<Collision*> m_StaticObjects;
+	std::vector<Collision*> m_ItemBoxes;
 	//Accel Obeject       Dynamic Size  -> list 
 	std::list<Collision*> m_AccelationObjects;
 	std::list<AliensBoudingBox*> m_EnemyObjects;
@@ -386,6 +387,7 @@ public:
 	void EnrollObjectIntoBox(bool isAccel,XMFLOAT3 center, XMFLOAT3  extend, GameObject* pOwner);
 	void EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT4X4 Transform, GameObject* pOwner);
 	void EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT3 extendscale, GameObject* pOwner);
+	void EnrollItemIntoBox( XMFLOAT3 center, XMFLOAT3 extend, GameObject* pOwner);
 
 	//µî·Ï ±¸
 	void EnrollObjectIntoSphere(bool isAccel, XMFLOAT3 center,float radius, GameObject* pOwner);
