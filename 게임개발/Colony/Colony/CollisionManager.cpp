@@ -158,12 +158,10 @@ void CollisionManager::EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOA
 void CollisionManager::EnrollItemIntoBox( XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT4X4 Transform, GameObject* pOwner)
 {
 
-	XMFLOAT3 EXTEND = extend;
-	EXTEND.x *= Transform._11;
-	EXTEND.y *= Transform._22;
-	EXTEND.z *= Transform._33;
 
-	BOBBox* pBox = new BOBBox(center, EXTEND, pOwner);
+
+	BOBBox* pBox = new BOBBox(center, extend , pOwner);
+	pBox->m_boundingbox.Transform(pBox->m_boundingbox, XMLoadFloat4x4(&Transform));
 
 	m_ItemBoxes.push_back(pBox);
 	m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);

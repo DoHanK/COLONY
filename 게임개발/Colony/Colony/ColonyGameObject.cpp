@@ -772,7 +772,7 @@ void GameObject::UpdateBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 			//((BoundingBoxMesh*)m_pBoundingMesh)->UpdateVertexPosition(&BoundingBox);
 
 
-			m_BoundingBox.Transform(m_BoundingBox, DirectX::XMLoadFloat4x4(&m_xmf4x4World));
+			//m_BoundingBox.Transform(m_BoundingBox, DirectX::XMLoadFloat4x4(&m_xmf4x4World));
 
 
 	if (m_pSibling) m_pSibling->UpdateBoundingBox();

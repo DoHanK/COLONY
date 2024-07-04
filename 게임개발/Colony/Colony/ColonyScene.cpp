@@ -639,9 +639,13 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pitemBox->SetChild(itemBoxInfo->m_pModelRootObject, true);
 		int index = m_pPathFinder->GetInvalidNode();
 		pitemBox->Rotate(-90.0f, GetRandomFloatInRange(-90.0f, 90.0f), 0.0f);
-		pitemBox->SetPosition(m_pPathFinder->m_Cell[index].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[index].m_BoundingBox.Center.z);
+		pitemBox->m_BoundingBox.Extents = XMFLOAT3(0, 0, 0);
+		pitemBox->MergehierarchyBoundingBox(pitemBox->m_BoundingBox);
+		pitemBox->SetPosition(m_pPathFinder->m_Cell[index].m_BoundingBox.Center.x, 3.f, m_pPathFinder->m_Cell[index].m_BoundingBox.Center.z);
+
 		pitemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
-		m_pCollisionManager->EnrollItemIntoBox(pitemBox->GetPosition(), pitemBox->m_BoundingBox.Extents, pitemBox->m_xmf4x4ToParent, pitemBox);
+		m_pCollisionManager->EnrollItemIntoBox(pitemBox->m_BoundingBox.Center, pitemBox->m_BoundingBox.Extents, itemBoxInfo->m_pModelRootObject->m_xmf4x4ToParent, pitemBox);
+
 		m_itemBoxes.push_back(pitemBox);
 	}
 
