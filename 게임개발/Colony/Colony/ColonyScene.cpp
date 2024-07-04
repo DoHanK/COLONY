@@ -594,27 +594,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 
 	
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//item
-	CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
-	/*CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
-	CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
-	CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/");
-	CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
-	CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");*/
 	
-	for (int i = 0; i < 20; i++){
-		GameObject* pitemBox = new ItemObject();
-		pitemBox->SetChild(itemBoxInfo->m_pModelRootObject, true);
-		int index = m_pPathFinder->GetInvalidNode();
-		pitemBox->Rotate(-90.0f, GetRandomFloatInRange(-90.0f,90.0f), 0.0f);
-		pitemBox->SetPosition(m_pPathFinder->m_Cell[index].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[index].m_BoundingBox.Center.z);
-		pitemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
-		m_pCollisionManager->EnrollItemIntoBox(pitemBox->m_BoundingBox.Center, pitemBox->m_BoundingBox.Extents, pitemBox);
-		m_itemBoxes.push_back(pitemBox);
-	}
-	
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	CLoadedModelInfo*  bullet = pResourceManager->BringModelInfo("Model/weapon/BulletCasing.bin", NULL);
 	bulletcasings.reserve(30); 
@@ -643,6 +623,30 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pRedZoneEffect->SettedTimer = 0.01f;
 	m_pRedZoneEffect->doOnce = true;
 	m_pRedZoneEffect->AddRef();
+
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//item
+	CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
+	/*CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
+	CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");*/
+
+	for (int i = 0; i < 20; i++) {
+		GameObject* pitemBox = new ItemObject();
+		pitemBox->SetChild(itemBoxInfo->m_pModelRootObject, true);
+		int index = m_pPathFinder->GetInvalidNode();
+		pitemBox->Rotate(-90.0f, GetRandomFloatInRange(-90.0f, 90.0f), 0.0f);
+		pitemBox->SetPosition(m_pPathFinder->m_Cell[index].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[index].m_BoundingBox.Center.z);
+		pitemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
+		m_pCollisionManager->EnrollItemIntoBox(pitemBox->GetPosition(), pitemBox->m_BoundingBox.Extents, pitemBox->m_xmf4x4ToParent, pitemBox);
+		m_itemBoxes.push_back(pitemBox);
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 

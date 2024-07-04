@@ -387,7 +387,7 @@ public:
 	void EnrollObjectIntoBox(bool isAccel,XMFLOAT3 center, XMFLOAT3  extend, GameObject* pOwner);
 	void EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT4X4 Transform, GameObject* pOwner);
 	void EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT3 extendscale, GameObject* pOwner);
-	void EnrollItemIntoBox( XMFLOAT3 center, XMFLOAT3 extend, GameObject* pOwner);
+	void EnrollItemIntoBox(XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT4X4 Transform, GameObject* pOwner);
 
 	//µî·Ï ±¸
 	void EnrollObjectIntoSphere(bool isAccel, XMFLOAT3 center,float radius, GameObject* pOwner);

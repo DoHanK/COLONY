@@ -155,9 +155,15 @@ void CollisionManager::EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOA
 
 }
 
-void CollisionManager::EnrollItemIntoBox( XMFLOAT3 center, XMFLOAT3 extend, GameObject* pOwner)
+void CollisionManager::EnrollItemIntoBox( XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT4X4 Transform, GameObject* pOwner)
 {
-	BOBBox* pBox = new BOBBox(center, extend, pOwner);
+
+	XMFLOAT3 EXTEND = extend;
+	EXTEND.x *= Transform._11;
+	EXTEND.y *= Transform._22;
+	EXTEND.z *= Transform._33;
+
+	BOBBox* pBox = new BOBBox(center, EXTEND, pOwner);
 
 	m_ItemBoxes.push_back(pBox);
 	m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);
@@ -765,13 +771,28 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 
 	int bulletcount = 0;
 	//총알만 업데이트
-	for (int i = m_StaticObjects.size(); i < boundingcur; ++i) {
+	for (int i = m_StaticObjects.size(); i < m_StaticObjects.size()+m_bullets.size(); ++i) {
 
 		if (((BOBBox*)m_bullets[bulletcount])->m_pOwner->m_bActive) {
 			m_BoundingBoxMeshes[i]->UpdateVertexPosition(&((BOBBox*)m_bullets[bulletcount++])->m_Transformboudingbox);
 			m_BoundingBoxMeshes[i]->Render(pd3dCommandList);
 		}
 	}
+
+
+	int itemboxCount = 0;
+	//아이템박스 바운딩 박스
+	for (int i = m_StaticObjects.size() + m_bullets.size(); i < boundingcur; ++i) {
+
+		//if (((BOBBox*)m_ItemBoxes[itemboxCount])->m_pOwner->m_bActive) {
+			((BOBBox*)m_ItemBoxes[itemboxCount])->UpdateCollision();
+			m_BoundingBoxMeshes[i]->UpdateVertexPosition(&((BOBBox*)m_ItemBoxes[itemboxCount++])->m_Transformboudingbox);
+			m_BoundingBoxMeshes[i]->Render(pd3dCommandList);
+		//}
+	}
+
+
+
 
 	 xmf4x4World = m_pPlayer->m_pOwner->m_xmf4x4World;
 	 xmf4x4World._41 += ((BCapsule*)(m_pPlayer))->m_center.x;
