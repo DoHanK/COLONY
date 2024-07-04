@@ -503,7 +503,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 1; ++j) {
+	for (int j = 0; j < 12; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
@@ -1500,6 +1500,147 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 			GO->Render(pd3dCommandList);
 		}
 	}
+}
+
+void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12GraphicsCommandList* pd3dSubCommandList[], int ableThread, Camera* pCamera)
+{
+	float LifeTime = 20.0f;
+	TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
+	m_currentMinute = static_cast<int>(TotalPlayTime / LifeTime);
+	//쉐이더로 전체 시간 보내기
+	//float totaltime = m_PlayTimeTimer.GetTotalTime();
+	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &totaltime, 41);
+	float bredzone = m_bCrashRedZone;
+	// 플레이어 방사능에 있는지 여부...
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &bredzone, 40);
+	//속도에 따른 블러링
+
+	//if (m_pPlayer) {
+	//	XMFLOAT3 vel = m_pPlayer->GetVelocity();
+	//	float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
+	//	int	 velo = int(velocity);
+	//	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
+	//}
+	//
+
+	//카메라 초기화
+	if (m_pCamera) {
+		m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		m_pCamera->UpdateShaderVariables(pd3dCommandList);
+	}
+	UpdateShaderVariables(pd3dCommandList);
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+
+	for (int i = 0; i < ableThread; ++i) {
+		if (m_pCamera) {
+			m_pCamera->SetViewportsAndScissorRects(pd3dSubCommandList[i]);
+			m_pCamera->UpdateShaderVariables(pd3dSubCommandList[i]);
+		}
+		UpdateShaderVariables(pd3dSubCommandList[i]);
+		D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+		pd3dSubCommandList[i]->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+	
+	}
+
+	if (true) {
+		m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
+
+		//for (auto& GO : m_pGameObject) {
+		//	if (GO->m_bActive) {
+		//		if (GO->m_bVisible) GO->Render(pd3dCommandList);
+		//	}
+		//}
+
+		for (int i= 0 ; i < m_pGameObject.size(); i++) {
+			m_pGameObject[i]->Render(pd3dSubCommandList[i% ableThread]);
+			
+		}
+
+		m_pPlayer->Render(pd3dCommandList);
+
+
+		for (auto& GO : m_pSceneObject) {
+			if (m_pCamera->IsInFrustum(GO->m_BoundingBox)) GO->Render(pd3dCommandList);
+		}
+
+	}
+
+	if (m_bBoundingRender) BoudingRendering(pd3dCommandList);
+
+	for (auto& b : bulletcasings) {
+		if (b->m_bActive) {
+			b->UpdateTransform();
+			b->Render(pd3dCommandList);
+
+		}
+	}
+
+	for (auto& GO : m_pBillObjects) {
+		if (GO->active) {
+			GO->Render(pd3dCommandList, m_pPlayer->GetCamera());
+		}
+	}
+
+
+	if (m_pBillObject->active) {
+		m_pBillObject->Render(pd3dCommandList, m_pPlayer->GetCamera());
+	}
+
+
+	for (int i = 0; i < 29; ++i) {
+		for (auto& B : m_pBloodBillboard[i]) {
+			if (B->active) {
+				B->Render(pd3dCommandList, m_pPlayer->GetCamera());
+			}
+		}
+	}
+
+	//for (auto& ParticleObject : m_pParticleObjects) {
+	//	if (ParticleObject->m_bActive) {
+	//		ParticleObject->Render(pd3dCommandList);
+	//	}
+	//}
+
+
+	if (m_RedZone) {
+
+		if (m_currentMinute > m_LastMinute) {
+
+			m_pRedZoneEffect->SetPosition(m_RedZone->GetPosition());
+			m_RedZone->m_xmf4x4ToParent = Matrix4x4::Identity();
+			int RandomPosition = GetRandomFloatInRange(-200.f, 200.f);
+			m_RedZone->SetPosition(RandomPosition, 0, RandomPosition);
+			m_RedZone->m_prexmf4x4ToParent = m_RedZone->m_xmf4x4ToParent;
+			m_LastMinute = m_currentMinute;
+			m_pRedZoneEffect->active = true;
+
+		}
+
+		if (TotalPlayTime % int(LifeTime) == int(LifeTime - 1)) {
+
+			m_RedZone->m_xmf4x4ToParent = m_RedZone->m_prexmf4x4ToParent;
+			float size = m_PlayTimeTimer.GetTotalTime() - int(m_PlayTimeTimer.GetTotalTime());
+			size = 1.0f - size;
+			m_RedZone->SetScale(size, size, size);
+
+		}
+
+		m_RedZone->Render(pd3dCommandList);
+	}
+
+	if (m_pRedZoneEffect->active) {
+		m_pRedZoneEffect->NoSetPositionRender(pd3dCommandList, m_pPlayer->GetCamera());
+	}
+
+
+	for (auto& GO : m_itemBoxes) {
+		if (GO) {
+			GO->UpdateTransform(NULL);
+			GO->Render(pd3dCommandList);
+		}
+	}
+
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

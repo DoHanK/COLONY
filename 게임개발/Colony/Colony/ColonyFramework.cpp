@@ -390,25 +390,53 @@ if (GetCursorPos(&p)) {
 
 	m_pDevice->CommandAllocatorReset();
 	m_pDevice->CommandListReset();
+
+	//서브 루틴
+#ifdef WITH_MULTITHREAD
+	m_pDevice->CommandSubAllocatorReset();
+	m_pDevice->CommandSubListReset();
+	m_pDevice->MakeSubListResourceBarrier();
+#endif
+
+
 	m_pDevice->MakeResourceBarrier();
 	m_pDevice->ResetBackBuffer();
 	m_pDevice->ResetDepthBuffer();
+
 	//루트 시그너쳐 연결 
 	m_pDevice->GetCommandList()->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
-
 	//랜더링 작성
-	// 리소스 업로드힙에 세팅 (씬으로 편입 예정)
-	if(m_pResourceManager)
+	if (m_pResourceManager)
 		GetDevice()->GetCommandList()->SetDescriptorHeaps(1, &m_pResourceManager->pSrvDescriptorHeap);
 
-	
+#ifdef WITH_MULTITHREAD 
+	for (int i = 0; i < m_pDevice->GetUseCoreNum(); ++i) {
+
+		m_pDevice->GetSubCommandList()[i]->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+		if (m_pResourceManager)
+			GetDevice()->GetSubCommandList()[i]->SetDescriptorHeaps(1, &m_pResourceManager->pSrvDescriptorHeap);
+	}
+
+
+#endif // WITH_MULTITHREAD 
+
+
 	if (m_pSceneManager) {
 		m_pSceneManager->RenderScene(GetDevice()->GetCommandList());
 	}
 
 	m_pDevice->CloseResourceBarrier();
+
+#ifdef WITH_MULTITHREAD
+	m_pDevice->CloseSubListResourceBarrier();
+
+	m_pDevice->CloseCommandAndPushQueueWithSubList();
+
+#else
 	m_pDevice->CloseCommandAndPushQueue();
+#endif
+
 	m_pDevice->WaitForGpuComplete();
 
 	if (m_pSceneManager) {

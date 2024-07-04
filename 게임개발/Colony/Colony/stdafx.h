@@ -58,6 +58,7 @@
 #include <vector>
 #include <stack>
 #include <random>
+#include <thread>	
 ////////////////////////////////
 
 //Direct x 관련 라이브러리
@@ -106,6 +107,11 @@ inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT
 inline float XM2CalDis(const XMFLOAT2& a, const XMFLOAT2& b) { return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)); }
 inline float XM3CalDis(const XMFLOAT3& a, const XMFLOAT3& b) { return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z)); }
 inline float VectorSize(XMFLOAT3 V) {	return (float)sqrt(V.x * V.x + V.y * V.y + V.z * V.z);}
+
+//멀티쓰레드
+//최대 16개 이상을 넘지 않도록 한다.
+#define MAX_THREAD_NUM	16	
+#define WITH_MULTITHREAD 
 
 void ResourceTransition(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dResource, D3D12_RESOURCE_STATES d3dStateBefore, D3D12_RESOURCE_STATES d3dStateAfter);
 void SwapResourcePointer(ID3D12Resource** ppd3dResourceA, ID3D12Resource** ppd3dResourceB);
