@@ -266,3 +266,19 @@ public:
 	UINT								m_nPipelineStates = 0;
 	ID3D12PipelineState** m_ppd3dPipelineStates = NULL;
 };
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										 RedZoneShader Class		  				    		   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+class RedZoneShader :public BasicShader {
+public:
+	RedZoneShader();
+	virtual ~RedZoneShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+	virtual D3D12_BLEND_DESC CreateBlendState();
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
+};

@@ -321,3 +321,33 @@ void ThirdPersonCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 	m_xmf3Up = XMFLOAT3(mtxLookAt._12, mtxLookAt._22, mtxLookAt._32);
 	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
 }
+
+void ThirdPersonCamera::UpdateCameraShake(float intensity, float duration, float SceneTimeElapsed,int gunType)
+{
+
+	std::default_random_engine generator;
+	std::uniform_real_distribution<float> distribution(-0.5f, 0.1f);
+
+	if (m_timeElapsed < duration)
+	{
+		float offsetX = distribution(generator)*intensity;
+		float offsetY = distribution(generator)*0.5f;// *intensity;
+		float offsetZ = distribution(generator)*intensity;
+
+		m_recoiVector.x += offsetX;
+		m_recoiVector.y += offsetY;
+		m_recoiVector.z += offsetZ;
+
+
+		m_timeElapsed += SceneTimeElapsed*8; 
+	}
+	else
+	{
+		m_timeElapsed = 0.0f; // Reset shake timer
+		m_recoiVector.x = 0.0f;
+		m_recoiVector.y = 0.0f;
+		m_recoiVector.z = 0.0f;
+	}
+}
+
+

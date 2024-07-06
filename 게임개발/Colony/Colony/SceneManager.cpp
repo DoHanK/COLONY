@@ -363,3 +363,6 @@ void SceneManager::RenderDepthScene(ID3D12GraphicsCommandList* pd3dCommandList)
 	
 
 }
+
+
+

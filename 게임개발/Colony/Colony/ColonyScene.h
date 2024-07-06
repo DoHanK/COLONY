@@ -273,6 +273,7 @@ protected:
 
 
 	//Red zone
+	RedZoneShader* m_RedZoneShader = NULL;
 	RedZone* m_RedZone = NULL;
 	int m_LastMinute = 0;
 	int m_currentMinute = 0;
@@ -285,4 +286,6 @@ protected:
 	//hurtUI
 	bool m_isHurt = false;
 	float m_hurtAnimation = 0.0f;
+
+	bool m_bisCameraShaking = false;
 };

@@ -13,5 +13,6 @@ public:
 
 public:
 	void GameStart();
+	void GameQuit();
 };
 

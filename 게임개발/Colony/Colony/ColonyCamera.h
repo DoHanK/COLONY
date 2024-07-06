@@ -111,6 +111,7 @@ public:
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt) { }
 	virtual bool IsInFrustum(BoundingOrientedBox& xmBoundingBox);
 	virtual bool IsInFrustum(BoundingSphere& xmBoundingShere);
+	virtual void UpdateCameraShake(float intensity, float duration){}
 
 };
 
@@ -125,8 +126,10 @@ public:
 	~ThirdPersonCamera();
 	 
 	XMFLOAT3 m_recoiVector;
+	float m_timeElapsed=0.0f;
 	virtual void Rotate(float fPitch, float fYaw, float fRoll);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt);
+	virtual void UpdateCameraShake(float intensity, float duration, float SceneTimeElapsed, int gunType);
 
 };

@@ -1028,3 +1028,71 @@ float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
     return cColor;
 }
 
+
+
+
+float4 PSRedZone(VS_STANDARD_OUTPUT input) : SV_TARGET
+{
+    
+    float4 cAlbedoColor = gMaterial.m_cDiffuse;
+    if (gnTexturesMask & MATERIAL_ALBEDO_MAP)
+        cAlbedoColor *= pow(gtxtAlbedoTexture.Sample(gssWrap, input.uv), gammaCorrection);
+
+    float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_SPECULAR_MAP)
+        cSpecularColor = pow(gtxtSpecularTexture.Sample(gssWrap, input.uv), gammaCorrection);
+    
+    float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+        cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
+    
+    float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_METALLIC_MAP)
+        cMetallicColor = pow(gtxtMetallicTexture.Sample(gssWrap, input.uv), gammaCorrection);
+    
+    float4 cEmissionColor = gMaterial.m_cEmissive;
+    if (gnTexturesMask & MATERIAL_EMISSION_MAP) 
+        cEmissionColor *= pow(gtxtEmissionTexture.Sample(gssWrap, input.uv), gammaCorrection);
+    float3 normalW;
+    float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
+    if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+    {
+        float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
+        float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+        normalW = normalize(mul(vNormal, TBN));
+    }
+    else
+    {
+        normalW = normalize(input.normalW);
+    }
+
+    
+    //float4 cIllumination = Lighting(input.positionW, normalW, false, input.uvs);
+    
+    //cColor.rgb = pow(cColor.rgb, 1 / gammaCorrection);
+
+    //cColor.rgb = reinhard_extended_luminance(cColor.rgb * cIllumination.rgb, 1.0f);
+
+    //cColor.rgb *= cIllumination;
+    //float4 fogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+    //if (IsPlayerInRadiation)
+    //    fogColor = float4(0.5f, 0.0f, 0.0f, 1.0f);
+
+
+    //float3 camerapos;
+    //camerapos.x = input.positionW.x - gvCameraPosition.x;
+    //camerapos.y = input.positionW.y - gvCameraPosition.y;
+    //camerapos.z = input.positionW.z - gvCameraPosition.z;
+    //float dis = length(camerapos);
+   
+    //float FF = saturate((dis - FogStart) / (FogEnd - FogStart));
+    //cColor = (1.0f - FF) * cColor + FF * fogColor;
+
+    
+    //float FF = MakeFogFactor(input.normalW);
+
+    float4 outputColor = cColor;
+    outputColor.a = 0.8f; 
+     
+    return outputColor;
+}

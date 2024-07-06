@@ -53,7 +53,7 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	pUImanager->CreateUINonNormalRect(-0.35, -0.45, -0.2, 0.2, pResourceManager->BringTexture("Model/Textures/SETTINGS.dds", UI_TEXTURE, true),NULL, NULL, 2, TEXTUREUSE, GetType(), true);
 
 	// 나가기
-	h_quitButton=pUImanager->CreateUINonNormalRect(-0.5, -0.6, -0.2, 0.2, m_TbuttonF,NULL, NULL, 1, TEXTUREUSE, GetType(), true);
+	h_quitButton=pUImanager->CreateUINonNormalRect(-0.5, -0.6, -0.2, 0.2, m_TbuttonF,NULL, &UIControlHelper::GameQuit, 1, TEXTUREUSE, GetType(), true);
 	pUImanager->CreateUINonNormalRect(-0.5, -0.6, -0.2, 0.2, pResourceManager->BringTexture("Model/Textures/QUIT.dds", UI_TEXTURE, true),NULL, NULL, 2, TEXTUREUSE, GetType(), true);
 
 
@@ -608,11 +608,16 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		bulletcasings.push_back(pbulletcasing);
 	}
 
+	//RedZone
+	m_RedZoneShader = new RedZoneShader();
+	m_RedZoneShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_RedZoneShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_RedZoneShader->AddRef();
 
-	m_RedZone = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone.bin", NULL, NULL,pResourceManager);
+	m_RedZone = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone.bin", m_RedZoneShader, NULL,pResourceManager);
 	m_pCollisionManager->EnrollRedZoneIntoSphere(m_RedZone->RedZoneObjectInfo->m_pModelRootObject->GetPosition(), 50.f, m_RedZone);
 
-	//RedZondEffect
+	//RedZoneEffect
 	m_pRedZoneEffect = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
 		pResourceManager->BringTexture("Model/Textures/RedZoneExplosion.dds", BILLBOARD_TEXTURE, true), m_BillShader, m_RedZone->RedZoneObjectInfo->m_pModelRootObject);
 	m_pRedZoneEffect->doAnimate = true;
@@ -641,7 +646,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pitemBox->Rotate(-90.0f, GetRandomFloatInRange(-90.0f, 90.0f), 0.0f);
 		pitemBox->m_BoundingBox.Extents = XMFLOAT3(0, 0, 0);
 		pitemBox->MergehierarchyBoundingBox(pitemBox->m_BoundingBox);
-		pitemBox->SetPosition(m_pPathFinder->m_Cell[index].m_BoundingBox.Center.x, 3.f, m_pPathFinder->m_Cell[index].m_BoundingBox.Center.z);
+		pitemBox->SetPosition(m_pPathFinder->m_Cell[index].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[index].m_BoundingBox.Center.z);
 
 		pitemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
 		m_pCollisionManager->EnrollItemIntoBox(pitemBox->m_BoundingBox.Center, pitemBox->m_BoundingBox.Extents, itemBoxInfo->m_pModelRootObject->m_xmf4x4ToParent, pitemBox);
@@ -792,6 +797,7 @@ void GamePlayScene::ReleaseObjects()
 	if(m_pDepthShader)m_pDepthShader->Release();
 	if (m_pDepthSkinnedShader)m_pDepthSkinnedShader->Release();
 
+	if (m_RedZoneShader) m_RedZoneShader->Release();
 
 	if (m_pNevMeshShader) m_pNevMeshShader->Release();
 	if (m_pNevMeshBaker) delete m_pNevMeshBaker;
@@ -993,29 +999,29 @@ void GamePlayScene::PlayerControlInput()
 				float AMP = m_pPlayer->GetAmp();
 				m_pPlayer->Rotate(-AMP, Sign* AMP*0.5, 0.0f);
 				
-				m_pCamera->m_recoiVector.z -= m_pPlayer->GetzRange(false);
+			/*	m_pCamera->m_recoiVector.z -= m_pPlayer->GetzRange(false);
 				if (m_pPlayer->GetzRange(false) < m_pCamera->m_recoiVector.z)
-					m_pCamera->m_recoiVector.z = -m_pPlayer->GetzRange(true);
+					m_pCamera->m_recoiVector.z = -m_pPlayer->GetzRange(true);*/
+
 
 
 				dwPlayerState |= STATE_SHOOT;
 				m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
 				m_pBillObject->active = true;
 				m_pPlayer->m_ReloadTime = 0;
+				m_bisCameraShaking = true;
 			}
 			else {
-				
+				m_bisCameraShaking = false;
 				m_pCamera->m_recoiVector.x = 0.0f;
 				m_pCamera->m_recoiVector.y = 0.0f;
-				
-		
-
+				m_pCamera->m_recoiVector.z = 0.0f;
 			}
 		}
-		else {
+	/*	else {
 			m_pCamera->m_recoiVector.z += 0.1f;
 			if (m_pCamera->m_recoiVector.z > 0) m_pCamera->m_recoiVector.z = 0;
-		}
+		}*/
 
 		//플레이어 애니메이션 적용
 		if (m_pPlayer)
@@ -1105,6 +1111,10 @@ void GamePlayScene::PlayerControlInput()
 void GamePlayScene::AnimateObjects(float fTimeElapsed)
 {
 
+	if (m_bisCameraShaking) {
+		//intensity, duration
+		m_pCamera->UpdateCameraShake(5.0f, 0.3f, fTimeElapsed,m_pPlayer->m_gunType);
+	}
 
 	m_fElapsedTime = fTimeElapsed;
 	m_pPlayer->m_ReloadTime += fTimeElapsed;
@@ -1283,6 +1293,10 @@ void GamePlayScene::UpdateUI() {
 	int minute, second;
 	if (TotalPlayTime >= 10 * 60) {
 		//10분경과 -> 게임종료
+		h_TImer1->RenderTexture = numTexture[1];
+		h_TImer2->RenderTexture = numTexture[0];
+		h_TImer3->RenderTexture = numTexture[0];
+		h_TImer4->RenderTexture = numTexture[0];
 	}
 	else {
 		minute = TotalPlayTime / 60;
