@@ -1613,7 +1613,7 @@ void GamePlayScene::PrepareDepthTexture(Camera* pCamera , int CameraIndex)
 
 			XMMATRIX xmmtxProjection;
 			if (m_pLights[CameraIndex].m_nType == DIRECTIONAL_LIGHT)
-			{
+			{ 
 				float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
 				fNearPlaneDistance = 0.0f, fFarPlaneDistance = 1500.0f;
 				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
@@ -1713,5 +1713,42 @@ void GamePlayScene::TestCameraRender(ID3D12GraphicsCommandList* pd3dCommandList,
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
 	m_pTestBox->Render(pd3dCommandList, 0);
 	
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//										WinScene Class				  						       //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+WinScene::WinScene()
+{
+}
+
+WinScene::~WinScene()
+{
+}
+
+void WinScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
+{
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//									 	LoseScene Class				  				  		       //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+LoseScene::LoseScene()
+{
+}
+
+LoseScene::~LoseScene()
+{
+}
+
+void LoseScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
+{
+	pUImanager->CreateUINonNormalRect(1.0, -1.0, -1.0, 1.0, pResourceManager->BringTexture("Model/Textures/UITexture/LoseScene.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.31, -0.38, -0.13, -0.03, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameStart, 1, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.31, -0.38, 0.03, 0.13, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameQuit, 0, TEXTUREUSE, GetType(), true);
 
 }

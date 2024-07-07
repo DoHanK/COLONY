@@ -14,5 +14,7 @@ public:
 public:
 	void GameStart();
 	void GameQuit();
+	void GameWin();
+	void GameLose();
 };
 

@@ -9,3 +9,12 @@ void UIControlHelper::GameQuit()
 {
 	PostQuitMessage(0);
 }
+
+void UIControlHelper::GameWin()
+{
+}
+
+void UIControlHelper::GameLose()
+{
+	m_pSceneManger->ChangeScene(new LoseScene);
+}
