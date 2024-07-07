@@ -288,4 +288,7 @@ protected:
 	//hurtUI
 	bool m_isHurt = false;
 	float m_hurtAnimation = 0.0f;
+
+	// MultiThread 
+	std::list<QuadTree*> m_Quadlist;
 };

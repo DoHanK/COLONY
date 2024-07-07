@@ -3,7 +3,7 @@
 #include "ColonyQuadtree.h"
 
 
-#define QuadtreeDepth 2
+#define QuadtreeDepth 4 // 16Ä­À¸·Î ³ª´²Áü
 
 
 
@@ -455,6 +455,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pCollisionManager->LoadCollisionBoxInfo(pd3dDevice, pd3dCommandList, "boundinginfo.bin");
 	m_pCollisionManager->EnrollPlayerIntoCapsule(XMFLOAT3(EPSILON, 0.0, EPSILON), 0.3, 1.3, 0.3, m_pPlayer);
 	m_pCollisionManager->EnrollBulletDir(m_pCamera);
+
 	for (auto& GO : m_pSceneObject) {
 		GO->m_BoundingBox;
 		if ((strstr(GO->m_pstrFrameName, "SM_Mountain_A") == NULL
@@ -473,12 +474,21 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	XMFLOAT3 OctreeScale = m_pScenePlane->m_BoundingBox.Extents;
 	
 	OctreeScale.y = 20.f;
-	XMFLOAT3 OctreeCenter = XMFLOAT3(-1.0f,0,0);
+	XMFLOAT3 OctreeCenter = XMFLOAT3(-1.0,0,0);
+
 
 	OctreeCenter.y = 20.f;
 	m_pQuadTree = new QuadTree(pd3dDevice, pd3dCommandList, 0, OctreeCenter, OctreeScale);
 	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, QuadtreeDepth);
 
+#ifdef WITH_MULTITHREAD	
+
+	m_pQuadTree->BringDepthTrees(m_Quadlist, QuadtreeDepth);
+	m_Quadlist.sort([](QuadTree* a, QuadTree* b) {return a->m_SameDepthidx < b->m_SameDepthidx; });
+
+	//ÀÎµ¦½º Á¤·Ä.
+
+#endif
 	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, CELL_SIZE, H_MAPSIZE_X, H_MAPSIZE_Y ,true);
 	//m_pNevMeshBaker->BakeNevMeshByCollision(pd3dDevice, pd3dCommandList,m_pCollisionManager->m_StaticObjects);
 	//m_pNevMeshBaker->SaveNevMesh();
@@ -495,19 +505,20 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	Texture* spiderColor[7];
 	int i = 0;
 	spiderColor[i++] = pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_Bone_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
-	spiderColor[i++] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_DarkGreen_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
-	spiderColor[i++] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_Green_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
-	spiderColor[i++] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_purple_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
-	spiderColor[i++] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_Red_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
-	spiderColor[i] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_White_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
-	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
+	spiderColor[i++] = pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_DarkGreen_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+	spiderColor[i++] = pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_Green_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+	spiderColor[i++] = pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_purple_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+	spiderColor[i++] = pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_Red_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+	spiderColor[i] = pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_White_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
+	spiderColor[6] = pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 12; ++j) {
+	for (int j = 0; j < 13; ++j) {
 		for (int i = 0; i < 1; i++) {
+
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
-		p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
+			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
 			p->SetPosition(j, 0.f, 0.f);
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
