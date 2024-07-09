@@ -85,7 +85,7 @@ public:
 	virtual void PostRender(int nPipelineState) {};
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL) {};
 	virtual void RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12GraphicsCommandList* pd3dSubCommandList[], int ableThread, Camera* pCamera = NULL){};
-
+	virtual void AnimateObjectsWithMultithread(float fTimeElapsed) {};
 	virtual void BakeDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, int CameraIndex) {};
 	virtual UINT GetType() { return Basic; };
 
@@ -136,6 +136,7 @@ public:
 	
 	void PlayerControlInput();
 	void AnimateObjects(float fTimeElapsed);
+	void AnimateObjectsWithMultithread(float fTimeElapsed);
 	void BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 	virtual void RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12GraphicsCommandList* pd3dSubCommandList[], int ableThread, Camera* pCamera = NULL);
@@ -291,4 +292,6 @@ protected:
 
 	// MultiThread 
 	std::list<QuadTree*> m_Quadlist;
+
+	int quadranderingidx = 0;
 };

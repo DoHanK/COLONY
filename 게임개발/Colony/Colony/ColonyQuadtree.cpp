@@ -1,6 +1,8 @@
 #include "ColonyQuadtree.h"
 
 
+mutex test;
+
 QuadTree::QuadTree(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList ,int depth, XMFLOAT3 center, XMFLOAT3 Extend) :m_depth(depth), m_BoundingBox(BoundingBox(center, Extend))
 {
 	m_BoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
@@ -99,9 +101,27 @@ bool QuadTree::BuildTreeByDepth(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 }
 
-void QuadTree::InsertStaticObject()
+void QuadTree::InsertStaticObject(std::vector<GameObject*> object)
 {
+
+	
+	XMFLOAT3 min;
+	XMFLOAT3 max;
+	min = Vector3::Subtract(m_BoundingBox.Center, m_BoundingBox.Extents);
+	max = Vector3::Add(m_BoundingBox.Center, m_BoundingBox.Extents);
+
+	for (auto p : object) {
+		XMFLOAT3 pos = XMFLOAT3(p->m_xmf4x4World._41, p->m_xmf4x4World._42, p->m_xmf4x4World._43);
+		if (min.x <= pos.x&& pos.x < max.x && min.z <= pos.z && pos.z < max.z) {
+			p->m_checkref++;
+			m_StaticObject.push_back(p);
+		}
+		
+	}
+
 }
+
+
 
 void QuadTree::InsertDynamicObject(){
 
@@ -188,4 +208,59 @@ void QuadTree::CalSameDepthidx()
 	m_SameDepthidx = numNodesPerRow * y + x;
 
 }
+
+void QuadTree::AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys)
+{
+
+	XMFLOAT3 min;
+	XMFLOAT3 max;
+	min = Vector3::Subtract(m_BoundingBox.Center, m_BoundingBox.Extents);
+	max = Vector3::Add(m_BoundingBox.Center, m_BoundingBox.Extents);
+
+	m_DynamicObject.clear();
+
+	for (auto& p : Enemys) {
+		XMFLOAT3 pos = p->GetPosition();
+		if (min.x <= pos.x && pos.x < max.x && min.z <= pos.z && pos.z < max.z) {
+
+			m_DynamicObject.push_back(p);
+		}
+
+	}
+
+	for (auto& GO : m_DynamicObject) {
+
+		if (GO->m_bActive) {
+			((AlienSpider*)(GO))->Update(elapsedTime);
+
+			if (((AlienSpider*)(GO))->m_GoalType != Jump_Goal)
+				((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
+			else if (((AlienSpider*)(GO))->m_pSoul->m_JumpStep >= JUMP_LANDING)
+				((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
+			GO->Animate(elapsedTime);
+
+		}
+	}
+
+}
+
+void QuadTree::Render(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	for (auto& GO : m_StaticObject) {
+		if (m_pCamera->IsInFrustum(GO->m_BoundingBox)) GO->Render(pd3dCommandList);
+	}
+
+		for (auto& GO : m_DynamicObject) {
+
+			if (GO->m_bActive) {
+				if (GO->m_bVisible) GO->Render(pd3dCommandList);
+			}
+
+		}
+
+
+
+
+}
+
 

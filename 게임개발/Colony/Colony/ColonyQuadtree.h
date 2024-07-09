@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ColonyGameObject.h"
 #include "ColonyMesh.h"
+#include "AlienSpider.h"
 enum QTDirection { LEFT_UP, RIGHT_UP, LEFT_BOTTOM, RIGHT_BOTTOM };
 class QuadTree
 {public:
@@ -17,7 +18,7 @@ public:
 	int							m_depth;
 	BoundingBox					m_BoundingBox;
 	std::vector<GameObject*>	m_StaticObject;
-	std::vector<GameObject*>	m_DynamicObject;
+	std::list<GameObject*>	m_DynamicObject;
 	
 	std::vector<int>			m_Route; // 루트 찾기
 
@@ -31,13 +32,15 @@ public:
 
 	BoundingBoxMesh* m_BoundingMesh =NULL;
 
+	Camera* m_pCamera;
+	Player* m_pPlayer;
 public:
 
 
 
 	bool BuildTreeByDepth(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int limitdepth);
 
-	void InsertStaticObject();
+	void InsertStaticObject(std::vector<GameObject*> object);
 
 	void InsertDynamicObject();
 
@@ -46,5 +49,9 @@ public:
 	void BringDepthTrees(std::list< QuadTree*>& out,int ndepth);
 
 	void CalSameDepthidx();
+
+	void AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys);
+	
+	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 };
 

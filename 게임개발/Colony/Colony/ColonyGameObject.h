@@ -369,6 +369,9 @@ public:
 	XMFLOAT4X4						m_xmf4x4ToParent;
 	XMFLOAT4X4						m_xmf4x4World;
 
+	XMFLOAT4X4*						m_xmfsub4x4ToParent =NULL;
+	XMFLOAT4X4*						m_xmfsub4x4World =NULL;
+
 	BoundingOrientedBox  m_BoundingBox = BoundingOrientedBox();
 	XMFLOAT3* FramePos = NULL;
 
@@ -384,7 +387,7 @@ public:
 	bool						m_bHitted = false;
 	bool						m_bVisible = true;
 	int							m_HP = 100;
-
+	int							m_checkref = 0;
 	void SetMesh(BasicMesh* pMesh);
 	void SetBoundingMesh(DynamicMesh* pMesh);
 	void SetMaterial(int nMaterial, Material* pMaterial);

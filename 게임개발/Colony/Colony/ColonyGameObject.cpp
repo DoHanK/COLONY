@@ -6,6 +6,8 @@
 #include "ColonyPlayer.h"
 class PlayerAnimationController;
 
+std::mutex testlock;
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //												Desc											    //
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -672,7 +674,10 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCam
 void GameObject::RenderBindAlbedo(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera,Texture* Albedo)
 {
 	//프레임으로 이뤄진 것이기에 필요가 없음
+
+	testlock.lock();
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+	testlock.unlock();
 
 
 	if (m_pMesh)
@@ -690,11 +695,12 @@ void GameObject::RenderBindAlbedo(ID3D12GraphicsCommandList* pd3dCommandList, Ca
 				}
 
 				if (Albedo)Albedo->UpdateShaderVariable(pd3dCommandList, 0);
+
 				m_pMesh->Render(pd3dCommandList, i);
 			}
 		}
-	}
 
+	}
 	if (m_pSibling) m_pSibling->RenderBindAlbedo(pd3dCommandList, pCamera, Albedo);
 	if (m_pChild) m_pChild->RenderBindAlbedo(pd3dCommandList, pCamera, Albedo);
 }
@@ -1402,7 +1408,22 @@ void AnimationController::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dC
 		if (m_ppSkinnedMeshes[i]) {
 			m_ppSkinnedMeshes[i]->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[i];
 			m_ppSkinnedMeshes[i]->m_pcbxmf4x4MappedSkinningBoneTransforms = m_ppcbxmf4x4MappedSkinningBoneTransforms[i];
+
+			if (m_ppSkinnedMeshes[i]->m_pd3dcbBindPoseBoneOffsets)
+			{
+				D3D12_GPU_VIRTUAL_ADDRESS d3dcbBoneOffsetsGpuVirtualAddress = m_ppSkinnedMeshes[i]->m_pd3dcbBindPoseBoneOffsets->GetGPUVirtualAddress();
+				pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dcbBoneOffsetsGpuVirtualAddress); //Skinned Bone Offsets
+			}
+
+			if (m_ppSkinnedMeshes[i]->m_pd3dcbSkinningBoneTransforms)
+			{
+				D3D12_GPU_VIRTUAL_ADDRESS d3dcbBoneTransformsGpuVirtualAddress = m_ppSkinnedMeshes[i]->m_pd3dcbSkinningBoneTransforms->GetGPUVirtualAddress();
+				pd3dCommandList->SetGraphicsRootConstantBufferView(12, d3dcbBoneTransformsGpuVirtualAddress); //Skinned Bone Transforms
+
+				
+			}
 		}
+
 	}
 }
 

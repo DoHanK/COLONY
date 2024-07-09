@@ -75,7 +75,6 @@ public:
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 	virtual void GhostTrailerRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
-
 	void PerceptionBindRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	void PerceptRangeRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	void RouteRender(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -97,6 +96,8 @@ public:
 	//GhostEffect
 	void SavePrevFrameInfo(XMFLOAT4X4** m_ppcbxmf4x4MappedSkinningBoneTransforms, float* elapsedTime);
 public:
+
+
 	//애니메이션 보간 및 상태
 	DWORD m_AnimationState = AlienAnimationName::Idle_1;
 	float m_nowAnimationWeight = 1.0f;

@@ -170,7 +170,20 @@ void SceneManager::ChangeScene(BasicScene* Scene)
 //애니메이션
 void SceneManager::AnimationGameObjects(const float& m_ElapsedTime)
 {
-	if(!m_SceneStack.empty()) m_SceneStack.top()->AnimateObjects(m_ElapsedTime);
+#ifdef WITH_MULTITHREAD
+	if (!m_SceneStack.empty())
+		if(m_SceneStack.top()->GetType()== GamePlay){
+		
+			m_SceneStack.top()->AnimateObjectsWithMultithread(m_ElapsedTime);
+			}
+		else {
+			m_SceneStack.top()->AnimateObjects(m_ElapsedTime);
+		}
+#else
+
+	if (!m_SceneStack.empty()) m_SceneStack.top()->AnimateObjects(m_ElapsedTime);
+#endif 
+
 
 }
 

@@ -58,7 +58,9 @@
 #include <vector>
 #include <stack>
 #include <random>
-#include <thread>	
+#include <thread>
+#include <chrono>
+#include <mutex>
 ////////////////////////////////
 
 //Direct x 관련 라이브러리

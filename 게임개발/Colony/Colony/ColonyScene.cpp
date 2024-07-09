@@ -3,7 +3,7 @@
 #include "ColonyQuadtree.h"
 
 
-#define QuadtreeDepth 4 // 16Ä­À¸·Î ³ª´²Áü
+#define QuadtreeDepth 2 // 16Ä­À¸·Î ³ª´²Áü
 
 
 
@@ -153,7 +153,14 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				}
 			}
 			break;
-
+		case '5':
+			quadranderingidx++;
+			DebugValue::Printfloat("Äõµå ÀÎµ¦½º", quadranderingidx);
+			break;
+		case '6':
+			quadranderingidx--;
+			DebugValue::Printfloat("Äõµå ÀÎµ¦½º", quadranderingidx);
+			break;
 		default:
 			break;
 		}
@@ -472,6 +479,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//Octree Crate
 	XMFLOAT3 OctreeScale = m_pScenePlane->m_BoundingBox.Extents;
+	OctreeScale = Vector3::ScalarProduct(OctreeScale, 1.2f, false);
 	
 	OctreeScale.y = 20.f;
 	XMFLOAT3 OctreeCenter = XMFLOAT3(-1.0,0,0);
@@ -481,16 +489,43 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pQuadTree = new QuadTree(pd3dDevice, pd3dCommandList, 0, OctreeCenter, OctreeScale);
 	m_pQuadTree->BuildTreeByDepth(pd3dDevice, pd3dCommandList, QuadtreeDepth);
 
+
+
+
+	//auto start_t = std::chrono::high_resolution_clock::now();
+	////ÄÚµå ±âÀÔ
+	//auto end_t = std::chrono::high_resolution_clock::now();
+	//auto exec_t = end_t - start_t;
+	//auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_t).count();
+	//DebugValue::Printfloat("½ÇÇà½Ã°£: ", exec_ms);
+
 #ifdef WITH_MULTITHREAD	
 
 	m_pQuadTree->BringDepthTrees(m_Quadlist, QuadtreeDepth);
-	m_Quadlist.sort([](QuadTree* a, QuadTree* b) {return a->m_SameDepthidx < b->m_SameDepthidx; });
+	//std::sort(m_Quadlist.begin(), m_Quadlist.end(), [](QuadTree * a, QuadTree * b) { return a->m_SameDepthidx < b->m_SameDepthidx; });
+	m_Quadlist.sort([](QuadTree* a, QuadTree* b) { return a->m_SameDepthidx < b->m_SameDepthidx; });
+	{
+		vector<thread> threads;
+		//ÀÎµ¦½º Á¤·Ä.
+		for (auto& QT : m_Quadlist) {
 
-	//ÀÎµ¦½º Á¤·Ä.
+			threads.push_back(thread(&QuadTree::InsertStaticObject, QT, m_pSceneObject));
+			//QT->InsertStaticObject(m_pSceneObject);   // ½Ì±ÛÄÚ¾î ÄÚµå
+			
+			QT->m_pCamera = m_pCamera;
+			QT->m_pPlayer = m_pPlayer;
+		}
+
+		for (auto& t : threads) {
+			t.join();
+		}
+
+	}
+	
 
 #endif
 	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, CELL_SIZE, H_MAPSIZE_X, H_MAPSIZE_Y ,true);
-	//m_pNevMeshBaker->BakeNevMeshByCollision(pd3dDevice, pd3dCommandList,m_pCollisionManager->m_StaticObjects);
+	//m_pNevMeshBaker->BakeNevMeshByCollision(pd3dDevice, pd3dCommabndList,m_pCollisionManager->m_StaticObjects);
 	//m_pNevMeshBaker->SaveNevMesh();
 	//m_pNevMeshBaker->LoadNevMesh();
 
@@ -513,13 +548,13 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] = pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 13; ++j) {
+	for (int j = 0; j < 300; ++j) {
 		for (int i = 0; i < 1; i++) {
 
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
 			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
-			p->SetPosition(j, 0.f, 0.f);
+			//p->SetPosition(j, 0.f, 0.f);
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
 			p->SetGhostShader(m_pGhostTraillerShader);
@@ -634,8 +669,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pbulletcasing->m_bActive = false;
 		pbulletcasing->SetChild(bullet->m_pModelRootObject, true);
 		m_pCollisionManager->EnrollbulletIntoBox(false, pbulletcasing->GetPosition(),
-			bullet->m_pModelRootObject->m_pMesh->GetAABBExtend(), bullet->m_pModelRootObject->m_xmf4x4ToParent, pbulletcasing);
-
+		bullet->m_pModelRootObject->m_pMesh->GetAABBExtend(), bullet->m_pModelRootObject->m_xmf4x4ToParent, pbulletcasing);
 		bulletcasings.push_back(pbulletcasing);
 	}
 
@@ -1130,7 +1164,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	}
 	m_pCollisionManager->CollisionEnemyToStaticObeject();
 	m_pCollisionManager->CollisionEnemyToPlayer();
-	m_bCrashRedZone=m_pCollisionManager->CollisionPlayerToRedZone();
+	m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
 	
 
 
@@ -1156,6 +1190,120 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	m_pPlayer->Animate(fTimeElapsed);
 	
+	for (auto& GO : m_pBillObjects) {
+		if (GO->doAnimate) {
+			GO->Animate(fTimeElapsed);
+		}
+	}
+
+	m_pBillObject->Animate(fTimeElapsed);
+
+	if (m_pRedZoneEffect->doAnimate) {
+		m_pRedZoneEffect->Animate(fTimeElapsed);
+	}
+
+	for (int i = 0; i < 29; ++i) {
+		for (auto& B : m_pBloodBillboard[i]) {
+			if (B->doAnimate) {
+				B->Animate(fTimeElapsed);
+			}
+		}
+	}
+	//crashUIAnimation
+	if (m_bcrashOk) {
+		m_crashAnimation += fTimeElapsed;
+		if (m_crashAnimation > 0.3f) {
+			m_bcrashOk = false;
+			m_crashAnimation = 0.0f;
+		}
+	}
+	// ÃÑ¾Ë 
+	for (auto& b : bulletcasings) {
+		if (b->m_bActive)
+			b->Update(fTimeElapsed);
+	}
+
+	m_pCollisionManager->CollisionBulletToObject();
+
+
+	//ÀýµÎÃ¼ ÄÃ¸µ
+	m_pCollisionManager->CheckVisiableEnemy();
+	m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
+}
+
+void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
+{
+
+	m_fElapsedTime = fTimeElapsed;
+	m_pPlayer->m_ReloadTime += fTimeElapsed;
+	PlayerControlInput();
+	m_pCollisionManager->CollisionPlayerToStaticObeject();
+	m_pCollisionManager->CollisionPlayerToEnemy();
+	auto start_t = std::chrono::high_resolution_clock::now();
+	//for (auto& GO : m_pGameObject) {
+
+	//	if (GO->m_bActive) {
+	//		((AlienSpider*)(GO))->Update(fTimeElapsed);
+
+	//		if (((AlienSpider*)(GO))->m_GoalType != Jump_Goal)
+	//			((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
+	//		else if (((AlienSpider*)(GO))->m_pSoul->m_JumpStep >= JUMP_LANDING)
+	//			((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
+	//		GO->Animate(fTimeElapsed);
+
+	//	}
+	//}
+
+	{
+		vector<thread> threads;
+		//ÀÎµ¦½º Á¤·Ä.
+		for (auto& QT : m_Quadlist) {
+
+			threads.push_back(thread(&QuadTree::AnimateObjects, QT, fTimeElapsed, m_pGameObject));
+
+		}
+
+		for (auto& t : threads) {
+			t.join();
+		}
+
+	}
+
+
+//auto end_t = std::chrono::high_resolution_clock::now();
+//auto exec_t = end_t - start_t;
+//auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_t).count();
+//DebugValue::Printfloat("½ÇÇà½Ã°£: ", exec_ms);
+
+
+	m_pCollisionManager->CollisionEnemyToStaticObeject();
+	m_pCollisionManager->CollisionEnemyToPlayer();
+	m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
+
+
+
+	m_RedZoneHurt += fTimeElapsed;
+	if (m_RedZoneHurt > 5.0f) {
+		m_RedZoneHurt = 0.0f;
+		if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
+			m_pPlayer->m_HP -= 1;
+			m_isHurt = true;
+		}
+	}
+
+
+
+	if (m_isHurt) {
+		m_hurtAnimation += fTimeElapsed;
+		if (m_hurtAnimation > 0.2f) {
+			m_isHurt = false;
+			m_hurtAnimation = 0.0f;
+		}
+	}
+
+
+	m_pPlayer->Animate(fTimeElapsed);
+
 	for (auto& GO : m_pBillObjects) {
 		if (GO->doAnimate) {
 			GO->Animate(fTimeElapsed);
@@ -1408,6 +1556,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	//}
 	//
 
+
+
 	//Ä«¸Þ¶ó ÃÊ±âÈ­
 	if (m_pCamera) {
 		m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
@@ -1511,6 +1661,8 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 			GO->Render(pd3dCommandList);
 		}
 	}
+
+
 }
 
 void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12GraphicsCommandList* pd3dSubCommandList[], int ableThread, Camera* pCamera)
@@ -1551,11 +1703,11 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 		UpdateShaderVariables(pd3dSubCommandList[i]);
 		D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 		pd3dSubCommandList[i]->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
-	
+		pd3dSubCommandList[i]->SetGraphicsRoot32BitConstants(1, 1, &bredzone, 40);
 	}
 
 	if (true) {
-		m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
+		//m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
 
 		//for (auto& GO : m_pGameObject) {
 		//	if (GO->m_bActive) {
@@ -1563,17 +1715,41 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 		//	}
 		//}
 
-		for (int i= 0 ; i < m_pGameObject.size(); i++) {
-			m_pGameObject[i]->Render(pd3dSubCommandList[i% ableThread]);
-			
+		{
+			int threadcount = 0;
+			vector<thread> threads;
+			//ÀÎµ¦½º Á¤·Ä.
+			for (auto& QT : m_Quadlist) {
+
+				threads.push_back(thread(&QuadTree::Render, QT, pd3dSubCommandList[threadcount]));
+				threadcount++;
+				if (ableThread == threadcount) break;
+			}
+
+			for (auto& t : threads) {
+				t.join();
+			}
+			  
 		}
 
+
+
+		m_pPlayer->Render(pd3dCommandList);
+		
+
+		/*for (auto& GO : m_pGameObject) {
+			if (GO->m_bActive) {
+				if (GO->m_bVisible) GO->Render(pd3dCommandList);
+			}
+		}
 		m_pPlayer->Render(pd3dCommandList);
 
 
 		for (auto& GO : m_pSceneObject) {
 			if (m_pCamera->IsInFrustum(GO->m_BoundingBox)) GO->Render(pd3dCommandList);
-		}
+		}*/
+
+	
 
 	}
 
@@ -1607,11 +1783,11 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 		}
 	}
 
-	//for (auto& ParticleObject : m_pParticleObjects) {
-	//	if (ParticleObject->m_bActive) {
-	//		ParticleObject->Render(pd3dCommandList);
-	//	}
-	//}
+	for (auto& ParticleObject : m_pParticleObjects) {
+		if (ParticleObject->m_bActive) {
+			ParticleObject->Render(pd3dCommandList);
+		}
+	}
 
 
 	if (m_RedZone) {
@@ -1651,6 +1827,16 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 			GO->Render(pd3dCommandList);
 		}
 	}
+
+
+	//int count = 0;
+	//for (auto& p : m_Quadlist) {
+	//	if (count == quadranderingidx) {
+	//		p->Render(pd3dCommandList);
+	//	}
+	//	count++;
+	//}
+
 
 }
 

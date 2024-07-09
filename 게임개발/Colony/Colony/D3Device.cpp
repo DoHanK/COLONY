@@ -32,8 +32,8 @@ D3Device::D3Device()
 	//Check Useable MultiThread Number
 #ifdef WITH_MULTITHREAD
 
-	m_nUseableCore = thread::hardware_concurrency();
-	//UseableCore limit MAX_THREAD_NUM 
+	m_nUseableCore = 16;
+	//UseableCore limit MAX_THREAD_NUM sssssssss
 	if (MAX_THREAD_NUM < m_nUseableCore) {
 		m_nUseableCore = MAX_THREAD_NUM;
 	}
