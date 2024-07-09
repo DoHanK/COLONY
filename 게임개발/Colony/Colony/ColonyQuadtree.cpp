@@ -237,7 +237,7 @@ void QuadTree::AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys)
 				((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
 			else if (((AlienSpider*)(GO))->m_pSoul->m_JumpStep >= JUMP_LANDING)
 				((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
-			GO->Animate(elapsedTime);
+			((AlienSpider*)(GO))->AnimateWithMultithread(elapsedTime, m_SameDepthidx);
 
 		}
 	}

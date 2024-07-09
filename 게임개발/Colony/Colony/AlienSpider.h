@@ -81,6 +81,8 @@ public:
 	virtual void BoudingBoxRender(ID3D12GraphicsCommandList* pd3dCommandList, bool isUpdateBounding = true, Camera* pCamera = NULL);
 	void Update(float fTimeElapsed);
 	void UpdatePosition(float fTimeElapsed);
+
+	virtual void AnimateWithMultithread(float fTimeElapsed,int idx);
 };
 
 
@@ -109,5 +111,6 @@ public:
 	bool isAnimationPlayProgress(DWORD dwState, float progress);
 	void SetAnimationPlayPos(DWORD dwState, float progress);
 
+	void AdvanceTimeWithMultithread(float fElapsedTime, GameObject* pRootGameObject,int idx);
 
 };

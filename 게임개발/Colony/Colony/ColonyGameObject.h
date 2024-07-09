@@ -337,6 +337,7 @@ public:
 
 	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
 	virtual void DirectUpdateMatrix();
+	virtual void DirectUpdateMatrixWithMultithread(int idx);
 };
 
 
@@ -464,6 +465,10 @@ public:
 
 	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);
 
+
+	//multithread
+	void UpdateTransformWithMultithread(XMFLOAT4X4* pxmf4x4Parent, int idx, int depth);
+	void UpdateFramePos(int idex, int threadidx);
 };
 
 class Player;
