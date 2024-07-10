@@ -210,6 +210,9 @@
     <ClInclude Include="TraceAndAttackGoal.h">
       <Filter>GameHeader\GameAiHeader\GoalHeader\CompositeGoalHeader</Filter>
     </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Colony.cpp">
@@ -322,6 +325,9 @@
     </ClCompile>
     <ClCompile Include="TraceAndAttackGoal.cpp">
       <Filter>GameCpp\GameAiCpp\GoalCpp\CompositeGoalCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

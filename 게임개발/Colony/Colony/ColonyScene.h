@@ -14,6 +14,7 @@
 #include "PerceptionMesh.h"
 #include "ColonyTimer.h"
 #include "CollisionManager.h"
+#include "SoundManager.h"
 class UIManager;
 struct UIInfo;
 class ResourceManager;

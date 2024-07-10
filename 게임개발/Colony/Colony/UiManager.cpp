@@ -326,7 +326,7 @@ void UIManager::SelectUI(float x, float y)
 
 					if (info.second != nullptr) {
 						info.first.Option |= SELECTUI;
-					}
+					} 
 
 
 				}

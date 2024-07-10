@@ -2,7 +2,6 @@
 #include "ColonyShader.h"
 #include "ColonyQuadtree.h"
 
-
 #define QuadtreeDepth 2
 
 
@@ -62,7 +61,8 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	//pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT/2, 0, FRAME_BUFFER_WIDTH/2, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
 	//	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, &UIControlHelper::TestFunc, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
 
-
+	/*SoundManager* soundManager = new SoundManager();
+	soundManager->CreateSound();*/
 }
 
 
@@ -1748,7 +1748,7 @@ LoseScene::~LoseScene()
 void LoseScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
 {
 	pUImanager->CreateUINonNormalRect(1.0, -1.0, -1.0, 1.0, pResourceManager->BringTexture("Model/Textures/UITexture/LoseScene.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
-	pUImanager->CreateUINonNormalRect(-0.31, -0.38, -0.13, -0.03, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameStart, 1, TEXTUREUSE, GetType(), true);
-	pUImanager->CreateUINonNormalRect(-0.31, -0.38, 0.03, 0.13, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameQuit, 0, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.3, -0.38, -0.12, -0.035, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameStart, 1, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.3, -0.38, 0.045, 0.12, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameQuit, 0, TEXTUREUSE, GetType(), true);
 
 }
