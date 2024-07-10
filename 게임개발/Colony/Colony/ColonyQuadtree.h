@@ -46,7 +46,7 @@ public:
 
 	void BoundingRendering(ID3D12GraphicsCommandList* pd3dCommandList,int DepthLevel);
 
-	void BringDepthTrees(std::list< QuadTree*>& out,int ndepth);
+	void BringDepthTrees(std::vector< QuadTree*>& out,int ndepth);
 
 	void CalSameDepthidx();
 

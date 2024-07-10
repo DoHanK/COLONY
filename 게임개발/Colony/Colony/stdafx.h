@@ -50,6 +50,7 @@
 #include <fstream>
 #include <string>
 // STL 관련 헤더파일들
+#include <iostream>
 #include <functional>
 #include <string>
 #include <deque>
@@ -61,6 +62,7 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <concurrent_queue.h>
 ////////////////////////////////
 
 //Direct x 관련 라이브러리
@@ -110,9 +112,17 @@ inline float XM2CalDis(const XMFLOAT2& a, const XMFLOAT2& b) { return sqrt((a.x 
 inline float XM3CalDis(const XMFLOAT3& a, const XMFLOAT3& b) { return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z)); }
 inline float VectorSize(XMFLOAT3 V) {	return (float)sqrt(V.x * V.x + V.y * V.y + V.z * V.z);}
 
+inline bool CAS(volatile int* addr, int expected, int new_val)
+{
+	return atomic_compare_exchange_strong(
+		reinterpret_cast<volatile atomic_int*>(addr),
+		&expected, new_val);
+}
+
+
 //멀티쓰레드
 //최대 16개 이상을 넘지 않도록 한다.
-#define MAX_THREAD_NUM	16	
+#define MAX_THREAD_NUM	4
 #define WITH_MULTITHREAD 
 
 void ResourceTransition(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dResource, D3D12_RESOURCE_STATES d3dStateBefore, D3D12_RESOURCE_STATES d3dStateAfter);

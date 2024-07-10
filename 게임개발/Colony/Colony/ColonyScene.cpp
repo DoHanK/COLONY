@@ -3,7 +3,7 @@
 #include "ColonyQuadtree.h"
 
 
-#define QuadtreeDepth 2 // 16칸으로 나눠짐
+#define QuadtreeDepth 1 // 16칸으로 나눠짐
 
 
 
@@ -78,6 +78,23 @@ GamePlayScene::GamePlayScene()
 GamePlayScene::~GamePlayScene()
 {
 	
+#ifdef WITH_MULTITHREAD
+	readycount = MAX_THREAD_NUM;
+
+	for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+
+		m_Joblist[i].push({ END ,-1 });
+	}
+
+	while (readycount != 0);
+
+	for (auto& t : m_threads) {
+
+		t.join();
+	}
+#endif // #WITH_MULTITHREAD
+
+
 }
 
 bool GamePlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -502,23 +519,29 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 #ifdef WITH_MULTITHREAD	
 
 	m_pQuadTree->BringDepthTrees(m_Quadlist, QuadtreeDepth);
-	//std::sort(m_Quadlist.begin(), m_Quadlist.end(), [](QuadTree * a, QuadTree * b) { return a->m_SameDepthidx < b->m_SameDepthidx; });
-	m_Quadlist.sort([](QuadTree* a, QuadTree* b) { return a->m_SameDepthidx < b->m_SameDepthidx; });
+	std::sort(m_Quadlist.begin(), m_Quadlist.end(), [](QuadTree * a, QuadTree * b) { return a->m_SameDepthidx < b->m_SameDepthidx; });
+	//m_Quadlist.sort([](QuadTree* a, QuadTree* b) { return a->m_SameDepthidx < b->m_SameDepthidx; });
+
+
 	{
-		vector<thread> threads;
+		//vector<thread> threads;
 		//인덱스 정렬.
+		int count = 0;
 		for (auto& QT : m_Quadlist) {
 
-			threads.push_back(thread(&QuadTree::InsertStaticObject, QT, m_pSceneObject));
-			//QT->InsertStaticObject(m_pSceneObject);   // 싱글코어 코드
+			//threads.push_back(thread(&QuadTree::InsertStaticObject, QT, m_pSceneObject));
+			QT->InsertStaticObject(m_pSceneObject);   // 싱글코어 코드
 			
 			QT->m_pCamera = m_pCamera;
 			QT->m_pPlayer = m_pPlayer;
+			m_threads.push_back(thread(&GamePlayScene::ThreadWorker, this, count++ ));
 		}
 
-		for (auto& t : threads) {
-			t.join();
-		}
+
+
+		//for (auto& t : threads) {
+		//	t.join();
+		//}
 
 	}
 	
@@ -547,8 +570,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[i] = pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_White_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
 	spiderColor[6] = pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
-	m_pGameObject.reserve(400);
-	for (int j = 0; j < 300; ++j) {
+	m_pGameObject.reserve(10000);
+	for (int j = 0; j < 10; ++j) {
 		for (int i = 0; i < 1; i++) {
 
 			int idex = m_pPathFinder->GetInvalidNode();
@@ -694,7 +717,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
 	BuildDefaultLightsAndMaterials();
 	BuildDepthTexture(pd3dDevice, pd3dCommandList);
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	CreateShaderVariables(pd3dDevice, pd3dCommandList); 
 }
 
 
@@ -707,6 +730,73 @@ float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal)
 	float randomInRange = minVal + random01 * (maxVal - minVal);
 
 	return randomInRange;
+}
+
+void GamePlayScene::ThreadWorker(int threadnum)
+{
+
+
+	while (true) {
+
+		if (!m_Joblist[threadnum].empty()) {
+			
+			pair<int, long long > OP;
+			
+
+			while (m_Joblist[threadnum].try_pop(OP));
+
+			switch (OP.first) {
+			case ANIMATION: {
+
+				
+
+				m_Quadlist[threadnum]->AnimateObjects(m_fElapsedTime, m_pGameObject);
+
+				while (true) {
+					int precount = readycount;
+					int nowcount = precount - 1;
+					if (CAS(&readycount, precount, nowcount)) break;
+				}
+
+
+				break;
+			}
+			case RENDERING: {
+				ID3D12GraphicsCommandList* subcommandlist = reinterpret_cast<ID3D12GraphicsCommandList*>(OP.second);
+				m_Quadlist[threadnum]->Render(subcommandlist);
+
+
+				while (true) {
+					int precount = readycount;
+					int nowcount = precount - 1;
+					if (CAS(&readycount, precount, nowcount)) break;
+
+				}
+				break;
+			}
+			case END:
+				while (true) {
+					int precount = readycount;
+					int nowcount = precount - 1;
+					if (CAS(&readycount, precount, nowcount)) break;
+
+				}
+				return;
+			
+			}
+
+
+
+
+		}
+
+	
+	}
+
+
+
+
+
 }
 
 void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
@@ -1234,12 +1324,15 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 {
 
+
+
+
+
 	m_fElapsedTime = fTimeElapsed;
 	m_pPlayer->m_ReloadTime += fTimeElapsed;
 	PlayerControlInput();
 	m_pCollisionManager->CollisionPlayerToStaticObeject();
 	m_pCollisionManager->CollisionPlayerToEnemy();
-	auto start_t = std::chrono::high_resolution_clock::now();
 	//for (auto& GO : m_pGameObject) {
 
 	//	if (GO->m_bActive) {
@@ -1254,20 +1347,20 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 	//	}
 	//}
 
-	{
-		vector<thread> threads;
-		//인덱스 정렬.
-		for (auto& QT : m_Quadlist) {
 
-			threads.push_back(thread(&QuadTree::AnimateObjects, QT, fTimeElapsed, m_pGameObject));
 
+		readycount = MAX_THREAD_NUM;
+
+		for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+
+			m_Joblist[i].push({ ANIMATION, -1 });
 		}
 
-		for (auto& t : threads) {
-			t.join();
-		}
 
-	}
+	
+
+
+	
 
 
 //auto end_t = std::chrono::high_resolution_clock::now();
@@ -1276,9 +1369,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 //DebugValue::Printfloat("실행시간: ", exec_ms);
 
 
-	m_pCollisionManager->CollisionEnemyToStaticObeject();
-	m_pCollisionManager->CollisionEnemyToPlayer();
-	m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
+
 
 
 
@@ -1338,11 +1429,25 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 	}
 
 	m_pCollisionManager->CollisionBulletToObject();
-
-
+	m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
 	//절두체 컬링
 	m_pCollisionManager->CheckVisiableEnemy();
+
 	m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
+
+
+
+
+	while (readycount != 0);
+
+		
+	m_pCollisionManager->CollisionEnemyToStaticObeject();
+	m_pCollisionManager->CollisionEnemyToPlayer();
+	
+
+
+
+
 }
 
 void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1665,179 +1770,163 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 }
 
-void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12GraphicsCommandList* pd3dSubCommandList[], int ableThread, Camera* pCamera)
-{
-	float LifeTime = 20.0f;
-	TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
-	m_currentMinute = static_cast<int>(TotalPlayTime / LifeTime);
-	//쉐이더로 전체 시간 보내기
-	//float totaltime = m_PlayTimeTimer.GetTotalTime();
-	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &totaltime, 41);
-	float bredzone = m_bCrashRedZone;
-	// 플레이어 방사능에 있는지 여부...
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &bredzone, 40);
-	//속도에 따른 블러링
-
-	//if (m_pPlayer) {
-	//	XMFLOAT3 vel = m_pPlayer->GetVelocity();
-	//	float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
-	//	int	 velo = int(velocity);
-	//	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
-	//}
-	//
-
-	//카메라 초기화
-	if (m_pCamera) {
-		m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-		m_pCamera->UpdateShaderVariables(pd3dCommandList);
-	}
-	UpdateShaderVariables(pd3dCommandList);
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
-
-	for (int i = 0; i < ableThread; ++i) {
-		if (m_pCamera) {
-			m_pCamera->SetViewportsAndScissorRects(pd3dSubCommandList[i]);
-			m_pCamera->UpdateShaderVariables(pd3dSubCommandList[i]);
-		}
-		UpdateShaderVariables(pd3dSubCommandList[i]);
-		D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-		pd3dSubCommandList[i]->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
-		pd3dSubCommandList[i]->SetGraphicsRoot32BitConstants(1, 1, &bredzone, 40);
-	}
+void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12GraphicsCommandList* pd3dSubCommandList[], int ableThread, Camera* pCamera){
 
 	if (true) {
-		//m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
 
-		//for (auto& GO : m_pGameObject) {
-		//	if (GO->m_bActive) {
-		//		if (GO->m_bVisible) GO->Render(pd3dCommandList);
-		//	}
+		float LifeTime = 20.0f;
+		TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
+		m_currentMinute = static_cast<int>(TotalPlayTime / LifeTime);
+		//쉐이더로 전체 시간 보내기
+		float totaltime = m_PlayTimeTimer.GetTotalTime();
+		//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &totaltime, 41);
+		float bredzone = m_bCrashRedZone;
+		// 플레이어 방사능에 있는지 여부...
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &bredzone, 40);
+		//속도에 따른 블러링
+
+		//if (m_pPlayer) {
+		//	XMFLOAT3 vel = m_pPlayer->GetVelocity();
+		//	float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
+		//	int	 velo = int(velocity);
+		//	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
 		//}
+		//
 
-		{
-			int threadcount = 0;
-			vector<thread> threads;
-			//인덱스 정렬.
-			for (auto& QT : m_Quadlist) {
 
-				threads.push_back(thread(&QuadTree::Render, QT, pd3dSubCommandList[threadcount]));
-				threadcount++;
-				if (ableThread == threadcount) break;
+
+		//카메라 초기화
+		if (m_pCamera) {
+			m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+			m_pCamera->UpdateShaderVariables(pd3dCommandList);
+		}
+
+
+		UpdateShaderVariables(pd3dCommandList);
+
+		D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+		pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+
+		for (int i = 0; i < ableThread; ++i) {
+			if (m_pCamera) {
+				m_pCamera->SetViewportsAndScissorRects(pd3dSubCommandList[i]);
+				m_pCamera->UpdateShaderVariables(pd3dSubCommandList[i]);
 			}
 
-			for (auto& t : threads) {
-				t.join();
+
+			UpdateShaderVariables(pd3dSubCommandList[i]);
+
+			D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+			pd3dSubCommandList[i]->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+
+			pd3dSubCommandList[i]->SetGraphicsRoot32BitConstants(1, 1, &bredzone, 40);
+		}
+
+
+		if (true) {
+
+
+			readycount = MAX_THREAD_NUM;
+
+			for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+				long long addr = reinterpret_cast<long long>(pd3dSubCommandList[i]);
+				m_Joblist[i].push({ RENDERING, addr });
 			}
-			  
+
+		}
+
+		m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
+			m_pPlayer->Render(pd3dCommandList);
+
+
+
+		if (m_bBoundingRender) BoudingRendering(pd3dCommandList);
+
+		for (auto& b : bulletcasings) {
+			if (b->m_bActive) {
+				b->UpdateTransform();
+				b->Render(pd3dCommandList);
+
+			}
+		}
+
+		for (auto& GO : m_pBillObjects) {
+			if (GO->active) {
+				GO->Render(pd3dCommandList, m_pPlayer->GetCamera());
+			}
+		}
+
+
+		if (m_pBillObject->active) {
+			m_pBillObject->Render(pd3dCommandList, m_pPlayer->GetCamera());
+		}
+
+
+		for (int i = 0; i < 29; ++i) {
+			for (auto& B : m_pBloodBillboard[i]) {
+				if (B->active) {
+					B->Render(pd3dCommandList, m_pPlayer->GetCamera());
+				}
+			}
+		}
+
+		for (auto& ParticleObject : m_pParticleObjects) {
+			if (ParticleObject->m_bActive) {
+				ParticleObject->Render(pd3dCommandList);
+			}
+		}
+
+
+		if (m_RedZone) {
+
+			if (m_currentMinute > m_LastMinute) {
+
+				m_pRedZoneEffect->SetPosition(m_RedZone->GetPosition());
+				m_RedZone->m_xmf4x4ToParent = Matrix4x4::Identity();
+				int RandomPosition = GetRandomFloatInRange(-200.f, 200.f);
+				m_RedZone->SetPosition(RandomPosition, 0, RandomPosition);
+				m_RedZone->m_prexmf4x4ToParent = m_RedZone->m_xmf4x4ToParent;
+				m_LastMinute = m_currentMinute;
+				m_pRedZoneEffect->active = true;
+
+			}
+
+			if (TotalPlayTime % int(LifeTime) == int(LifeTime - 1)) {
+
+				m_RedZone->m_xmf4x4ToParent = m_RedZone->m_prexmf4x4ToParent;
+				float size = m_PlayTimeTimer.GetTotalTime() - int(m_PlayTimeTimer.GetTotalTime());
+				size = 1.0f - size;
+				m_RedZone->SetScale(size, size, size);
+
+			}
+
+			m_RedZone->Render(pd3dCommandList);
+		}
+
+		if (m_pRedZoneEffect->active) {
+			m_pRedZoneEffect->NoSetPositionRender(pd3dCommandList, m_pPlayer->GetCamera());
+		}
+
+
+		for (auto& GO : m_itemBoxes) {
+			if (GO) {
+				GO->UpdateTransform(NULL);
+				GO->Render(pd3dCommandList);
+			}
 		}
 
 
 
-		m_pPlayer->Render(pd3dCommandList);
-		
-
-		/*for (auto& GO : m_pGameObject) {
-			if (GO->m_bActive) {
-				if (GO->m_bVisible) GO->Render(pd3dCommandList);
-			}
-		}
-		m_pPlayer->Render(pd3dCommandList);
 
 
-		for (auto& GO : m_pSceneObject) {
-			if (m_pCamera->IsInFrustum(GO->m_BoundingBox)) GO->Render(pd3dCommandList);
-		}*/
+
+
+		while (readycount != 0);
+
+
+	}
 
 	
-
-	}
-
-	if (m_bBoundingRender) BoudingRendering(pd3dCommandList);
-
-	for (auto& b : bulletcasings) {
-		if (b->m_bActive) {
-			b->UpdateTransform();
-			b->Render(pd3dCommandList);
-
-		}
-	}
-
-	for (auto& GO : m_pBillObjects) {
-		if (GO->active) {
-			GO->Render(pd3dCommandList, m_pPlayer->GetCamera());
-		}
-	}
-
-
-	if (m_pBillObject->active) {
-		m_pBillObject->Render(pd3dCommandList, m_pPlayer->GetCamera());
-	}
-
-
-	for (int i = 0; i < 29; ++i) {
-		for (auto& B : m_pBloodBillboard[i]) {
-			if (B->active) {
-				B->Render(pd3dCommandList, m_pPlayer->GetCamera());
-			}
-		}
-	}
-
-	for (auto& ParticleObject : m_pParticleObjects) {
-		if (ParticleObject->m_bActive) {
-			ParticleObject->Render(pd3dCommandList);
-		}
-	}
-
-
-	if (m_RedZone) {
-
-		if (m_currentMinute > m_LastMinute) {
-
-			m_pRedZoneEffect->SetPosition(m_RedZone->GetPosition());
-			m_RedZone->m_xmf4x4ToParent = Matrix4x4::Identity();
-			int RandomPosition = GetRandomFloatInRange(-200.f, 200.f);
-			m_RedZone->SetPosition(RandomPosition, 0, RandomPosition);
-			m_RedZone->m_prexmf4x4ToParent = m_RedZone->m_xmf4x4ToParent;
-			m_LastMinute = m_currentMinute;
-			m_pRedZoneEffect->active = true;
-
-		}
-
-		if (TotalPlayTime % int(LifeTime) == int(LifeTime - 1)) {
-
-			m_RedZone->m_xmf4x4ToParent = m_RedZone->m_prexmf4x4ToParent;
-			float size = m_PlayTimeTimer.GetTotalTime() - int(m_PlayTimeTimer.GetTotalTime());
-			size = 1.0f - size;
-			m_RedZone->SetScale(size, size, size);
-
-		}
-
-		m_RedZone->Render(pd3dCommandList);
-	}
-
-	if (m_pRedZoneEffect->active) {
-		m_pRedZoneEffect->NoSetPositionRender(pd3dCommandList, m_pPlayer->GetCamera());
-	}
-
-
-	for (auto& GO : m_itemBoxes) {
-		if (GO) {
-			GO->UpdateTransform(NULL);
-			GO->Render(pd3dCommandList);
-		}
-	}
-
-
-	//int count = 0;
-	//for (auto& p : m_Quadlist) {
-	//	if (count == quadranderingidx) {
-	//		p->Render(pd3dCommandList);
-	//	}
-	//	count++;
-	//}
-
-
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

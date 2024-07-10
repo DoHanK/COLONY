@@ -157,7 +157,7 @@ public:
 
 protected:
 
-	float								m_fElapsedTime = 0.0f;
+	volatile float								m_fElapsedTime = 0.0f;
 
 	LIGHT*								m_pLights = NULL;
 	int									m_nLights = 0;
@@ -291,7 +291,17 @@ protected:
 	float m_hurtAnimation = 0.0f;
 
 	// MultiThread 
-	std::list<QuadTree*> m_Quadlist;
+	std::vector<QuadTree*> m_Quadlist;
 
 	int quadranderingidx = 0;
+
+public:
+	enum OP_TYPE{ANIMATION, RENDERING ,END};
+
+	std::vector<std::thread> m_threads;
+	
+	Concurrency::concurrent_queue<pair<int, long long >> m_Joblist[MAX_THREAD_NUM];  ///first -> op , second -> extra info
+
+	void ThreadWorker(int threadnum);
+	volatile int readycount = 0;
 };

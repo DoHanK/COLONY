@@ -250,7 +250,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
         float dis = length(camerapos);
    
        float FF = saturate((dis - FogStart) / (FogEnd - FogStart));
-    cColor = (1.0f - FF) * cColor +  FF * fogColor;
+         cColor = (1.0f - FF) * cColor +  FF * fogColor;
 
     
     //float FF = MakeFogFactor(input.normalW);

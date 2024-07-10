@@ -148,7 +148,7 @@ void QuadTree::BoundingRendering(ID3D12GraphicsCommandList* pd3dCommandList,int 
 
 }
 
-void QuadTree::BringDepthTrees(std::list<QuadTree*>& out, int ndepth)
+void QuadTree::BringDepthTrees(std::vector<QuadTree*>& out, int ndepth)
 {
 	static int count  = 0;
 
