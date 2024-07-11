@@ -654,6 +654,7 @@ void CollisionManager::CheckVisiableEnemy()
 {
 	for (auto& a : m_EnemyObjects) {
 		a->UpdateEntireBouding();
+		
 		if (m_pCamera->IsInFrustum(a->m_Entire)) a->m_pOwner->m_bVisible = true;
 		else a->m_pOwner->m_bVisible = false;
 	}
@@ -798,6 +799,7 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 		a->UpdateEntireBouding();
 		a->UpdateBodyBouding();
 		a->UPdateLegBounding();
+
 	}
 	//적의 바운디 박스
 	for (const auto& a : m_EnemyObjects) {

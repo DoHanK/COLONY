@@ -79,20 +79,20 @@ GamePlayScene::~GamePlayScene()
 {
 	
 #ifdef WITH_MULTITHREAD
-	readycount = MAX_THREAD_NUM;
 
 	for (int i = 0; i < MAX_THREAD_NUM; ++i) {
 
 		m_Joblist[i].push({ END ,-1 });
 	}
 
-	while (readycount != 0);
-
 	for (auto& t : m_threads) {
 
 		t.join();
 	}
+
 #endif // #WITH_MULTITHREAD
+
+
 
 
 }
@@ -571,7 +571,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] = pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(10000);
-	for (int j = 0; j < 10; ++j) {
+	for (int j = 0; j < 300; ++j) {
 		for (int i = 0; i < 1; i++) {
 
 			int idex = m_pPathFinder->GetInvalidNode();
@@ -748,7 +748,6 @@ void GamePlayScene::ThreadWorker(int threadnum)
 			switch (OP.first) {
 			case ANIMATION: {
 
-				
 
 				m_Quadlist[threadnum]->AnimateObjects(m_fElapsedTime, m_pGameObject);
 
@@ -758,29 +757,25 @@ void GamePlayScene::ThreadWorker(int threadnum)
 					if (CAS(&readycount, precount, nowcount)) break;
 				}
 
+		
+
+
 
 				break;
 			}
 			case RENDERING: {
 				ID3D12GraphicsCommandList* subcommandlist = reinterpret_cast<ID3D12GraphicsCommandList*>(OP.second);
 				m_Quadlist[threadnum]->Render(subcommandlist);
-
-
 				while (true) {
 					int precount = readycount;
 					int nowcount = precount - 1;
 					if (CAS(&readycount, precount, nowcount)) break;
 
 				}
+
 				break;
 			}
 			case END:
-				while (true) {
-					int precount = readycount;
-					int nowcount = precount - 1;
-					if (CAS(&readycount, precount, nowcount)) break;
-
-				}
 				return;
 			
 			}
@@ -1327,53 +1322,24 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 
 
-
 	m_fElapsedTime = fTimeElapsed;
+
 	m_pPlayer->m_ReloadTime += fTimeElapsed;
 	PlayerControlInput();
 	m_pCollisionManager->CollisionPlayerToStaticObeject();
 	m_pCollisionManager->CollisionPlayerToEnemy();
-	//for (auto& GO : m_pGameObject) {
-
-	//	if (GO->m_bActive) {
-	//		((AlienSpider*)(GO))->Update(fTimeElapsed);
-
-	//		if (((AlienSpider*)(GO))->m_GoalType != Jump_Goal)
-	//			((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
-	//		else if (((AlienSpider*)(GO))->m_pSoul->m_JumpStep >= JUMP_LANDING)
-	//			((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
-	//		GO->Animate(fTimeElapsed);
-
-	//	}
-	//}
-
+	
 
 
 		readycount = MAX_THREAD_NUM;
 
 		for (int i = 0; i < MAX_THREAD_NUM; ++i) {
-
 			m_Joblist[i].push({ ANIMATION, -1 });
 		}
 
 
-	
-
-
-	
-
-
-//auto end_t = std::chrono::high_resolution_clock::now();
-//auto exec_t = end_t - start_t;
-//auto exec_ms = std::chrono::duration_cast<std::chrono::milliseconds>(exec_t).count();
-//DebugValue::Printfloat("실행시간: ", exec_ms);
-
-
-
-
-
-
 	m_RedZoneHurt += fTimeElapsed;
+
 	if (m_RedZoneHurt > 5.0f) {
 		m_RedZoneHurt = 0.0f;
 		if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
@@ -1436,9 +1402,10 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 	m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
 
 
-
-
 	while (readycount != 0);
+
+
+
 
 		
 	m_pCollisionManager->CollisionEnemyToStaticObeject();
@@ -1914,6 +1881,7 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 				GO->Render(pd3dCommandList);
 			}
 		}
+
 
 
 

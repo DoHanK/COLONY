@@ -340,7 +340,7 @@ void AlienSpider::AnimateWithMultithread(float fTimeElapsed, int idx)
 AlienSpiderAnimationController::AlienSpiderAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel):
 AnimationController(pd3dDevice, pd3dCommandList,  nAnimationTracks, pModel)
 {
-
+	m_ppSubAnimationSets = pModel->m_ppSubAnimationSets;
 
 }
 
@@ -407,8 +407,8 @@ void AlienSpiderAnimationController::AdvanceTime(float fElapsedTime, GameObject*
 				//OutputDebugStringA("   ");
 	
 		}
-		std::vector < XMFLOAT4X4> tempmatrix;
-		//OutputDebugStringA("  \n ");
+	
+
 		for (int i = 0; i < m_nSkinnedMeshes; i++)
 		{
 			for (int j = 0; j < m_pnAnimatedBoneFrames[i]; j++)
@@ -418,11 +418,9 @@ void AlienSpiderAnimationController::AdvanceTime(float fElapsedTime, GameObject*
 
 				for (int k = 0; k < m_nAnimationTracks; k++)
 				{
-					animationlock.lock();
 					AnimationSet* pAnimationSet = m_ppAnimationSets[i]->m_ppAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
 					pAnimationSet->SetPosition(m_pAnimationTracks[k].m_fPosition);
 					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j);
-					animationlock.unlock();
 				
 					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
 
@@ -432,29 +430,16 @@ void AlienSpiderAnimationController::AdvanceTime(float fElapsedTime, GameObject*
 					xmf4x4Transform._42 = -0.0001055449;
 					xmf4x4Transform._43 = 0.007409086;
 				}
-
-				tempmatrix.push_back(xmf4x4Transform);
-
-			}
-
-		}
-
-		modellock.lock();
-		auto p = tempmatrix.begin();
-		for (int i = 0; i < m_nSkinnedMeshes; i++)
-		{
-			for (int j = 0; j < m_pnAnimatedBoneFrames[i]; j++)
-			{
-				m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = *p;
-				p++;
+				m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
 
 			}
 
 		}
+
+
 
 		pRootGameObject->UpdateTransform(NULL);
 		DirectUpdateMatrix();
-		modellock.unlock();
 
 	}
 
@@ -519,11 +504,10 @@ void AlienSpiderAnimationController::AdvanceTimeWithMultithread(float fElapsedTi
 
 				for (int k = 0; k < m_nAnimationTracks; k++)
 				{
-					AnimationSet* pAnimationSet = m_ppAnimationSets[i]->m_ppAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
-					animationlock.lock();
+					AnimationSet* pAnimationSet = m_ppSubAnimationSets[idx][i]->m_ppAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
 					pAnimationSet->SetPosition(m_pAnimationTracks[k].m_fPosition);
 					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j);
-					animationlock.unlock();
+			
 
 					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
 

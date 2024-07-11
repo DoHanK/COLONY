@@ -1216,11 +1216,21 @@ void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedM
 			pLoadedModel->m_ppAnimationSets = new AnimationSets * [pLoadedModel->m_nSkinnedMeshes];
 			pLoadedModel->m_ppSkinnedMeshes = new SkinnedMesh * [pLoadedModel->m_nSkinnedMeshes];
 			pLoadedModel->m_pppAnimatedBoneFrameCaches = new GameObject * *[pLoadedModel->m_nSkinnedMeshes];
+#ifdef WITH_MULTITHREAD
+
+			for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+				pLoadedModel->m_ppSubAnimationSets[i] = new AnimationSets * [pLoadedModel->m_nSkinnedMeshes];
+			}
+#endif
 
 			for (int i = 0; i < pLoadedModel->m_nSkinnedMeshes; i++)
 			{
 				pLoadedModel->m_ppAnimationSets[i] = new AnimationSets(nAnimationSets);
-
+#ifdef WITH_MULTITHREAD
+				for (int j = 0; j < MAX_THREAD_NUM; ++j) {
+					pLoadedModel->m_ppSubAnimationSets[j][i] = new AnimationSets(nAnimationSets);
+				}
+#endif
 
 
 				::ReadStringFromFile(pInFile, pstrToken); //Skinned Mesh Name
@@ -1261,6 +1271,12 @@ void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedM
 			for (int i = 0; i < pLoadedModel->m_nSkinnedMeshes; i++)//[프레임] [애니메이션Set]   
 			{
 				pLoadedModel->m_ppAnimationSets[i]->m_ppAnimationSets[nAnimationSet] = new AnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pnAnimatedBoneFrames[i], pstrToken);
+#ifdef WITH_MULTITHREAD
+				for (int j = 0; j < MAX_THREAD_NUM; ++j) {
+					pLoadedModel->m_ppSubAnimationSets[j][i]->m_ppAnimationSets[nAnimationSet] = new AnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pnAnimatedBoneFrames[i], pstrToken);
+				}
+#endif
+
 			}
 
 			for (int i = 0; i < nKeyFrames; i++)
@@ -1278,7 +1294,16 @@ void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedM
 						pAnimationSet->m_pfKeyFrameTimes[i] = fKeyTime;
 						nReads = (UINT)::fread(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i], sizeof(XMFLOAT4X4), pLoadedModel->m_pnAnimatedBoneFrames[j], pInFile);
 
-					
+#ifdef WITH_MULTITHREAD
+						for (int s = 0; s < MAX_THREAD_NUM; ++s) {
+							//int nSkin = ::ReadIntegerFromFile(pInFile); //j
+							AnimationSet* psubAnimationSet = pLoadedModel->m_ppSubAnimationSets[s][j]->m_ppAnimationSets[nAnimationSet];//각 프레임마다 해당 값 넣어주는중.
+							psubAnimationSet->m_pfKeyFrameTimes[i] = fKeyTime;
+							psubAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]= pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i];
+						}
+#endif	
+
+
 					}
 				}
 			}

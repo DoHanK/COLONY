@@ -265,8 +265,12 @@ public:
 
 	AnimationSets** m_ppAnimationSets = NULL;
 
+	AnimationSets** m_ppSubAnimationSets[MAX_THREAD_NUM];
+
 	int* m_pnAnimatedBoneFrames = NULL; //[SkinnedMeshes]
 	GameObject*** m_pppAnimatedBoneFrameCaches = NULL; //[SkinnedMeshes][Bones]
+
+	
 };
 
 
@@ -321,7 +325,7 @@ public:
 
 	ID3D12Resource** m_ppd3dcbSkinningBoneTransforms = NULL; //[SkinnedMeshes]
 	XMFLOAT4X4** m_ppcbxmf4x4MappedSkinningBoneTransforms = NULL;
-
+	AnimationSets*** m_ppSubAnimationSets;
 public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
