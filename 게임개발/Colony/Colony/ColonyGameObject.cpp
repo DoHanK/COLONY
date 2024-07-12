@@ -433,6 +433,13 @@ CLoadedModelInfo::~CLoadedModelInfo()
 		if (m_pppAnimatedBoneFrameCaches[i]) delete[] m_pppAnimatedBoneFrameCaches[i];
 	}
 	if (m_pppAnimatedBoneFrameCaches) delete[] m_pppAnimatedBoneFrameCaches;
+
+	for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+		if (m_ppSubAnimationSets[i])
+		{
+			delete[] m_ppSubAnimationSets[i];
+		}
+	}
 }
 
 
@@ -484,6 +491,7 @@ GameObject::~GameObject()
 		delete[] m_xmfsub4x4World;
 		m_xmfsub4x4World = NULL;
 	}
+
 
 }
 

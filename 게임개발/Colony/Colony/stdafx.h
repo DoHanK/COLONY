@@ -119,6 +119,23 @@ inline bool CAS(volatile int* addr, int expected, int new_val)
 		&expected, new_val);
 }
 
+inline float VectorLength(XMFLOAT3 vec) {
+	return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+}
+inline float DistancePointToPlane(XMFLOAT3 point, XMFLOAT3 planeNormal, XMFLOAT3 planePoint) {
+	// XMFLOAT3에서 XMVECTOR로 변환
+	XMVECTOR vecPoint = XMLoadFloat3(&point);
+	XMVECTOR vecPlaneNormal = XMLoadFloat3(&planeNormal);
+	XMVECTOR vecPlanePoint = XMLoadFloat3(&planePoint);
+
+	// 법선 벡터 정규화
+	vecPlaneNormal = XMVector3Normalize(vecPlaneNormal);
+
+	// 점과 평면 사이의 거리 계산
+	float numerator = XMVectorGetX(XMVector3Dot(vecPlaneNormal, vecPoint)) - XMVectorGetX(XMVector3Dot(vecPlaneNormal, vecPlanePoint));
+	return fabs(numerator);  // 절대값 계산
+}
+
 
 //멀티쓰레드
 //최대 16개 이상을 넘지 않도록 한다.

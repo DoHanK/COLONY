@@ -531,7 +531,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 			//threads.push_back(thread(&QuadTree::InsertStaticObject, QT, m_pSceneObject));
 			QT->InsertStaticObject(m_pSceneObject);   // 싱글코어 코드
-			
+			QT->SettingStaticBounding(*m_pCollisionManager);
 			QT->m_pCamera = m_pCamera;
 			QT->m_pPlayer = m_pPlayer;
 			m_threads.push_back(thread(&GamePlayScene::ThreadWorker, this, count++ ));
@@ -570,8 +570,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[i] = pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_White_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
 	spiderColor[6] = pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
-	m_pGameObject.reserve(10000);
-	for (int j = 0; j < 300; ++j) {
+	m_pGameObject.reserve(400);
+	for (int j = 0; j < 100; ++j) {
 		for (int i = 0; i < 1; i++) {
 
 			int idex = m_pPathFinder->GetInvalidNode();
@@ -1408,8 +1408,8 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 
 		
-	m_pCollisionManager->CollisionEnemyToStaticObeject();
-	m_pCollisionManager->CollisionEnemyToPlayer();
+	//m_pCollisionManager->CollisionEnemyToStaticObeject();
+	//m_pCollisionManager->CollisionEnemyToPlayer();
 	
 
 

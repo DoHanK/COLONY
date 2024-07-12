@@ -504,10 +504,12 @@ void AlienSpiderAnimationController::AdvanceTimeWithMultithread(float fElapsedTi
 
 				for (int k = 0; k < m_nAnimationTracks; k++)
 				{
+					//animationlock.lock();
 					AnimationSet* pAnimationSet = m_ppSubAnimationSets[idx][i]->m_ppAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
 					pAnimationSet->SetPosition(m_pAnimationTracks[k].m_fPosition);
 					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j);
-			
+					//animationlock.unlock();
+
 
 					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
 

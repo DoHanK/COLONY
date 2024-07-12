@@ -3,6 +3,8 @@
 #include "ColonyGameObject.h"
 #include "ColonyMesh.h"
 #include "AlienSpider.h"
+#include "CollisionManager.h"
+
 enum QTDirection { LEFT_UP, RIGHT_UP, LEFT_BOTTOM, RIGHT_BOTTOM };
 class QuadTree
 {public:
@@ -19,8 +21,10 @@ public:
 	BoundingBox					m_BoundingBox;
 	std::vector<GameObject*>	m_StaticObject;
 	std::list<GameObject*>	m_DynamicObject;
-	
 	std::vector<int>			m_Route; // 루트 찾기
+
+	//	
+	std::vector<Collision*> m_StaticBoundings;
 
 
 	QuadTree* m_LeftUp = NULL;
@@ -34,6 +38,8 @@ public:
 
 	Camera* m_pCamera;
 	Player* m_pPlayer;
+	BCapsule* m_pBoundPlayer;
+
 public:
 
 
@@ -44,6 +50,8 @@ public:
 
 	void InsertDynamicObject();
 
+	void SettingStaticBounding(CollisionManager& collisionManager);
+
 	void BoundingRendering(ID3D12GraphicsCommandList* pd3dCommandList,int DepthLevel);
 
 	void BringDepthTrees(std::vector< QuadTree*>& out,int ndepth);
@@ -53,5 +61,8 @@ public:
 	void AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys);
 	
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void CollisionEnemyToStaticObject();
+	void CollisionEnemyToPlayer();
 };
 

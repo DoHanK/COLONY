@@ -3,22 +3,7 @@
 
 class AlienSpider;
 // 벡터의 길이(크기)를 계산하는 함수
-float VectorLength(XMFLOAT3 vec) {
-	return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-}
-float DistancePointToPlane(XMFLOAT3 point, XMFLOAT3 planeNormal, XMFLOAT3 planePoint) {
-	// XMFLOAT3에서 XMVECTOR로 변환
-	XMVECTOR vecPoint = XMLoadFloat3(&point);
-	XMVECTOR vecPlaneNormal = XMLoadFloat3(&planeNormal);
-	XMVECTOR vecPlanePoint = XMLoadFloat3(&planePoint);
 
-	// 법선 벡터 정규화
-	vecPlaneNormal = XMVector3Normalize(vecPlaneNormal);
-
-	// 점과 평면 사이의 거리 계산
-	float numerator = XMVectorGetX(XMVector3Dot(vecPlaneNormal, vecPoint)) - XMVectorGetX(XMVector3Dot(vecPlaneNormal, vecPlanePoint));
-	return fabs(numerator);  // 절대값 계산
-}
 
 CollisionManager::CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
