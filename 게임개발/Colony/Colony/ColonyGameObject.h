@@ -255,7 +255,11 @@ public:
 class CLoadedModelInfo
 {
 public:
-	CLoadedModelInfo() { }
+	CLoadedModelInfo() { 
+		for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+			m_ppSubAnimationSets[i] = NULL;
+		}
+	}
 	~CLoadedModelInfo();
 
 	GameObject* m_pModelRootObject = NULL;
