@@ -571,7 +571,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] = pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 100; ++j) {
+	for (int j = 0; j < 1000; ++j) {
 		for (int i = 0; i < 1; i++) {
 
 			int idex = m_pPathFinder->GetInvalidNode();
@@ -1325,9 +1325,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 	m_fElapsedTime = fTimeElapsed;
 
 	m_pPlayer->m_ReloadTime += fTimeElapsed;
-	PlayerControlInput();
-	m_pCollisionManager->CollisionPlayerToStaticObeject();
-	m_pCollisionManager->CollisionPlayerToEnemy();
+
 	
 
 
@@ -1337,6 +1335,9 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 			m_Joblist[i].push({ ANIMATION, -1 });
 		}
 
+		PlayerControlInput(); 
+		m_pCollisionManager->CollisionPlayerToStaticObeject();
+		m_pCollisionManager->CollisionPlayerToEnemy();
 
 	m_RedZoneHurt += fTimeElapsed;
 
@@ -1396,8 +1397,8 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 	m_pCollisionManager->CollisionBulletToObject();
 	m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
-	//절두체 컬링
-	m_pCollisionManager->CheckVisiableEnemy();
+
+
 
 	m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
 

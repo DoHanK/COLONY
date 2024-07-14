@@ -290,10 +290,18 @@ void QuadTree::CollisionEnemyToStaticObject()
 	
 
 
+	m_pCamera->RegenerateViewMatrix();
+
 	for (auto& E : m_DynamicObject) {
+		float dis = XM3CalDis(m_pCamera->GetPosition(), E->GetPosition());
+		
 		AliensBoudingBox AliensBound(E);
 		AliensBound.UpdateCollisionDetectBouding();
 		int inputcount = 0;
+		AliensBound.UpdateEntireBouding();
+		if (m_pCamera->IsInFrustum(AliensBound.m_Entire)&& dis<100.f) AliensBound.m_pOwner->m_bVisible = true;
+		else AliensBound.m_pOwner->m_bVisible = false;
+
 		for (const auto& a : m_StaticBoundings) {
 			//전체 바운딩박스 이동
 		

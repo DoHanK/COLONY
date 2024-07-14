@@ -1188,7 +1188,7 @@ void GameObject::PrintFrameInfo(GameObject* pGameObject, GameObject* pParent)
 
 void GameObject::UpdateTransformWithMultithread(XMFLOAT4X4* pxmf4x4Parent,int idx ,int depth)
 {
-	if (depth == 0 || depth == 1) {
+	if (depth == 0) {
 		m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4ToParent, *pxmf4x4Parent) : m_xmf4x4ToParent;
 		if (m_pSibling) m_pSibling->UpdateTransformWithMultithread(pxmf4x4Parent, idx, depth + 1);
 		if (m_pChild) m_pChild->UpdateTransformWithMultithread(&m_xmf4x4World, idx, depth + 1);
