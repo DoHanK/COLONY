@@ -911,7 +911,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 	return crush;
 }
 
-void CollisionManager::CollisionBulletToItemBox()
+void CollisionManager::CollisionBulletToItemBox(Billboard* ExplosionEffect)
 {
 	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());
 	FXMVECTOR BulletDir = XMLoadFloat3(&m_pCamera->GetLookVector());
@@ -922,6 +922,9 @@ void CollisionManager::CollisionBulletToItemBox()
 		((BOBBox*)a)->UpdateCollision();
 		if (((BOBBox*)a)->m_Transformboudingbox.Intersects(BulletPos, BulletDir, dis)) {
 			a->m_pOwner->m_bActive = false;
+			//ExplosionEffect->m_ownerObject = a->m_pOwner;
+			ExplosionEffect->SetPosition(a->m_pOwner->GetPosition());
+			ExplosionEffect->active = true;
 		}
 		
 	}

@@ -255,6 +255,7 @@ protected:
 	vector<GameObject*>m_machineguns;
 	vector<GameObject*>m_syrings;
 	vector<GameObject*>m_eyes;
+	Billboard* m_ItemBoxExplosion;
 
 	GameObject* itemBox = NULL;
 

@@ -653,9 +653,21 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_itemBoxes.push_back(pitemBox);
 	}
 
+	//ItemBoxExplosion
+	m_ItemBoxExplosion = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		pResourceManager->BringTexture("Model/Textures/ItemBoxExplosion.dds", BILLBOARD_TEXTURE, true), m_BillShader, NULL);
+	m_ItemBoxExplosion->doAnimate = true;
+	m_ItemBoxExplosion->active = false;
+	m_ItemBoxExplosion->SetRowNCol(1, 13);
+	m_ItemBoxExplosion->m_BillMesh->UpdataVertexPosition(UIRect(3.0, -1.0, -2.0, 2.0), 1.0f);
+	m_ItemBoxExplosion->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+	m_ItemBoxExplosion->SettedTimer = 0.02f;
+	m_ItemBoxExplosion->doOnce = true;
+	m_ItemBoxExplosion->AddRef();
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+	
 
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
@@ -851,6 +863,8 @@ void GamePlayScene::ReleaseObjects()
 	for (auto& b : bulletcasings) {
 		b->Release();
 	}
+
+	if (m_ItemBoxExplosion)m_ItemBoxExplosion->Release(); 
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -1006,7 +1020,7 @@ void GamePlayScene::PlayerControlInput()
 
 				dwPlayerState |= STATE_SHOOT;
 				m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
-				m_pCollisionManager->CollisionBulletToItemBox();
+				m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion);
 				m_pBillObject->active = true;
 				m_pPlayer->m_ReloadTime = 0;
 				m_bisCameraShaking = true;
@@ -1176,6 +1190,10 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 	if (m_pRedZoneEffect->doAnimate) {
 		m_pRedZoneEffect->Animate(fTimeElapsed);
+	}
+
+	if (m_ItemBoxExplosion->doAnimate) {
+		m_ItemBoxExplosion->Animate(fTimeElapsed);
 	}
 
 	for (int i = 0; i < 29; ++i) {
@@ -1525,6 +1543,10 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 			GO->Render(pd3dCommandList);
 		}
 	}
+
+	if (m_ItemBoxExplosion->active) {
+		m_ItemBoxExplosion->Render(pd3dCommandList, m_pPlayer->GetCamera());
+	}
 }
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1686,6 +1708,7 @@ void GamePlayScene::ReleaseUploadBuffers()
 		b->ReleaseUploadBuffers();
 		break;// 어쳐피 공유 인스턴싱이기 때문에 한번만. 
 	}
+
 
 }
 
