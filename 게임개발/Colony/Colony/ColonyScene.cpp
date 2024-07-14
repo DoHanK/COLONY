@@ -614,7 +614,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_RedZoneShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	m_RedZoneShader->AddRef();
 
-	m_RedZone = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone.bin", m_RedZoneShader, NULL,pResourceManager);
+	m_RedZone = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone2.bin", m_RedZoneShader, "Model/Textures/",pResourceManager);
 	m_pCollisionManager->EnrollRedZoneIntoSphere(m_RedZone->RedZoneObjectInfo->m_pModelRootObject->GetPosition(), 50.f, m_RedZone);
 
 	//RedZoneEffect
@@ -647,10 +647,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pitemBox->m_BoundingBox.Extents = XMFLOAT3(0, 0, 0);
 		pitemBox->MergehierarchyBoundingBox(pitemBox->m_BoundingBox);
 		pitemBox->SetPosition(m_pPathFinder->m_Cell[index].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[index].m_BoundingBox.Center.z);
-
 		pitemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
 		m_pCollisionManager->EnrollItemIntoBox(pitemBox->m_BoundingBox.Center, pitemBox->m_BoundingBox.Extents, itemBoxInfo->m_pModelRootObject->m_xmf4x4ToParent, pitemBox);
-
+		pitemBox->m_bActive = true;
 		m_itemBoxes.push_back(pitemBox);
 	}
 
@@ -1007,6 +1006,7 @@ void GamePlayScene::PlayerControlInput()
 
 				dwPlayerState |= STATE_SHOOT;
 				m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
+				m_pCollisionManager->CollisionBulletToItemBox();
 				m_pBillObject->active = true;
 				m_pPlayer->m_ReloadTime = 0;
 				m_bisCameraShaking = true;
@@ -1120,6 +1120,7 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	m_pPlayer->m_ReloadTime += fTimeElapsed;
 	PlayerControlInput();
 	m_pCollisionManager->CollisionPlayerToStaticObeject();
+	m_pCollisionManager->CollisionPlayerToItemBox();
 	m_pCollisionManager->CollisionPlayerToEnemy();
 
 	for (auto& GO : m_pGameObject) {
@@ -1138,7 +1139,9 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	m_pCollisionManager->CollisionEnemyToStaticObeject();
 	m_pCollisionManager->CollisionEnemyToPlayer();
 	m_bCrashRedZone=m_pCollisionManager->CollisionPlayerToRedZone();
-	
+
+
+
 
 
 	m_RedZoneHurt += fTimeElapsed;
@@ -1488,15 +1491,15 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 	if (m_RedZone) {
 
 		if (m_currentMinute > m_LastMinute) {
-
 			m_pRedZoneEffect->SetPosition(m_RedZone->GetPosition());
+			m_pRedZoneEffect->active = true;
 			m_RedZone->m_xmf4x4ToParent = Matrix4x4::Identity();
-			int RandomPosition = GetRandomFloatInRange(-200.f, 200.f);
-			m_RedZone->SetPosition(RandomPosition, 0, RandomPosition);
+			int index = m_pPathFinder->GetInvalidNode();
+			m_RedZone->SetPosition(m_pPathFinder->m_Cell[index].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[index].m_BoundingBox.Center.z);
+			//int RandomPosition = GetRandomFloatInRange(-200.f, 200.f);
+			//m_RedZone->SetPosition(RandomPosition, 0, RandomPosition);
 			m_RedZone->m_prexmf4x4ToParent = m_RedZone->m_xmf4x4ToParent;
 			m_LastMinute = m_currentMinute;
-			m_pRedZoneEffect->active = true;
-
 		}
 
 		if (TotalPlayTime % int(LifeTime) == int(LifeTime-1)) {
@@ -1517,7 +1520,7 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 
 
 	for (auto& GO : m_itemBoxes) {
-		if (GO) {
+		if (GO->m_bActive) {
 			GO->UpdateTransform(NULL);
 			GO->Render(pd3dCommandList);
 		}

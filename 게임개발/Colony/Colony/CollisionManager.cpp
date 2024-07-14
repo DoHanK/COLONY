@@ -263,6 +263,14 @@ void CollisionManager::EnrollEnemy(GameObject* pEnemy)
 	}
 }
 
+void CollisionManager::EnrollRedZoneIntoSphere(XMFLOAT3 center, float radius, GameObject* pOwner)
+{
+	BSphere* psphere = new BSphere(center, radius, pOwner);
+
+	m_pRedZoneCollision = psphere;
+
+}
+
 bool CollisionManager::CollisionPlayerToStaticObeject()
 {
 
@@ -422,6 +430,165 @@ bool CollisionManager::CollisionPlayerToStaticObeject()
 
 
 	
+	return true;
+}
+
+bool CollisionManager::CollisionPlayerToItemBox()
+{
+	//콜리전 위치 이동
+	int count = 0;
+	for (const auto& a : m_ItemBoxes) {
+		BoundingSphere boundingsphere = ((BCapsule*)m_pPlayer)->GetCapsuleBounding(*reinterpret_cast<BOBBox*>(a));
+		if (boundingsphere.Intersects(((BOBBox*)a)->m_Transformboudingbox)) {
+			m_PlayerCapsulePos = boundingsphere.Center;
+			((BCapsule*)m_pPlayer)->m_boundingshpere.Center = m_PlayerCapsulePos;
+
+
+
+			//충돌면 구하기
+			XMFLOAT3 m_BoundingCorner[8];
+
+			XMFLOAT3 BoxCenter = reinterpret_cast<BOBBox*>(a)->m_Transformboudingbox.Center;
+			((BOBBox*)a)->m_Transformboudingbox.GetCorners(m_BoundingCorner);
+			//캡슐의 센터
+			XMFLOAT3 CapsuleCenter = m_PlayerCapsulePos;
+			XMFLOAT3 CapsuleToBox = Vector3::Normalize(Vector3::Subtract(CapsuleCenter, BoxCenter));
+
+
+			// 뒷면 , 앞면 , 오른쪽 면 , 왼쪽 면 , 아래면 , 윗면
+			XMFLOAT3 PLANECENTER[6];
+			XMFLOAT3 PLANENORMAL[6];
+
+
+			// 앞면
+			PLANECENTER[0].x = (m_BoundingCorner[0].x + m_BoundingCorner[1].x + m_BoundingCorner[2].x + m_BoundingCorner[3].x) / 4;
+			PLANECENTER[0].y = (m_BoundingCorner[0].y + m_BoundingCorner[1].y + m_BoundingCorner[2].y + m_BoundingCorner[3].y) / 4;
+			PLANECENTER[0].z = (m_BoundingCorner[0].z + m_BoundingCorner[1].z + m_BoundingCorner[2].z + m_BoundingCorner[3].z) / 4;
+
+			// 뒷면
+			PLANECENTER[1].x = (m_BoundingCorner[4].x + m_BoundingCorner[5].x + m_BoundingCorner[6].x + m_BoundingCorner[7].x) / 4;
+			PLANECENTER[1].y = (m_BoundingCorner[4].y + m_BoundingCorner[5].y + m_BoundingCorner[6].y + m_BoundingCorner[7].y) / 4;
+			PLANECENTER[1].z = (m_BoundingCorner[4].z + m_BoundingCorner[5].z + m_BoundingCorner[6].z + m_BoundingCorner[7].z) / 4;
+
+			// 오른쪽 면
+			PLANECENTER[2].x = (m_BoundingCorner[1].x + m_BoundingCorner[5].x + m_BoundingCorner[6].x + m_BoundingCorner[2].x) / 4;
+			PLANECENTER[2].y = (m_BoundingCorner[1].y + m_BoundingCorner[5].y + m_BoundingCorner[6].y + m_BoundingCorner[2].y) / 4;
+			PLANECENTER[2].z = (m_BoundingCorner[1].z + m_BoundingCorner[5].z + m_BoundingCorner[6].z + m_BoundingCorner[2].z) / 4;
+
+			// 왼쪽 면
+			PLANECENTER[3].x = (m_BoundingCorner[0].x + m_BoundingCorner[4].x + m_BoundingCorner[7].x + m_BoundingCorner[3].x) / 4;
+			PLANECENTER[3].y = (m_BoundingCorner[0].y + m_BoundingCorner[4].y + m_BoundingCorner[7].y + m_BoundingCorner[3].y) / 4;
+			PLANECENTER[3].z = (m_BoundingCorner[0].z + m_BoundingCorner[4].z + m_BoundingCorner[7].z + m_BoundingCorner[3].z) / 4;
+
+			// 윗면
+			PLANECENTER[4].x = (m_BoundingCorner[3].x + m_BoundingCorner[2].x + m_BoundingCorner[6].x + m_BoundingCorner[7].x) / 4;
+			PLANECENTER[4].y = (m_BoundingCorner[3].y + m_BoundingCorner[2].y + m_BoundingCorner[6].y + m_BoundingCorner[7].y) / 4;
+			PLANECENTER[4].z = (m_BoundingCorner[3].z + m_BoundingCorner[2].z + m_BoundingCorner[6].z + m_BoundingCorner[7].z) / 4;
+
+			// 아랫면
+			PLANECENTER[5].x = (m_BoundingCorner[0].x + m_BoundingCorner[1].x + m_BoundingCorner[5].x + m_BoundingCorner[4].x) / 4;
+			PLANECENTER[5].y = (m_BoundingCorner[0].y + m_BoundingCorner[1].y + m_BoundingCorner[5].y + m_BoundingCorner[4].y) / 4;
+			PLANECENTER[5].z = (m_BoundingCorner[0].z + m_BoundingCorner[1].z + m_BoundingCorner[5].z + m_BoundingCorner[4].z) / 4;
+
+
+
+			for (int i = 0; i < 6; ++i) {
+				PLANENORMAL[i] = Vector3::Normalize(Vector3::Subtract(PLANECENTER[i], BoxCenter));
+			}
+
+			int selectNum = -1;
+			float minDistance = FLT_MAX;
+			for (int i = 0; i < 6; ++i) {
+				if (0 < Vector3::DotProduct(PLANENORMAL[i], CapsuleToBox)) {
+					float distance = DistancePointToPlane(CapsuleCenter, PLANENORMAL[i], PLANECENTER[i]);
+					if (distance < minDistance) {
+						selectNum = i;
+						minDistance = distance;
+					}
+				}
+			}
+			// selectNum 0 뒷 , 1 앞 , 2 오른 ,3 왼 ,4 위 ,5  아래
+
+			//string tt = "";
+			//switch (selectNum) {
+			//case 0:
+			//	tt = "뒷 ";
+			//	break;
+			//case 1:
+			//	tt = "앞 ";
+			//	break;
+			//case 2:
+			//	tt = "오른 ";
+			//	break;
+			//case 3:
+			//	tt = "왼 ";
+			//	break;
+			//case 4:
+			//	tt = "위 ";
+			//	break;
+			//case 5:
+			//	tt = "아래 ";
+			//	break;
+			//default:
+			//	tt = " 충돌면 없음 ";
+			//	break;
+
+			//}
+
+			//count++;
+			//string temp = "충돌  ";
+			//temp += to_string(count);
+			//temp += "번호  ";
+			////temp += to_string(selectNum);
+			//temp += tt;
+			//temp += "\n";
+			//OutputDebugStringA(temp.c_str());
+
+
+			float dotProduct = Vector3::DotProduct(((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity, PLANENORMAL[selectNum]);
+			if (dotProduct <= EPSILON) {
+				XMFLOAT3 slidingVector = Vector3::Subtract(((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity, { PLANENORMAL[selectNum].x * dotProduct, PLANENORMAL[selectNum].y * dotProduct, PLANENORMAL[selectNum].z * dotProduct });
+				((Player*)m_pPlayer->m_pOwner)->RollbackPosition();
+				((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Position = ((Player*)m_pPlayer->m_pOwner)->m_xmf3Position;
+				((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity = slidingVector;
+				((Player*)m_pPlayer->m_pOwner)->AddPosition(slidingVector);
+				//			if (a->m_pOwner) {
+				//				OutputDebugStringA(a->m_pOwner->m_pstrFrameName);
+				//				;
+				//							string temp = "x  ";
+				//temp += to_string(((BOBBox*)a)->m_boundingbox.Center.x);
+				// temp += "y  ";
+				//temp += to_string(((BOBBox*)a)->m_boundingbox.Center.y);
+				// temp += "z  ";
+				//temp += to_string(((BOBBox*)a)->m_boundingbox.Center.z);
+				//OutputDebugStringA(temp.c_str());
+				//				OutputDebugStringA("충돌\n");
+				//				
+				//			}
+				//			string temp = "x  ";
+				//temp += to_string(((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity.x);
+				// temp += "y  ";
+				//temp += to_string(((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity.y);
+				// temp += "z  ";
+				//temp += to_string(((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity.z);
+				//temp += "\n";
+				//OutputDebugStringA(temp.c_str());
+			}
+
+			if (selectNum == 4) {
+				((Player*)m_pPlayer->m_pOwner)->isJump = false;
+				((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Position.y = PLANECENTER[4].y;
+				if (((Player*)m_pPlayer->m_pOwner)->m_xmf3Velocity.y < 0) {
+					((Player*)m_pPlayer->m_pOwner)->m_xmf3Velocity.y = 0;
+					((Player*)m_pPlayer->m_pOwner)->m_xmfPre3Velocity.y = 0;
+				}
+				//((Player*)m_pPlayer->m_pOwner)->m_xmf3Position.y = PLANECENTER[4].y;
+			}
+		}
+
+	}
+
+
 	return true;
 }
 
@@ -608,15 +775,6 @@ void CollisionManager::CollisionEnemyToPlayer() {
 	}
 }
 
-
-void CollisionManager::EnrollRedZoneIntoSphere(XMFLOAT3 center, float radius, GameObject* pOwner)
-{
-	BSphere* psphere = new BSphere(center, radius, pOwner);
-
-	m_pRedZoneCollision = psphere;
-
-}
-
 bool CollisionManager::CollisionPlayerToRedZone()
 {
 	m_pRedZoneCollision->UpdateCollision();
@@ -651,7 +809,6 @@ void CollisionManager::CollisionBulletToObject()
 	}
 
 }
-
 
 
 void CollisionManager::CheckVisiableEnemy()
@@ -752,6 +909,23 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 
 
 	return crush;
+}
+
+void CollisionManager::CollisionBulletToItemBox()
+{
+	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());
+	FXMVECTOR BulletDir = XMLoadFloat3(&m_pCamera->GetLookVector());
+
+	float dis = 0;
+
+	for (const auto &a : m_ItemBoxes) {
+		((BOBBox*)a)->UpdateCollision();
+		if (((BOBBox*)a)->m_Transformboudingbox.Intersects(BulletPos, BulletDir, dis)) {
+			a->m_pOwner->m_bActive = false;
+		}
+		
+	}
+
 }
 
 void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList)

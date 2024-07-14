@@ -1093,7 +1093,8 @@ float4 PSRedZone(VS_STANDARD_OUTPUT input) : SV_TARGET
     //float FF = MakeFogFactor(input.normalW);
 
     float4 outputColor = cColor;
-    outputColor.a = 0.7f; 
+    outputColor.r *= 20.0f;
+    outputColor.a = 0.501f; 
      
     return outputColor;
 }
