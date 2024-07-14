@@ -903,16 +903,23 @@ void CollisionManager::CollisionBulletToItemBox(Billboard* ExplosionEffect)
 
 	float dis = 0;
 
-	for (const auto &a : m_ItemBoxes) {
-		((BOBBox*)a)->UpdateCollision();
-		if (((BOBBox*)a)->m_Transformboudingbox.Intersects(BulletPos, BulletDir, dis)) {
+
+	for (auto it = m_ItemBoxes.begin(); it != m_ItemBoxes.end(); ++it) {
+		BOBBox* a = static_cast<BOBBox*>(*it);
+		a->UpdateCollision();
+		if (a->m_Transformboudingbox.Intersects(BulletPos, BulletDir, dis)) {
 			a->m_pOwner->m_bActive = false;
-			//ExplosionEffect->m_ownerObject = a->m_pOwner;
 			ExplosionEffect->SetPosition(a->m_pOwner->GetPosition());
 			ExplosionEffect->active = true;
+			delete* it;
+			m_ItemBoxes.erase(it);
+			break;
 		}
-		
 	}
+
+
+
+
 
 }
 

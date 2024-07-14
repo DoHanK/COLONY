@@ -754,11 +754,6 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 	}
 
 
-	readycount = MAX_THREAD_NUM;
-
-	for (int i = 0; i < MAX_THREAD_NUM; ++i) {
-		m_Joblist[i].push({ ANIMATION, -1 });
-	}
 
 	m_fElapsedTime = fTimeElapsed;
 	m_pPlayer->m_ReloadTime += fTimeElapsed;
@@ -768,6 +763,14 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 	m_pCollisionManager->CollisionPlayerToEnemy();
 
 	m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
+
+	readycount = MAX_THREAD_NUM;
+
+	for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+		m_Joblist[i].push({ ANIMATION, -1 });
+	}
+
+
 
 
 
@@ -987,7 +990,7 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 
 		for (auto& GO : m_itemBoxes) {
-			if (GO) {
+			if (GO->m_bActive) {
 				GO->UpdateTransform(NULL);
 				GO->Render(pd3dCommandList);
 			}
@@ -1002,7 +1005,7 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 		while (readycount != 0);
 
-		if (m_RedZone) m_RedZone->Render(pd3dSubCommandList[MAX_THREAD_NUM -1	]);
+		if (m_RedZone) m_RedZone->Render(pd3dSubCommandList[MAX_THREAD_NUM -1]);
 	}
 }
 
