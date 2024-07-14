@@ -75,11 +75,11 @@ float Player::GetShootingCoolTime()
 {
 	if (m_gunType == HAVE_RIFLE) {
 
-		return 0.33f;
+		return 0.3f;
 	}
 	else if (m_gunType == HAVE_SHOTGUN) {
 
-		return 1.0f;
+		return 0.15f;
 	}
 	else if (m_gunType == HAVE_MACHINEGUN) {
 

@@ -977,7 +977,10 @@ void GamePlayScene::PlayerControlInput()
 			
 		}
 		//ÃÑ ½î±â
+
 		if (m_pPlayer->GetShootingCoolTime() < m_pPlayer->m_ReloadTime && m_pPlayer->m_WeaponState == RIGHT_HAND) {
+
+
 			static int SignCount = 0;
 
 			if (pKeysBuffer[L_MOUSE] & 0xF0) {
@@ -1027,6 +1030,7 @@ void GamePlayScene::PlayerControlInput()
 			}
 			else {
 				m_bisCameraShaking = false;
+				m_pCamera->m_bOnceShaking = true;
 				m_pCamera->m_recoiVector.x = 0.0f;
 				m_pCamera->m_recoiVector.y = 0.0f;
 				m_pCamera->m_recoiVector.z = 0.0f;

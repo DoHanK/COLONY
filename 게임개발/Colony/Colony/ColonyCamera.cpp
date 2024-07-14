@@ -330,16 +330,52 @@ void ThirdPersonCamera::UpdateCameraShake(float intensity, float duration, float
 
 	if (m_timeElapsed < duration)
 	{
-		float offsetX = distribution(generator)*intensity;
-		float offsetY = distribution(generator)*0.5f;// *intensity;
-		float offsetZ = distribution(generator)*intensity;
+		//float offsetX = distribution(generator)*intensity;
+		//float offsetY = distribution(generator)*0.5f;//*intensity;
+		//float offsetZ = distribution(generator)*intensity;
 
-		m_recoiVector.x += offsetX;
-		m_recoiVector.y += offsetY;
-		m_recoiVector.z += offsetZ;
+		//m_recoiVector.x += offsetX;
+		//m_recoiVector.y += offsetY;
+		//m_recoiVector.z += offsetZ;
 
+		if (gunType == HAVE_RIFLE) {
+			float offsetX = distribution(generator) * intensity;
+			float offsetY = distribution(generator) * 0.5f;//*intensity;
+			float offsetZ = distribution(generator) * intensity;
 
-		m_timeElapsed += SceneTimeElapsed*8; 
+			m_recoiVector.x += offsetX;
+			m_recoiVector.y += offsetY;
+			m_recoiVector.z += offsetZ;
+
+			m_timeElapsed += SceneTimeElapsed * 8;
+		}
+		else if (gunType == HAVE_SHOTGUN) {
+			if (m_bOnceShaking) {
+				float offsetX = distribution(generator) * intensity;
+				//float offsetY = distribution(generator) * 5.0f;//*intensity;
+				float offsetZ = distribution(generator) * intensity*0.5f;
+
+				m_recoiVector.x += offsetX;
+				//m_recoiVector.y += offsetY;
+				m_recoiVector.z += offsetZ;
+
+				m_bOnceShaking = false;
+			}
+			//m_timeElapsed += SceneTimeElapsed * 1000;
+		}
+		else {
+			float offsetX = distribution(generator) * intensity;
+			float offsetY = distribution(generator) * 0.5f;//*intensity;
+			float offsetZ = distribution(generator) * intensity;
+
+			m_recoiVector.x += offsetX;
+			m_recoiVector.y += offsetY;
+			m_recoiVector.z += offsetZ;
+
+			m_timeElapsed += SceneTimeElapsed * 8;
+		}
+
+		
 	}
 	else
 	{
@@ -347,6 +383,7 @@ void ThirdPersonCamera::UpdateCameraShake(float intensity, float duration, float
 		m_recoiVector.x = 0.0f;
 		m_recoiVector.y = 0.0f;
 		m_recoiVector.z = 0.0f;
+		m_bOnceShaking = true;
 	}
 }
 
