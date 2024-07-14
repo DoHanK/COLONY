@@ -29,6 +29,19 @@ D3Device::D3Device()
 	for (int i = 0; i < m_nSwapChainBuffers; i++) m_nFenceValues[i] = 0;
 
 
+
+
+	//Check Useable MultiThread Number
+#ifdef WITH_MULTITHREAD
+
+	m_nUseableCore = 4;
+	//UseableCore limit MAX_THREAD_NUM sssssssss
+	if (MAX_THREAD_NUM < m_nUseableCore) {
+		m_nUseableCore = MAX_THREAD_NUM;
+	}
+
+#endif
+
 }
 
 D3Device::~D3Device()
@@ -72,6 +85,15 @@ void D3Device::DestroyDevice()
 	if (m_pdxgiSwapChain) m_pdxgiSwapChain->Release();
 	if (m_pd3dDevice) m_pd3dDevice->Release();
 	if (m_pdxgiFactory) m_pdxgiFactory->Release();
+
+
+#ifdef WITH_MULTITHREAD
+	for (int i = 0; i < m_nUseableCore; i++) {
+		if (m_pd3dSubCommandAllocators[i]) m_pd3dSubCommandAllocators[i]->Release();
+		if (m_pd3dSubCommandLists[i]) m_pd3dSubCommandLists[i]->Release();
+	}
+#endif 
+
 
 #if defined(_DEBUG)
 	IDXGIDebug1* pdxgiDebug = NULL;
@@ -154,6 +176,19 @@ void D3Device::CreateCommandQueueAndList()
 	hResult = m_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_pd3dCommandAllocator, NULL, __uuidof(ID3D12GraphicsCommandList), (void**)&m_pd3dCommandList);
 
 	hResult = m_pd3dCommandList->Close();
+
+#ifdef WITH_MULTITHREAD
+
+
+	for (int i = 0; i < m_nUseableCore; i++) {
+		hResult = m_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, __uuidof(ID3D12CommandAllocator), (void**)&m_pd3dSubCommandAllocators[i]);
+		hResult = m_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_pd3dSubCommandAllocators[i], NULL, __uuidof(ID3D12GraphicsCommandList), (void**)&m_pd3dSubCommandLists[i]);
+		hResult = m_pd3dSubCommandLists[i]->Close();
+
+	}
+
+#endif 
+
 }
 
 void D3Device::CreateSwapChain()
@@ -449,4 +484,127 @@ void D3Device::ChangeResourceBarrier(D3D12_RESOURCE_STATES Before, D3D12_RESOURC
 
 }
 
+
+//Multithread
+
+void D3Device::CommandSubListReset()
+{
+	for (int i = 0; i < m_nUseableCore; ++i)
+		m_pd3dSubCommandLists[i]->Reset(m_pd3dSubCommandAllocators[i], NULL);
+
+}
+
+void D3Device::CommandSubListReset(int num)
+{
+	if (num <= m_nUseableCore)
+		for (int i = 0; i < num; ++i)
+			m_pd3dSubCommandLists[i]->Reset(m_pd3dSubCommandAllocators[i], NULL);
+
+}
+
+void D3Device::CloseCommandAndPushQueueWithSubList()
+{
+	for (int i = 0; i < m_nUseableCore; ++i)
+		m_pd3dSubCommandLists[i]->Close();
+
+	m_pd3dCommandList->Close();
+	ID3D12CommandList** pCommandList = new ID3D12CommandList * [1 + m_nUseableCore];
+
+
+	pCommandList[0] = m_pd3dCommandList;
+	for (int i = 1; i < m_nUseableCore + 1; ++i) {
+		pCommandList[i] = m_pd3dSubCommandLists[i - 1];
+	}
+
+
+	m_pd3dCommandQueue->ExecuteCommandLists(1 + m_nUseableCore, pCommandList);
+
+}
+
+void D3Device::SetRtIntoTextureInSubList(ID3D12Resource* SetTexture, const D3D12_CPU_DESCRIPTOR_HANDLE& RenderTargetView)
+{
+	for (int i = 0; i < m_nUseableCore; ++i) {
+		D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		m_pd3dSubCommandLists[i]->OMSetRenderTargets(1, &RenderTargetView, true, &d3dDsvCPUDescriptorHandle);
+
+	}
+
+}
+
+void D3Device::MakeSubListResourceBarrier()
+{
+	::ZeroMemory(&m_d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
+	m_d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	m_d3dResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	m_d3dResourceBarrier.Transition.pResource = m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex];
+	m_d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	m_d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	m_d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+	for (int i = 0; i < m_nUseableCore; ++i) {
+
+		m_pd3dSubCommandLists[i]->ResourceBarrier(1, &m_d3dResourceBarrier);
+	}
+
+
+}
+
+void D3Device::CloseSubListResourceBarrier()
+{
+
+
+	m_d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	m_d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	m_d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	for (int i = 0; i < m_nUseableCore; ++i) {
+		m_pd3dSubCommandLists[i]->ResourceBarrier(1, &m_d3dResourceBarrier);
+	}
+
+}
+
+void D3Device::ChangeSubListResourceBarrier(int idx, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After, ID3D12Resource* SetTexture)
+{
+	//·£´õÅ¸°Ù ½¦ÀÌ´õ ÃÊ±âÈ­
+	D3D12_RESOURCE_BARRIER d3dResourceShaderBarrier;
+	::ZeroMemory(&d3dResourceShaderBarrier, sizeof(D3D12_RESOURCE_BARRIER));
+	d3dResourceShaderBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	d3dResourceShaderBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	d3dResourceShaderBarrier.Transition.pResource = SetTexture;
+	d3dResourceShaderBarrier.Transition.StateBefore = Before;
+	d3dResourceShaderBarrier.Transition.StateAfter = After;
+	d3dResourceShaderBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+	m_pd3dSubCommandLists[idx]->ResourceBarrier(1, &d3dResourceShaderBarrier);
+
+}
+
+void D3Device::ChangeSubListResourceBarrier(D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After, ID3D12Resource* SetTexture)
+{
+	//·£´õÅ¸°Ù ½¦ÀÌ´õ ÃÊ±âÈ­
+	D3D12_RESOURCE_BARRIER d3dResourceShaderBarrier;
+	::ZeroMemory(&d3dResourceShaderBarrier, sizeof(D3D12_RESOURCE_BARRIER));
+	d3dResourceShaderBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	d3dResourceShaderBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	d3dResourceShaderBarrier.Transition.pResource = SetTexture;
+	d3dResourceShaderBarrier.Transition.StateBefore = Before;
+	d3dResourceShaderBarrier.Transition.StateAfter = After;
+	d3dResourceShaderBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	for (int i = 0; i < m_nUseableCore; ++i) {
+		m_pd3dSubCommandLists[i]->ResourceBarrier(1, &d3dResourceShaderBarrier);
+	}
+}
+
+void D3Device::SetSubListRtIntoBackBufferAndBasicDepth()
+{
+
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * m_nRtvDescriptorIncrementSize);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	for (int i = 0; i < m_nUseableCore; ++i) {
+
+		m_pd3dSubCommandLists[i]->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+
+	}
+}
 

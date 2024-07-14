@@ -2,9 +2,14 @@
 #include "stdafx.h"
 #include "ColonyGameObject.h"
 #include "ColonyMesh.h"
+#include "AlienSpider.h"
+#include "CollisionManager.h"
 
+enum QTDirection { LEFT_UP, RIGHT_UP, LEFT_BOTTOM, RIGHT_BOTTOM };
 class QuadTree
-{public:
+{
+public:
+
 	QuadTree(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int depth, XMFLOAT3 center, XMFLOAT3 Extend);
 	~QuadTree();
 protected:
@@ -15,10 +20,12 @@ public:
 public:
 	int							m_depth;
 	BoundingBox					m_BoundingBox;
-
 	std::vector<GameObject*>	m_StaticObject;
-	std::vector<GameObject*>	m_DynamicObject;
+	std::list<GameObject*>	m_DynamicObject;
+	std::vector<int>			m_Route; // 루트 찾기
 
+	//	
+	std::vector<Collision*> m_StaticBoundings;
 
 
 	QuadTree* m_LeftUp = NULL;
@@ -26,17 +33,37 @@ public:
 	QuadTree* m_LeftBottom = NULL;
 	QuadTree* m_RightBottom = NULL;
 
-	BoundingBoxMesh* m_BoundingMesh =NULL;
+	int			m_SameDepthidx = 0;
+
+	BoundingBoxMesh* m_BoundingMesh = NULL;
+
+	Camera* m_pCamera;
+	Player* m_pPlayer;
+	BCapsule* m_pBoundPlayer;
+
 public:
 
 
 
 	bool BuildTreeByDepth(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int limitdepth);
 
-	void InsertStaticObject();
+	void InsertStaticObject(std::vector<GameObject*> object);
 
 	void InsertDynamicObject();
 
-	void BoundingRendering(ID3D12GraphicsCommandList* pd3dCommandList,int DepthLevel);
+	void SettingStaticBounding(CollisionManager& collisionManager);
+
+	void BoundingRendering(ID3D12GraphicsCommandList* pd3dCommandList, int DepthLevel);
+
+	void BringDepthTrees(std::vector< QuadTree*>& out, int ndepth);
+
+	void CalSameDepthidx();
+
+	void AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys);
+
+	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void CollisionEnemyToStaticObject();
+	void CollisionEnemyToPlayer();
 };
 

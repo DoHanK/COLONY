@@ -266,6 +266,62 @@ void AlienSpider::UpdatePosition(float fTimeElapsed)
 
 }
 
+void AlienSpider::AnimateWithMultithread(float fTimeElapsed, int idx)
+{
+
+	m_AniTime += fTimeElapsed;
+	static int count = 0;
+	static int stdcount = 1;
+	//폐기되기전 기록 저장
+	if (m_AniTime > m_AniCoolTime) {
+		m_GhostNum[0] = 0.f;
+		if (count > stdcount) {
+			((AlienSpiderAnimationController*)m_pSkinnedAnimationController)->SavePrevFrameInfo(m_ppcbxmf4x4MappedSkinningBoneTransforms, m_GhostNum);
+
+			count = 0;
+			stdcount = rand() % 2 + 1;
+		}
+		for (int i = 0; i < TRAILER_COUNT; i++) {
+			m_GhostNum[i] += fTimeElapsed;
+		}
+		m_AniTime = 0;
+		m_AniCoolTime = (rand() / RAND_MAX) / 100.f + 0.05f;
+		count++;
+	}
+
+
+
+
+	if (m_pSkinnedAnimationController)((AlienSpiderAnimationController*)m_pSkinnedAnimationController)->AdvanceTimeWithMultithread(fTimeElapsed, this, idx);
+
+
+	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
+	if (m_pChild) m_pChild->Animate(fTimeElapsed);
+
+	if (FramePos) {
+
+		//몸통
+		UpdateFramePos(AlienboneIndex::DEF_HIPS, idx);
+		UpdateFramePos(AlienboneIndex::DEF_SPINE_1, idx);
+		UpdateFramePos(AlienboneIndex::DEF_CHEST, idx);
+		UpdateFramePos(AlienboneIndex::DEF_NECK_1, idx);
+		UpdateFramePos(AlienboneIndex::DEF_HEAD, idx);
+		UpdateFramePos(AlienboneIndex::DEF_TAIL, idx);
+		UpdateFramePos(AlienboneIndex::DEF_TAIL_001, idx);
+
+		//다리
+		UpdateFramePos(AlienboneIndex::DEF_LEG_BACK_02_L, idx);
+		UpdateFramePos(AlienboneIndex::DEF_LEG_BACK_02_R, idx);
+		UpdateFramePos(AlienboneIndex::DEF_LEG_FRONT_02_L, idx);
+		UpdateFramePos(AlienboneIndex::DEF_LEG_FRONT_02_R, idx);
+		UpdateFramePos(AlienboneIndex::DEF_LEG_MIDDLE_02_L, idx);
+		UpdateFramePos(AlienboneIndex::DEF_LEG_MIDDLE_02_R, idx);
+		UpdateFramePos(AlienboneIndex::DEF_FORARM_L, idx);
+		UpdateFramePos(AlienboneIndex::DEF_FORARM_R, idx);
+	}
+
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //								AlienSpiderAnimationController Class								//
@@ -273,6 +329,8 @@ void AlienSpider::UpdatePosition(float fTimeElapsed)
 AlienSpiderAnimationController::AlienSpiderAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel):
 AnimationController(pd3dDevice, pd3dCommandList,  nAnimationTracks, pModel)
 {
+	m_ppSubAnimationSets = pModel->m_ppSubAnimationSets;
+
 }
 
 void AlienSpiderAnimationController::SavePrevFrameInfo(XMFLOAT4X4** ppcbxmf4x4MappedSkinningBoneTransforms ,float* elapsedTime)
@@ -387,5 +445,75 @@ void AlienSpiderAnimationController::SetAnimationPlayPos(DWORD dwState, float pr
 {
 	m_pAnimationTracks[NOW_TRACK].m_fPosition = progress * m_ppAnimationSets[0]->m_ppAnimationSets[dwState]->m_fLength;
 	
+
+}
+
+void AlienSpiderAnimationController::AdvanceTimeWithMultithread(float fElapsedTime, GameObject* pRootGameObject, int idx)
+{
+
+
+	m_fTime += fElapsedTime;
+
+	if (m_nowAnimationWeight < 1.0f) {
+		m_nowAnimationWeight += fElapsedTime * 2;
+		m_PreAnimationWeight = 1.0f - m_nowAnimationWeight;
+
+	}
+	else {
+		m_nowAnimationWeight = 1.0f;
+		m_PreAnimationWeight = 0.0f;
+	}
+	SetTrackWeight(NOW_TRACK, m_nowAnimationWeight);
+	SetTrackWeight(PRE_TRACK, m_PreAnimationWeight);
+
+
+	if (m_pAnimationTracks)
+	{
+		for (int i = 0; i < m_nAnimationTracks; i++) {
+			//상체
+			//if (m_nowAnimationWeight == 1 && (i == NOW_TRACK || i == PRE_TRACK)) {
+			m_pAnimationTracks[i].m_fPosition += (fElapsedTime * m_pAnimationTracks[i].m_fSpeed);
+			//}
+				//OutputDebugStringA(to_string(m_pAnimationTracks[i].m_fSpeed).c_str());
+				//OutputDebugStringA("   ");
+
+		}
+
+		for (int i = 0; i < m_nSkinnedMeshes; i++)
+		{
+			for (int j = 0; j < m_pnAnimatedBoneFrames[i]; j++)
+			{
+				XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Zero();
+
+
+				for (int k = 0; k < m_nAnimationTracks; k++)
+				{
+
+					AnimationSet* pAnimationSet = m_ppSubAnimationSets[idx][i]->m_ppAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
+					pAnimationSet->SetPosition(m_pAnimationTracks[k].m_fPosition);
+					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j);
+
+
+
+					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
+
+				}
+				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "DEF-HIPS") {
+					xmf4x4Transform._41 = 1.72889e-06;
+					xmf4x4Transform._42 = -0.0001055449;
+					xmf4x4Transform._43 = 0.007409086;
+				}
+
+				m_pppAnimatedBoneFrameCaches[i][j]->m_xmfsub4x4ToParent[idx] = xmf4x4Transform;
+
+			}
+
+		}
+
+
+		pRootGameObject->UpdateTransformWithMultithread(NULL, idx, 0);
+		DirectUpdateMatrixWithMultithread(idx);
+
+	}
 
 }

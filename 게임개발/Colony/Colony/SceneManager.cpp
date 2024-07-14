@@ -170,7 +170,22 @@ void SceneManager::ChangeScene(BasicScene* Scene)
 //애니메이션
 void SceneManager::AnimationGameObjects(const float& m_ElapsedTime)
 {
-	if(!m_SceneStack.empty()) m_SceneStack.top()->AnimateObjects(m_ElapsedTime);
+
+#ifdef WITH_MULTITHREAD
+	if (!m_SceneStack.empty())
+		if (m_SceneStack.top()->GetType() == GamePlay) {
+
+			m_SceneStack.top()->AnimateObjectsWithMultithread(m_ElapsedTime);
+		}
+		else {
+			m_SceneStack.top()->AnimateObjects(m_ElapsedTime);
+		}
+#else
+
+	if (!m_SceneStack.empty()) m_SceneStack.top()->AnimateObjects(m_ElapsedTime);
+#endif 
+
+
 
 }
 
@@ -185,25 +200,93 @@ void SceneManager::RenderScene(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 
 
-
 	m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET, m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0));
 	m_pD3Device->SetRtIntoTexture(m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0), RtvView[m_SceneStack.top()->GetType()]);
-	
-	m_pDepthFromLightTexture[0]->UpdateShaderVariable(pd3dCommandList,0);
-	if(!m_SceneStack.empty()) m_SceneStack.top()->Render(pd3dCommandList);
-	
+
+	m_pDepthFromLightTexture[0]->UpdateShaderVariable(pd3dCommandList, 0);
+
+
+
+#ifdef WITH_MULTITHREAD
+
+
+
+	m_pD3Device->ChangeSubListResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET, m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0));
+	m_pD3Device->SetRtIntoTextureInSubList(m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0), RtvView[m_SceneStack.top()->GetType()]);
+
+	for (int i = 0; i < m_pD3Device->GetUseCoreNum(); i++) {
+		m_pDepthFromLightTexture[0]->UpdateShaderVariable(m_pD3Device->GetSubCommandList()[i], 0);
+	}
+
 	if (!m_SceneStack.empty()) {
 		if (m_SceneStack.top()->GetType() == GamePlay) {
-			for (int i = 0; i < MAX_DEPTH_TEXTURES; ++i) {
-				//((GamePlayScene*)m_SceneStack.top())->TestCameraRender(pd3dCommandList, m_ppDepthRenderCameras[i]);
-			}
-		
+
+			if (!m_SceneStack.empty()) m_SceneStack.top()->RenderWithMultiThread(pd3dCommandList, m_pD3Device->GetSubCommandList(), m_pD3Device->GetUseCoreNum());
+
+
+		}
+		else {
+
+			if (!m_SceneStack.empty()) m_SceneStack.top()->Render(pd3dCommandList);
+
 		}
 	}
-	
-	if(m_pCamera) m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+#else 
+	if (!m_SceneStack.empty()) m_SceneStack.top()->Render(pd3dCommandList);
+#endif
 
-	m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON,  m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0));
+
+
+	if (m_pCamera) m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+
+
+
+
+#ifdef WITH_MULTITHREAD
+
+	if (m_pCamera) m_pCamera->SetViewportsAndScissorRects(m_pD3Device->GetSubCommandList(m_pD3Device->GetUseCoreNum() - 1));
+
+	m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0));
+	m_pD3Device->ChangeSubListResourceBarrier(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0));
+
+	if (!m_SceneStack.empty()) {
+		if (m_SceneStack.top()->GetType() == GamePlay) {
+
+
+
+			m_pD3Device->SetRtIntoBackBufferAndBasicDepth();
+			m_pD3Device->SetSubListRtIntoBackBufferAndBasicDepth();
+
+			if (!m_SceneStack.empty()) m_SceneStack.top()->UpdateUI();
+
+			if (m_pUIManager) {
+				m_pUIManager->DrawScene(m_pD3Device->GetSubCommandList(m_pD3Device->GetUseCoreNum() - 1), m_SceneStack.top()->GetType());
+				m_pUIManager->AllLayerDrawRect(m_pD3Device->GetSubCommandList(m_pD3Device->GetUseCoreNum() - 1), m_SceneStack.top()->GetType());
+			}
+
+
+		}
+		else {
+
+			if (m_pCamera) m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+			m_pD3Device->SetRtIntoBackBufferAndBasicDepth();
+
+			if (!m_SceneStack.empty()) m_SceneStack.top()->UpdateUI();
+
+			if (m_pUIManager) {
+				m_pUIManager->DrawScene(pd3dCommandList, m_SceneStack.top()->GetType());
+				m_pUIManager->AllLayerDrawRect(pd3dCommandList, m_SceneStack.top()->GetType());
+			}
+
+		}
+	}
+
+
+#else 
+
+	if (m_pCamera) m_pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+
+	m_pD3Device->ChangeResourceBarrier(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, m_TextureScene[m_SceneStack.top()->GetType()]->GetTexture(0));
 
 
 	m_pD3Device->SetRtIntoBackBufferAndBasicDepth();
@@ -214,6 +297,9 @@ void SceneManager::RenderScene(ID3D12GraphicsCommandList* pd3dCommandList)
 		m_pUIManager->DrawScene(pd3dCommandList, m_SceneStack.top()->GetType());
 		m_pUIManager->AllLayerDrawRect(pd3dCommandList, m_SceneStack.top()->GetType());
 	}
+#endif
+
+
 }
 
 void SceneManager::SetRootSignature(ID3D12RootSignature* pd3dGraphicsRootSignature)

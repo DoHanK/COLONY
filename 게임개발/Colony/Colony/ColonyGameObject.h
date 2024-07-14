@@ -255,7 +255,11 @@ public:
 class CLoadedModelInfo
 {
 public:
-	CLoadedModelInfo() { }
+	CLoadedModelInfo() {
+		for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+			m_ppSubAnimationSets[i] = NULL;
+		}
+	}
 	~CLoadedModelInfo();
 
 	GameObject* m_pModelRootObject = NULL;
@@ -267,6 +271,9 @@ public:
 
 	int* m_pnAnimatedBoneFrames = NULL; //[SkinnedMeshes]
 	GameObject*** m_pppAnimatedBoneFrameCaches = NULL; //[SkinnedMeshes][Bones]
+
+	//Multithread
+	AnimationSets** m_ppSubAnimationSets[MAX_THREAD_NUM];
 };
 
 
@@ -322,6 +329,9 @@ public:
 	ID3D12Resource** m_ppd3dcbSkinningBoneTransforms = NULL; //[SkinnedMeshes]
 	XMFLOAT4X4** m_ppcbxmf4x4MappedSkinningBoneTransforms = NULL;
 
+	//Multithread
+	AnimationSets*** m_ppSubAnimationSets;
+
 public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
@@ -337,6 +347,8 @@ public:
 
 	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
 	virtual void DirectUpdateMatrix();
+	//Multithread 
+	virtual void DirectUpdateMatrixWithMultithread(int idx);
 };
 
 
@@ -376,6 +388,11 @@ public:
 	GameObject* m_pParent = NULL;
 	GameObject* m_pChild = NULL;
 	GameObject* m_pSibling = NULL;
+public:
+// Multithread
+	XMFLOAT4X4* m_xmfsub4x4ToParent = NULL;
+	XMFLOAT4X4* m_xmfsub4x4World = NULL;
+
 public:
 	XMFLOAT3					m_xmfPre3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmfPre3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -461,6 +478,10 @@ public:
 
 	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);
 
+
+	//multithread
+	void UpdateTransformWithMultithread(XMFLOAT4X4* pxmf4x4Parent, int idx, int depth);
+	void UpdateFramePos(int idex, int threadidx);
 };
 
 class Player;

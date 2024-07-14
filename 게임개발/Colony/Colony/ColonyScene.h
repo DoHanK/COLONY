@@ -92,6 +92,10 @@ public:
 	virtual void UpdateUI() {};
 
 
+	//Multithread
+
+	virtual void RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12GraphicsCommandList* pd3dSubCommandList[], int ableThread, Camera* pCamera = NULL) {};
+	virtual void AnimateObjectsWithMultithread(float fTimeElapsed) {};
 };
 
 class GameLobbyScene :public BasicScene {
@@ -151,6 +155,10 @@ public:
 	virtual void UpdateUI();
 
 	float GetRandomFloatInRange(float minVal, float maxVal);
+	
+	//Multithread
+	void AnimateObjectsWithMultithread(float fTimeElapsed);
+	virtual void RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12GraphicsCommandList* pd3dSubCommandList[], int ableThread, Camera* pCamera = NULL);
 
 protected:
 
@@ -290,6 +298,24 @@ protected:
 	float m_hurtAnimation = 0.0f;
 
 	bool m_bisCameraShaking = false;
+
+
+
+
+	// MultiThread 
+	std::vector<QuadTree*> m_Quadlist;
+
+	int quadranderingidx = 0;
+
+public:
+	enum OP_TYPE { ANIMATION, RENDERING, END };
+
+	std::vector<std::thread> m_threads;
+
+	Concurrency::concurrent_queue<pair<int, long long >> m_Joblist[MAX_THREAD_NUM];  ///first -> op , second -> extra info
+
+	void ThreadWorker(int threadnum);
+	volatile int readycount = 0;
 };
 
 

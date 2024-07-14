@@ -38,6 +38,12 @@ private:
 	UINT m_nDsvDescriptorIncrementSize;
 
 	D3D12_RESOURCE_BARRIER m_d3dResourceBarrier;
+
+
+	//MutliThread
+	ID3D12CommandAllocator* m_pd3dSubCommandAllocators[MAX_THREAD_NUM];
+	ID3D12GraphicsCommandList* m_pd3dSubCommandLists[MAX_THREAD_NUM];
+	int								m_nUseableCore = 0;
 public:
 	//디바이스 생성자
 	D3Device();
@@ -96,6 +102,32 @@ public:
 
 
 	HWND GetHWND() { return m_hWnd; }
+
+	//MutliThread
+//SubRoutine
+	ID3D12GraphicsCommandList* GetSubCommandList(int idx) { return m_pd3dSubCommandLists[idx]; }
+	ID3D12GraphicsCommandList** GetSubCommandList() { return m_pd3dSubCommandLists; }
+	int GetUseCoreNum() { return m_nUseableCore; };
+	void CommandSubAllocatorReset() {
+		for (int i = 0; i < m_nUseableCore; ++i) {
+			m_pd3dSubCommandAllocators[i]->Reset();
+		}
+	};
+	void CommandSubListReset();
+	void CommandSubListReset(int num);
+	void CloseCommandAndPushQueueWithSubList();
+	void SetRtIntoTextureInSubList(ID3D12Resource* SetTexture, const D3D12_CPU_DESCRIPTOR_HANDLE& RenderTargetView);
+
+
+	void MakeSubListResourceBarrier();
+	void CloseSubListResourceBarrier();
+	void ChangeSubListResourceBarrier(int idx, D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After, ID3D12Resource* SetTexture);
+	void ChangeSubListResourceBarrier(D3D12_RESOURCE_STATES Before, D3D12_RESOURCE_STATES After, ID3D12Resource* SetTexture);
+	void SetSubListRtIntoBackBufferAndBasicDepth();
+
+
+
+
 };
 
 

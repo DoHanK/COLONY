@@ -432,6 +432,13 @@ CLoadedModelInfo::~CLoadedModelInfo()
 		if (m_pppAnimatedBoneFrameCaches[i]) delete[] m_pppAnimatedBoneFrameCaches[i];
 	}
 	if (m_pppAnimatedBoneFrameCaches) delete[] m_pppAnimatedBoneFrameCaches;
+
+	for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+		if (m_ppSubAnimationSets[i])
+		{
+			delete[] m_ppSubAnimationSets[i];
+		}
+	}
 }
 
 
@@ -473,6 +480,17 @@ GameObject::~GameObject()
 	if (m_ppMaterials) delete[] m_ppMaterials;
 
 	if (m_pSkinnedAnimationController) delete m_pSkinnedAnimationController;
+
+
+	if (m_xmfsub4x4ToParent) {
+		delete[] m_xmfsub4x4ToParent;
+		m_xmfsub4x4ToParent = NULL;
+	}
+
+	if (m_xmfsub4x4World) {
+		delete[] m_xmfsub4x4World;
+		m_xmfsub4x4World = NULL;
+	}
 }
 
 void GameObject::AddRef()
@@ -1048,6 +1066,11 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3
 
 	GameObject* pGameObject = new GameObject();
 
+#ifdef  WITH_MULTITHREAD
+	pGameObject->m_xmfsub4x4ToParent = new XMFLOAT4X4[MAX_THREAD_NUM];
+	pGameObject->m_xmfsub4x4World = new XMFLOAT4X4[MAX_THREAD_NUM];
+#endif //  WITH_MULTITHREAD
+
 	for (; ; )
 	{
 		::ReadStringFromFile(pInFile, pstrToken);
@@ -1070,6 +1093,13 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3
 		else if (!strcmp(pstrToken, "<TransformMatrix>:"))
 		{
 			nReads = (UINT)::fread(&pGameObject->m_xmf4x4ToParent, sizeof(float), 16, pInFile);
+
+#ifdef  WITH_MULTITHREAD
+			for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+				pGameObject->m_xmfsub4x4ToParent[i] = pGameObject->m_xmf4x4ToParent;
+			}
+#endif //  WITH_MULTITHREAD
+
 		}
 		else if (!strcmp(pstrToken, "<Mesh>:"))
 		{
@@ -1140,6 +1170,33 @@ void GameObject::PrintFrameInfo(GameObject* pGameObject, GameObject* pParent)
 	if (pGameObject->m_pChild) GameObject::PrintFrameInfo(pGameObject->m_pChild, pGameObject);
 }
 
+void GameObject::UpdateTransformWithMultithread(XMFLOAT4X4* pxmf4x4Parent, int idx, int depth)
+{
+	if (depth == 0) {
+		m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4ToParent, *pxmf4x4Parent) : m_xmf4x4ToParent;
+		if (m_pSibling) m_pSibling->UpdateTransformWithMultithread(pxmf4x4Parent, idx, depth + 1);
+		if (m_pChild) m_pChild->UpdateTransformWithMultithread(&m_xmf4x4World, idx, depth + 1);
+	}
+	else {
+		m_xmfsub4x4World[idx] = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmfsub4x4ToParent[idx], *pxmf4x4Parent) : m_xmfsub4x4ToParent[idx];
+		if (m_pSibling) m_pSibling->UpdateTransformWithMultithread(pxmf4x4Parent, idx, depth + 1);
+		if (m_pChild) m_pChild->UpdateTransformWithMultithread(&m_xmfsub4x4World[idx], idx, depth + 1);
+	}
+
+}
+
+void GameObject::UpdateFramePos(int idex, int threadidx)
+{
+	if (FramePos) {
+		if (m_pSkinnedAnimationController->m_pppAnimatedBoneFrameCaches[idex]) {
+			FramePos[idex].x = m_pSkinnedAnimationController->m_pppAnimatedBoneFrameCaches[idex][0]->m_xmfsub4x4World[threadidx]._41;
+			FramePos[idex].y = m_pSkinnedAnimationController->m_pppAnimatedBoneFrameCaches[idex][0]->m_xmfsub4x4World[threadidx]._42;
+			FramePos[idex].z = m_pSkinnedAnimationController->m_pppAnimatedBoneFrameCaches[idex][0]->m_xmfsub4x4World[threadidx]._43;
+		}
+	}
+
+}
+
 void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedModel)
 {
 	char pstrToken[64] = { '\0' };
@@ -1162,12 +1219,24 @@ void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedM
 			pLoadedModel->m_ppAnimationSets = new AnimationSets * [pLoadedModel->m_nSkinnedMeshes];
 			pLoadedModel->m_ppSkinnedMeshes = new SkinnedMesh * [pLoadedModel->m_nSkinnedMeshes];
 			pLoadedModel->m_pppAnimatedBoneFrameCaches = new GameObject * *[pLoadedModel->m_nSkinnedMeshes];
+#ifdef WITH_MULTITHREAD
+
+			for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+				pLoadedModel->m_ppSubAnimationSets[i] = new AnimationSets * [pLoadedModel->m_nSkinnedMeshes];
+			}
+#endif
+
+
 
 			for (int i = 0; i < pLoadedModel->m_nSkinnedMeshes; i++)
 			{
 				pLoadedModel->m_ppAnimationSets[i] = new AnimationSets(nAnimationSets);
 
-
+#ifdef WITH_MULTITHREAD
+				for (int j = 0; j < MAX_THREAD_NUM; ++j) {
+					pLoadedModel->m_ppSubAnimationSets[j][i] = new AnimationSets(nAnimationSets);
+				}
+#endif
 
 				::ReadStringFromFile(pInFile, pstrToken); //Skinned Mesh Name
 				pLoadedModel->m_ppSkinnedMeshes[i] = pLoadedModel->m_pModelRootObject->FindSkinnedMesh(pstrToken);
@@ -1207,6 +1276,12 @@ void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedM
 			for (int i = 0; i < pLoadedModel->m_nSkinnedMeshes; i++)//[프레임] [애니메이션Set]   
 			{
 				pLoadedModel->m_ppAnimationSets[i]->m_ppAnimationSets[nAnimationSet] = new AnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pnAnimatedBoneFrames[i], pstrToken);
+#ifdef WITH_MULTITHREAD
+				for (int j = 0; j < MAX_THREAD_NUM; ++j) {
+					pLoadedModel->m_ppSubAnimationSets[j][i]->m_ppAnimationSets[nAnimationSet] = new AnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pnAnimatedBoneFrames[i], pstrToken);
+				}
+#endif
+
 			}
 
 			for (int i = 0; i < nKeyFrames; i++)
@@ -1224,6 +1299,14 @@ void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedM
 						pAnimationSet->m_pfKeyFrameTimes[i] = fKeyTime;
 						nReads = (UINT)::fread(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i], sizeof(XMFLOAT4X4), pLoadedModel->m_pnAnimatedBoneFrames[j], pInFile);
 
+#ifdef WITH_MULTITHREAD
+						for (int s = 0; s < MAX_THREAD_NUM; ++s) {
+							//int nSkin = ::ReadIntegerFromFile(pInFile); //j
+							AnimationSet* psubAnimationSet = pLoadedModel->m_ppSubAnimationSets[s][j]->m_ppAnimationSets[nAnimationSet];//각 프레임마다 해당 값 넣어주는중.
+							psubAnimationSet->m_pfKeyFrameTimes[i] = fKeyTime;
+							psubAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i];
+						}
+#endif	
 					
 					}
 				}
@@ -1400,9 +1483,25 @@ void AnimationController::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dC
 	for (int i = 0; i < m_nSkinnedMeshes; i++)
 	{
 		if (m_ppSkinnedMeshes[i]) {
-			m_ppSkinnedMeshes[i]->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[i];
-			m_ppSkinnedMeshes[i]->m_pcbxmf4x4MappedSkinningBoneTransforms = m_ppcbxmf4x4MappedSkinningBoneTransforms[i];
+			//m_ppSkinnedMeshes[i]->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[i];
+			//m_ppSkinnedMeshes[i]->m_pcbxmf4x4MappedSkinningBoneTransforms = m_ppcbxmf4x4MappedSkinningBoneTransforms[i];
+
+			if (m_ppSkinnedMeshes[i]->m_pd3dcbBindPoseBoneOffsets)
+			{
+
+				D3D12_GPU_VIRTUAL_ADDRESS d3dcbBoneOffsetsGpuVirtualAddress = m_ppSkinnedMeshes[i]->m_pd3dcbBindPoseBoneOffsets->GetGPUVirtualAddress();
+				pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dcbBoneOffsetsGpuVirtualAddress); //Skinned Bone Offsets
+			}
+
+			if (m_ppd3dcbSkinningBoneTransforms[i])
+			{
+				D3D12_GPU_VIRTUAL_ADDRESS d3dcbBoneTransformsGpuVirtualAddress = m_ppd3dcbSkinningBoneTransforms[i]->GetGPUVirtualAddress();
+				pd3dCommandList->SetGraphicsRootConstantBufferView(12, d3dcbBoneTransformsGpuVirtualAddress); //Skinned Bone Transforms
+
+
+			}
 		}
+
 	}
 }
 
@@ -1451,6 +1550,21 @@ void AnimationController::DirectUpdateMatrix()
 		}
 	}
 
+}
+
+void AnimationController::DirectUpdateMatrixWithMultithread(int idx)
+{
+
+	for (int i = 0; i < m_nSkinnedMeshes; i++)
+	{
+		if (m_ppSkinnedMeshes[i]) {
+
+			for (int j = 0; j < m_ppSkinnedMeshes[i]->m_nSkinningBones; j++) {
+				XMStoreFloat4x4(&m_ppcbxmf4x4MappedSkinningBoneTransforms[i][j], XMMatrixTranspose(XMLoadFloat4x4(&m_ppSkinnedMeshes[i]->m_ppSkinningBoneFrameCaches[j]->m_xmfsub4x4World[idx])));
+
+			}
+		}
+	}
 }
 
 

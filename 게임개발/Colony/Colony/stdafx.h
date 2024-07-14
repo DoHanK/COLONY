@@ -58,6 +58,10 @@
 #include <vector>
 #include <stack>
 #include <random>
+#include <thread>
+#include <chrono>
+#include <mutex>
+#include <concurrent_queue.h>
 ////////////////////////////////
 
 //Direct x 관련 라이브러리
@@ -106,6 +110,37 @@ inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT
 inline float XM2CalDis(const XMFLOAT2& a, const XMFLOAT2& b) { return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)); }
 inline float XM3CalDis(const XMFLOAT3& a, const XMFLOAT3& b) { return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z)); }
 inline float VectorSize(XMFLOAT3 V) {	return (float)sqrt(V.x * V.x + V.y * V.y + V.z * V.z);}
+
+
+inline float VectorLength(XMFLOAT3 vec) {
+	return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+}
+inline float DistancePointToPlane(XMFLOAT3 point, XMFLOAT3 planeNormal, XMFLOAT3 planePoint) {
+	// XMFLOAT3에서 XMVECTOR로 변환
+	XMVECTOR vecPoint = XMLoadFloat3(&point);
+	XMVECTOR vecPlaneNormal = XMLoadFloat3(&planeNormal);
+	XMVECTOR vecPlanePoint = XMLoadFloat3(&planePoint);
+
+	// 법선 벡터 정규화
+	vecPlaneNormal = XMVector3Normalize(vecPlaneNormal);
+
+	// 점과 평면 사이의 거리 계산
+	float numerator = XMVectorGetX(XMVector3Dot(vecPlaneNormal, vecPoint)) - XMVectorGetX(XMVector3Dot(vecPlaneNormal, vecPlanePoint));
+	return fabs(numerator);  // 절대값 계산
+}
+
+
+//멀티쓰레드
+#define MAX_THREAD_NUM	4
+#define WITH_MULTITHREAD 
+
+inline bool CAS(volatile int* addr, int expected, int new_val)
+{
+	return atomic_compare_exchange_strong(
+		reinterpret_cast<volatile atomic_int*>(addr),
+		&expected, new_val);
+}
+
 
 void ResourceTransition(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dResource, D3D12_RESOURCE_STATES d3dStateBefore, D3D12_RESOURCE_STATES d3dStateAfter);
 void SwapResourcePointer(ID3D12Resource** ppd3dResourceA, ID3D12Resource** ppd3dResourceB);
