@@ -126,16 +126,16 @@ bool SoundManager::CreateSound()
         return 0;
     }
 
-    // 사운드 재생 대기
-    //while (pSourceVoice->GetState().BuffersQueued > 0) {
-    Sleep(1000);
-    //}
+    //// 사운드 재생 대기
+    ////while (pSourceVoice->GetState().BuffersQueued > 0) {
+    //Sleep(1000);
+    ////}
 
-    // 리소스 정리
-    pSourceVoice->DestroyVoice();
-    delete[] pDataBuffer;
-    pMasterVoice->DestroyVoice();
-    pXAudio2->Release();
+    //// 리소스 정리
+    //pSourceVoice->DestroyVoice();
+    //delete[] pDataBuffer;
+    //pMasterVoice->DestroyVoice();
+    //pXAudio2->Release();
 
         
 	
