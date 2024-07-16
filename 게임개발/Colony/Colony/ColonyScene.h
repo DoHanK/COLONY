@@ -201,7 +201,7 @@ protected:
 	DepthSkinnedRenderingShader*		m_pDepthSkinnedShader = NULL;
 	DepthRenderingShader*				m_pDepthShader = NULL;
 	BillboardShader*					m_BillShader=NULL;
-
+	bool								alreadyMaking = false;
 
 	bool								m_bBoundingRender = false;
 	int									m_DepthRender = 0;
