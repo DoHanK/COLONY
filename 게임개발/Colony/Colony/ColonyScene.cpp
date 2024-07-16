@@ -1408,7 +1408,7 @@ void GamePlayScene::PlayerControlInput()
 
 
 				dwPlayerState |= STATE_SHOOT;
-				m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard, &m_KillCount);
+				m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard, m_KillCount);
 				m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion);
 				m_pBillObject->active = true;
 				m_pPlayer->m_ReloadTime = 0;

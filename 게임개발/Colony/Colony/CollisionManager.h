@@ -415,7 +415,7 @@ public:
 	bool CollisionPlayerToStaticObeject();
 	bool CollisionPlayerToItemBox();
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList);
-	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard, int* KillCount);
+	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard, int& KillCount);
 	void CollisionBulletToItemBox(Billboard* ExplosionEffect);
 	void CollisionEnemyToStaticObeject();    
 	void CollisionPlayerToEnemy();
