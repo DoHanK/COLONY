@@ -13,5 +13,6 @@ public:
 	AlienSpider*			m_pOwner;
 
 	void IsLookPlayer(Player* pPlayer);
+	void IsLookPlayer(Player* pPlayer, float scale);
 };
 

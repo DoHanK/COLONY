@@ -249,6 +249,26 @@ public:
 		m_legs[6].Radius = 0.2f; //DEF_TAIL_001; 
 		m_legs[7].Radius = 0.2f; //DEF_TAIL_001; 
 	}
+	AliensBoudingBox(GameObject* pOwner,float scale) :Collision(pOwner) {
+		m_Obstable.Radius = 0.8f * scale;
+		m_Entire.Radius = 1.5f * scale;
+		m_Bodys[0].Radius = 0.3f * scale; //DEF_SPINE_1
+		m_Bodys[1].Radius = 0.3f * scale; //DEF_CHEST
+		m_Bodys[2].Radius = 0.2f * scale; //DEF_NECK_1
+		m_Bodys[3].Radius = 0.2f * scale; //DEF_HEAD
+		m_Bodys[4].Radius = 0.4f * scale; //DEF_TAIL
+		m_Bodys[5].Radius = 0.4f * scale; //DEF_TAIL_001; 
+
+		m_legs[0].Radius = 0.2f * scale; //DEF_SPINE_1
+		m_legs[1].Radius = 0.2f * scale; //DEF_CHEST
+		m_legs[2].Radius = 0.2f * scale; //DEF_NECK_1
+		m_legs[3].Radius = 0.2f * scale; //DEF_HEAD
+		m_legs[4].Radius = 0.2f * scale; //DEF_TAIL
+		m_legs[5].Radius = 0.2f * scale; //DEF_TAIL_001; 
+		m_legs[6].Radius = 0.2f * scale; //DEF_TAIL_001; 
+		m_legs[7].Radius = 0.2f * scale; //DEF_TAIL_001; 
+	}
+
 public:
 	BoundingSphere m_Obstable; 
 	BoundingSphere m_Entire; //DEF-Hip의 정보를 가져옴
