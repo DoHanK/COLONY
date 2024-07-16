@@ -113,6 +113,7 @@ void QuadTree::InsertStaticObject(std::vector<GameObject*> object)
 	for (auto p : object) {
 		XMFLOAT3 pos = XMFLOAT3(p->m_xmf4x4World._41, p->m_xmf4x4World._42, p->m_xmf4x4World._43);
 		if (min.x <= pos.x && pos.x < max.x && min.z <= pos.z && pos.z < max.z) {
+
 			m_StaticObject.push_back(p);
 		}
 
@@ -288,8 +289,6 @@ void QuadTree::CollisionEnemyToStaticObject()
 	std::list<AliensBoudingBox*> m_RemoveObjects;
 
 
-
-	m_pCamera->RegenerateViewMatrix();
 
 	for (auto& E : m_DynamicObject) {
 		float dis = XM3CalDis(m_pCamera->GetPosition(), E->GetPosition());

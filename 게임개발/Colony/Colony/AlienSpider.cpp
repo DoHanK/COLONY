@@ -254,7 +254,7 @@ void AlienSpider::UpdatePosition(float fTimeElapsed)
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
 	if ((m_GoalType == Deaded_Goal ||
 		m_GoalType == Hitted_Goal ||
-		m_GoalType == Attack_Goal) && !m_pBrain->m_bJump) {
+		m_GoalType == Attack_Goal)) {
 		m_xmf3Velocity.x = 0;
 		m_xmf3Velocity.z = 0;
 

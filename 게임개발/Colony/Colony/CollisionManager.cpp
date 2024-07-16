@@ -737,7 +737,7 @@ void CollisionManager::CollisionPlayerToEnemy() {
 	}
 }
 
-void CollisionManager::CollisionEnemyToPlayer() {
+void CollisionManager::CollisionEnemyToPlayer() { //싱글쓰레드일때 
 	for (const auto& a : m_EnemyObjects) {
 		if (a->m_pOwner->m_HP > 0) {
 			a->UpdateEntireBouding();
@@ -817,7 +817,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 		a->UPdateLegBounding();
 	}
 
-
+	std::list<AliensBoudingBox*> m_RemoveObjects;
 	float dis = 0;
 	bool crush = false;
 	//1차 충돌 처리
@@ -862,6 +862,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 				enemy.first->m_pOwner->m_bHitted = true;
 				enemy.first->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage();
 				if (enemy.first->m_pOwner->m_HP<= 0) {
+					m_RemoveObjects.push_back(enemy.first);
 					++KillCount;
 				}
 				crush = true;
@@ -889,6 +890,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 				enemy.first->m_pOwner->m_bHitted = true;
 				enemy.first->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage();
 				if (enemy.first->m_pOwner->m_HP <= 0) {
+					m_RemoveObjects.push_back(enemy.first);
 					++KillCount;
 				}
 				crush = true;
@@ -899,7 +901,11 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 
 	}
 
+	for (auto RE : m_RemoveObjects) {
 
+		m_EnemyObjects.remove(RE);
+		delete RE;
+	}
 
 	return crush;
 }
