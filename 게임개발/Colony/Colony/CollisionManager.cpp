@@ -805,7 +805,7 @@ void CollisionManager::CheckVisiableEnemy()
 	}
 }
 
-bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard)
+bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard,int* KillCount)
 {
 	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());
 	
@@ -861,8 +861,11 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 				}
 				enemy.first->m_pOwner->m_bHitted = true;
 				enemy.first->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage();
-
+				if (enemy.first->m_pOwner->m_HP>= 0) {
+					++KillCount;
+				}
 				crush = true;
+
 				break;
 			}
 		}
@@ -885,12 +888,17 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 				}
 				enemy.first->m_pOwner->m_bHitted = true;
 				enemy.first->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage();
-
+				if (enemy.first->m_pOwner->m_HP >= 0) {
+					++KillCount;
+				}
 				crush = true;
+
 				break;
 			}
 		}
+
 	}
+
 
 
 	return crush;

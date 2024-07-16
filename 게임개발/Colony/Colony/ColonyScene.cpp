@@ -61,8 +61,8 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	//pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT/2, 0, FRAME_BUFFER_WIDTH/2, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
 	//	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, &UIControlHelper::TestFunc, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
 
-	SoundManager* soundManager = new SoundManager();
-	soundManager->CreateSound();
+	//SoundManager* soundManager = new SoundManager();
+	//soundManager->CreateSound();
 }
 
 
@@ -557,8 +557,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 500; ++j) {
-		for (int i = 0; i < 1; i++) {
+	for (int j = 0; j < 1; ++j) {
+		for (int i = 0; i < 10; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder);
 			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
@@ -1153,8 +1153,15 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	h_TargetMachineGun=pUImanager->CreateUINonNormalRect(0.055, -0.055, -0.035, 0.035, m_TNone,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
+	//거미 아이콘
+	pUImanager->CreateUINonNormalRect(0.95, 0.83, -0.98, -0.92, pResourceManager->BringTexture("Model/Textures/UITexture/SpiderIcon.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
+	//Kill Count
+	pUImanager->CreateUINonNormalRect(0.96, 0.88, -0.93, -0.8, pResourceManager->BringTexture("Model/Textures/UITexture/KillCount.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
+	h_KillCount1= BringUINum(pUImanager, pResourceManager, 0.89, 0.85, -0.92, -0.905, 0, 0, GetType());
+	h_KillCount2 = BringUINum(pUImanager, pResourceManager, 0.89, 0.85, -0.9, -0.885, 0, 0, GetType());
+	h_KillCount3 = BringUINum(pUImanager, pResourceManager, 0.89, 0.85, -0.88, -0.865, 0, 0, GetType());
 
 	Texture* tempTexture = NULL;
 	for (int i = 0; i < 10; ++i) {
@@ -1401,7 +1408,7 @@ void GamePlayScene::PlayerControlInput()
 
 
 				dwPlayerState |= STATE_SHOOT;
-				m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard);
+				m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard, &m_KillCount);
 				m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion);
 				m_pBillObject->active = true;
 				m_pPlayer->m_ReloadTime = 0;
@@ -1800,6 +1807,11 @@ void GamePlayScene::UpdateUI() {
 		h_HurtState->RenderTexture = m_TNone;
 	}
 	
+	//kill count update
+	h_KillCount1->RenderTexture= numTexture[m_KillCount / 100];
+	h_KillCount2->RenderTexture = numTexture[m_KillCount / 10];
+	h_KillCount3->RenderTexture = numTexture[m_KillCount % 10];
+
 }
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)

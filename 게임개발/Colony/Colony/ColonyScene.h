@@ -227,6 +227,9 @@ protected:
 	UIInfo* h_TargetShotgun;
 	UIInfo* h_TargetMachineGun;
 	UIInfo* h_HurtState;
+	UIInfo* h_KillCount1;
+	UIInfo* h_KillCount2;
+	UIInfo* h_KillCount3;
 	
 
 	vector<Texture*>					numTexture;
@@ -299,6 +302,8 @@ protected:
 
 	bool m_bisCameraShaking = false;
 
+	//Àû Á×ÀÎ¼ö
+	int m_KillCount = 0;
 
 
 
