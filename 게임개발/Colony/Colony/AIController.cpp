@@ -225,8 +225,8 @@ void AIController::MoveDest(float fTimeElapsed){
 		m_pBody->m_xmf3Velocity.z = 0;
 		//이동
 		Distance = XM2CalDis(m_dest, ObjectPos);
-		m_pBody->m_xmf3Velocity.x += Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false).x;
-		m_pBody->m_xmf3Velocity.z += Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false).z;
+		m_pBody->m_xmf3Velocity.x += Vector3::ScalarProduct(m_dir, m_pBody->m_MonsterScale *fTimeElapsed * 1000.f, false).x;
+		m_pBody->m_xmf3Velocity.z += Vector3::ScalarProduct(m_dir, m_pBody->m_MonsterScale *fTimeElapsed * 1000.f, false).z;
 		//속력 = 시간 * 가속도
 		//m_pBody->m_xmf3Velocity = Vector3::Add(m_pBody->m_xmf3Velocity, Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false));
 	}
@@ -316,8 +316,8 @@ void AIController::JumpDest(float fTimeElapsed)
 		//속력 = 시간 * 가속도
 		
 		//m_pBody->m_xmf3Velocity = Vector3::Add(m_pBody->m_xmf3Velocity, Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false));
-		m_pBody->m_xmf3Velocity.x += Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false).x;
-		m_pBody->m_xmf3Velocity.z += Vector3::ScalarProduct(m_dir, fTimeElapsed * 1000.f, false).z;
+		m_pBody->m_xmf3Velocity.x += Vector3::ScalarProduct(m_dir,m_pBody->m_MonsterScale* fTimeElapsed * 1000.f, false).x;
+		m_pBody->m_xmf3Velocity.z += Vector3::ScalarProduct(m_dir,m_pBody->m_MonsterScale* fTimeElapsed * 1000.f, false).z;
 
 
 

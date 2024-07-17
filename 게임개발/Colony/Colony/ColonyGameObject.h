@@ -402,6 +402,9 @@ public:
 	bool						m_bVisible = true;
 	int							m_HP = 100;
 
+	//크기 조절
+	float						m_MonsterScale = 1.0f;
+
 	void SetMesh(BasicMesh* pMesh);
 	void SetBoundingMesh(DynamicMesh* pMesh);
 	void SetMaterial(int nMaterial, Material* pMaterial);

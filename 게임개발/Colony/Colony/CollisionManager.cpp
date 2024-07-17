@@ -241,7 +241,8 @@ void CollisionManager::LoadCollisionBoxInfo(ID3D12Device* pd3dDevice, ID3D12Grap
 void CollisionManager::EnrollEnemy(GameObject* pEnemy)
 {
 	if (pEnemy) {
-		AliensBoudingBox* m_pBounding = new AliensBoudingBox(pEnemy);
+		
+		AliensBoudingBox* m_pBounding = new AliensBoudingBox(pEnemy, ((AlienSpider*)pEnemy)->m_MonsterScale);
 
 		m_EnemyObjects.emplace_back(m_pBounding);
 
@@ -254,7 +255,7 @@ void CollisionManager::CheckCollisionEnemytoStaticObject(GameObject* pEnemy)
 
 	
 		float dis = XM3CalDis(m_pCamera->GetPosition(),pEnemy->GetPosition());
-		AliensBoudingBox AliensBound(pEnemy, ((AlienSpider*)pEnemy)->m_MonsterScale);
+		AliensBoudingBox AliensBound(pEnemy, pEnemy->m_MonsterScale);
 		AliensBound.UpdateCollisionDetectBouding();
 		int inputcount = 0;
 		AliensBound.UpdateEntireBouding();
@@ -1168,6 +1169,49 @@ void CollisionManager::CollisionBulletToItemBox(Billboard* ExplosionEffect)
 
 }
 
+void CollisionManager::RenderEnemyBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, GameObject* pObject)
+{
+
+	AliensBoudingBox a(pObject, pObject->m_MonsterScale);
+	a.UpdateCollisionDetectBouding();
+	a.UpdateEntireBouding();
+	a.UpdateBodyBouding();
+	a.UPdateLegBounding();
+	XMFLOAT4X4 xmf4x4World = Matrix4x4::Identity();
+
+	XMFLOAT3 xmfloat3 = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+
+	xmf4x4World = GetSphereMatrix(a.m_Obstable.Radius, a.m_Obstable.Center);
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
+
+	xmfloat3 = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
+
+	xmf4x4World = GetSphereMatrix(a.m_Entire.Radius, a.m_Entire.Center);
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
+
+	//세부 사항
+	for (int i = 0; i < 6; i++) {
+		xmf4x4World = GetSphereMatrix(a.m_Bodys[i].Radius, a.m_Bodys[i].Center);
+		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+		if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
+	}
+
+	for (int i = 0; i < 8; i++) {
+		xmf4x4World = GetSphereMatrix(a.m_legs[i].Radius, a.m_legs[i].Center);
+		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+		if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
+	}
+
+}
+
 void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	
@@ -1225,45 +1269,10 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 
 
 
-	for ( auto& a : m_EnemyObjects) {
 
-		a->UpdateCollisionDetectBouding();
-		a->UpdateEntireBouding();
-		a->UpdateBodyBouding();
-		a->UPdateLegBounding();
-	}
 	//적의 바운디 박스
 	for (const auto& a : m_EnemyObjects) {
-		xmfloat3 = XMFLOAT3(0.0f, 1.0f, 0.0f);
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-
-		xmf4x4World = GetSphereMatrix(a->m_Obstable.Radius, a->m_Obstable.Center);
-		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-		if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
-
-		xmfloat3 = XMFLOAT3(1.0f, 0.0f, 0.0f);
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
-
-		xmf4x4World = GetSphereMatrix(a->m_Entire.Radius, a->m_Entire.Center);
-		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
-		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-		if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
-
-		//세부 사항
-		for (int i = 0; i < 6; i++) {
-			xmf4x4World = GetSphereMatrix(a->m_Bodys[i].Radius, a->m_Bodys[i].Center);
-			XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
-			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-			if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
-		}
-
-		for (int i = 0; i < 8; i++) {
-			xmf4x4World = GetSphereMatrix(a->m_legs[i].Radius, a->m_legs[i].Center);
-			XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
-			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-			if (m_psphere) m_psphere->Render(pd3dCommandList, 0);
-		}
+		RenderEnemyBoundingBox(pd3dCommandList,a->m_pOwner);
 	}
 
 	

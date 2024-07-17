@@ -292,11 +292,11 @@ void QuadTree::CollisionEnemyToStaticObject()
 
 	for (auto& E : m_DynamicObject) {
 		float dis = XM3CalDis(m_pCamera->GetPosition(), E->GetPosition());
-
-		AliensBoudingBox AliensBound(E);
+		
+		AliensBoudingBox AliensBound(E,E->m_MonsterScale);
 		AliensBound.UpdateCollisionDetectBouding();
-		int inputcount = 0;
 		AliensBound.UpdateEntireBouding();
+		int inputcount = 0;
 		if (m_pCamera->IsInFrustum(AliensBound.m_Entire) && dis < 100.f) AliensBound.m_pOwner->m_bVisible = true;
 		else AliensBound.m_pOwner->m_bVisible = false;
 
@@ -437,7 +437,7 @@ void QuadTree::CollisionEnemyToPlayer()
 {
 	for (auto& E : m_DynamicObject) {
 
-		AliensBoudingBox AliensBound(E);
+		AliensBoudingBox AliensBound(E, E->m_MonsterScale);
 		AliensBound.UpdateCollisionDetectBouding();
 		if (AliensBound.m_pOwner->m_HP > 0) {
 			AliensBound.UpdateEntireBouding();

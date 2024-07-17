@@ -674,6 +674,8 @@ float4 PSUiRect(VS_UIRECT_OUTPUT input) : SV_TARGET
         }
     }
     
+    if (PlayerVelocityScalar)
+        Blur(PlayerVelocityScalar, input.TexC);
     
     if (input.Mask & SELECTUI)
     {

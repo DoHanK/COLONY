@@ -153,7 +153,7 @@ void JumpGoal::Activate()
 	m_pOwner->m_WaitingTime = 0.f;
 	m_iStatus = active;
 	m_pOwner->m_pSoul->m_JumpStep = 0;
-	m_pOwner->m_xmf3Velocity.y += 10.f;
+	m_pOwner->m_xmf3Velocity.y += 10.f* m_pOwner->m_MonsterScale;
 	m_pOwner->m_pBrain->m_bJump = true;
 
 }

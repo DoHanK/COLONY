@@ -283,7 +283,7 @@ void AlienSpider::Update(float fTimeElapsed)
 
 void AlienSpider::UpdatePosition(float fTimeElapsed)
 {
-	XMFLOAT3 xmf3Gravity = XMFLOAT3(0, -9.8f, 0);
+	XMFLOAT3 xmf3Gravity = XMFLOAT3(0, -9.8f* m_MonsterScale, 0);
 
 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(xmf3Gravity, fTimeElapsed, false));

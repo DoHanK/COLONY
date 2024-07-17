@@ -21,7 +21,7 @@ int TraceAndAttack::Process()
 		if (m_pOwner->m_pPlayer) {
 
 			float Dis = XM3CalDis(m_pOwner->m_pPlayer->m_xmf3FinalPosition, m_pOwner->GetPosition());
-			if (Dis < 2.0f && m_SubGoals.front()->GetGoalType() != Attack_Goal) {
+			if (Dis < 2.0f * m_pOwner->m_MonsterScale && m_SubGoals.front()->GetGoalType() != Attack_Goal) {
 				AddSubgoal(new AttackGoal(m_pOwner, 1.0f));
 			}
 		}

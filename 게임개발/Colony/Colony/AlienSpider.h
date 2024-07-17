@@ -48,8 +48,7 @@ public:
 	Texture*					m_pGhostMaskTex = NULL;
 	
 
-	//크기 조절
-	float						m_MonsterScale = 1.0f;
+
 public:
 	float           			m_fMaxVelocityXZ = 3.0f;
 	void						AddPostion(const XMFLOAT3& Pos);

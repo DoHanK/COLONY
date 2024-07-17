@@ -441,7 +441,10 @@ public:
 	//충돌 처리 함수들
 	bool CollisionPlayerToStaticObeject();
 	bool CollisionPlayerToItemBox();
+	
+	void RenderEnemyBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, GameObject* pObject);
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList);
+
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard, int& KillCount);
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard,GameObject* pEnemy,int& KillCount);
 	void CollisionBulletToItemBox(Billboard* ExplosionEffect);
@@ -450,6 +453,9 @@ public:
 	void CollisionEnemyToPlayer();
 	bool CollisionPlayerToRedZone();
 	void CollisionBulletToObject();
+
+
+
 
 	void ReleaseUploadBuffers();
 };
