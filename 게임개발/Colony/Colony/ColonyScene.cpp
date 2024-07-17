@@ -721,6 +721,17 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	//ShotGunEffect 
+	m_pShotgunEffect = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		pResourceManager->BringTexture("Model/Textures/ShotgunEffect.dds", BILLBOARD_TEXTURE, true), m_BillShader, m_RedZone->RedZoneObjectInfo->m_pModelRootObject);
+	m_pShotgunEffect->doAnimate = true;
+	m_pShotgunEffect->active = false;
+	m_pShotgunEffect->SetRowNCol(3,5);
+	m_pShotgunEffect->m_BillMesh->UpdataVertexPosition(UIRect(50.0, -50.0, -50.0, 50.0), 1.0f);
+	m_pShotgunEffect->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+	m_pShotgunEffect->SettedTimer = 0.01f;
+	m_pShotgunEffect->doOnce = true;
+	m_pShotgunEffect->AddRef();
 	
 
 
@@ -1117,11 +1128,11 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	
 
 	//Item
-	pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.8, 0.86, pResourceManager->BringTexture("Model/Textures/UITexture/syringe.dds", UI_TEXTURE, true),
+	pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.89, 0.95, pResourceManager->BringTexture("Model/Textures/UITexture/syringe.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
-	pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.9, 0.95, pResourceManager->BringTexture("Model/Textures/UITexture/eye.dds", UI_TEXTURE, true),
-		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	/*pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.9, 0.95, pResourceManager->BringTexture("Model/Textures/UITexture/eye.dds", UI_TEXTURE, true),
+		NULL, NULL, 0, TEXTUREUSE, GetType(), true);*/
 	
 	
 	// HP

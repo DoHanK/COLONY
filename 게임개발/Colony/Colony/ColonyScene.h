@@ -251,6 +251,7 @@ protected:
 	vector<Billboard*>					m_pBloodBillboard[29];
 	bool								test = false;
 	Billboard*							m_pRedZoneEffect;
+	Billboard* m_pShotgunEffect;
 
 
 	// Particle
