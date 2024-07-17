@@ -1265,6 +1265,8 @@ void GamePlayScene::ReleaseObjects()
 	}
 
 	if (m_ItemBoxExplosion)m_ItemBoxExplosion->Release(); 
+
+	if (m_pShotgunEffect) m_pShotgunEffect->Release();
 }
 
 void GamePlayScene::PlayerControlInput()
