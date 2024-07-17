@@ -25,6 +25,7 @@ class Perception;
 class AlienSpider : public GameObject{
 public:
 	AlienSpider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManage,PathFinder* pPathFinder);
+	AlienSpider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManage,PathFinder* pPathFinder,float scale);
 	virtual ~AlienSpider();
 
 public:
@@ -35,8 +36,8 @@ public:
 	std::list<XMFLOAT2> m_Path;
 
 	//PathManager
-	PathFinder*		m_pPathFinder;
-	RouteMesh* m_pRoute;
+	PathFinder*					m_pPathFinder;
+	RouteMesh*					m_pRoute;
 
 	//시야 범위
 	PerceptionRangeMesh*		m_pPerceptionRangeMesh = NULL;
@@ -46,9 +47,12 @@ public:
 	Texture*					m_pSpiderTex = NULL;
 	Texture*					m_pGhostMaskTex = NULL;
 	
+
+	//크기 조절
+	float						m_MonsterScale = 1.0f;
 public:
 	float           			m_fMaxVelocityXZ = 3.0f;
-	void AddPostion(const XMFLOAT3& Pos);
+	void						AddPostion(const XMFLOAT3& Pos);
 	//idle 기다리기
 	float						m_WaitingTime = 0;
 	float						m_WaitCoolTime = 0;

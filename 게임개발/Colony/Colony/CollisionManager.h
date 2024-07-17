@@ -11,6 +11,9 @@ public:
 	Collision(GameObject* pOwner):m_pOwner(pOwner){
 
 	};
+	Collision(GameObject* pOwner,float scale) :m_pOwner(pOwner) {
+
+	};
 	virtual ~Collision() {};
 	 
 	 BasicMesh* m_pMesh = NULL;
@@ -230,6 +233,7 @@ public:
 //복합 콜리젼
 class AliensBoudingBox:public Collision {
 public:
+	AliensBoudingBox() {};
 	AliensBoudingBox(GameObject* pOwner) :Collision(pOwner) {
 		m_Obstable.Radius = 0.8f;
 		m_Entire.Radius = 1.5f;
@@ -418,6 +422,9 @@ public:
 
 	void EnrollEnemy(GameObject* pEnemy);
 
+
+
+	void CheckCollisionEnemytoStaticObject(GameObject* pEnemy);
 	//총알 등록
 
 	void EnrollbulletIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT4X4 Transform, GameObject* pOwner);
@@ -436,6 +443,7 @@ public:
 	bool CollisionPlayerToItemBox();
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList);
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard, int& KillCount);
+	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard,GameObject* pEnemy,int& KillCount);
 	void CollisionBulletToItemBox(Billboard* ExplosionEffect);
 	void CollisionEnemyToStaticObeject();    
 	void CollisionPlayerToEnemy();

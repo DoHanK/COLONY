@@ -61,6 +61,56 @@ AlienSpider::AlienSpider(ID3D12Device* pd3dDevice , ID3D12GraphicsCommandList* p
 	
 }
 
+AlienSpider::AlienSpider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, PathFinder* pPathFinder, float scale)
+{
+	CLoadedModelInfo* pSpider = pResourceManager->BringModelInfo("Model/AlienSpider.bin", "Model/");
+	AlienSpiderAnimationController* pAnimationSpider = new AlienSpiderAnimationController(pd3dDevice, pd3dCommandList, 2, pSpider);
+	pAnimationSpider->SetTrackAnimationSet(0, 0);
+	SetPosition(XMFLOAT3(0, 0, 0));
+	SetChild(pSpider->m_pModelRootObject, true);
+	SetAnimator(pAnimationSpider);
+	m_pSkinnedModel = pSpider->m_pModelRootObject->FindFrame("polySurface10");
+
+
+	//m_pBrain
+	m_pBrain = new GoalThink(this);
+	//Soul
+	m_pSoul = new AIController(m_pBrain, this);
+	m_pSoul->m_pAnimationControl = ((AlienSpiderAnimationController*)m_pSkinnedAnimationController);
+	m_pPathFinder = pPathFinder;
+	m_pRoute = new RouteMesh(pd3dDevice, pd3dCommandList);
+	m_pRoute->AddRef();
+	//Alien 특성
+	m_EndureLevel = floatEndureDis(gen);
+
+	//인식
+	m_pPerception = new Perception(this);
+
+	FramePos = new XMFLOAT3[AlienboneIndex::End];
+
+	m_pHead = pSpider->m_pModelRootObject->FindFrame("DEF-HEAD");
+
+	//m_pBoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
+	//m_pBoundingMesh->AddRef();
+	m_BoundingBox = pSpider->m_pModelRootObject->FindFrame("polySurface10")->m_BoundingBox;
+
+	//Ghost Effect
+	m_ppd3dcbSkinningBoneTransforms = new ID3D12Resource * [TRAILER_COUNT];
+	m_ppcbxmf4x4MappedSkinningBoneTransforms = new XMFLOAT4X4 * [TRAILER_COUNT];
+	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256의 배수
+	for (int i = 0; i < TRAILER_COUNT; ++i) {
+		m_GhostNum[i] = 0;
+
+		m_ppd3dcbSkinningBoneTransforms[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+		m_ppd3dcbSkinningBoneTransforms[i]->Map(0, NULL, (void**)&m_ppcbxmf4x4MappedSkinningBoneTransforms[i]);
+	}
+
+
+	m_MonsterScale = scale;
+
+	SetScale(scale, scale, scale);
+}
+
 AlienSpider::~AlienSpider()
 {
 	//Brain

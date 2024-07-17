@@ -248,6 +248,151 @@ void CollisionManager::EnrollEnemy(GameObject* pEnemy)
 	}
 }
 
+void CollisionManager::CheckCollisionEnemytoStaticObject(GameObject* pEnemy)
+{
+
+
+	
+		float dis = XM3CalDis(m_pCamera->GetPosition(),pEnemy->GetPosition());
+		AliensBoudingBox AliensBound(pEnemy, ((AlienSpider*)pEnemy)->m_MonsterScale);
+		AliensBound.UpdateCollisionDetectBouding();
+		int inputcount = 0;
+		AliensBound.UpdateEntireBouding();
+		if (m_pCamera->IsInFrustum(AliensBound.m_Entire) && dis < 100.f) AliensBound.m_pOwner->m_bVisible = true;
+		else AliensBound.m_pOwner->m_bVisible = false;
+
+		for (const auto& a : m_StaticObjects) {
+			//전체 바운딩박스 이동
+
+
+			if (AliensBound.m_Obstable.Intersects(((BOBBox*)a)->m_boundingbox)) {
+				XMFLOAT3 m_EnemyPos = AliensBound.m_Entire.Center;
+
+				//충돌면 구하기
+				XMFLOAT3 m_BoundingCorner[8];
+
+				XMFLOAT3 BoxCenter = reinterpret_cast<BOBBox*>(a)->m_boundingbox.Center;
+				((BOBBox*)a)->m_boundingbox.GetCorners(m_BoundingCorner);
+
+				XMFLOAT3 SphereToBox = Vector3::Normalize(Vector3::Subtract(m_EnemyPos, BoxCenter));
+
+
+				// 뒷면 , 앞면 , 오른쪽 면 , 왼쪽 면 , 아래면 , 윗면
+				XMFLOAT3 PLANECENTER[6];
+				XMFLOAT3 PLANENORMAL[6];
+
+
+				// 앞면
+				PLANECENTER[0].x = (m_BoundingCorner[0].x + m_BoundingCorner[1].x + m_BoundingCorner[2].x + m_BoundingCorner[3].x) / 4;
+				PLANECENTER[0].y = (m_BoundingCorner[0].y + m_BoundingCorner[1].y + m_BoundingCorner[2].y + m_BoundingCorner[3].y) / 4;
+				PLANECENTER[0].z = (m_BoundingCorner[0].z + m_BoundingCorner[1].z + m_BoundingCorner[2].z + m_BoundingCorner[3].z) / 4;
+
+				// 뒷면
+				PLANECENTER[1].x = (m_BoundingCorner[4].x + m_BoundingCorner[5].x + m_BoundingCorner[6].x + m_BoundingCorner[7].x) / 4;
+				PLANECENTER[1].y = (m_BoundingCorner[4].y + m_BoundingCorner[5].y + m_BoundingCorner[6].y + m_BoundingCorner[7].y) / 4;
+				PLANECENTER[1].z = (m_BoundingCorner[4].z + m_BoundingCorner[5].z + m_BoundingCorner[6].z + m_BoundingCorner[7].z) / 4;
+
+				// 오른쪽 면
+				PLANECENTER[2].x = (m_BoundingCorner[1].x + m_BoundingCorner[5].x + m_BoundingCorner[6].x + m_BoundingCorner[2].x) / 4;
+				PLANECENTER[2].y = (m_BoundingCorner[1].y + m_BoundingCorner[5].y + m_BoundingCorner[6].y + m_BoundingCorner[2].y) / 4;
+				PLANECENTER[2].z = (m_BoundingCorner[1].z + m_BoundingCorner[5].z + m_BoundingCorner[6].z + m_BoundingCorner[2].z) / 4;
+
+				// 왼쪽 면
+				PLANECENTER[3].x = (m_BoundingCorner[0].x + m_BoundingCorner[4].x + m_BoundingCorner[7].x + m_BoundingCorner[3].x) / 4;
+				PLANECENTER[3].y = (m_BoundingCorner[0].y + m_BoundingCorner[4].y + m_BoundingCorner[7].y + m_BoundingCorner[3].y) / 4;
+				PLANECENTER[3].z = (m_BoundingCorner[0].z + m_BoundingCorner[4].z + m_BoundingCorner[7].z + m_BoundingCorner[3].z) / 4;
+
+				// 윗면
+				PLANECENTER[4].x = (m_BoundingCorner[3].x + m_BoundingCorner[2].x + m_BoundingCorner[6].x + m_BoundingCorner[7].x) / 4;
+				PLANECENTER[4].y = (m_BoundingCorner[3].y + m_BoundingCorner[2].y + m_BoundingCorner[6].y + m_BoundingCorner[7].y) / 4;
+				PLANECENTER[4].z = (m_BoundingCorner[3].z + m_BoundingCorner[2].z + m_BoundingCorner[6].z + m_BoundingCorner[7].z) / 4;
+
+				// 아랫면
+				PLANECENTER[5].x = (m_BoundingCorner[0].x + m_BoundingCorner[1].x + m_BoundingCorner[5].x + m_BoundingCorner[4].x) / 4;
+				PLANECENTER[5].y = (m_BoundingCorner[0].y + m_BoundingCorner[1].y + m_BoundingCorner[5].y + m_BoundingCorner[4].y) / 4;
+				PLANECENTER[5].z = (m_BoundingCorner[0].z + m_BoundingCorner[1].z + m_BoundingCorner[5].z + m_BoundingCorner[4].z) / 4;
+
+
+
+				for (int i = 0; i < 6; ++i) {
+					PLANENORMAL[i] = Vector3::Normalize(Vector3::Subtract(PLANECENTER[i], BoxCenter));
+				}
+
+				int selectNum = -1;
+				float minDistance = FLT_MAX;
+				for (int i = 0; i < 6; ++i) {
+					if (0 < Vector3::DotProduct(PLANENORMAL[i], SphereToBox)) {
+						float distance = DistancePointToPlane(SphereToBox, PLANENORMAL[i], PLANECENTER[i]);
+						if (distance < minDistance) {
+							selectNum = i;
+							minDistance = distance;
+						}
+					}
+				}
+
+				if ((((AlienSpider*)AliensBound.m_pOwner)->m_GoalType != Wander_Goal) &&
+					(((AlienSpider*)AliensBound.m_pOwner)->m_GoalType != FollowPath_Goal)
+					) {
+					//살아있을때만 적용
+					if (AliensBound.m_pOwner->m_bActive == true) {
+						float dotProduct = Vector3::DotProduct(AliensBound.m_pOwner->m_xmfPre3Velocity, PLANENORMAL[selectNum]);
+						if (dotProduct <= EPSILON) {
+							XMFLOAT3 slidingVector = Vector3::Subtract(AliensBound.m_pOwner->m_xmfPre3Velocity, { PLANENORMAL[selectNum].x * dotProduct, PLANENORMAL[selectNum].y * dotProduct, PLANENORMAL[selectNum].z * dotProduct });
+							(AliensBound.m_pOwner)->RollbackPosition();
+							XMFLOAT3 TempPos = XMFLOAT3(AliensBound.m_pOwner->m_xmf4x4ToParent._41, AliensBound.m_pOwner->m_xmf4x4ToParent._42, AliensBound.m_pOwner->m_xmf4x4ToParent._43);
+							(AliensBound.m_pOwner)->m_xmfPre3Position = TempPos;
+							(AliensBound.m_pOwner)->m_xmfPre3Velocity = slidingVector;
+							(AliensBound.m_pOwner)->AddPostion(slidingVector);
+
+						}
+					}
+
+				}
+
+				if (selectNum == 4) {
+
+
+
+					if (((AlienSpider*)AliensBound.m_pOwner)->m_pSoul->m_JumpStep == JUMPING &&
+						((AlienSpider*)AliensBound.m_pOwner)->m_pSoul->m_JumpStep != JUMP_LANDING &&
+						((AlienSpider*)AliensBound.m_pOwner)->m_pSoul->m_JumpStep != JUMP_END &&
+						AliensBound.m_pOwner->m_xmf3Velocity.y < 0) {
+
+						((AlienSpider*)AliensBound.m_pOwner)->m_pSoul->m_JumpStep = JUMP_LANDING;
+
+					}
+
+					if (((AlienSpider*)AliensBound.m_pOwner)->m_GoalType != Jump_Goal) {
+
+						if (PLANECENTER[4].y > 0.5f) {
+							((AlienSpider*)AliensBound.m_pOwner)->m_pBrain->m_NeedJump = true;
+						}
+					}
+					else {
+						if (((AlienSpider*)AliensBound.m_pOwner)->m_pSoul->m_JumpStep == JUMP_LANDING) {
+
+						}
+
+					}
+					(AliensBound.m_pOwner)->m_xmfPre3Position.y = PLANECENTER[4].y;
+					if (AliensBound.m_pOwner->m_xmf3Velocity.y < 0) {
+						(AliensBound.m_pOwner)->m_xmf3Velocity.y = 0;
+						(AliensBound.m_pOwner)->m_xmfPre3Velocity.y = 0;
+
+					}
+					(AliensBound.m_pOwner)->m_xmf4x4ToParent._42 = PLANECENTER[4].y;
+					if (AliensBound.m_pOwner->m_bActive == false && inputcount == 0) {
+
+					}
+				}
+			}
+		}
+	
+
+}
+
+
+
 void CollisionManager::EnrollRedZoneIntoSphere(XMFLOAT3 center, float radius, GameObject* pOwner)
 {
 	BSphere* psphere = new BSphere(center, radius, pOwner);
@@ -908,6 +1053,92 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 	}
 
 	return crush;
+}
+
+bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard, GameObject* pEnemy, int& KillCount)
+{
+
+	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());
+
+	FXMVECTOR BulletDir = XMLoadFloat3(&m_pCamera->GetLookVector());
+
+	float dis = 0;
+	bool crush = false;
+
+	//1차 충돌 처리
+	std::list<pair<AliensBoudingBox*, float>> crushlist;
+	AliensBoudingBox EnmeyCollsion(pEnemy, ((AlienSpider*)(pEnemy))->m_MonsterScale);
+	EnmeyCollsion.UpdateEntireBouding();
+	EnmeyCollsion.UpdateBodyBouding();
+	EnmeyCollsion.UPdateLegBounding();
+
+		if (((AlienSpider*)(pEnemy))->m_GoalType != Deaded_Goal) {
+		
+			for (int i = 0; i < 6; i++) {
+				if (crush == true)
+					break;
+
+				if (EnmeyCollsion.m_Bodys[i].Intersects(BulletPos, BulletDir, dis)) {
+
+					for (int i = 0; i < 5; ++i) {
+
+						int idx = EffectIndex[rand() % 11];
+						for (auto& paticle : m_pBloodBillboard[idx]) {
+							if (!paticle->active) {
+								paticle->active = true;
+								paticle->m_CrashObject = &EnmeyCollsion.m_Bodys[i];
+								break;
+							}
+						}
+					}
+					EnmeyCollsion.m_pOwner->m_bHitted = true;
+					EnmeyCollsion.m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage();
+					if (EnmeyCollsion.m_pOwner->m_HP <= 0) {
+						++KillCount;
+					}
+					crush = true;
+
+					break;
+				}
+			}
+
+			for (int i = 0; i < 8; i++) {
+				if (crush == true)
+					break;
+				if (EnmeyCollsion.m_legs[i].Intersects(BulletPos, BulletDir, dis)) {
+
+					for (int i = 0; i < 5; ++i) {
+						//int idx = rand() % 15;
+						int idx = EffectIndex[rand() % 11];
+						for (auto& paticle : m_pBloodBillboard[idx]) {
+							if (!paticle->active) {
+								paticle->active = true;
+								paticle->m_CrashObject = &EnmeyCollsion.m_legs[i];
+								break;
+							}
+						}
+					}
+					EnmeyCollsion.m_pOwner->m_bHitted = true;
+					EnmeyCollsion.m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage();
+					if (EnmeyCollsion.m_pOwner->m_HP <= 0) {
+						++KillCount;
+					}
+					crush = true;
+
+					break;
+				}
+			}
+
+		}
+	
+
+
+
+
+
+
+
+		return crush;
 }
 
 void CollisionManager::CollisionBulletToItemBox(Billboard* ExplosionEffect)
