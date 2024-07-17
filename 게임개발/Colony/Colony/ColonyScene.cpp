@@ -557,15 +557,20 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 350; ++j) {
+	for (int j = 0; j < 100; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
-			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder,rand()%6);
+			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, MonsterSizeDis(gen));
 			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 15.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
 			//p->SetPosition(j, 0.f, 0.f);
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
 			p->SetGhostShader(m_pGhostTraillerShader);
+			if (p->m_MonsterScale > 6.f) {
+
+				p->m_pSpiderTex = spiderColor[4];
+			}
+			else
 			p->m_pSpiderTex = spiderColor[j % 6];
 			p->m_pGhostMaskTex = spiderColor[6];
 			m_pCollisionManager->EnrollEnemy(p);
@@ -651,8 +656,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 	
 	CLoadedModelInfo*  bullet = pResourceManager->BringModelInfo("Model/weapon/BulletCasing.bin", NULL);
-	bulletcasings.reserve(30); 
-	for (int i = 0; i < 30; i++) {
+	bulletcasings.reserve(60); 
+	for (int i = 0; i < 60; i++) {
 		BulletCasing* pbulletcasing = new BulletCasing;
 		pbulletcasing->m_bActive = false;
 		pbulletcasing->SetChild(bullet->m_pModelRootObject, true);

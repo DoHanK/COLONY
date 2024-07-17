@@ -300,7 +300,8 @@ void QuadTree::CollisionEnemyToStaticObject()
 		AliensBound.UpdateCollisionDetectBouding();
 		AliensBound.UpdateEntireBouding();
 		int inputcount = 0;
-		if (m_pCamera->IsInFrustum(AliensBound.m_Entire) && dis < 100.f) AliensBound.m_pOwner->m_bVisible = true;
+		if (m_pCamera->IsInFrustum(AliensBound.m_Entire) && dis < 150.f) AliensBound.m_pOwner->m_bVisible = true;
+		//if (m_pCamera->IsInFrustum(AliensBound.m_Entire) ) AliensBound.m_pOwner->m_bVisible = true;
 		else AliensBound.m_pOwner->m_bVisible = false;
 
 		for (const auto& a : m_StaticBoundings) {
@@ -393,6 +394,8 @@ void QuadTree::CollisionEnemyToStaticObject()
 					}
 
 				}
+
+
 
 				if (selectNum == 4) {
 

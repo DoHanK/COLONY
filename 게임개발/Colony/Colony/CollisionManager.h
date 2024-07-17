@@ -285,7 +285,7 @@ public:
 		
 		XMFLOAT3 pos = XMFLOAT3(m_pOwner->m_xmf4x4ToParent._41, m_pOwner->m_xmf4x4ToParent._42, m_pOwner->m_xmf4x4ToParent._43);
 		m_Entire.Center = pos;
-		m_Entire.Center.y += 0.75f *m_pOwner->m_MonsterScale;
+		m_Entire.Center.y +=m_pOwner->m_MonsterScale;
 	}
 
 	void UpdateCollisionDetectBouding() {
