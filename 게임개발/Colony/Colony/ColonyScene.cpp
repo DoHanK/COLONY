@@ -557,11 +557,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(400);
-	for (int j = 0; j < 100; ++j) {
+	for (int j = 0; j < 350; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
-			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder,rand()%5);
-			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 5.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
+			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder,rand()%6);
+			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 15.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
 			//p->SetPosition(j, 0.f, 0.f);
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
@@ -880,12 +880,12 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &bredzone, 40);
 		//속도에 따른 블러링
 
-		if (m_pPlayer) {
-			XMFLOAT3 vel = m_pPlayer->GetVelocity();
-			float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
-			int	 velo = int(velocity);
-			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
-		}
+		//if (m_pPlayer) {
+		//	XMFLOAT3 vel = m_pPlayer->GetVelocity();
+		//	float velocity = sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
+		//	int	 velo = int(velocity);
+		//	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
+		//}
 		
 
 
