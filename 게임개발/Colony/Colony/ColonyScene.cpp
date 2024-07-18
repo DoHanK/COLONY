@@ -30,7 +30,7 @@ UIInfo* BringUINum(UIManager* pUImanager, ResourceManager* pResourceManager, flo
 //										LobbyScene Class				  						   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
+void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager,SoundManager* pSoundManager)
 {
 	//pUImanager->CreateUINonNormalRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true), NULL, NULL, 0,  TEXTUREUSE , GetType());
 
@@ -47,13 +47,13 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	h_gameButton=pUImanager->CreateUINonNormalRect(-0.2, -0.3, -0.2, 0.2, m_TbuttonF,NULL, &UIControlHelper::GameStart, 1, TEXTUREUSE, GetType(), true);
 	pUImanager->CreateUINonNormalRect(-0.2, -0.3, -0.2, 0.2, pResourceManager->BringTexture("Model/Textures/GAMESTART.dds", UI_TEXTURE, true),NULL, NULL, 2, TEXTUREUSE, GetType(), true);
 
-	// 세팅
-	h_settingButton=pUImanager->CreateUINonNormalRect(-0.35, -0.45, -0.2, 0.2, m_TbuttonF,NULL, NULL, 1, TEXTUREUSE, GetType(), true);
-	pUImanager->CreateUINonNormalRect(-0.35, -0.45, -0.2, 0.2, pResourceManager->BringTexture("Model/Textures/SETTINGS.dds", UI_TEXTURE, true),NULL, NULL, 2, TEXTUREUSE, GetType(), true);
+	//// 세팅
+	//h_settingButton=pUImanager->CreateUINonNormalRect(-0.35, -0.45, -0.2, 0.2, m_TbuttonF,NULL, NULL, 1, TEXTUREUSE, GetType(), true);
+	//pUImanager->CreateUINonNormalRect(-0.35, -0.45, -0.2, 0.2, pResourceManager->BringTexture("Model/Textures/SETTINGS.dds", UI_TEXTURE, true),NULL, NULL, 2, TEXTUREUSE, GetType(), true);
 
 	// 나가기
-	h_quitButton=pUImanager->CreateUINonNormalRect(-0.5, -0.6, -0.2, 0.2, m_TbuttonF,NULL, &UIControlHelper::GameQuit, 1, TEXTUREUSE, GetType(), true);
-	pUImanager->CreateUINonNormalRect(-0.5, -0.6, -0.2, 0.2, pResourceManager->BringTexture("Model/Textures/QUIT.dds", UI_TEXTURE, true),NULL, NULL, 2, TEXTUREUSE, GetType(), true);
+	h_quitButton=pUImanager->CreateUINonNormalRect(-0.35, -0.45, -0.2, 0.2, m_TbuttonF,NULL, &UIControlHelper::GameQuit, 1, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.35, -0.45, -0.2, 0.2, pResourceManager->BringTexture("Model/Textures/QUIT.dds", UI_TEXTURE, true),NULL, NULL, 2, TEXTUREUSE, GetType(), true);
 
 
 
@@ -61,8 +61,9 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	//pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT/2, 0, FRAME_BUFFER_WIDTH/2, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
 	//	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, &UIControlHelper::TestFunc, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
 
-	//SoundManager* soundManager = new SoundManager();
-	//soundManager->CreateSound();
+	/*SoundManager* soundManager = new SoundManager();
+	IXAudio2SourceVoice* testSound=soundManager->AddSound("sample1.wav");
+	testSound->Start(0);*/
 }
 
 
@@ -418,7 +419,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 	::fclose(pFile);
 }
 
-void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
+void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager,SoundManager* pSoundManager)
 {
 	m_pResourceManager = pResourceManager;
 
@@ -2167,7 +2168,7 @@ WinScene::~WinScene()
 {
 }
 
-void WinScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
+void WinScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager, SoundManager* pSoundManager)
 {
 }
 
@@ -2184,7 +2185,7 @@ LoseScene::~LoseScene()
 {
 }
 
-void LoseScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager)
+void LoseScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager,SoundManager* pSoundManager)
 {
 	pUImanager->CreateUINonNormalRect(1.0, -1.0, -1.0, 1.0, pResourceManager->BringTexture("Model/Textures/UITexture/LoseScene.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	pUImanager->CreateUINonNormalRect(-0.3, -0.38, -0.12, -0.035, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameStart, 1, TEXTUREUSE, GetType(), true);

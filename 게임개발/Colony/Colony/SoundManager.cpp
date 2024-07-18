@@ -1,11 +1,19 @@
 #include "SoundManager.h"
 
+
 SoundManager::SoundManager()
 {
 }
 
 SoundManager::~SoundManager()
 {
+}
+
+void SoundManager::Intialize()
+{
+    //initialize
+    XAudio2Create(&pXAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
+    pXAudio2->CreateMasteringVoice(&pMasterVoice);
 }
 
 
@@ -54,34 +62,15 @@ bool SoundManager::LoadWaveFile(const char* filename, WAVEFORMATEX& wfx, BYTE** 
     return true;
 }
 
-
-
-bool SoundManager::CreateSound()
+IXAudio2SourceVoice* SoundManager::AddSound(const char* filename)
 {
-
-    // XAudio2 초기화
-    IXAudio2* pXAudio2 = nullptr;
-    IXAudio2MasteringVoice* pMasterVoice = nullptr;
-
-    HRESULT hr = XAudio2Create(&pXAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
-    if (FAILED(hr)) {
-        // 오류 처리
-        return 0;
-    }
-
-    hr = pXAudio2->CreateMasteringVoice(&pMasterVoice);
-    if (FAILED(hr)) {
-        // 오류 처리
-        pXAudio2->Release();
-        return 0;
-    }
-
     // WAVE 파일 로드
     WAVEFORMATEX wfx = { 0 };
     BYTE* pDataBuffer = nullptr;
     DWORD dataBufferSize = 0;
 
-    if (!LoadWaveFile("TestFile.wav", wfx, &pDataBuffer, dataBufferSize)) {
+
+    if (!LoadWaveFile(filename, wfx, &pDataBuffer, dataBufferSize)) {
         // 오류 처리
         pMasterVoice->DestroyVoice();
         pXAudio2->Release();
@@ -90,7 +79,7 @@ bool SoundManager::CreateSound()
 
     // 소스 보이스 생성
     IXAudio2SourceVoice* pSourceVoice = nullptr;
-    hr = pXAudio2->CreateSourceVoice(&pSourceVoice, &wfx);
+    HRESULT hr = pXAudio2->CreateSourceVoice(&pSourceVoice, &wfx);
     if (FAILED(hr)) {
         // 오류 처리
         delete[] pDataBuffer;
@@ -115,28 +104,21 @@ bool SoundManager::CreateSound()
         return 0;
     }
 
-    // 사운드 재생
-    hr = pSourceVoice->Start(0);
-    if (FAILED(hr)) {
-        // 오류 처리
-        pSourceVoice->DestroyVoice();
-        delete[] pDataBuffer;
-        pMasterVoice->DestroyVoice();
-        pXAudio2->Release();
-        return 0;
-    }
+    m_SourceVoices.push_back(pSourceVoice);
+    m_buffers.push_back(pDataBuffer);
 
-    //// 사운드 재생 대기
-    ////while (pSourceVoice->GetState().BuffersQueued > 0) {
-    //Sleep(1000);
-    ////}
-
-    //// 리소스 정리
-    //pSourceVoice->DestroyVoice();
-    //delete[] pDataBuffer;
-    //pMasterVoice->DestroyVoice();
-    //pXAudio2->Release();
-
-        
-	
+    return pSourceVoice;
 }
+
+void SoundManager::Release()
+{
+    for (auto& sourceVoice : m_SourceVoices) {
+        sourceVoice->DestroyVoice();
+    }
+    for (auto& buffer : m_buffers) {
+        delete[] buffer;
+    }
+    pMasterVoice->DestroyVoice();
+    pXAudio2->Release();
+}
+

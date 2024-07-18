@@ -11,10 +11,11 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //										SceneManager Class										   //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-SceneManager::SceneManager(D3Device* pDevice,ResourceManager* pResourceManager, UIManager* pUIManager )
+SceneManager::SceneManager(D3Device* pDevice,ResourceManager* pResourceManager, UIManager* pUIManager,SoundManager* pSoundManager)
 {
 	m_pResourceManager = pResourceManager;
 	m_pUIManager = pUIManager;
+	m_pSoundManager = pSoundManager;
 	m_pD3Device = pDevice;
 	m_pCamera = new Camera();
 	for (int i = 0; i < TEXTURE_SCENE_NUM; ++i) {
@@ -83,7 +84,7 @@ void SceneManager::PushScene(BasicScene* Scene,bool bBuild = true)
 	if (bBuild) {
 		m_pD3Device->CommandAllocatorReset();
 		m_pD3Device->CommandListReset();
-		m_SceneStack.top()->BuildObjects(m_pD3Device->GetID3DDevice(), m_pD3Device->GetCommandList(), m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
+		m_SceneStack.top()->BuildObjects(m_pD3Device->GetID3DDevice(), m_pD3Device->GetCommandList(), m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager, m_pSoundManager);
 		m_pD3Device->CloseCommandAndPushQueue();
 		m_pD3Device->WaitForGpuComplete();
 
@@ -91,6 +92,7 @@ void SceneManager::PushScene(BasicScene* Scene,bool bBuild = true)
 		if (m_pResourceManager) m_pResourceManager->ReleaseUploadBuffers();
 	}
 		m_pUIManager->CreateRederTargetRect(0, FRAME_BUFFER_HEIGHT, 0, FRAME_BUFFER_WIDTH, m_TextureScene[m_SceneStack.top()->GetType()], NULL, NULL, 0, AMPLIFIER | TEXTUREUSE, m_SceneStack.top()->GetType(), false);
+		m_pSoundManager->Intialize();
 }
 
 void SceneManager::PopScene()
@@ -122,7 +124,7 @@ void SceneManager::PopScene()
 	else {
 		while (ShowCursor(true) < 0);
 	}
-
+	m_pSoundManager->Release();
 
 }
 
@@ -154,7 +156,7 @@ void SceneManager::ChangeScene(BasicScene* Scene)
 		while (ShowCursor(true) < 0);
 	}
 
-	m_SceneStack.top()->BuildObjects(m_pD3Device->GetID3DDevice(), m_pD3Device->GetCommandList(), m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
+	m_SceneStack.top()->BuildObjects(m_pD3Device->GetID3DDevice(), m_pD3Device->GetCommandList(), m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager, m_pSoundManager);
 	m_pD3Device->CloseCommandAndPushQueue();
 	m_pD3Device->WaitForGpuComplete();
 

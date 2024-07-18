@@ -3,6 +3,7 @@
 #include "ColonyScene.h"
 #include "ResourceManager.h"
 #include "D3Device.h"
+#include "SoundManager.h"
 
 class BasicScene;
 class UIManager;
@@ -15,7 +16,7 @@ struct UIInfo;
 class SceneManager
 {
 public:
-	SceneManager(D3Device* pDevice , ResourceManager* pResourceManager, UIManager* pUIManager);
+	SceneManager(D3Device* pDevice , ResourceManager* pResourceManager, UIManager* pUIManager,SoundManager* pSoundManager);
 	~SceneManager();
 	
 	std::stack<BasicScene*>	m_SceneStack;
@@ -24,6 +25,7 @@ public:
 	//Manager
 	ResourceManager*	 m_pResourceManager = NULL;
 	UIManager*			 m_pUIManager = NULL;
+	SoundManager* m_pSoundManager = NULL;
 	Camera* m_pCamera =NULL;
 	//
 	D3Device* m_pD3Device = NULL;

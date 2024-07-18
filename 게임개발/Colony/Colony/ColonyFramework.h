@@ -42,6 +42,7 @@ private:
 	ResourceManager*				 m_pResourceManager;
 	UIManager*						 m_pUIManager;
 	SceneManager*					 m_pSceneManager;
+	SoundManager*					m_pSoundManager;
 	//Helper
 	UIControlHelper*				m_pUIControlHelper;
 

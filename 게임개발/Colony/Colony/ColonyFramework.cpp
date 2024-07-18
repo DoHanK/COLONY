@@ -301,11 +301,12 @@ bool ColonyFramework::MakeGameObjects()
 	m_pResourceManager = new ResourceManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), NULL);
 	m_pUIManager = new UIManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pd3dGraphicsRootSignature);
 	m_pUIManager->m_pfunctionQueue = &m_functionQueue;
+	m_pSoundManager = new SoundManager();
 
 	//씬을 구성하는 매니져들
-	m_pSceneManager = new SceneManager(GetDevice(),m_pResourceManager, m_pUIManager);
+	m_pSceneManager = new SceneManager(GetDevice(),m_pResourceManager, m_pUIManager, m_pSoundManager);
 	m_pSceneManager->PushScene(new GameLobbyScene, false);
-	m_pSceneManager->m_SceneStack.top()->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(),m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager);
+	m_pSceneManager->m_SceneStack.top()->BuildObjects(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(),m_pd3dGraphicsRootSignature, m_pResourceManager, m_pUIManager, m_pSoundManager);
 	m_pSceneManager->SetRootSignature(m_pd3dGraphicsRootSignature);
 
 	m_pUIControlHelper = new UIControlHelper();
