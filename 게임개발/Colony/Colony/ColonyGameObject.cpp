@@ -549,7 +549,16 @@ void GameObject::SetMaterial(int nMaterial, Material* pMaterial)
 	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
 }
 
+void GameObject::FindAllFrame(std::vector<GameObject*>& FrameBoxs)
+{
+	FrameBoxs.push_back(this);
+
+	if (m_pSibling) m_pSibling->FindAllFrame(FrameBoxs);
+	if (m_pChild) m_pChild->FindAllFrame(FrameBoxs);
+}
+
 void GameObject::SetAnimator(AnimationController* animator){
+
 	if (animator) {
 		if (m_pSkinnedAnimationController) {
 			delete m_pSkinnedAnimationController;
