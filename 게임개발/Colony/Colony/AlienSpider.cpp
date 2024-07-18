@@ -290,7 +290,7 @@ void AlienSpider::UpdatePosition(float fTimeElapsed)
 	// 
 	//¸¶Âû°è¼ö
 	float  fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	float fMaxVelocityXZ = 5.f;
+	float fMaxVelocityXZ = 4.f + m_MonsterScale;
 
 	if (fLength > fMaxVelocityXZ)
 	{
@@ -299,9 +299,6 @@ void AlienSpider::UpdatePosition(float fTimeElapsed)
 
 	}
 
-
-
-	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
 	if ((m_GoalType == Deaded_Goal ||
 		m_GoalType == Hitted_Goal ||
 		m_GoalType == Attack_Goal)) {
@@ -309,6 +306,11 @@ void AlienSpider::UpdatePosition(float fTimeElapsed)
 		m_xmf3Velocity.z = 0;
 
 	}
+
+
+	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+
+
 	
 	XMFLOAT3 PrePos = XMFLOAT3(m_xmf4x4ToParent._41, m_xmf4x4ToParent._42, m_xmf4x4ToParent._43);
 	m_xmfPre3Position = PrePos;

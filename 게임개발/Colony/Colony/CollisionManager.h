@@ -236,7 +236,7 @@ public:
 	AliensBoudingBox() {};
 	AliensBoudingBox(GameObject* pOwner) :Collision(pOwner) {
 		m_Obstable.Radius = 0.8f;
-		m_Entire.Radius = 1.5f;
+		m_Entire.Radius = 1.0f;
 		m_Bodys[0].Radius = 0.3f; //DEF_SPINE_1
 		m_Bodys[1].Radius = 0.3f; //DEF_CHEST
 		m_Bodys[2].Radius = 0.2f; //DEF_NECK_1
@@ -255,7 +255,7 @@ public:
 	}
 	AliensBoudingBox(GameObject* pOwner,float scale) :Collision(pOwner) {
 		m_Obstable.Radius = 0.8f * scale;
-		m_Entire.Radius = 1.5f * scale;
+		m_Entire.Radius = 1.0f * scale;
 		m_Bodys[0].Radius = 0.3f * scale; //DEF_SPINE_1
 		m_Bodys[1].Radius = 0.3f * scale; //DEF_CHEST
 		m_Bodys[2].Radius = 0.2f * scale; //DEF_NECK_1
@@ -283,11 +283,9 @@ public:
 	void UpdateEntireBouding() {
 		
 		
-		XMFLOAT3 pos;
-
-		pos = m_pOwner->FramePos[AlienboneIndex::DEF_HIPS];
+		XMFLOAT3 pos = XMFLOAT3(m_pOwner->m_xmf4x4ToParent._41, m_pOwner->m_xmf4x4ToParent._42, m_pOwner->m_xmf4x4ToParent._43);
 		m_Entire.Center = pos;
-		m_Entire.Center.y += 0.75f;
+		m_Entire.Center.y +=m_pOwner->m_MonsterScale;
 	}
 
 	void UpdateCollisionDetectBouding() {
@@ -299,7 +297,7 @@ public:
 		XMFLOAT3 offset = XMFLOAT3(0.0, 0.0, 1.0f);
 		m_Obstable.Center = pos;
 		XMFLOAT3 LookVector = m_pOwner->GetLook();
-		LookVector = Vector3::ScalarProduct(LookVector, 2.0f, true);
+		LookVector = Vector3::ScalarProduct(LookVector, 2.0f* m_pOwner->m_MonsterScale, true);
 		m_Obstable.Center = Vector3::Add(m_Obstable.Center, LookVector);
 
 	}

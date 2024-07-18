@@ -26,7 +26,7 @@ int TraceAndAttack::Process()
 			}
 		}
 		if (m_SubGoals.size() < 3) {
-			if (m_SubGoals.front()->GetGoalType() != Jump_Goal && m_pOwner->m_HP != 100) {
+			if (m_SubGoals.front()->GetGoalType() != Jump_Goal && m_pOwner->m_HP  < 60 && JumpRandom(gen) == 0) {
 				AddSubgoal(new JumpGoal(m_pOwner, 1.0f));
 			}
 		}

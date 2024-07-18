@@ -131,6 +131,9 @@ void QuadTree::SettingStaticBounding(CollisionManager& collisionManager)
 {
 
 	m_pBoundPlayer = (BCapsule*)collisionManager.m_pPlayer;
+	
+	Vector3::ScalarProduct(m_BoundingBox.Extents, 1.2f, false);
+
 
 	for (auto o : collisionManager.m_StaticObjects) {
 
@@ -297,16 +300,18 @@ void QuadTree::CollisionEnemyToStaticObject()
 		AliensBound.UpdateCollisionDetectBouding();
 		AliensBound.UpdateEntireBouding();
 		int inputcount = 0;
-		if (m_pCamera->IsInFrustum(AliensBound.m_Entire) && dis < 100.f) AliensBound.m_pOwner->m_bVisible = true;
+		if (m_pCamera->IsInFrustum(AliensBound.m_Entire) && dis < 150.f) AliensBound.m_pOwner->m_bVisible = true;
+		//if (m_pCamera->IsInFrustum(AliensBound.m_Entire) ) AliensBound.m_pOwner->m_bVisible = true;
 		else AliensBound.m_pOwner->m_bVisible = false;
 
 		for (const auto& a : m_StaticBoundings) {
 			//전체 바운딩박스 이동
 
 
-			if (AliensBound.m_Obstable.Intersects(((BOBBox*)a)->m_boundingbox)) {
+				AliensBound.UpdateEntireBouding();
+			if (AliensBound.m_Entire.Intersects(((BOBBox*)a)->m_boundingbox)) {
 				XMFLOAT3 m_EnemyPos = AliensBound.m_Entire.Center;
-
+	
 				//충돌면 구하기
 				XMFLOAT3 m_BoundingCorner[8];
 
@@ -361,20 +366,22 @@ void QuadTree::CollisionEnemyToStaticObject()
 				float minDistance = FLT_MAX;
 				for (int i = 0; i < 6; ++i) {
 					if (0 < Vector3::DotProduct(PLANENORMAL[i], SphereToBox)) {
-						float distance = DistancePointToPlane(SphereToBox, PLANENORMAL[i], PLANECENTER[i]);
+						float distance = DistancePointToPlane(m_EnemyPos, PLANENORMAL[i], PLANECENTER[i]);
 						if (distance < minDistance) {
 							selectNum = i;
 							minDistance = distance;
 						}
 					}
 				}
-
 				if ((((AlienSpider*)AliensBound.m_pOwner)->m_GoalType != Wander_Goal) &&
 					(((AlienSpider*)AliensBound.m_pOwner)->m_GoalType != FollowPath_Goal)
 					) {
+
+			
 					//살아있을때만 적용
 					if (AliensBound.m_pOwner->m_bActive == true) {
 						float dotProduct = Vector3::DotProduct(AliensBound.m_pOwner->m_xmfPre3Velocity, PLANENORMAL[selectNum]);
+
 						if (dotProduct <= EPSILON) {
 							XMFLOAT3 slidingVector = Vector3::Subtract(AliensBound.m_pOwner->m_xmfPre3Velocity, { PLANENORMAL[selectNum].x * dotProduct, PLANENORMAL[selectNum].y * dotProduct, PLANENORMAL[selectNum].z * dotProduct });
 							(AliensBound.m_pOwner)->RollbackPosition();
@@ -387,6 +394,8 @@ void QuadTree::CollisionEnemyToStaticObject()
 					}
 
 				}
+
+
 
 				if (selectNum == 4) {
 
@@ -419,7 +428,7 @@ void QuadTree::CollisionEnemyToStaticObject()
 						(AliensBound.m_pOwner)->m_xmfPre3Velocity.y = 0;
 
 					}
-					(AliensBound.m_pOwner)->m_xmf4x4ToParent._42 = PLANECENTER[4].y;
+					(AliensBound.m_pOwner)->m_xmf4x4ToParent._42 = PLANECENTER[4].y ;
 					if (AliensBound.m_pOwner->m_bActive == false && inputcount == 0) {
 
 					}

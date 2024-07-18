@@ -927,15 +927,15 @@ void CollisionManager::CollisionBulletToObject()
 			((BOBBox*)b)->UpdateCollision();
 
 
-			for (auto& o : m_StaticObjects) {
+		
 
-				if (((BOBBox*)o)->m_boundingbox.Intersects(((BOBBox*)b)->m_Transformboudingbox)) {
-				
+				if (b->m_pOwner->m_xmf4x4ToParent._42 < 0.1f) {
+					b->m_pOwner->m_xmf4x4ToParent._42 = 0.1f;
 					((BulletCasing*)b->m_pOwner)->m_bcrushed = true;
 					((BulletCasing*)b->m_pOwner)->m_postCollisionSurvivalTime = 0.0f;
 
 				}
-			}
+			
 		}
 	}
 
@@ -998,6 +998,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 					 int idx = EffectIndex[rand() % 11];
 					for (auto& paticle : m_pBloodBillboard[idx]) {
 						if (!paticle->active) {
+							paticle->m_BillMesh->UpdataVertexPosition(UIRect(2.0* enemy.first ->m_pOwner->m_MonsterScale, -2.0 * enemy.first->m_pOwner->m_MonsterScale, -2.0 * enemy.first->m_pOwner->m_MonsterScale, 2.0 * enemy.first->m_pOwner->m_MonsterScale), 0.0f);
 							paticle->active = true;
 							//paticle->m_ownerObject = enemy.first->m_pOwner;
 							paticle->m_CrashObject = &enemy.first->m_Bodys[i];
@@ -1006,7 +1007,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 					}
 				}
 				enemy.first->m_pOwner->m_bHitted = true;
-				enemy.first->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage();
+				enemy.first->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage() / enemy.first->m_pOwner->m_MonsterScale;
 				if (enemy.first->m_pOwner->m_HP<= 0) {
 					m_RemoveObjects.push_back(enemy.first);
 					++KillCount;
@@ -1027,6 +1028,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 					int idx = EffectIndex[rand() % 11];
 					for (auto& paticle : m_pBloodBillboard[idx]) {
 						if (!paticle->active) {
+							paticle->m_BillMesh->UpdataVertexPosition(UIRect(2.0 * enemy.first->m_pOwner->m_MonsterScale, -2.0 * enemy.first->m_pOwner->m_MonsterScale, -2.0 * enemy.first->m_pOwner->m_MonsterScale, 2.0 * enemy.first->m_pOwner->m_MonsterScale), 0.0f);
 							paticle->active = true;
 							paticle->m_CrashObject = &enemy.first->m_legs[i];
 							break;
@@ -1034,7 +1036,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 					}
 				}
 				enemy.first->m_pOwner->m_bHitted = true;
-				enemy.first->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage();
+				enemy.first->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage()/ enemy.first->m_pOwner->m_MonsterScale;
 				if (enemy.first->m_pOwner->m_HP <= 0) {
 					m_RemoveObjects.push_back(enemy.first);
 					++KillCount;
