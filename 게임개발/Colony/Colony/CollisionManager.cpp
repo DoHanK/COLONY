@@ -153,6 +153,31 @@ void CollisionManager::EnrollItemIntoBox( XMFLOAT3 center, XMFLOAT3 extend, XMFL
 	
 }
 
+void CollisionManager::EnrollHierarchicalStaticGameObject(GameObject* pOwner)
+{
+	vector<GameObject*> Frameboxs;
+	pOwner->FindAllFrame(Frameboxs);
+
+
+	for (auto Frame : Frameboxs) {
+		if (Frame->m_pMesh) {
+			
+			XMFLOAT3 extend(Frame->m_pMesh->GetAABBExtend());
+			//extend.x =1.2f;
+			BOBBox* pBox = new BOBBox(Frame->m_pMesh->GetAABBCenter(), extend, Frame);
+
+				pBox->UpdateCollision();
+				pBox->m_boundingbox = pBox->m_Transformboudingbox;
+				m_StaticObjects.push_back(pBox);
+				m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_Transformboudingbox);
+			
+
+		}
+
+	}
+
+}
+
 //±¸ µî·Ï
 void CollisionManager::EnrollObjectIntoSphere(bool isAccel, XMFLOAT3 center, float radius, GameObject* pOwner)
 {
