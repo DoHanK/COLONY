@@ -308,7 +308,10 @@ protected:
 	//Àû Á×ÀÎ¼ö
 	int m_KillCount = 0;
 
-
+	//Sound
+	IXAudio2SourceVoice* PlaySceneBGM = nullptr;
+	IXAudio2SourceVoice* StepSound = nullptr;
+	IXAudio2SourceVoice* RifleSound = nullptr;
 
 	// MultiThread 
 	std::vector<QuadTree*> m_Quadlist;
@@ -324,6 +327,7 @@ public:
 
 	void ThreadWorker(int threadnum);
 	volatile int readycount = 0;
+
 };
 
 

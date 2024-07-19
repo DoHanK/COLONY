@@ -61,12 +61,8 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	//pUImanager->CreateUISpriteNormalRect(0, FRAME_BUFFER_HEIGHT/2, 0, FRAME_BUFFER_WIDTH/2, pResourceManager->BringTexture("Model/Textures/RobbyTexture/PrimaryTexture.dds", UI_TEXTURE, true),
 	//	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, &UIControlHelper::TestFunc, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
 
-	/*SoundManager* soundManager = new SoundManager();
-	soundManager->Intialize();
-	IXAudio2SourceVoice* testSound=soundManager->AddSound("Sound/02. a little pain.wav");
-	testSound->Start(0)*/;
 	m_pSoundManager = pSoundManager;
-	IXAudio2SourceVoice* LobbyBGM = m_pSoundManager->AddSound("Sound/LobbySceneBGM.wav");
+	IXAudio2SourceVoice* LobbyBGM = m_pSoundManager->AddSound("Sound/LobbySceneBGM.wav",true);
 	LobbyBGM->Start(0);
 }
 
@@ -743,6 +739,15 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pShotgunEffect->doOnce = true;
 	m_pShotgunEffect->AddRef();
 	
+	//Sound
+	m_pSoundManager = pSoundManager;
+	PlaySceneBGM= m_pSoundManager->AddSound("Sound/PlaySceneBGM.wav",true);
+	PlaySceneBGM->SetVolume(0.3);
+	PlaySceneBGM->Start(0);
+	StepSound = m_pSoundManager->AddSound("Sound/1.wav", true);
+	StepSound -> SetVolume(0.5);
+	RifleSound = m_pSoundManager->AddSound("Sound/RifleSound.wav", false);
+	RifleSound->SetVolume(0.5);
 
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
@@ -754,14 +759,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal)
 {
-
 	float random01 = static_cast<double>(rand()) / RAND_MAX; // 0.0부터 1.0 사이의 랜덤 값
-
 	// 범위를 조절하여 원하는 범위 내의 랜덤 값 생성
 	float randomInRange = minVal + random01 * (maxVal - minVal);
 
 	return randomInRange;
-
 }
 
 void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
@@ -1291,10 +1293,10 @@ void GamePlayScene::PlayerControlInput()
 		DWORD dwPlayerState = STATE_IDLE;
 
 		//Move
-		if (pKeysBuffer[W] & 0xF0)
+		if (pKeysBuffer[W] & 0xF0) {
 			dwDirection |= DIR_FORWARD;
-		
-			
+			//StepSound->Start(0);
+		}
 		if (m_pPlayer->m_WeaponState == RIGHT_HAND) {
 			if (pKeysBuffer[S] & 0xF0)
 				dwDirection |= DIR_BACKWARD;
@@ -1302,12 +1304,13 @@ void GamePlayScene::PlayerControlInput()
 				dwDirection |= DIR_LEFT;
 			if (pKeysBuffer[D] & 0xF0)
 				dwDirection |= DIR_RIGHT;
+			//StepSound->Start(0);
 		}
 		//하나라도 안눌려있으면 0
 		if (!((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) || (dwDirection & DIR_LEFT) || (dwDirection & DIR_RIGHT))) {
 			m_pPlayer->m_xmf3Velocity.x = 0.0f;
 			m_pPlayer->m_xmf3Velocity.z = 0.0f;
-				
+			//StepSound->Stop();
 		}
 		//W S A D 키입력 검사
 		//RUN
@@ -1396,7 +1399,7 @@ void GamePlayScene::PlayerControlInput()
 			static int SignCount = 0;
 
 			if (pKeysBuffer[L_MOUSE] & 0xF0) {
-				
+				//RifleSound->Start(0);
 				for (auto& b : bulletcasings) {
 					if (b->m_bActive == false) {
 						b->m_bActive = true;
@@ -1441,6 +1444,7 @@ void GamePlayScene::PlayerControlInput()
 				m_bisCameraShaking = true;
 			}
 			else {
+
 				m_bisCameraShaking = false;
 				m_pCamera->m_bOnceShaking = true;
 				m_pCamera->m_recoiVector.x = 0.0f;

@@ -76,7 +76,7 @@ bool SoundManager::LoadWaveFile(const char* filename, WAVEFORMATEX& wfx, BYTE** 
     return true;
 }
 
-IXAudio2SourceVoice* SoundManager::AddSound(const char* filename)
+IXAudio2SourceVoice* SoundManager::AddSound(const char* filename,bool bLoop)
 {
     // WAVE 파일 로드
     WAVEFORMATEX wfx = { 0 };
@@ -107,6 +107,9 @@ IXAudio2SourceVoice* SoundManager::AddSound(const char* filename)
     buffer.AudioBytes = dataBufferSize;
     buffer.pAudioData = pDataBuffer;
     buffer.Flags = XAUDIO2_END_OF_STREAM;
+    if (bLoop) {
+        buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
+    }
 
     hr = pSourceVoice->SubmitSourceBuffer(&buffer);
     if (FAILED(hr)) {
@@ -130,13 +133,6 @@ void SoundManager::DestroySounds()
         if (sourceVoice)
             sourceVoice->Stop();
     }
-
-    //for (auto& buffer : m_buffers) {
-    //    if(buffer)
-    //    delete[] buffer;
-    //}
-
-    //pMasterVoice->DestroyVoice();
-    //pXAudio2->Release();
 }
+
 

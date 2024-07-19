@@ -14,8 +14,9 @@ public:
 	~SoundManager();
 	void Intialize();
 	bool LoadWaveFile(const char* filename, WAVEFORMATEX& wfx, BYTE** data, DWORD& dataSize);
-	IXAudio2SourceVoice* AddSound(const char* filename);
+	IXAudio2SourceVoice* AddSound(const char* filename, bool bLoop);
 	void DestroySounds();
+	//void NonLoopRestart();
 
 	IXAudio2* pXAudio2;
 	IXAudio2MasteringVoice* pMasterVoice = nullptr;
