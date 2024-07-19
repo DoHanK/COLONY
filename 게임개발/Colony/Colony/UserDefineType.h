@@ -1,5 +1,8 @@
 #pragma once
 
+enum ScenePlace {
+	MainPlace, SubPlace
+};
 /// AI
 //GoalState Á¤ÀÇ
 enum AIBehaviorState {

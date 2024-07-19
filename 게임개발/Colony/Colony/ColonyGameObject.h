@@ -404,6 +404,8 @@ public:
 
 	//크기 조절
 	float						m_MonsterScale = 1.0f;
+	int							m_PlayerInPlace;
+
 
 	void SetMesh(BasicMesh* pMesh);
 	void SetBoundingMesh(DynamicMesh* pMesh);

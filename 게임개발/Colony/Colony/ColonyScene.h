@@ -162,6 +162,10 @@ public:
 	void AnimateObjectsWithMultithread(float fTimeElapsed);
 	virtual void RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12GraphicsCommandList* pd3dSubCommandList[], int ableThread, Camera* pCamera = NULL);
 
+	XMFLOAT3 GetMainScene() { return XMFLOAT3(56.160427, 0.099998, -4.593836); }
+
+	XMFLOAT3 GetSubScene() { return XMFLOAT3(72.728699 ,9.658748 , -3.842552); }
+
 protected:
 
 	float								m_fElapsedTime = 0.0f;
@@ -187,6 +191,8 @@ protected:
 	int									m_nGameObjects = 0;
 	SkyBox*								m_pskybox = NULL;
 	GameObject*							m_pScenePlane = NULL;
+	GameObject*							m_pSceneSpaceShip = NULL;
+	GameObject*							m_pSpaceShipMap = NULL;
 	vector<GameObject*>					m_pGameObject;
 	vector<GameObject*>					m_pSceneObject;
 

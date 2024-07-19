@@ -372,6 +372,7 @@ class CollisionManager{
 public:
 
 	std::vector<Collision*> m_StaticObjects;
+	std::vector<Collision*> m_SubStaticObjects;
 	std::vector<Collision*> m_ItemBoxes;
 	//Accel Obeject       Dynamic Size  -> list 
 	std::list<Collision*> m_AccelationObjects;
@@ -389,7 +390,9 @@ public:
 
 	//Rendering
 	std::vector<BoundingBoxMesh*> m_BoundingBoxMeshes;
+	std::vector<BoundingBoxMesh*> m_SubBoundingBoxMeshes;
 	int boundingcur = 0 ;
+	int subboundingcur = 0 ;
 	CapsuleMesh* m_pCapsuleMesh=NULL;
 	ShphereMesh* m_psphere=NULL;
 
@@ -440,6 +443,7 @@ public:
 
 	//충돌 처리 함수들
 	bool CollisionPlayerToStaticObeject();
+	bool CollisionPlayerToSubSceneStaticObeject();
 	bool CollisionPlayerToItemBox();
 	
 	void RenderEnemyBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, GameObject* pObject);

@@ -63,7 +63,7 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	m_pSoundManager = pSoundManager;
 	IXAudio2SourceVoice* LobbyBGM = m_pSoundManager->AddSound("Sound/LobbySceneBGM.wav",true);
-	LobbyBGM->Start(0);
+	//LobbyBGM->Start(0);
 }
 
 
@@ -165,6 +165,20 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				}
 				else {
 					particleObject->m_bActive = true;
+				}
+			}
+			break;
+		case 'O':
+			if (m_pPlayer) {
+
+				if (m_pPlayer->m_PlayerInPlace == MainPlace) {
+					m_pPlayer->m_PlayerInPlace = SubPlace;
+					m_pPlayer->SetPosition(GetSubScene());
+
+				}
+				else {
+					m_pPlayer->m_PlayerInPlace = MainPlace;
+					m_pPlayer->SetPosition(GetMainScene());
 				}
 			}
 			break;
@@ -309,6 +323,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 	::ReadUnityBinaryString(pFile, pstrToken, &nStrLength); //"<GameObjects>:"
 	nReads = (UINT)::fread(&m_nGameObjects, sizeof(int), 1, pFile); //루트 게임 오브젝트 수 
 
+
 	m_pSceneObject.reserve(m_nGameObjects);
 
 	GameObject* pGameObject = NULL;
@@ -393,6 +408,11 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 					pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, NULL, pInFile, m_pPlaneShader, TexFileName, pResourceManager);
 					m_pScenePlane = pGameObject;
 				}
+				else if (strstr(pstrGameObjectName, "SF_Free-Fighter") != NULL) {
+					pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, NULL, pInFile, NULL, TexFileName, pResourceManager);
+					m_pSceneSpaceShip = pGameObject;
+
+				}
 				else {
 					pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, NULL, pInFile, NULL, TexFileName, pResourceManager);
 				}
@@ -408,9 +428,17 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 			}
 
+	
+			 if (strstr(pstrGameObjectName, "SF_Free-Fighter") != NULL) {
+
+				m_pSceneSpaceShip = pGameObject;
+
+			}
+			else {
+				m_pSceneObject.push_back(pGameObject);
+				cur_object += 1;
+			}
 			
-			m_pSceneObject.push_back(pGameObject);
-			cur_object += 1;
 			
 		//}
 
@@ -460,16 +488,38 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pDepthShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
 
 	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/MainScene.bin","Model/Textures/scene/", pResourceManager,"Model/MainSceneMeshes/");
-	//LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/SpaceStationScene.bin", "Model/Textures/scene/", pResourceManager, "Model/SpaceStationMeshes/");
 
 	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pResourceManager);
+
+
+	m_pPlayer->m_PlayerInPlace = MainPlace;    //SpaceShip안에서 시작
 	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
 	m_pCamera->SetPlayer(m_pPlayer);
+
+
+
+
+
 
 	m_pCollisionManager = new CollisionManager(pd3dDevice, pd3dCommandList);
 	m_pCollisionManager->LoadCollisionBoxInfo(pd3dDevice, pd3dCommandList, "boundinginfo.bin");
 	m_pCollisionManager->EnrollPlayerIntoCapsule(XMFLOAT3(EPSILON, 0.0, EPSILON), 0.3, 1.3, 0.3, m_pPlayer);
 	m_pCollisionManager->EnrollBulletDir(m_pCamera);
+
+
+	m_pSpaceShipMap = new GameObject();
+	m_pSpaceShipMap->SetPosition(m_pSceneSpaceShip->m_xmf4x4World._41,
+									m_pSceneSpaceShip->m_xmf4x4World._42, 
+									m_pSceneSpaceShip->m_xmf4x4World._43);
+
+	m_pSpaceShipMap->SetScale(1.5f, 2.0f, 1.5f);
+
+	m_pSpaceShipMap->Rotate(&XMFLOAT3(0, 1, 0), 90.f);
+	m_pSpaceShipMap->SetChild(pResourceManager->BringModelInfo("Model/SpaceShip.bin", "Model/Textures/SpaceShipScene/")->m_pModelRootObject,true);
+	m_pSpaceShipMap->UpdateTransform(NULL);
+	m_pCollisionManager->EnrollHierarchicalStaticGameObject(m_pSpaceShipMap);
+
+
 	for (auto& GO : m_pSceneObject) {
 		GO->m_BoundingBox;
 		if ((strstr(GO->m_pstrFrameName, "SM_Mountain_A") == NULL
@@ -743,7 +793,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSoundManager = pSoundManager;
 	PlaySceneBGM= m_pSoundManager->AddSound("Sound/PlaySceneBGM.wav",true);
 	PlaySceneBGM->SetVolume(0.3);
-	PlaySceneBGM->Start(0);
+	//PlaySceneBGM->Start(0);
 	StepSound = m_pSoundManager->AddSound("Sound/1.wav", true);
 	StepSound -> SetVolume(0.5);
 	RifleSound = m_pSoundManager->AddSound("Sound/RifleSound.wav", false);
@@ -755,7 +805,6 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	BuildDepthTexture(pd3dDevice, pd3dCommandList);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
-
 
 float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal)
 {
@@ -769,106 +818,182 @@ float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal)
 void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 {
 
-
-
-
 	if (m_bisCameraShaking) {
 		//intensity, duration
 		m_pCamera->UpdateCameraShake(5.0f, 0.3f, fTimeElapsed, m_pPlayer->m_gunType);
 	}
 
-
-
 	m_fElapsedTime = fTimeElapsed;
 	m_pPlayer->m_ReloadTime += fTimeElapsed;
+
 	PlayerControlInput();
-	m_pCollisionManager->CollisionPlayerToStaticObeject();
-	m_pCollisionManager->CollisionPlayerToItemBox();
-	m_pCollisionManager->CollisionPlayerToEnemy();
 
-	m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
+	if (m_pPlayer->m_PlayerInPlace == SubPlace) {
 
-	readycount = MAX_THREAD_NUM;
-
-	for (int i = 0; i < MAX_THREAD_NUM; ++i) {
-		m_Joblist[i].push({ ANIMATION, -1 });
-	}
+		m_pCollisionManager->CollisionPlayerToSubSceneStaticObeject();
 
 
 
 
-
-
-
-	m_RedZoneHurt += fTimeElapsed;
-	if (m_RedZoneHurt > 5.0f) {
-		m_RedZoneHurt = 0.0f;
-		if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
-			m_pPlayer->m_HP -= 1;
-			m_isHurt = true;
-		}
-	}
-
-
-
-	if (m_isHurt) {
-		m_hurtAnimation += fTimeElapsed;
-		if (m_hurtAnimation > 0.2f) {
-			m_isHurt = false;
-			m_hurtAnimation = 0.0f;
-		}
-	}
-
-
-	m_pPlayer->Animate(fTimeElapsed);
-
-	for (auto& GO : m_pBillObjects) {
-		if (GO->doAnimate) {
-			GO->Animate(fTimeElapsed);
-		}
-	}
-
-	m_pBillObject->Animate(fTimeElapsed);
-
-	if (m_pRedZoneEffect->doAnimate) {
-		m_pRedZoneEffect->Animate(fTimeElapsed);
-	}
-
-	if (m_ItemBoxExplosion->doAnimate) {
-		m_ItemBoxExplosion->Animate(fTimeElapsed);
-	}
-
-	for (int i = 0; i < 29; ++i) {
-		for (auto& B : m_pBloodBillboard[i]) {
-			if (B->doAnimate) {
-				B->Animate(fTimeElapsed);
+		m_RedZoneHurt += fTimeElapsed;
+		if (m_RedZoneHurt > 5.0f) {
+			m_RedZoneHurt = 0.0f;
+			if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
+				m_pPlayer->m_HP -= 1;
+				m_isHurt = true;
 			}
 		}
-	}
-	//crashUIAnimation
-	if (m_bcrashOk) {
-		m_crashAnimation += fTimeElapsed;
-		if (m_crashAnimation > 0.3f) {
-			m_bcrashOk = false;
-			m_crashAnimation = 0.0f;
+
+
+
+		if (m_isHurt) {
+			m_hurtAnimation += fTimeElapsed;
+			if (m_hurtAnimation > 0.2f) {
+				m_isHurt = false;
+				m_hurtAnimation = 0.0f;
+			}
 		}
+
+
+		m_pPlayer->Animate(fTimeElapsed);
+
+		for (auto& GO : m_pBillObjects) {
+			if (GO->doAnimate) {
+				GO->Animate(fTimeElapsed);
+			}
+		}
+
+		m_pBillObject->Animate(fTimeElapsed);
+
+		if (m_pRedZoneEffect->doAnimate) {
+			m_pRedZoneEffect->Animate(fTimeElapsed);
+		}
+
+		if (m_ItemBoxExplosion->doAnimate) {
+			m_ItemBoxExplosion->Animate(fTimeElapsed);
+		}
+
+		for (int i = 0; i < 29; ++i) {
+			for (auto& B : m_pBloodBillboard[i]) {
+				if (B->doAnimate) {
+					B->Animate(fTimeElapsed);
+				}
+			}
+		}
+		//crashUIAnimation
+		if (m_bcrashOk) {
+			m_crashAnimation += fTimeElapsed;
+			if (m_crashAnimation > 0.3f) {
+				m_bcrashOk = false;
+				m_crashAnimation = 0.0f;
+			}
+		}
+		// 총알 
+		for (auto& b : bulletcasings) {
+			if (b->m_bActive)
+				b->Update(fTimeElapsed);
+		}
+
+		m_pCollisionManager->CollisionBulletToObject();
+
+
+
+		m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
+
 	}
-	// 총알 
-	for (auto& b : bulletcasings) {
-		if (b->m_bActive)
-			b->Update(fTimeElapsed);
+	else if (m_pPlayer->m_PlayerInPlace == MainPlace) {
+
+
+		m_pCollisionManager->CollisionPlayerToStaticObeject();
+		m_pCollisionManager->CollisionPlayerToItemBox();
+		m_pCollisionManager->CollisionPlayerToEnemy();
+
+		m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
+
+		readycount = MAX_THREAD_NUM;
+
+		for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+			m_Joblist[i].push({ ANIMATION, -1 });
+		}
+
+
+
+
+
+
+
+		m_RedZoneHurt += fTimeElapsed;
+		if (m_RedZoneHurt > 5.0f) {
+			m_RedZoneHurt = 0.0f;
+			if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
+				m_pPlayer->m_HP -= 1;
+				m_isHurt = true;
+			}
+		}
+
+
+
+		if (m_isHurt) {
+			m_hurtAnimation += fTimeElapsed;
+			if (m_hurtAnimation > 0.2f) {
+				m_isHurt = false;
+				m_hurtAnimation = 0.0f;
+			}
+		}
+
+
+		m_pPlayer->Animate(fTimeElapsed);
+
+		for (auto& GO : m_pBillObjects) {
+			if (GO->doAnimate) {
+				GO->Animate(fTimeElapsed);
+			}
+		}
+
+		m_pBillObject->Animate(fTimeElapsed);
+
+		if (m_pRedZoneEffect->doAnimate) {
+			m_pRedZoneEffect->Animate(fTimeElapsed);
+		}
+
+		if (m_ItemBoxExplosion->doAnimate) {
+			m_ItemBoxExplosion->Animate(fTimeElapsed);
+		}
+
+		for (int i = 0; i < 29; ++i) {
+			for (auto& B : m_pBloodBillboard[i]) {
+				if (B->doAnimate) {
+					B->Animate(fTimeElapsed);
+				}
+			}
+		}
+		//crashUIAnimation
+		if (m_bcrashOk) {
+			m_crashAnimation += fTimeElapsed;
+			if (m_crashAnimation > 0.3f) {
+				m_bcrashOk = false;
+				m_crashAnimation = 0.0f;
+			}
+		}
+		// 총알 
+		for (auto& b : bulletcasings) {
+			if (b->m_bActive)
+				b->Update(fTimeElapsed);
+		}
+
+		m_pCollisionManager->CollisionBulletToObject();
+
+
+
+		m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
+
+
+
+
+
+		while (readycount != 0);
+
 	}
-
-	m_pCollisionManager->CollisionBulletToObject();
-
-
-
-	m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
-
-
-
-	while (readycount != 0);
-
 
 
 
@@ -899,7 +1024,7 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 		//	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
 		//}
 		
-
+		DebugValue::PrintVector3(m_pPlayer->GetPosition());
 
 
 		//카메라 초기화
@@ -942,9 +1067,24 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 		}
 
+
+	
 		m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
 		m_pPlayer->Render(pd3dCommandList);
 
+
+		if (m_pPlayer->m_PlayerInPlace == SubPlace) {
+
+
+			m_pSpaceShipMap->UpdateTransform(NULL);
+			m_pSpaceShipMap->Render(pd3dCommandList);
+
+
+		}
+		else if (m_pPlayer->m_PlayerInPlace == MainPlace) {
+
+			m_pSceneSpaceShip->Render(pd3dCommandList);
+		}
 
 
 		if (m_bBoundingRender) BoudingRendering(pd3dCommandList);
@@ -1279,6 +1419,9 @@ void GamePlayScene::ReleaseObjects()
 	if (m_ItemBoxExplosion)m_ItemBoxExplosion->Release(); 
 
 	if (m_pShotgunEffect) m_pShotgunEffect->Release();
+
+	if (m_pSpaceShipMap)m_pSpaceShipMap->Release();
+	if (m_pSceneSpaceShip)m_pSceneSpaceShip->Release();
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -1392,7 +1535,6 @@ void GamePlayScene::PlayerControlInput()
 			
 		}
 		//총 쏘기
-
 		if (m_pPlayer->GetShootingCoolTime() < m_pPlayer->m_ReloadTime && m_pPlayer->m_WeaponState == RIGHT_HAND) {
 
 
@@ -1437,8 +1579,11 @@ void GamePlayScene::PlayerControlInput()
 
 
 				dwPlayerState |= STATE_SHOOT;
-				m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard, m_KillCount);
-				m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion);
+				if (m_pPlayer->m_PlayerInPlace == MainPlace) {
+					m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard, m_KillCount);
+					m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion);
+
+				}
 				m_pBillObject->active = true;
 				m_pPlayer->m_ReloadTime = 0;
 				m_bisCameraShaking = true;
@@ -1540,6 +1685,7 @@ void GamePlayScene::PlayerControlInput()
 
 	if (m_pPlayer)
 		m_pPlayer->UpdatePosition(m_fElapsedTime);
+
 }
 
 void GamePlayScene::AnimateObjects(float fTimeElapsed)
@@ -1654,6 +1800,7 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 
+	
 	for (auto& GO : m_pGameObject) {
 
 		if (GO->m_bActive) {
@@ -1688,6 +1835,9 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 
 		}
 	}
+
+
+
 
 	if (true) {
 		xmf4x4World = Matrix4x4::Identity();
@@ -1726,6 +1876,7 @@ void GamePlayScene::BoudingRendering(ID3D12GraphicsCommandList* pd3dCommandList)
 		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &xmfloat3, 36);
 		m_pBoundigShader->OnPrepareRender(pd3dCommandList);
+
 		m_pCollisionManager->RenderBoundingBox(pd3dCommandList);
 		
 	}
@@ -2136,6 +2287,9 @@ void GamePlayScene::ReleaseUploadBuffers()
 		break;// 어쳐피 공유 인스턴싱이기 때문에 한번만. 
 	}
 
+	if (m_pSpaceShipMap)m_pSpaceShipMap->ReleaseUploadBuffers();
+
+	if (m_pSceneSpaceShip)m_pSceneSpaceShip->ReleaseUploadBuffers();
 
 }
 

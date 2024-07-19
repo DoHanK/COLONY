@@ -109,6 +109,7 @@ public:
 	float m_ReloadTime = 0;
 
 
+
 	// Weapon
 	GameObject*	m_UMP5Object = NULL;
 	GameObject* m_shotgunObject = NULL;
