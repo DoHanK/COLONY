@@ -62,8 +62,12 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	//	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, &UIControlHelper::TestFunc, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
 
 	/*SoundManager* soundManager = new SoundManager();
-	IXAudio2SourceVoice* testSound=soundManager->AddSound("sample1.wav");
-	testSound->Start(0);*/
+	soundManager->Intialize();
+	IXAudio2SourceVoice* testSound=soundManager->AddSound("Sound/02. a little pain.wav");
+	testSound->Start(0)*/;
+	m_pSoundManager = pSoundManager;
+	IXAudio2SourceVoice* LobbyBGM = m_pSoundManager->AddSound("Sound/LobbySceneBGM.wav");
+	LobbyBGM->Start(0);
 }
 
 
@@ -647,7 +651,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pParticleShader->AddRef();
 
-	for (int i = 0; i <400; i < i++) {
+	for (int i = 0; i <250; i < i++) {
 		ParticleObject* pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/Raindrop2.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
 			XMFLOAT3(GetRandomFloatInRange(-250.f,250.f), 0.0f, GetRandomFloatInRange(-250.f, 250.f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(8.0f, 12.0f), GetRandomFloatInRange(5.0f, 10.0f), 0.0f, 0.0f, 100);
 		m_pParticleObjects.push_back(pParticleObject);

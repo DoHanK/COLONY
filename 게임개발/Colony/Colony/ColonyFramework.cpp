@@ -302,6 +302,7 @@ bool ColonyFramework::MakeGameObjects()
 	m_pUIManager = new UIManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pd3dGraphicsRootSignature);
 	m_pUIManager->m_pfunctionQueue = &m_functionQueue;
 	m_pSoundManager = new SoundManager();
+	m_pSoundManager->Intialize();
 
 	//씬을 구성하는 매니져들
 	m_pSceneManager = new SceneManager(GetDevice(),m_pResourceManager, m_pUIManager, m_pSoundManager);
@@ -338,7 +339,9 @@ void ColonyFramework::DestroyGameObjects()
 		delete m_pUIManager;
 	}
 
-
+	if (m_pSoundManager) {
+		delete m_pSoundManager;
+	}
 
 
 	//루트 시그너쳐 릴리즈
@@ -469,8 +472,9 @@ LRESULT ColonyFramework::CatchInputMessaging(HWND hWnd, UINT nMessageID, WPARAM 
 		break;
 	}
 	case WM_LBUTTONDOWN:
-		if (m_pUIManager)
+		if (m_pUIManager) {
 			m_pUIManager->ClickUI(LOWORD(lParam), HIWORD(lParam));
+		}
 		m_pSceneManager->m_SceneStack.top()->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 		break;
 	case WM_RBUTTONDOWN:

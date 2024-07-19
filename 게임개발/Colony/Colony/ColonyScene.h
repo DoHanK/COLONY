@@ -96,6 +96,8 @@ public:
 
 	virtual void RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12GraphicsCommandList* pd3dSubCommandList[], int ableThread, Camera* pCamera = NULL) {};
 	virtual void AnimateObjectsWithMultithread(float fTimeElapsed) {};
+
+	SoundManager* m_pSoundManager = NULL;
 };
 
 class GameLobbyScene :public BasicScene {

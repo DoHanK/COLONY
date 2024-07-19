@@ -7,6 +7,18 @@ SoundManager::SoundManager()
 
 SoundManager::~SoundManager()
 {
+    for (auto& sourceVoice : m_SourceVoices) {
+        if (sourceVoice)
+            sourceVoice->DestroyVoice();
+    }
+
+    for (auto& buffer : m_buffers) {
+        if(buffer)
+        delete[] buffer;
+    }
+
+    pMasterVoice->DestroyVoice();
+    pXAudio2->Release();
 }
 
 void SoundManager::Intialize()
@@ -14,6 +26,8 @@ void SoundManager::Intialize()
     //initialize
     XAudio2Create(&pXAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
     pXAudio2->CreateMasteringVoice(&pMasterVoice);
+    m_SourceVoices.reserve(200);
+    m_buffers.reserve(200);
 }
 
 
@@ -110,15 +124,19 @@ IXAudio2SourceVoice* SoundManager::AddSound(const char* filename)
     return pSourceVoice;
 }
 
-void SoundManager::Release()
+void SoundManager::DestroySounds()
 {
     for (auto& sourceVoice : m_SourceVoices) {
-        sourceVoice->DestroyVoice();
+        if (sourceVoice)
+            sourceVoice->Stop();
     }
-    for (auto& buffer : m_buffers) {
-        delete[] buffer;
-    }
-    pMasterVoice->DestroyVoice();
-    pXAudio2->Release();
+
+    //for (auto& buffer : m_buffers) {
+    //    if(buffer)
+    //    delete[] buffer;
+    //}
+
+    //pMasterVoice->DestroyVoice();
+    //pXAudio2->Release();
 }
 

@@ -15,9 +15,9 @@ public:
 	void Intialize();
 	bool LoadWaveFile(const char* filename, WAVEFORMATEX& wfx, BYTE** data, DWORD& dataSize);
 	IXAudio2SourceVoice* AddSound(const char* filename);
-	void Release();
+	void DestroySounds();
 
-	IXAudio2* pXAudio2 = nullptr;
+	IXAudio2* pXAudio2;
 	IXAudio2MasteringVoice* pMasterVoice = nullptr;
 	vector< IXAudio2SourceVoice*> m_SourceVoices;
 	vector<BYTE*> m_buffers;
