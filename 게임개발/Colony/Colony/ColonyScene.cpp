@@ -204,9 +204,6 @@ void GamePlayScene::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommand
 	m_pLights[2].m_xmf3Position.y += 2.f;
 	m_pLights[2].m_xmf3Direction = m_pPlayer->GetCamera()->m_xmf3Look;
 
-
-
-
 	//XMFLOAT3 dir = m_pPlayer->GetCamera()->m_xmf3Look;
 	//XMFLOAT3  against  = Vector3::ScalarProduct(m_pPlayer->GetCamera()->m_xmf3Look, -1, true);
 
@@ -792,7 +789,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//Sound
 	m_pSoundManager = pSoundManager;
 	PlaySceneBGM= m_pSoundManager->AddSound("Sound/PlaySceneBGM.wav",true);
-	PlaySceneBGM->SetVolume(0.3);
+	PlaySceneBGM->SetVolume(0.7);
 	//PlaySceneBGM->Start(0);
 	StepSound = m_pSoundManager->AddSound("Sound/1.wav", true);
 	StepSound -> SetVolume(0.5);
