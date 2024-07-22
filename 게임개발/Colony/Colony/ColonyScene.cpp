@@ -511,7 +511,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pEpBillboard->active = true;
 	pEpBillboard->SetRowNCol(1, 1);
 	pEpBillboard->m_OffsetPos = XMFLOAT3(0, 0.5, 2.5);
-	pEpBillboard->m_BillMesh->UpdataVertexPosition(UIRect(1.5, -1.5, -1.5, 1.5), 0.0f);
+	pEpBillboard->m_BillMesh->UpdataVertexPosition(UIRect(0.1, -1.5, -1.0, 1.0), 0.0f);
 	pEpBillboard->m_BillMesh->UpdateUvCoord(UIRect(0, 1, 1, 0));
 	pEpBillboard->SettedTimer = 3.0;
 	pEpBillboard->doOnce = true;
@@ -1404,7 +1404,7 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 
 	//UIInfo 
-	m_InFoUI = pUImanager->CreateUINonNormalRect(0.07+0.3, -0.07 + 0.3, -0.5, 0.5, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/FrontMoniter.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	m_InFoUI = pUImanager->CreateUINonNormalRect(0.03+0.77, -0.03 + 0.77, -0.25, 0.25, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/FrontMoniter.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/presskey.dds", UI_TEXTURE, true);
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/Alpha.dds", UI_TEXTURE, true);
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/gooutside.dds", UI_TEXTURE, true);
