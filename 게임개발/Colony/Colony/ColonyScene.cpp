@@ -169,18 +169,6 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			}
 			break;
 		case 'O':
-			if (m_pPlayer) {
-
-				if (m_pPlayer->m_PlayerInPlace == MainPlace) {
-					m_pPlayer->m_PlayerInPlace = SubPlace;
-					m_pPlayer->SetPosition(GetSubScene());
-
-				}
-				else {
-					m_pPlayer->m_PlayerInPlace = MainPlace;
-					m_pPlayer->SetPosition(GetMainScene());
-				}
-			}
 			break;
 
 		default:
@@ -489,7 +477,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pResourceManager);
 
 
-	m_pPlayer->m_PlayerInPlace = MainPlace;    //SpaceShip안에서 시작
+	m_pPlayer->m_PlayerInPlace = SubPlace;    //SpaceShip안에서 시작
+	m_pPlayer->SetPosition(GetSubScene());
 	m_pPlayer->SetCamera(((ThirdPersonCamera*)m_pCamera));
 	m_pCamera->SetPlayer(m_pPlayer);
 
@@ -503,18 +492,45 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pCollisionManager->EnrollPlayerIntoCapsule(XMFLOAT3(EPSILON, 0.0, EPSILON), 0.3, 1.3, 0.3, m_pPlayer);
 	m_pCollisionManager->EnrollBulletDir(m_pCamera);
 
-
+	//SubScene
 	m_pSpaceShipMap = new GameObject();
 	m_pSpaceShipMap->SetPosition(m_pSceneSpaceShip->m_xmf4x4World._41,
 									m_pSceneSpaceShip->m_xmf4x4World._42, 
 									m_pSceneSpaceShip->m_xmf4x4World._43);
-
 	m_pSpaceShipMap->SetScale(1.5f, 2.0f, 1.5f);
-
 	m_pSpaceShipMap->Rotate(&XMFLOAT3(0, 1, 0), 90.f);
 	m_pSpaceShipMap->SetChild(pResourceManager->BringModelInfo("Model/SpaceShip.bin", "Model/Textures/SpaceShipScene/")->m_pModelRootObject,true);
 	m_pSpaceShipMap->UpdateTransform(NULL);
 	m_pCollisionManager->EnrollHierarchicalStaticGameObject(m_pSpaceShipMap);
+
+
+	Billboard* pEpBillboard = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/mission.dds", BILLBOARD_TEXTURE, true), m_BillShader, NULL);
+
+	pEpBillboard->doAnimate = true;
+	pEpBillboard->active = true;
+	pEpBillboard->SetRowNCol(1, 1);
+	pEpBillboard->m_OffsetPos = XMFLOAT3(0, 0.5, 2.5);
+	pEpBillboard->m_BillMesh->UpdataVertexPosition(UIRect(1.5, -1.5, -1.5, 1.5), 0.0f);
+	pEpBillboard->m_BillMesh->UpdateUvCoord(UIRect(0, 1, 1, 0));
+	pEpBillboard->SettedTimer = 3.0;
+	pEpBillboard->doOnce = true;
+	pEpBillboard->AddRef();
+	m_InFoBillBoard.push_back(pEpBillboard);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	for (auto& GO : m_pSceneObject) {
@@ -671,7 +687,6 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		}
 	}
 
-
 	//billboard test
 	m_pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
 	pResourceManager->BringTexture("Model/Textures/Explosion03.dds", BILLBOARD_TEXTURE, true), m_BillShader,m_pPlayer->m_SelectWeapon.FindFrame("Export"));
@@ -685,10 +700,6 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillObject->doOnce = true;
 	m_pBillObject->AddRef();
 
-	
-
-
-
 	//// particle
 	m_pParticleShader = new ParticleShader();
 	m_pParticleShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -699,10 +710,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			XMFLOAT3(GetRandomFloatInRange(-250.f,250.f), 0.0f, GetRandomFloatInRange(-250.f, 250.f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(8.0f, 12.0f), GetRandomFloatInRange(5.0f, 10.0f), 0.0f, 0.0f, 100);
 		m_pParticleObjects.push_back(pParticleObject);
 	}
+	
 
-	
-	
-	
+
 	CLoadedModelInfo*  bullet = pResourceManager->BringModelInfo("Model/weapon/BulletCasing.bin", NULL);
 	bulletcasings.reserve(60); 
 	for (int i = 0; i < 60; i++) {
@@ -821,13 +831,66 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 	}
 
 	m_fElapsedTime = fTimeElapsed;
+
 	m_pPlayer->m_ReloadTime += fTimeElapsed;
 
 	PlayerControlInput();
 
+
 	if (m_pPlayer->m_PlayerInPlace == SubPlace) {
 
 		m_pCollisionManager->CollisionPlayerToSubSceneStaticObeject();
+
+
+		if (m_Progress == SceneProgress::GoMoniterNCheckMission) {
+			m_InFoBillBoard[0]->active = false;
+			m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/FrontMoniter.dds", UI_TEXTURE, true);
+		}
+		else if(m_Progress == SceneProgress::GoOutSide) {
+
+			m_InFoBillBoard[0]->active = false;
+			m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/gooutside.dds.dds", UI_TEXTURE, true);
+		}
+
+
+
+			if (XM3CalDis(XMFLOAT3(51.494446, 9.574662, 10.364511), m_pPlayer->GetPosition()) < 1.0f ||
+				XM3CalDis(XMFLOAT3(51.488869, 9.574662, 4.230450), m_pPlayer->GetPosition()) < 1.0f) {
+
+				static UCHAR pKeysBuffer[256];
+				m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/presskey.dds", UI_TEXTURE, true);
+				m_InFoBillBoard[0]->active = false;
+
+				if (GetKeyboardState(pKeysBuffer)) {
+
+					if (pKeysBuffer['O'] & 0xF0) {
+						m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/Alpha.dds", UI_TEXTURE, true);
+						m_InFoBillBoard[0]->active = true;
+						m_Progress = SceneProgress::GoOutSide;
+					}
+				}
+
+			}
+			else if (XM3CalDis(GetSubScene(), m_pPlayer->GetPosition()) < 1.0f && m_Progress == SceneProgress::GoOutSide) {
+
+				static UCHAR pKeysBuffer[256];
+				m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/presskey.dds", UI_TEXTURE, true);
+				m_InFoBillBoard[0]->active = false;
+
+				if (GetKeyboardState(pKeysBuffer)) {
+
+					if (pKeysBuffer['O'] & 0xF0) {
+						m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/Alpha.dds", UI_TEXTURE, true);
+						m_pPlayer->m_PlayerInPlace = MainPlace;
+						m_pPlayer->SetPosition(GetMainScene());
+					}
+				}
+
+			}
+
+	
+
+
 
 
 
@@ -862,29 +925,8 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 		m_pBillObject->Animate(fTimeElapsed);
 
-		if (m_pRedZoneEffect->doAnimate) {
-			m_pRedZoneEffect->Animate(fTimeElapsed);
-		}
+	
 
-		if (m_ItemBoxExplosion->doAnimate) {
-			m_ItemBoxExplosion->Animate(fTimeElapsed);
-		}
-
-		for (int i = 0; i < 29; ++i) {
-			for (auto& B : m_pBloodBillboard[i]) {
-				if (B->doAnimate) {
-					B->Animate(fTimeElapsed);
-				}
-			}
-		}
-		//crashUIAnimation
-		if (m_bcrashOk) {
-			m_crashAnimation += fTimeElapsed;
-			if (m_crashAnimation > 0.3f) {
-				m_bcrashOk = false;
-				m_crashAnimation = 0.0f;
-			}
-		}
 		// 총알 
 		for (auto& b : bulletcasings) {
 			if (b->m_bActive)
@@ -920,6 +962,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 
 		m_RedZoneHurt += fTimeElapsed;
+
 		if (m_RedZoneHurt > 5.0f) {
 			m_RedZoneHurt = 0.0f;
 			if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
@@ -1004,10 +1047,18 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 	if (true) {
 
 		float LifeTime = 20.0f;
-		TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
-		m_currentMinute = static_cast<int>(TotalPlayTime / LifeTime);
-		//쉐이더로 전체 시간 보내기
-		float totaltime = m_PlayTimeTimer.GetTotalTime();
+
+		if (m_pPlayer->m_PlayerInPlace == MainPlace) {
+
+		
+			TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
+			m_currentMinute = static_cast<int>(TotalPlayTime / LifeTime);
+			//쉐이더로 전체 시간 보내기
+			float totaltime = m_PlayTimeTimer.GetTotalTime();
+
+
+		}
+
 		//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &totaltime, 41);
 		float bredzone = m_bCrashRedZone;
 		// 플레이어 방사능에 있는지 여부...
@@ -1021,7 +1072,7 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 		//	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &velo, 39);
 		//}
 		
-		DebugValue::PrintVector3(m_pPlayer->GetPosition());
+
 
 
 		//카메라 초기화
@@ -1070,6 +1121,14 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 		m_pPlayer->Render(pd3dCommandList);
 
 
+		for (auto& InFoBill : m_InFoBillBoard) {
+
+			if (InFoBill->active)
+				InFoBill->CameraBillBoradNRendring(pd3dCommandList, m_pPlayer->GetCamera());
+
+
+		}
+
 		if (m_pPlayer->m_PlayerInPlace == SubPlace) {
 
 
@@ -1077,10 +1136,16 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 			m_pSpaceShipMap->Render(pd3dCommandList);
 
 
+
+			//m_InFoBillBoard[0]->CameraBillBoradNRendring(pd3dCommandList, m_pCamera);
+
+
 		}
 		else if (m_pPlayer->m_PlayerInPlace == MainPlace) {
 
 			m_pSceneSpaceShip->Render(pd3dCommandList);
+
+
 		}
 
 
@@ -1170,7 +1235,7 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 		if (m_RedZone) m_RedZone->Render(pd3dSubCommandList[MAX_THREAD_NUM -1]);
 	}
-}
+};
 
 void GamePlayScene::ThreadWorker(int threadnum)
 {
@@ -1332,11 +1397,17 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		numTexture.push_back(tempTexture);
 	}
 
+
+
+
 	m_pResourceManager->BringTexture("Model/Textures/UITexture/TimerBAR(T).dds", UI_TEXTURE, true);
 
 
-
-
+	//UIInfo 
+	m_InFoUI = pUImanager->CreateUINonNormalRect(0.07+0.3, -0.07 + 0.3, -0.5, 0.5, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/FrontMoniter.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/presskey.dds", UI_TEXTURE, true);
+	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/Alpha.dds", UI_TEXTURE, true);
+	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/gooutside.dds", UI_TEXTURE, true);
 	
 }
 
@@ -1419,6 +1490,14 @@ void GamePlayScene::ReleaseObjects()
 
 	if (m_pSpaceShipMap)m_pSpaceShipMap->Release();
 	if (m_pSceneSpaceShip)m_pSceneSpaceShip->Release();
+
+
+
+	for (auto& pbills : m_InFoBillBoard) {
+		pbills->Release();
+	}
+
+
 }
 
 void GamePlayScene::PlayerControlInput()

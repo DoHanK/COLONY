@@ -207,7 +207,7 @@ void Camera::ChangeMoveVector(XMFLOAT3& V)
 		xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
 		xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
 
-		XMFLOAT3 V = Vector3::TransformCoord(V, xmf4x4Rotate);
+		 V = Vector3::TransformCoord(V, xmf4x4Rotate);
 
 	}
 }

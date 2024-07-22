@@ -533,8 +533,10 @@ public:
 	GameObject* m_ownerObject;
 	void SetRowNCol(float row, float col) { m_rows = row; m_cols = col; }
 	virtual void Animate(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 	virtual void NoSetPositionRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
+
+	virtual void CameraBillBoradNRendring(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera );
 	void Update(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up);
 	void SetAddPosition(XMFLOAT3 xmf3AddPosition) {TickAddPosition = xmf3AddPosition;}
 	void SetOffsetPos(const XMFLOAT3& Pos) { m_OffsetPos = Pos; };

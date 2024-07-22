@@ -191,8 +191,7 @@ protected:
 	int									m_nGameObjects = 0;
 	SkyBox*								m_pskybox = NULL;
 	GameObject*							m_pScenePlane = NULL;
-	GameObject*							m_pSceneSpaceShip = NULL;
-	GameObject*							m_pSpaceShipMap = NULL;
+
 	vector<GameObject*>					m_pGameObject;
 	vector<GameObject*>					m_pSceneObject;
 
@@ -259,7 +258,8 @@ protected:
 	vector<Billboard*>					m_pBloodBillboard[29];
 	bool								test = false;
 	Billboard*							m_pRedZoneEffect;
-	Billboard* m_pShotgunEffect;
+	Billboard*							m_pShotgunEffect;
+
 
 
 	// Particle
@@ -276,6 +276,7 @@ protected:
 	vector<GameObject*>m_syrings;
 	vector<GameObject*>m_eyes;
 	Billboard* m_ItemBoxExplosion;
+
 
 	GameObject* itemBox = NULL;
 
@@ -319,10 +320,31 @@ protected:
 	IXAudio2SourceVoice* StepSound = nullptr;
 	IXAudio2SourceVoice* RifleSound = nullptr;
 
+
+
+	/// SubScene Object 
+	GameObject* m_pSceneSpaceShip = NULL;
+	GameObject* m_pSpaceShipMap = NULL;
+
+	//INFO BillBorad
+	vector<Billboard*>					m_InFoBillBoard;
+
+	UIInfo*								m_InFoUI;
+
+
+
+
+	int							m_Progress = 0;
+	enum SceneProgress {
+		GoMoniterNCheckMission,
+		GoOutSide
+	};
+
 	// MultiThread 
 	std::vector<QuadTree*> m_Quadlist;
 
 	int quadranderingidx = 0;
+
 
 public:
 	enum OP_TYPE { ANIMATION, RENDERING, END };
@@ -333,6 +355,10 @@ public:
 
 	void ThreadWorker(int threadnum);
 	volatile int readycount = 0;
+
+
+
+	
 
 };
 
