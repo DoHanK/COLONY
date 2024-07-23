@@ -1558,7 +1558,11 @@ void GamePlayScene::ReleaseObjects()
 		pbills->Release();
 	}
 
-
+	for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+		for (auto& pbills : m_DeadEneyEffect[i]) {
+			pbills->Release();
+		}
+	}
 }
 
 void GamePlayScene::PlayerControlInput()
