@@ -62,8 +62,8 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	//	pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", UI_MASK_TEXTURE, true), EffectInfo, &UIControlHelper::TestFunc, 1, (MASKUSE | TEXTUREUSE), GetType(),false);
 
 	m_pSoundManager = pSoundManager;
-	IXAudio2SourceVoice* LobbyBGM = m_pSoundManager->AddSound("Sound/LobbySceneBGM.wav",true);
-	//LobbyBGM->Start(0);
+	LPDIRECTSOUNDBUFFER LobbyBGM = m_pSoundManager->LoadWaveToBuffer("Sound/LobbySceneBGM.wav");
+	LobbyBGM->Play(0, 0, 0);
 }
 
 
@@ -162,9 +162,11 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			for (auto& particleObject : m_pParticleObjects) {
 				if (particleObject->m_bActive) {
 					particleObject->m_bActive = false;
+					RainBGM->Stop();
 				}
 				else {
 					particleObject->m_bActive = true;
+					RainBGM->Play(0, 0, DSBPLAY_LOOPING);
 				}
 			}
 			break;
@@ -732,6 +734,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	for (int i = 0; i <250; i < i++) {
 		ParticleObject* pParticleObject = new ParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager->BringTexture("Model/Textures/Raindrop2.dds", PARTICLE_TEXTURE, true), m_pParticleShader,
 			XMFLOAT3(GetRandomFloatInRange(-250.f,250.f), 0.0f, GetRandomFloatInRange(-250.f, 250.f)), 0, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), GetRandomFloatInRange(8.0f, 12.0f), GetRandomFloatInRange(5.0f, 10.0f), 0.0f, 0.0f, 100);
+		pParticleObject->m_bActive = false;
 		m_pParticleObjects.push_back(pParticleObject);
 	}
 	
@@ -823,13 +826,27 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 	//Sound
 	m_pSoundManager = pSoundManager;
-	PlaySceneBGM= m_pSoundManager->AddSound("Sound/PlaySceneBGM.wav",true);
-	PlaySceneBGM->SetVolume(0.7);
-	//PlaySceneBGM->Start(0);
-	StepSound = m_pSoundManager->AddSound("Sound/1.wav", true);
-	StepSound -> SetVolume(0.5);
-	RifleSound = m_pSoundManager->AddSound("Sound/RifleSound.wav", false);
-	RifleSound->SetVolume(0.5);
+	SpaceShipBGM = m_pSoundManager->LoadWaveToBuffer("Sound/SpaceShipBGM.wav");
+	SpaceShipBGM->SetVolume(0);//-10000 ~ 0(오리지널 데시벨)
+	PlaySceneBGM= m_pSoundManager->LoadWaveToBuffer("Sound/PlaySceneBGM.wav");
+	PlaySceneBGM->SetVolume(-10000); 
+	PlaySceneBGM->Play(0, 0, DSBPLAY_LOOPING);
+	RainBGM = m_pSoundManager->LoadWaveToBuffer("Sound/RainSound.wav");
+	RainBGM->SetVolume(-1000);
+	StepSound = m_pSoundManager->LoadWaveToBuffer("Sound/1.wav");
+	StepSound -> SetVolume(0);
+	SpiderHurt = m_pSoundManager->LoadWaveToBuffer("Sound/spiderHurt.wav");
+	SpiderHurt->SetVolume(-300);
+	JumpSound = m_pSoundManager->LoadWaveToBuffer("Sound/JumpSound.wav");
+	JumpSound->SetVolume(0);
+	RifleSound = m_pSoundManager->LoadWaveToBuffer("Sound/RifleSound.wav");
+	RifleSound->SetVolume(0);
+	ShotgunSound = m_pSoundManager->LoadWaveToBuffer("Sound/ShotgunSound.wav");
+	ShotgunSound->SetVolume(0);
+	MachineGunSound = m_pSoundManager->LoadWaveToBuffer("Sound/MachineGunEffect.wav");
+	MachineGunSound->SetVolume(0);
+	ReloadSound = m_pSoundManager->LoadWaveToBuffer("Sound/clipload1.wav");
+	ReloadSound->SetVolume(-8000);
 
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
@@ -1225,6 +1242,7 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 		for (auto& ParticleObject : m_pParticleObjects) {
 			if (ParticleObject->m_bActive) {
 				ParticleObject->Render(pd3dCommandList);
+				RainBGM->Play(0, 0, DSBPLAY_LOOPING);
 			}
 		}
 
@@ -1557,7 +1575,6 @@ void GamePlayScene::PlayerControlInput()
 		//Move
 		if (pKeysBuffer[W] & 0xF0) {
 			dwDirection |= DIR_FORWARD;
-			//StepSound->Start(0);
 		}
 		if (m_pPlayer->m_WeaponState == RIGHT_HAND) {
 			if (pKeysBuffer[S] & 0xF0)
@@ -1566,13 +1583,11 @@ void GamePlayScene::PlayerControlInput()
 				dwDirection |= DIR_LEFT;
 			if (pKeysBuffer[D] & 0xF0)
 				dwDirection |= DIR_RIGHT;
-			//StepSound->Start(0);
 		}
 		//하나라도 안눌려있으면 0
 		if (!((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) || (dwDirection & DIR_LEFT) || (dwDirection & DIR_RIGHT))) {
 			m_pPlayer->m_xmf3Velocity.x = 0.0f;
 			m_pPlayer->m_xmf3Velocity.z = 0.0f;
-			//StepSound->Stop();
 		}
 		//W S A D 키입력 검사
 		//RUN
@@ -1610,15 +1625,24 @@ void GamePlayScene::PlayerControlInput()
 		if (pKeysBuffer['1'] & 0xF0) {
 
 			m_pPlayer->ChangeRifle();
+			if (!m_pSoundManager->IsSoundBufferPlaying(ReloadSound)) {
+				m_pSoundManager->RestartSound(ReloadSound);
+			}
 		}
 		
 		if (pKeysBuffer['2'] & 0xF0) {
 
 			m_pPlayer->ChangeShotgun();
+			if (!m_pSoundManager->IsSoundBufferPlaying(ReloadSound)) {
+				m_pSoundManager->RestartSound(ReloadSound);
+			}
 		}
 		if (pKeysBuffer['3'] & 0xF0) {
 
 			m_pPlayer->Chagnemachinegun();
+			if (!m_pSoundManager->IsSoundBufferPlaying(ReloadSound)) {
+				m_pSoundManager->RestartSound(ReloadSound);
+			}
 		}
 	
 		//JUMP
@@ -1628,6 +1652,9 @@ void GamePlayScene::PlayerControlInput()
 			// 플레이어 상태
 			dwPlayerState |= STATE_JUMP;
 			m_pPlayer->isJump = true;
+			if (!m_pSoundManager->IsSoundBufferPlaying(JumpSound)) {
+				m_pSoundManager->RestartSound(JumpSound);
+			}
 		}
 		// 총알 리로드
 		if (pKeysBuffer[R] & 0xF0) {
@@ -1660,7 +1687,15 @@ void GamePlayScene::PlayerControlInput()
 			static int SignCount = 0;
 
 			if (pKeysBuffer[L_MOUSE] & 0xF0) {
-				//RifleSound->Start(0);
+				if (m_pPlayer->m_gunType == HAVE_RIFLE) {
+					m_pSoundManager->RestartSound(RifleSound);
+				}
+				else if (m_pPlayer->m_gunType == HAVE_SHOTGUN) {
+					m_pSoundManager->RestartSound(ShotgunSound);
+				}
+				else {
+					m_pSoundManager->RestartSound(MachineGunSound);
+				}
 				for (auto& b : bulletcasings) {
 					if (b->m_bActive == false) {
 						b->m_bActive = true;
@@ -1694,21 +1729,19 @@ void GamePlayScene::PlayerControlInput()
 			/*	m_pCamera->m_recoiVector.z -= m_pPlayer->GetzRange(false);
 				if (m_pPlayer->GetzRange(false) < m_pCamera->m_recoiVector.z)
 					m_pCamera->m_recoiVector.z = -m_pPlayer->GetzRange(true);*/
-
-
-
 				dwPlayerState |= STATE_SHOOT;
 				if (m_pPlayer->m_PlayerInPlace == MainPlace) {
 					m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard, m_KillCount);
 					m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion);
-
+					if (m_bcrashOk) { 
+						if(!m_pSoundManager->IsSoundBufferPlaying(SpiderHurt))
+						m_pSoundManager->RestartSound(SpiderHurt); }
 				}
 				m_pBillObject->active = true;
 				m_pPlayer->m_ReloadTime = 0;
 				m_bisCameraShaking = true;
 			}
 			else {
-
 				m_bisCameraShaking = false;
 				m_pCamera->m_bOnceShaking = true;
 				m_pCamera->m_recoiVector.x = 0.0f;

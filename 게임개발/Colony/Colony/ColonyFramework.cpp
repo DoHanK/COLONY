@@ -302,7 +302,9 @@ bool ColonyFramework::MakeGameObjects()
 	m_pUIManager = new UIManager(GetDevice()->GetID3DDevice(), GetDevice()->GetCommandList(), m_pd3dGraphicsRootSignature);
 	m_pUIManager->m_pfunctionQueue = &m_functionQueue;
 	m_pSoundManager = new SoundManager();
-	m_pSoundManager->Intialize();
+	if (!m_pSoundManager->InitDirectSound(m_hWnd)) {
+		DebugValue::PrintStr("사운드 초기화 실패");
+	}
 
 	//씬을 구성하는 매니져들
 	m_pSceneManager = new SceneManager(GetDevice(),m_pResourceManager, m_pUIManager, m_pSoundManager);
@@ -340,6 +342,7 @@ void ColonyFramework::DestroyGameObjects()
 	}
 
 	if (m_pSoundManager) {
+		m_pSoundManager->Cleanup();
 		delete m_pSoundManager;
 	}
 

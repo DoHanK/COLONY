@@ -4,6 +4,13 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <mmsystem.h>
+#include <dsound.h>
+#include <iostream>
+
+#pragma comment(lib, "dsound.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "winmm.lib")
 
 using namespace std;
 
@@ -12,15 +19,17 @@ class SoundManager
 public:
 	SoundManager();
 	~SoundManager();
-	void Intialize();
-	bool LoadWaveFile(const char* filename, WAVEFORMATEX& wfx, BYTE** data, DWORD& dataSize);
-	IXAudio2SourceVoice* AddSound(const char* filename, bool bLoop);
-	void DestroySounds();
-	//void NonLoopRestart();
+	bool InitDirectSound(HWND hWnd);
+	LPDIRECTSOUNDBUFFER LoadWaveToBuffer(const char* fileName);
+	void ChangeSceneSound();
+	void Cleanup();
+	void RestartSound(LPDIRECTSOUNDBUFFER sounbuffer);
+	bool IsSoundBufferPlaying(LPDIRECTSOUNDBUFFER pDSBuffer);
 
-	IXAudio2* pXAudio2;
-	IXAudio2MasteringVoice* pMasterVoice = nullptr;
-	vector< IXAudio2SourceVoice*> m_SourceVoices;
-	vector<BYTE*> m_buffers;
+	LPDIRECTSOUND8 g_pDS = nullptr;
+	LPDIRECTSOUNDBUFFER g_pPrimaryBuffer = nullptr;
+	LPDIRECTSOUNDBUFFER g_pSecondaryBuffer = nullptr;
+
+	vector<LPDIRECTSOUNDBUFFER> m_SoundVec;
 };
 

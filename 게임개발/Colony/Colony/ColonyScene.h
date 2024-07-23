@@ -317,11 +317,16 @@ protected:
 	int m_KillCount = 0;
 
 	//Sound
-	IXAudio2SourceVoice* PlaySceneBGM = nullptr;
-	IXAudio2SourceVoice* StepSound = nullptr;
-	IXAudio2SourceVoice* RifleSound = nullptr;
-
-
+	LPDIRECTSOUNDBUFFER SpaceShipBGM = nullptr;
+	LPDIRECTSOUNDBUFFER PlaySceneBGM = nullptr;
+	LPDIRECTSOUNDBUFFER RainBGM = nullptr;
+	LPDIRECTSOUNDBUFFER StepSound = nullptr;
+	LPDIRECTSOUNDBUFFER JumpSound = nullptr;
+	LPDIRECTSOUNDBUFFER RifleSound = nullptr;
+	LPDIRECTSOUNDBUFFER ShotgunSound = nullptr;
+	LPDIRECTSOUNDBUFFER MachineGunSound = nullptr;
+	LPDIRECTSOUNDBUFFER SpiderHurt = nullptr;
+	LPDIRECTSOUNDBUFFER ReloadSound = nullptr;
 
 	/// SubScene Object 
 	GameObject* m_pSceneSpaceShip = NULL;

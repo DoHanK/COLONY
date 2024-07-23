@@ -136,7 +136,7 @@ void SceneManager::ChangeScene(BasicScene* Scene)
 	pScene->ReleaseObjects();
 	delete pScene;
 	
-	if (m_pSoundManager)m_pSoundManager->DestroySounds();
+	if (m_pSoundManager)m_pSoundManager->ChangeSceneSound();
 
 	for (int i = 0; i < TEXTURE_LAYER; ++i) {
 		m_pUIManager->m_RenderUIList[i].clear();
