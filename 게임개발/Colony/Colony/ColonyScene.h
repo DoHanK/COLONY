@@ -102,7 +102,7 @@ public:
 
 class GameLobbyScene :public BasicScene {
 public:
-	GameLobbyScene() {};
+	GameLobbyScene() { };
 	virtual~GameLobbyScene() {};
 
 	virtual void  BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager,SoundManager* pSoundManager);
@@ -259,7 +259,8 @@ protected:
 	bool								test = false;
 	Billboard*							m_pRedZoneEffect;
 	Billboard*							m_pShotgunEffect;
-
+	vector<Billboard*>					m_InFoBillBoard;
+	vector<Billboard*>					m_DeadEneyEffect[MAX_THREAD_NUM];
 
 
 	// Particle
@@ -327,11 +328,11 @@ protected:
 	GameObject* m_pSpaceShipMap = NULL;
 
 	//INFO BillBorad
-	vector<Billboard*>					m_InFoBillBoard;
+
 
 	UIInfo*								m_InFoUI;
 
-
+	
 
 
 	int							m_Progress = 0;

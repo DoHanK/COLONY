@@ -391,6 +391,8 @@ public:
 	//Rendering
 	std::vector<BoundingBoxMesh*> m_BoundingBoxMeshes;
 	std::vector<BoundingBoxMesh*> m_SubBoundingBoxMeshes;
+	
+	BoundingBoxMesh*				m_BoundingMesh;
 	int boundingcur = 0 ;
 	int subboundingcur = 0 ;
 	CapsuleMesh* m_pCapsuleMesh=NULL;

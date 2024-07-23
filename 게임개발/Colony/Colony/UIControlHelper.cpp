@@ -12,6 +12,7 @@ void UIControlHelper::GameQuit()
 
 void UIControlHelper::GameWin()
 {
+
 }
 
 void UIControlHelper::GameLose()

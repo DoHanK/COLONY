@@ -48,7 +48,6 @@ public:
 	Texture*					m_pGhostMaskTex = NULL;
 	
 
-
 public:
 	float           			m_fMaxVelocityXZ = 3.0f;
 	void						AddPostion(const XMFLOAT3& Pos);
@@ -61,6 +60,7 @@ public:
 	//인식
 	GameObject*		m_pHead = NULL;
 public:
+	bool						m_OnceDead = false;
 
 public:
 	//GhostTrailEffect를 위한 변수들

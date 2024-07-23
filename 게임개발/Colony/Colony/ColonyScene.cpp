@@ -432,7 +432,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 	::fclose(pFile);
 }
 
-void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager,SoundManager* pSoundManager)
+void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager, SoundManager* pSoundManager)
 {
 	m_pResourceManager = pResourceManager;
 
@@ -472,7 +472,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pDepthShader = new DepthRenderingShader();
 	m_pDepthShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
 
-	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/MainScene.bin","Model/Textures/scene/", pResourceManager,"Model/MainSceneMeshes/");
+	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, "Model/MainScene.bin", "Model/Textures/scene/", pResourceManager, "Model/MainSceneMeshes/");
 
 	m_pPlayer = new Player(pd3dDevice, pd3dCommandList, pResourceManager);
 
@@ -495,11 +495,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//SubScene
 	m_pSpaceShipMap = new GameObject();
 	m_pSpaceShipMap->SetPosition(m_pSceneSpaceShip->m_xmf4x4World._41,
-									m_pSceneSpaceShip->m_xmf4x4World._42, 
-									m_pSceneSpaceShip->m_xmf4x4World._43);
+		m_pSceneSpaceShip->m_xmf4x4World._42,
+		m_pSceneSpaceShip->m_xmf4x4World._43);
 	m_pSpaceShipMap->SetScale(1.5f, 2.0f, 1.5f);
 	m_pSpaceShipMap->Rotate(&XMFLOAT3(0, 1, 0), 90.f);
-	m_pSpaceShipMap->SetChild(pResourceManager->BringModelInfo("Model/SpaceShip.bin", "Model/Textures/SpaceShipScene/")->m_pModelRootObject,true);
+	m_pSpaceShipMap->SetChild(pResourceManager->BringModelInfo("Model/SpaceShip.bin", "Model/Textures/SpaceShipScene/")->m_pModelRootObject, true);
 	m_pSpaceShipMap->UpdateTransform(NULL);
 	m_pCollisionManager->EnrollHierarchicalStaticGameObject(m_pSpaceShipMap);
 
@@ -576,6 +576,25 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	std::sort(m_Quadlist.begin(), m_Quadlist.end(), [](QuadTree* a, QuadTree* b) { return a->m_SameDepthidx < b->m_SameDepthidx; });
 	//m_Quadlist.sort([](QuadTree* a, QuadTree* b) { return a->m_SameDepthidx < b->m_SameDepthidx; });
 
+	for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+
+		for (int j = 0; j < 20; ++j) {
+			m_pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+				pResourceManager->BringTexture("Model/Textures/teleport3.dds", BILLBOARD_TEXTURE, true), m_BillShader, m_pPlayer->m_SelectWeapon.FindFrame("Export"));
+			m_pPlayer->m_pExportEffect = m_pBillObject;
+			m_pBillObject->doAnimate = true;
+			m_pBillObject->active = false;
+			m_pBillObject->m_OffsetPos = XMFLOAT3(0, -1.0f, 0);
+			m_pBillObject->SetRowNCol(7, 8);
+			m_pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(2.0, -2.0, -2.0, 2.0), 1.0f);
+			m_pBillObject->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+			m_pBillObject->SettedTimer = 0.01f;
+			m_pBillObject->doOnce = true;
+			m_pBillObject->AddRef();
+			m_DeadEneyEffect[i].push_back(m_pBillObject);
+		}
+	}
+
 
 	{
 		//vector<thread> threads;
@@ -588,13 +607,18 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			QT->SettingStaticBounding(*m_pCollisionManager);
 			QT->m_pCamera = m_pCamera;
 			QT->m_pPlayer = m_pPlayer;
+			QT->m_DeadEneyEffect = m_DeadEneyEffect;
 			m_threads.push_back(thread(&GamePlayScene::ThreadWorker, this, count++));
 		}
 
 
 	}
 
+
+
 #endif
+
+	
 
 
 	m_pNevMeshBaker = new NevMeshBaker(pd3dDevice, pd3dCommandList, CELL_SIZE, H_MAPSIZE_X, H_MAPSIZE_Y ,true);
@@ -620,8 +644,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[i] =pResourceManager->BringTexture("Model/AlienspiderColor/1_Alien_Spider_White_AlbedoTransparency.dds", ALBEDO_TEXTURE, true);
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
-	m_pGameObject.reserve(400);
-	for (int j = 0; j < 100; ++j) {
+	m_pGameObject.reserve(500);
+	for (int j = 0; j < 10; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, MonsterSizeDis(gen));
@@ -756,7 +780,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
 	CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");*/
 
-	for (int i = 0; i < 20; i++) {
+	m_itemBoxes.reserve(600);
+	for (int i = 0; i < 600; i++) {
 		GameObject* pitemBox = new ItemObject();
 		pitemBox->SetChild(itemBoxInfo->m_pModelRootObject, true);
 		int index = m_pPathFinder->GetInvalidNode();
@@ -764,9 +789,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pitemBox->m_BoundingBox.Extents = XMFLOAT3(0, 0, 0);
 		pitemBox->MergehierarchyBoundingBox(pitemBox->m_BoundingBox);
 		pitemBox->SetPosition(m_pPathFinder->m_Cell[index].m_BoundingBox.Center.x, 0.f, m_pPathFinder->m_Cell[index].m_BoundingBox.Center.z);
-		pitemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
-		m_pCollisionManager->EnrollItemIntoBox(pitemBox->m_BoundingBox.Center, pitemBox->m_BoundingBox.Extents, itemBoxInfo->m_pModelRootObject->m_xmf4x4ToParent, pitemBox);
-		pitemBox->m_bActive = true;
+		//pitemBox->UpdateBoundingBox(pd3dDevice, pd3dCommandList);
+		//m_pCollisionManager->EnrollItemIntoBox(pitemBox->m_BoundingBox.Center, pitemBox->m_BoundingBox.Extents, itemBoxInfo->m_pModelRootObject->m_xmf4x4ToParent, pitemBox);
+		pitemBox->m_bActive = false;
 		m_itemBoxes.push_back(pitemBox);
 	}
 
@@ -836,7 +861,6 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 	PlayerControlInput();
 
-
 	if (m_pPlayer->m_PlayerInPlace == SubPlace) {
 
 		m_pCollisionManager->CollisionPlayerToSubSceneStaticObeject();
@@ -854,7 +878,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 
 
-			if (XM3CalDis(XMFLOAT3(51.494446, 9.574662, 10.364511), m_pPlayer->GetPosition()) < 1.0f ||
+			if (XM3CalDis(XMFLOAT3(51.494446, 9.574662, 10.364511), m_pPlayer->GetPosition()) < 1.0f ||// 모니터 앞 인지 검사
 				XM3CalDis(XMFLOAT3(51.488869, 9.574662, 4.230450), m_pPlayer->GetPosition()) < 1.0f) {
 
 				static UCHAR pKeysBuffer[256];
@@ -871,7 +895,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 				}
 
 			}
-			else if (XM3CalDis(GetSubScene(), m_pPlayer->GetPosition()) < 1.0f && m_Progress == SceneProgress::GoOutSide) {
+			else if (XM3CalDis(GetSubScene(), m_pPlayer->GetPosition()) < 1.0f && m_Progress == SceneProgress::GoOutSide) { // 입구앞 인지 검사
 
 				static UCHAR pKeysBuffer[256];
 				m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/presskey.dds", UI_TEXTURE, true);
@@ -883,6 +907,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 						m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/Alpha.dds", UI_TEXTURE, true);
 						m_pPlayer->m_PlayerInPlace = MainPlace;
 						m_pPlayer->SetPosition(GetMainScene());
+						m_PlayTimeTimer.Reset();
 					}
 				}
 
@@ -1028,10 +1053,28 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 		m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
 
 
-
-
+		
 
 		while (readycount != 0);
+		//아이템 박스 리스폰
+		for (auto& quad : m_Quadlist) {
+
+			for (auto& itempos : quad->m_itemRespons) {
+
+				for (auto& item : m_itemBoxes) {
+
+					if (item->m_bActive == false) {
+						item->SetPosition(itempos);
+						item->m_bActive = true;
+						m_pCollisionManager->EnrollItemIntoBox(item->m_BoundingBox.Center, item->m_BoundingBox.Extents, item->m_pChild->m_xmf4x4ToParent, item);
+						break;
+					}
+				}
+
+			}
+			quad->m_itemRespons.clear();
+
+		}
 
 	}
 

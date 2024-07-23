@@ -7,7 +7,7 @@ QuadTree::QuadTree(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 {
 	m_BoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
 	m_BoundingMesh->UpdateVertexPosition(&BoundingOrientedBox(m_BoundingBox.Center, m_BoundingBox.Extents, XMFLOAT4(0, 0, 0, 1)));
-
+	m_itemRespons.reserve(20);
 
 }
 QuadTree::~QuadTree()
@@ -258,6 +258,32 @@ void QuadTree::AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys)
 				((AlienSpider*)(GO))->m_pPerception->IsLookPlayer(m_pPlayer);
 			((AlienSpider*)(GO))->AnimateWithMultithread(elapsedTime, m_SameDepthidx);
 
+			if (((AlienSpider*)(GO))->m_OnceDead == true) {
+
+				for (auto Effect : m_DeadEneyEffect[m_SameDepthidx]) {
+
+					if (Effect->active == false) {
+						Effect->active = true;
+						Effect->m_OffsetPos = XMFLOAT3(0, -1.5f, 0);
+						Effect->m_BillMesh->UpdataVertexPosition(UIRect(9.0* GO->m_MonsterScale, 0, -3.5 * GO->m_MonsterScale, 3.5 * GO->m_MonsterScale), 1.0f);
+						Effect->m_ownerObject = GO;
+						XMFLOAT3 pos = GO->GetPosition();
+						GO->SetPosition(pos.x, 0, pos.z);
+						break;
+					}
+				}
+
+
+				m_itemRespons.push_back(GO->GetPosition());
+				((AlienSpider*)(GO))->m_OnceDead == false;
+			}
+
+		}
+	}
+
+	for (auto& EnemyEffect : m_DeadEneyEffect[m_SameDepthidx]) {
+		if (EnemyEffect->active) {
+			EnemyEffect->Animate(elapsedTime);
 		}
 	}
 
@@ -279,7 +305,11 @@ void QuadTree::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	}
 
-
+	for (auto& EnemyEffect : m_DeadEneyEffect[m_SameDepthidx]) {
+		if (EnemyEffect->active) {
+			EnemyEffect->Render(pd3dCommandList,m_pCamera);
+		}
+	}
 
 
 }

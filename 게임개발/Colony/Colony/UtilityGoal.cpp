@@ -101,6 +101,8 @@ void DeadedGoal::Terminate()
 	m_pOwner->m_bActive = false;
 	m_pOwner->m_pSkinnedAnimationController->SetTrackSpeed(NOW_TRACK, 1.0f);
 	m_pOwner->m_pSkinnedAnimationController->SetTrackSpeed(PRE_TRACK, 1.0f);
+
+	m_pOwner->m_OnceDead = true;
 }
 
 

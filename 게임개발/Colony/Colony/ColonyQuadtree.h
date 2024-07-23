@@ -41,6 +41,9 @@ public:
 	Player* m_pPlayer;
 	BCapsule* m_pBoundPlayer;
 
+
+	vector<Billboard*>*					m_DeadEneyEffect;
+	vector <XMFLOAT3>					m_itemRespons;
 public:
 
 

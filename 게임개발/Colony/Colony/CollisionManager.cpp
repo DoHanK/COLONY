@@ -7,7 +7,7 @@ class AlienSpider;
 
 CollisionManager::CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	for (int i = 0; i < 1000; ++i) {
+	for (int i = 0; i < 3000; ++i) {
 		BoundingBoxMesh* pBounding = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
 		m_BoundingBoxMeshes.push_back(pBounding);
 	}
@@ -17,6 +17,8 @@ CollisionManager::CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		m_SubBoundingBoxMeshes.push_back(pBounding);
 
 	}
+
+	m_BoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
 	 m_pCapsuleMesh = new CapsuleMesh(pd3dDevice, pd3dCommandList,20,10,1,1,0);
 	m_pPlayerCapsuleMesh = new CapsuleMesh(pd3dDevice, pd3dCommandList,20,10, 0.3, 1.3, 0.3);
 	m_psphere = new ShphereMesh(pd3dDevice, pd3dCommandList, 20, 10,1) ;
@@ -118,7 +120,6 @@ void CollisionManager::EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOA
 	}
 	else {
 		m_StaticObjects.push_back(pBox);
-		m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);
 	}
 
 }
@@ -139,7 +140,6 @@ void CollisionManager::EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOA
 	else {
 
 		m_StaticObjects.push_back(pBox);
-		m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);
 
 	}
 
@@ -160,7 +160,6 @@ void CollisionManager::EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOA
 	}
 	else {
 		m_StaticObjects.push_back(pBox);
-		m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);
 	}
 
 }
@@ -174,7 +173,6 @@ void CollisionManager::EnrollItemIntoBox( XMFLOAT3 center, XMFLOAT3 extend, XMFL
 	pBox->m_boundingbox.Transform(pBox->m_boundingbox, XMLoadFloat4x4(&Transform));
 
 	m_ItemBoxes.push_back(pBox);
-	m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);
 	
 }
 
@@ -248,7 +246,6 @@ void CollisionManager::EnrollbulletIntoBox(bool isAccel, XMFLOAT3 center, XMFLOA
 	BOBBox* pBox = new BOBBox(center, EXTEND, pOwner);
 
 	m_bullets.push_back(pBox);
-	m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&pBox->m_boundingbox);
 
 	
 }
@@ -278,7 +275,6 @@ void CollisionManager::LoadCollisionBoxInfo(ID3D12Device* pd3dDevice, ID3D12Grap
 		m_StaticObjects.push_back(bxinfo);
 
 		
-		m_BoundingBoxMeshes[boundingcur++]->UpdateVertexPosition(&bxinfo->m_boundingbox);
 
 	
 	}
@@ -1434,39 +1430,41 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	int BoundingMeshCount = 0;
+	if (m_pPlayer->m_pOwner->m_PlayerInPlace == MainPlace) {
 
-	if(m_pPlayer->m_pOwner->m_PlayerInPlace == MainPlace)
-	for (int i = 0; i < m_StaticObjects.size(); ++i) {
-		m_BoundingBoxMeshes[i]->Render(pd3dCommandList);
+		for (auto& SM : m_StaticObjects) {
+			m_BoundingBoxMeshes[BoundingMeshCount]->UpdateVertexPosition(&((BOBBox*)SM)->m_Transformboudingbox);
+			m_BoundingBoxMeshes[BoundingMeshCount++]->Render(pd3dCommandList);
+		}
+
 	}
+
 	if (m_pPlayer->m_pOwner->m_PlayerInPlace == SubPlace)
 	for (int i = 0; i < m_SubStaticObjects.size(); ++i) {
 		m_SubBoundingBoxMeshes[i]->Render(pd3dCommandList);
 	}
 
-	int bulletcount = 0;
-	//총알만 업데이트
-	for (int i = m_StaticObjects.size(); i < m_StaticObjects.size()+m_bullets.size(); ++i) {
 
-		if (((BOBBox*)m_bullets[bulletcount])->m_pOwner->m_bActive) {
-			m_BoundingBoxMeshes[i]->UpdateVertexPosition(&((BOBBox*)m_bullets[bulletcount++])->m_Transformboudingbox);
-			m_BoundingBoxMeshes[i]->Render(pd3dCommandList);
+	//총알만 업데이트
+	for (auto& SM : m_bullets) {
+		if (SM->m_pOwner->m_bActive) {
+			m_BoundingBoxMeshes[BoundingMeshCount]->UpdateVertexPosition(&((BOBBox*)SM)->m_Transformboudingbox);
+			m_BoundingBoxMeshes[BoundingMeshCount++]->Render(pd3dCommandList);
 		}
 	}
 
 
-	int itemboxCount = 0;
-	//아이템박스 바운딩 박스
-	for (int i = m_StaticObjects.size() + m_bullets.size(); i < boundingcur; ++i) {
 
-		//if (((BOBBox*)m_ItemBoxes[itemboxCount])->m_pOwner->m_bActive) {
-			((BOBBox*)m_ItemBoxes[itemboxCount])->UpdateCollision();
-			m_BoundingBoxMeshes[i]->UpdateVertexPosition(&((BOBBox*)m_ItemBoxes[itemboxCount++])->m_Transformboudingbox);
-			m_BoundingBoxMeshes[i]->Render(pd3dCommandList);
-		//}
+
+	//아이템 바운딩박스 업데이트
+	for (auto& SM : m_ItemBoxes) {
+		if (SM->m_pOwner->m_bActive) {
+			((BOBBox*)SM)->UpdateCollision();
+			m_BoundingBoxMeshes[BoundingMeshCount]->UpdateVertexPosition(&((BOBBox*)SM)->m_Transformboudingbox);
+			m_BoundingBoxMeshes[BoundingMeshCount++]->Render(pd3dCommandList);
+		}
 	}
-
-
 
 
 	 xmf4x4World = m_pPlayer->m_pOwner->m_xmf4x4World;
