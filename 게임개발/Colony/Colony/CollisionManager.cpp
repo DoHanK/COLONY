@@ -18,7 +18,6 @@ CollisionManager::CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	}
 
-	m_BoundingMesh = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
 	 m_pCapsuleMesh = new CapsuleMesh(pd3dDevice, pd3dCommandList,20,10,1,1,0);
 	m_pPlayerCapsuleMesh = new CapsuleMesh(pd3dDevice, pd3dCommandList,20,10, 0.3, 1.3, 0.3);
 	m_psphere = new ShphereMesh(pd3dDevice, pd3dCommandList, 20, 10,1) ;

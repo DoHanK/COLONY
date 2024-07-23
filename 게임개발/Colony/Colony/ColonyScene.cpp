@@ -647,7 +647,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(500);
-	for (int j = 0; j < 10; ++j) {
+	for (int j = 0; j < 500; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, MonsterSizeDis(gen));
@@ -2052,7 +2052,9 @@ void GamePlayScene::UpdateUI() {
 		if (minute >= 10) {
 			int ten_s = minute / 10;
 			int one_s = minute % 10;
+			if(RangeCheck(0,9, ten_s))
 			h_TImer3->RenderTexture = numTexture[ten_s];
+			if (RangeCheck(0, 9, one_s))
 			h_TImer4->RenderTexture = numTexture[one_s];
 		}
 		else {
@@ -2063,11 +2065,14 @@ void GamePlayScene::UpdateUI() {
 		if (second >= 10) {
 			int ten_s = second / 10;
 			int one_s = second % 10;
-			h_TImer3->RenderTexture = numTexture[ten_s];
-			h_TImer4->RenderTexture = numTexture[one_s];
+			if (RangeCheck(0, 9, ten_s))
+				h_TImer3->RenderTexture = numTexture[ten_s];
+			if (RangeCheck(0, 9, one_s))
+				h_TImer4->RenderTexture = numTexture[one_s];
 		}
 		else {
 			h_TImer3->RenderTexture = numTexture[0];
+			if (RangeCheck(0, 9, second))
 			h_TImer4->RenderTexture = numTexture[second];
 		}
 	}
@@ -2131,9 +2136,13 @@ void GamePlayScene::UpdateUI() {
 	}
 
 	if (m_pPlayer->m_HP<100) {
+		int onevalue = m_pPlayer->m_HP / 10;
+		int twovalue = m_pPlayer->m_HP % 10;
 		h_HP[0]->RenderTexture = m_TNone;
-		h_HP[1]->RenderTexture = numTexture[m_pPlayer->m_HP / 10];
-		h_HP[2]->RenderTexture = numTexture[m_pPlayer->m_HP % 10];
+		if (RangeCheck(0, 9, onevalue))
+		h_HP[1]->RenderTexture = numTexture[onevalue];
+		if (RangeCheck(0, 9, twovalue))
+		h_HP[2]->RenderTexture = numTexture[twovalue];
 
 	}
 
@@ -2146,9 +2155,19 @@ void GamePlayScene::UpdateUI() {
 	}
 	
 	//kill count update
-	h_KillCount1->RenderTexture= numTexture[m_KillCount / 100];
-	h_KillCount2->RenderTexture = numTexture[m_KillCount / 10];
-	h_KillCount3->RenderTexture = numTexture[m_KillCount % 10];
+	{
+		int onevalue = m_KillCount / 100;
+		int twovalue = (m_KillCount / 10) % 10;
+		int threevalue = m_KillCount % 10;
+
+		if (RangeCheck(0, 9, onevalue))
+		h_KillCount1->RenderTexture = numTexture[onevalue];
+		if (RangeCheck(0, 9, twovalue))
+		h_KillCount2->RenderTexture = numTexture[twovalue];
+		if (RangeCheck(0, 9, threevalue))
+		h_KillCount3->RenderTexture = numTexture[threevalue];
+
+	}
 
 }
 

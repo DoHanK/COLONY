@@ -111,6 +111,15 @@ inline float XM2CalDis(const XMFLOAT2& a, const XMFLOAT2& b) { return sqrt((a.x 
 inline float XM3CalDis(const XMFLOAT3& a, const XMFLOAT3& b) { return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z)); }
 inline float VectorSize(XMFLOAT3 V) {	return (float)sqrt(V.x * V.x + V.y * V.y + V.z * V.z);}
 
+inline bool RangeCheck(int min, int max, int CheckValue) {
+
+	if (min <= CheckValue) {
+		if (CheckValue <= max) {
+			return true;
+		}
+	}
+	return false;
+}
 
 inline float VectorLength(XMFLOAT3 vec) {
 	return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);

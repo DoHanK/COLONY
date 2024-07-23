@@ -217,7 +217,9 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList, i
 
 					//텍스쳐 있는지 없는지 확인
 					if (info.first.RenderTexture) {
-						info.first.RenderTexture->UpdateShaderVariable(pd3d12CommandList, 0);
+						if(pd3d12CommandList)
+							info.first.RenderTexture->UpdateShaderVariable(pd3d12CommandList, 0);
+
 					}
 					if (info.first.MaskTexture) {
 
