@@ -175,6 +175,10 @@ CLoadedModelInfo* ResourceManager::BringModelInfo(const char* filename,const cha
 
 void ResourceManager::ReleaseUploadBuffers()
 {
+	for (auto& model : ModelnfoList) {
+		model.second->m_pModelRootObject->ReleaseUploadBuffers();
+	}
+
 	for (auto& Texture : TextureList) {
 		Texture.second->ReleaseUploadBuffers();
 	}

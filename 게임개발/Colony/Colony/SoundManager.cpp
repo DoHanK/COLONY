@@ -44,6 +44,8 @@ bool SoundManager::InitDirectSound(HWND hWnd)
     wfx.wBitsPerSample = 16;
     wfx.nBlockAlign = wfx.wBitsPerSample / 8 * wfx.nChannels;
     wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
+   
+
 
     if (FAILED(g_pPrimaryBuffer->SetFormat(&wfx))) {
         std::cerr << "프라이머리 버퍼 포맷 설정 실패" << std::endl;
@@ -149,7 +151,7 @@ LPDIRECTSOUNDBUFFER SoundManager::LoadWaveToBuffer(const char* fileName) {
     DSBUFFERDESC bufferDesc;
     ZeroMemory(&bufferDesc, sizeof(bufferDesc));
     bufferDesc.dwSize = sizeof(bufferDesc);
-    bufferDesc.dwFlags = 0;
+    bufferDesc.dwFlags = DSBCAPS_CTRLVOLUME;
     bufferDesc.dwBufferBytes = subChunk2Size;
     bufferDesc.lpwfxFormat = &waveFormat;
 

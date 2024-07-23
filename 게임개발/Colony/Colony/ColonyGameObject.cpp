@@ -1670,16 +1670,15 @@ void Billboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCame
 		XMFLOAT4X4 m = m_ownerObject->m_xmf4x4World;
 		XMFLOAT3 pos = XMFLOAT3(m._41, m._42, m._43 );
 
-		XMFLOAT3 MoveVecotor = Vector3::Subtract( pCamera->GetPosition(), pos);
-		MoveVecotor.y = 0;
-		MoveVecotor = Vector3::ScalarProduct(MoveVecotor, 2.0, true);
+		XMFLOAT3 MoveVecotor = m_OffsetPos;
+	
+		pCamera->ChangeMoveVector(MoveVecotor);
 
 		
 
-		XMFLOAT3 v = XMFLOAT3(pos.x + MoveVecotor.x + m_OffsetPos.x,
-							pos.y + MoveVecotor.y + m_OffsetPos.y, 
-							pos.z + MoveVecotor.z+ m_OffsetPos.z);
-		DebugValue::PrintVector3(v);
+		XMFLOAT3 v = XMFLOAT3(pos.x + MoveVecotor.x ,
+							pos.y + MoveVecotor.y , 
+							pos.z + MoveVecotor.z);
 		SetPosition(v);
 	}
 	if (m_CrashObject) {
@@ -1742,6 +1741,101 @@ void Billboard::NoSetPositionRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 		m_BillMesh->Render(pd3dCommandList);
 }
 
+void Billboard::CloseCameraPositionRendering(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, float offset)
+{
+
+	if (m_ownerObject) {
+		XMFLOAT4X4 m = m_ownerObject->m_xmf4x4World;
+		XMFLOAT3 pos = XMFLOAT3(m._41, m._42, m._43);
+
+		XMFLOAT3 MoveVecotor = Vector3::Subtract(pCamera->GetPosition(), pos);
+		MoveVecotor.y = 0;
+		MoveVecotor = Vector3::ScalarProduct(MoveVecotor, offset, true);
+
+
+
+		XMFLOAT3 v = XMFLOAT3(pos.x + MoveVecotor.x + m_OffsetPos.x,
+			pos.y + MoveVecotor.y + m_OffsetPos.y,
+			pos.z + MoveVecotor.z + m_OffsetPos.z);
+		SetPosition(v);
+	}
+	if (m_CrashObject) {
+		XMFLOAT3 ReverseCameraV = Vector3::ScalarProduct(pCamera->GetLookVector(), -1);
+
+		XMFLOAT3 v = XMFLOAT3(m_CrashObject->Center.x + m_OffsetPos.x * ReverseCameraV.x, m_CrashObject->Center.y + m_OffsetPos.y * ReverseCameraV.y, m_CrashObject->Center.z + m_OffsetPos.z * ReverseCameraV.z);
+		SetPosition(v);
+	}
+
+
+	Update(pCamera->GetPosition(), XMFLOAT3(0, 1, 0));
+
+
+	if (m_nMaterials > 0)
+	{
+		for (int i = 0; i < m_nMaterials; i++)
+		{
+			if (m_ppMaterials[i])
+			{
+				if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+				m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+			}
+			//m_pMesh->Render(pd3dCommandList, i);
+		}
+	}
+
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+	if (m_BillMesh)
+		m_BillMesh->Render(pd3dCommandList);
+}
+
+
+void Billboard::NoSetPositionRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, float offset)
+{
+
+		
+		XMFLOAT3 pos = m_StaticPos;
+
+		XMFLOAT3 MoveVecotor = Vector3::Subtract(pCamera->GetPosition(), pos);
+		MoveVecotor.y = 0;
+		MoveVecotor = Vector3::ScalarProduct(MoveVecotor, offset, true);
+
+
+
+		XMFLOAT3 v = XMFLOAT3(pos.x + MoveVecotor.x + m_OffsetPos.x,
+			pos.y + MoveVecotor.y + m_OffsetPos.y,
+			pos.z + MoveVecotor.z + m_OffsetPos.z);
+
+		SetPosition(v);
+	
+
+
+	Update(pCamera->GetPosition(), XMFLOAT3(0, 1, 0));
+
+
+	if (m_nMaterials > 0)
+	{
+		for (int i = 0; i < m_nMaterials; i++)
+		{
+			if (m_ppMaterials[i])
+			{
+				if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+				m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+			}
+			//m_pMesh->Render(pd3dCommandList, i);
+		}
+	}
+
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+	if (m_BillMesh)
+		m_BillMesh->Render(pd3dCommandList);
+
+}
 
 void Billboard::CameraBillBoradNRendring(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {

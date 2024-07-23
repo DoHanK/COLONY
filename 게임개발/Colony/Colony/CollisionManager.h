@@ -3,7 +3,7 @@
 #include "ColonyGameObject.h"
 #include "ColonyMesh.h"
 #include "ColonyPlayer.h"
-
+#include "ResourceManager.h"
 
 class Collision {
 public:
@@ -401,6 +401,9 @@ public:
 	XMFLOAT3 m_PlayerCapsulePos;
 
 	int EffectIndex[11] = { 0,1,2,5,8,9,10,11,12,13,16 };
+
+	ResourceManager* m_pResourceManager = NULL;
+
 public:
 
 	CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -452,7 +455,7 @@ public:
 
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard, int& KillCount);
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard,GameObject* pEnemy,int& KillCount);
-	void CollisionBulletToItemBox(Billboard* ExplosionEffect);
+	void CollisionBulletToItemBox(vector<Billboard*>& ExplosionEffect, vector<Item*>& Items);
 	void CollisionEnemyToStaticObeject();    
 	void CollisionPlayerToEnemy();
 	void CollisionEnemyToPlayer();

@@ -1352,7 +1352,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 		return crush;
 }
 
-void CollisionManager::CollisionBulletToItemBox(Billboard* ExplosionEffect)
+void CollisionManager::CollisionBulletToItemBox(vector<Billboard*>& ExplosionEffect,vector<Item*>& Items)
 {
 	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());
 	FXMVECTOR BulletDir = XMLoadFloat3(&m_pCamera->GetLookVector());
@@ -1365,8 +1365,29 @@ void CollisionManager::CollisionBulletToItemBox(Billboard* ExplosionEffect)
 		a->UpdateCollision();
 		if (a->m_Transformboudingbox.Intersects(BulletPos, BulletDir, dis)) {
 			a->m_pOwner->m_bActive = false;
-			ExplosionEffect->SetPosition(a->m_pOwner->GetPosition());
-			ExplosionEffect->active = true;
+			for (auto& bill : ExplosionEffect) {
+				if (bill->active == false) {
+					bill->SetPosition(a->m_pOwner->GetPosition());
+					bill->active = true;
+					break;
+				}
+			}
+
+			for (auto& item : Items) {
+
+				if (item->m_bActive == false) {
+					item->m_bActive = true;
+					item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/")->m_pModelRootObject;
+					item->SetItemType(sampling1);
+					item->SetPosition(a->m_pOwner->GetPosition());
+					break;
+				}
+
+			}
+
+
+
+
 			delete* it;
 			m_ItemBoxes.erase(it);
 			break;

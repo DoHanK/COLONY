@@ -264,11 +264,12 @@ void QuadTree::AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys)
 
 					if (Effect->active == false) {
 						Effect->active = true;
-						Effect->m_OffsetPos = XMFLOAT3(0, -1.5f, 0);
+						Effect->m_OffsetPos = XMFLOAT3(0, -0.5*GO->m_MonsterScale, 0);
 						Effect->m_BillMesh->UpdataVertexPosition(UIRect(9.0* GO->m_MonsterScale, 0, -3.5 * GO->m_MonsterScale, 3.5 * GO->m_MonsterScale), 1.0f);
-						Effect->m_ownerObject = GO;
+						Effect->SetPosition(GO->GetPosition());
 						XMFLOAT3 pos = GO->GetPosition();
-						GO->SetPosition(pos.x, 0, pos.z);
+						pos.y = 0.0f;
+						Effect->m_StaticPos = pos;
 						break;
 					}
 				}
@@ -307,7 +308,7 @@ void QuadTree::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	for (auto& EnemyEffect : m_DeadEneyEffect[m_SameDepthidx]) {
 		if (EnemyEffect->active) {
-			EnemyEffect->Render(pd3dCommandList,m_pCamera);
+			EnemyEffect->NoSetPositionRender(pd3dCommandList,m_pCamera, 3.0f);
 		}
 	}
 

@@ -230,13 +230,13 @@ protected:
 	UIInfo*								h_weapon;
 	UIInfo*								h_TimerBar[5];
 	UIInfo*								h_HP[3];
-	UIInfo* h_TargetRifle;
-	UIInfo* h_TargetShotgun;
-	UIInfo* h_TargetMachineGun;
-	UIInfo* h_HurtState;
-	UIInfo* h_KillCount1;
-	UIInfo* h_KillCount2;
-	UIInfo* h_KillCount3;
+	UIInfo*								h_TargetRifle;
+	UIInfo*								h_TargetShotgun;
+	UIInfo*								h_TargetMachineGun;
+	UIInfo*								h_HurtState;
+	UIInfo*								h_KillCount1;
+	UIInfo*								h_KillCount2;
+	UIInfo*								h_KillCount3;
 	
 
 	vector<Texture*>					numTexture;
@@ -270,13 +270,9 @@ protected:
 
 	//Item
 	UINT m_nItemBox = 0; 
-	vector<GameObject*>m_itemBoxes;
-	vector<GameObject*>m_rifles;
-	vector<GameObject*>m_shotguns;
-	vector<GameObject*>m_machineguns;
-	vector<GameObject*>m_syrings;
-	vector<GameObject*>m_eyes;
-	Billboard* m_ItemBoxExplosion;
+	vector<GameObject*>					m_itemBoxes;
+	vector<Item*>					m_items;
+	vector<Billboard*>					m_ItemBoxExplosion;
 
 
 	GameObject* itemBox = NULL;
@@ -344,6 +340,11 @@ protected:
 	enum SceneProgress {
 		GoMoniterNCheckMission,
 		GoOutSide
+	};
+	enum BillInfoNum {
+		mission,
+
+
 	};
 
 	// MultiThread 

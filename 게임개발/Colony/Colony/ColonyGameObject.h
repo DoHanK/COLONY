@@ -516,6 +516,7 @@ public:
 	BillBoardMesh* m_BillMesh;
 	Material* BillboardMaterial;
 	XMFLOAT3 m_OffsetPos = XMFLOAT3(0,0,0);
+	XMFLOAT3 m_StaticPos = XMFLOAT3(0, 0, 0);
 	// Set
 	float m_rows = 8;
 	float m_cols = 8;
@@ -535,7 +536,9 @@ public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera = NULL);
 	virtual void NoSetPositionRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera);
+	virtual void CloseCameraPositionRendering(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, float offset);
 
+	virtual void NoSetPositionRender(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera, float offset);
 	virtual void CameraBillBoradNRendring(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera );
 	void Update(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up);
 	void SetAddPosition(XMFLOAT3 xmf3AddPosition) {TickAddPosition = xmf3AddPosition;}
@@ -597,4 +600,24 @@ public:
 
 	void Update(float fTimeElapsed);
 
+};
+
+enum ItemType {
+	sampling1,
+	sampling2,
+	sampling3,
+	syringe,
+
+
+};
+class Item : public GameObject {
+public:
+	Item() {};
+	~Item() {};
+
+	int		m_itemtype;
+public:
+	
+	int GetItemType() {return m_itemtype;};
+	void SetItemType(int type) { m_itemtype = type; };
 };

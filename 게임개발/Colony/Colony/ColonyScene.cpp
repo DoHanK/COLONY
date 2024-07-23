@@ -493,6 +493,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pCollisionManager->LoadCollisionBoxInfo(pd3dDevice, pd3dCommandList, "boundinginfo.bin");
 	m_pCollisionManager->EnrollPlayerIntoCapsule(XMFLOAT3(EPSILON, 0.0, EPSILON), 0.3, 1.3, 0.3, m_pPlayer);
 	m_pCollisionManager->EnrollBulletDir(m_pCamera);
+	m_pCollisionManager->m_pResourceManager = pResourceManager;
 
 	//SubScene
 	m_pSpaceShipMap = new GameObject();
@@ -647,17 +648,17 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(500);
-	for (int j = 0; j < 500; ++j) {
+	for (int j = 0; j < 250; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, MonsterSizeDis(gen));
+			//AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, 12.f);
 			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 15.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
 			//p->SetPosition(j, 0.f, 0.f);
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
 			p->SetGhostShader(m_pGhostTraillerShader);
 			if (p->m_MonsterScale > 6.f) {
-
 				p->m_pSpiderTex = spiderColor[4];
 			}
 			else
@@ -776,17 +777,21 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//item
-	CLoadedModelInfo* itemBoxInfo = pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/");
-	/*CLoadedModelInfo* rifleInfo = pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
-	CLoadedModelInfo* shotgunInfo = pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
-	CLoadedModelInfo* machinegunInfo = pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/");
-	CLoadedModelInfo* syringeInfo = pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
-	CLoadedModelInfo* eyeInfo = pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");*/
+		
+		pResourceManager->BringModelInfo("Model/Item/rifle.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Item/sampling2.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Item/sampling3.bin", "Model/Textures/Item/");
 
+	//item
 	m_itemBoxes.reserve(600);
 	for (int i = 0; i < 600; i++) {
 		GameObject* pitemBox = new ItemObject();
-		pitemBox->SetChild(itemBoxInfo->m_pModelRootObject, true);
+		pitemBox->SetChild(pResourceManager->BringModelInfo("Model/Item/itemBox.bin", "Model/Textures/Item/")->m_pModelRootObject, true);
 		int index = m_pPathFinder->GetInvalidNode();
 		pitemBox->Rotate(-90.0f, GetRandomFloatInRange(-90.0f, 90.0f), 0.0f);
 		pitemBox->m_BoundingBox.Extents = XMFLOAT3(0, 0, 0);
@@ -797,19 +802,29 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pitemBox->m_bActive = false;
 		m_itemBoxes.push_back(pitemBox);
 	}
+	//아이템
+	m_items.reserve(600);
+	for (int i = 0; i < 600; i++) {
+		Item* pitemBox = new Item();
+		pitemBox->m_bActive = false;
+		//pitemBox->SetScale(2.0f, 2.0f, 2.0f);
+		m_items.push_back(pitemBox);
+	}
 
 	//ItemBoxExplosion
-	m_ItemBoxExplosion = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-		pResourceManager->BringTexture("Model/Textures/ItemBoxExplosion.dds", BILLBOARD_TEXTURE, true), m_BillShader, NULL);
-	m_ItemBoxExplosion->doAnimate = true;
-	m_ItemBoxExplosion->active = false;
-	m_ItemBoxExplosion->SetRowNCol(1, 13);
-	m_ItemBoxExplosion->m_BillMesh->UpdataVertexPosition(UIRect(3.0, -1.0, -2.0, 2.0), 1.0f);
-	m_ItemBoxExplosion->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
-	m_ItemBoxExplosion->SettedTimer = 0.02f;
-	m_ItemBoxExplosion->doOnce = true;
-	m_ItemBoxExplosion->AddRef();
-
+	for (int i = 0; i < 10; i++) {
+		Billboard* pItemBoxExplosion = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+			pResourceManager->BringTexture("Model/Textures/ItemBoxExplosion.dds", BILLBOARD_TEXTURE, true), m_BillShader, NULL);
+		 pItemBoxExplosion->doAnimate = true;
+		 pItemBoxExplosion->active = false;
+		 pItemBoxExplosion->SetRowNCol(1, 13);
+		 pItemBoxExplosion->m_BillMesh->UpdataVertexPosition(UIRect(3.0, -1.0, -2.0, 2.0), 1.0f);
+		 pItemBoxExplosion->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+		 pItemBoxExplosion->SettedTimer = 0.02f;
+		 pItemBoxExplosion->doOnce = true;
+		 pItemBoxExplosion->AddRef();
+		 m_ItemBoxExplosion.push_back(pItemBoxExplosion);
+	}
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//ShotGunEffect 
@@ -828,8 +843,9 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSoundManager = pSoundManager;
 	SpaceShipBGM = m_pSoundManager->LoadWaveToBuffer("Sound/SpaceShipBGM.wav");
 	SpaceShipBGM->SetVolume(0);//-10000 ~ 0(오리지널 데시벨)
+	SpaceShipBGM->SetFrequency(-1000);
 	PlaySceneBGM= m_pSoundManager->LoadWaveToBuffer("Sound/PlaySceneBGM.wav");
-	PlaySceneBGM->SetVolume(-10000); 
+	PlaySceneBGM->SetVolume(-2000);
 	PlaySceneBGM->Play(0, 0, DSBPLAY_LOOPING);
 	RainBGM = m_pSoundManager->LoadWaveToBuffer("Sound/RainSound.wav");
 	RainBGM->SetVolume(-1000);
@@ -847,7 +863,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	MachineGunSound->SetVolume(0);
 	ReloadSound = m_pSoundManager->LoadWaveToBuffer("Sound/clipload1.wav");
 	ReloadSound->SetVolume(-8000);
-
+	
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
 	BuildDefaultLightsAndMaterials();
@@ -1038,10 +1054,11 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 			m_pRedZoneEffect->Animate(fTimeElapsed);
 		}
 
-		if (m_ItemBoxExplosion->doAnimate) {
-			m_ItemBoxExplosion->Animate(fTimeElapsed);
+		for (auto& bill : m_ItemBoxExplosion) {
+			if (bill->doAnimate) {
+				bill->Animate(fTimeElapsed);
+			}
 		}
-
 		for (int i = 0; i < 29; ++i) {
 			for (auto& B : m_pBloodBillboard[i]) {
 				if (B->doAnimate) {
@@ -1197,7 +1214,7 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 
 
-			//m_InFoBillBoard[0]->CameraBillBoradNRendring(pd3dCommandList, m_pCamera);
+		
 
 
 		}
@@ -1216,6 +1233,13 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 				b->UpdateTransform();
 				b->Render(pd3dCommandList);
 
+			}
+		}
+		
+		for (auto& item : m_items) {
+			if (item->m_bActive) {
+				item->UpdateTransform();
+				item->Render(pd3dCommandList);
 			}
 		}
 
@@ -1285,11 +1309,11 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 			}
 		}
 
-
-		if (m_ItemBoxExplosion->active) {
-			m_ItemBoxExplosion->Render(pd3dCommandList, m_pPlayer->GetCamera());
+		for (auto& bill : m_ItemBoxExplosion) {
+			if (bill->active) {
+				bill->Render(pd3dCommandList, m_pPlayer->GetCamera());
+			}
 		}
-
 
 
 		while (readycount != 0);
@@ -1545,8 +1569,9 @@ void GamePlayScene::ReleaseObjects()
 		b->Release();
 	}
 
-	if (m_ItemBoxExplosion)m_ItemBoxExplosion->Release(); 
-
+	for (auto& bill : m_ItemBoxExplosion) {
+		if (bill)bill->Release();
+	}
 	if (m_pShotgunEffect) m_pShotgunEffect->Release();
 
 	if (m_pSpaceShipMap)m_pSpaceShipMap->Release();
@@ -1670,6 +1695,15 @@ void GamePlayScene::PlayerControlInput()
 		//줍기
 		if (pKeysBuffer[F] & 0xF0) {
 			// 총알 스테이트 변경
+			for (auto& item : m_items) {
+				if (item->m_bActive) {
+					if (XM3CalDis(item->GetPosition(), m_pPlayer->GetPosition()) <= 1.0f) {
+						DebugValue::PrintStr("출력 \n");
+						item->m_bActive = false;
+					}
+				}
+			}
+
 
 			// 플레이어 상태
 			dwPlayerState |= STATE_PICK_UP;
@@ -1730,13 +1764,11 @@ void GamePlayScene::PlayerControlInput()
 				float AMP = m_pPlayer->GetAmp();
 				m_pPlayer->Rotate(-AMP, Sign* AMP*0.5, 0.0f);
 				
-			/*	m_pCamera->m_recoiVector.z -= m_pPlayer->GetzRange(false);
-				if (m_pPlayer->GetzRange(false) < m_pCamera->m_recoiVector.z)
-					m_pCamera->m_recoiVector.z = -m_pPlayer->GetzRange(true);*/
+
 				dwPlayerState |= STATE_SHOOT;
 				if (m_pPlayer->m_PlayerInPlace == MainPlace) {
 					m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard, m_KillCount);
-					m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion);
+					m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion,m_items);
 					if (m_bcrashOk) { 
 						if(!m_pSoundManager->IsSoundBufferPlaying(SpiderHurt))
 						m_pSoundManager->RestartSound(SpiderHurt); }
@@ -1914,8 +1946,10 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 		m_pRedZoneEffect->Animate(fTimeElapsed);
 	}
 
-	if (m_ItemBoxExplosion->doAnimate) {
-		m_ItemBoxExplosion->Animate(fTimeElapsed);
+	for (auto& bill : m_ItemBoxExplosion) {
+		if (bill->doAnimate) {
+			bill->Animate(fTimeElapsed);
+		}
 	}
 
 	for (int i = 0; i < 29; ++i) {
@@ -2295,9 +2329,12 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 			GO->Render(pd3dCommandList);
 		}
 	}
+	
+	for (auto& bill : m_ItemBoxExplosion) {
+		if (bill->active) {
+			bill->NoSetPositionRender(pd3dCommandList, m_pPlayer->GetCamera(),1.0f);
+		}
 
-	if (m_ItemBoxExplosion->active) {
-		m_ItemBoxExplosion->Render(pd3dCommandList, m_pPlayer->GetCamera());
 	}
 }
 
@@ -2462,7 +2499,7 @@ void GamePlayScene::ReleaseUploadBuffers()
 		break;// 어쳐피 공유 인스턴싱이기 때문에 한번만. 
 	}
 
-	if (m_pSpaceShipMap)m_pSpaceShipMap->ReleaseUploadBuffers();
+	//if (m_pSpaceShipMap)m_pSpaceShipMap->ReleaseUploadBuffers();
 
 	if (m_pSceneSpaceShip)m_pSceneSpaceShip->ReleaseUploadBuffers();
 
