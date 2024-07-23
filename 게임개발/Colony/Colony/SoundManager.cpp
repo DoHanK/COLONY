@@ -151,7 +151,7 @@ LPDIRECTSOUNDBUFFER SoundManager::LoadWaveToBuffer(const char* fileName) {
     DSBUFFERDESC bufferDesc;
     ZeroMemory(&bufferDesc, sizeof(bufferDesc));
     bufferDesc.dwSize = sizeof(bufferDesc);
-    bufferDesc.dwFlags = DSBCAPS_CTRLVOLUME;
+    bufferDesc.dwFlags = DSBCAPS_CTRLVOLUME|DSBCAPS_CTRLFREQUENCY;
     bufferDesc.dwBufferBytes = subChunk2Size;
     bufferDesc.lpwfxFormat = &waveFormat;
 

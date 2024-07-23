@@ -843,26 +843,29 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSoundManager = pSoundManager;
 	SpaceShipBGM = m_pSoundManager->LoadWaveToBuffer("Sound/SpaceShipBGM.wav");
 	SpaceShipBGM->SetVolume(0);//-10000 ~ 0(오리지널 데시벨)
-	SpaceShipBGM->SetFrequency(-1000);
+	SpaceShipBGM->SetFrequency(-1000); //100~100000 클수록 재생속도 증가
 	PlaySceneBGM= m_pSoundManager->LoadWaveToBuffer("Sound/PlaySceneBGM.wav");
 	PlaySceneBGM->SetVolume(-2000);
 	PlaySceneBGM->Play(0, 0, DSBPLAY_LOOPING);
 	RainBGM = m_pSoundManager->LoadWaveToBuffer("Sound/RainSound.wav");
 	RainBGM->SetVolume(-1000);
-	StepSound = m_pSoundManager->LoadWaveToBuffer("Sound/1.wav");
-	StepSound -> SetVolume(0);
+	StepSound = m_pSoundManager->LoadWaveToBuffer("Sound/StepSound.wav");
+	StepSound -> SetVolume(-100);
+	StepSound->SetFrequency(20000);
 	SpiderHurt = m_pSoundManager->LoadWaveToBuffer("Sound/spiderHurt.wav");
 	SpiderHurt->SetVolume(-300);
 	JumpSound = m_pSoundManager->LoadWaveToBuffer("Sound/JumpSound.wav");
 	JumpSound->SetVolume(0);
 	RifleSound = m_pSoundManager->LoadWaveToBuffer("Sound/RifleSound.wav");
-	RifleSound->SetVolume(0);
+	RifleSound->SetVolume(-400);
 	ShotgunSound = m_pSoundManager->LoadWaveToBuffer("Sound/ShotgunSound.wav");
-	ShotgunSound->SetVolume(0);
+	ShotgunSound->SetVolume(-800);
 	MachineGunSound = m_pSoundManager->LoadWaveToBuffer("Sound/MachineGunEffect.wav");
-	MachineGunSound->SetVolume(0);
+	MachineGunSound->SetVolume(-400);
 	ReloadSound = m_pSoundManager->LoadWaveToBuffer("Sound/clipload1.wav");
-	ReloadSound->SetVolume(-8000);
+	ReloadSound->SetVolume(-2000);
+	ScopeModeSound = m_pSoundManager->LoadWaveToBuffer("Sound/ScopeModeSound.wav");
+	ScopeModeSound->SetVolume(-200);
 	
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
@@ -1606,12 +1609,15 @@ void GamePlayScene::PlayerControlInput()
 			dwDirection |= DIR_FORWARD;
 		}
 		if (m_pPlayer->m_WeaponState == RIGHT_HAND) {
-			if (pKeysBuffer[S] & 0xF0)
+			if (pKeysBuffer[S] & 0xF0) {
 				dwDirection |= DIR_BACKWARD;
-			if (pKeysBuffer[A] & 0xF0)
+			}
+			if (pKeysBuffer[A] & 0xF0) {
 				dwDirection |= DIR_LEFT;
-			if (pKeysBuffer[D] & 0xF0)
+			}
+			if (pKeysBuffer[D] & 0xF0) {
 				dwDirection |= DIR_RIGHT;
+			}
 		}
 		//하나라도 안눌려있으면 0
 		if (!((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) || (dwDirection & DIR_LEFT) || (dwDirection & DIR_RIGHT))) {
@@ -1630,14 +1636,16 @@ void GamePlayScene::PlayerControlInput()
 					if (m_pPlayer->m_WeaponState == SPINE_BACK) {
 						m_pPlayer->SetMaxXZVelocity(7.0f);
 						AddAcel += NoGrapAcel;
+
 					}
 					else {
 						//총기소유하고 걸을때
 						m_pPlayer->SetMaxXZVelocity(4.0f);
 					}
-			
+
 			}
 			else {
+
 				//걸을때
 				dwPlayerState = STATE_WALK;
 				//총기 소유 안할때
@@ -1684,6 +1692,7 @@ void GamePlayScene::PlayerControlInput()
 			if (!m_pSoundManager->IsSoundBufferPlaying(JumpSound)) {
 				m_pSoundManager->RestartSound(JumpSound);
 			}
+			StepSound->Stop();
 		}
 		// 총알 리로드
 		if (pKeysBuffer[R] & 0xF0) {
@@ -1851,12 +1860,15 @@ void GamePlayScene::PlayerControlInput()
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 
 		if (pKeysBuffer[R_MOUSE] & 0xF0 && m_pPlayer->m_WeaponState == RIGHT_HAND) {
-
-
+			if (ScopeSoundOnce) {
+				ScopeModeSound->Play(0, 0, 0);
+				ScopeSoundOnce = false;
+			}
 			m_bScopeMode = true;
 			m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.35f, 2.4f, 10.0f));
 		}
 		else {
+			ScopeSoundOnce = true;
 			m_bScopeMode = false;
 			m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.35f, 2.4f, -1.7f));
 		}

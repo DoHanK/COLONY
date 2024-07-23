@@ -323,6 +323,9 @@ protected:
 	LPDIRECTSOUNDBUFFER MachineGunSound = nullptr;
 	LPDIRECTSOUNDBUFFER SpiderHurt = nullptr;
 	LPDIRECTSOUNDBUFFER ReloadSound = nullptr;
+	LPDIRECTSOUNDBUFFER ScopeModeSound = nullptr;
+
+	bool ScopeSoundOnce = true;
 
 	/// SubScene Object 
 	GameObject* m_pSceneSpaceShip = NULL;
