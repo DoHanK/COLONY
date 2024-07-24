@@ -189,6 +189,6 @@ static std::mt19937 gen(rd());
 static std::uniform_real_distribution<float> floatEndureDis(30.f, 45.f);
 static std::uniform_real_distribution<float> floatSignDis(-1.0f, 1.0f);
 static std::uniform_real_distribution<float> MonsterSizeDis(2.0f, 4.0f);
-static std::uniform_int_distribution<>	 RandomItemType(0,6);
+static std::uniform_int_distribution<>	 RandomItemType(0,8);
 static std::uniform_int_distribution<> IdleRandom(0, 6);
 static std::uniform_int_distribution<> JumpRandom(0, 200);

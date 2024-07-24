@@ -1377,8 +1377,37 @@ void CollisionManager::CollisionBulletToItemBox(vector<Billboard*>& ExplosionEff
 
 				if (item->m_bActive == false) {
 					item->m_bActive = true;
-					item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/")->m_pModelRootObject;
-					item->SetItemType(sampling1);
+					switch (RandomItemType(gen)) {
+					case 0:
+						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/")->m_pModelRootObject;
+						item->SetItemType(sampling1);
+					break;
+					case 1:
+						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/")->m_pModelRootObject;
+						break;
+					case 2:
+						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/")->m_pModelRootObject;
+						break;
+					case 3:
+						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/")->m_pModelRootObject;
+						break;
+					case 4:
+						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/")->m_pModelRootObject;
+						break;
+					case 5:
+						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling2.bin", "Model/Textures/Item/")->m_pModelRootObject;
+						break;
+					case 6:	
+						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling3.bin", "Model/Textures/Item/")->m_pModelRootObject;
+						break;
+					case 7:
+						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/healthpack.bin", "Model/Textures/Item/")->m_pModelRootObject;
+						break;
+					case 8:
+						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/")->m_pModelRootObject;
+						break;
+					}
+
 					item->SetPosition(a->m_pOwner->GetPosition());
 					break;
 				}
