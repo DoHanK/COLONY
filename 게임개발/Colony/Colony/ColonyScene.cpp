@@ -648,7 +648,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(500);
-	for (int j = 0; j < 250; ++j) {
+	for (int j = 0; j < 100; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, MonsterSizeDis(gen));
@@ -786,6 +786,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/");
 		pResourceManager->BringModelInfo("Model/Item/sampling2.bin", "Model/Textures/Item/");
 		pResourceManager->BringModelInfo("Model/Item/sampling3.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Item/speed.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Item/Damage.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Item/Multiattack.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Item/Health.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Item/shield.bin", "Model/Textures/Item/");
 
 	//item
 	m_itemBoxes.reserve(600);

@@ -1377,7 +1377,7 @@ void CollisionManager::CollisionBulletToItemBox(vector<Billboard*>& ExplosionEff
 
 				if (item->m_bActive == false) {
 					item->m_bActive = true;
-					switch (RandomItemType(gen)) {
+		/*			switch (RandomItemType(gen)) {
 					case 0:
 						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/")->m_pModelRootObject;
 						item->SetItemType(sampling1);
@@ -1406,8 +1406,8 @@ void CollisionManager::CollisionBulletToItemBox(vector<Billboard*>& ExplosionEff
 					case 8:
 						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/")->m_pModelRootObject;
 						break;
-					}
-
+					}*/
+					item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/speed.bin", "Model/Textures/Item/")->m_pModelRootObject;
 					item->SetPosition(a->m_pOwner->GetPosition());
 					break;
 				}
