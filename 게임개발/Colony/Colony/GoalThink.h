@@ -45,3 +45,23 @@ public:
 
 };
 
+class DogGoalThink :public CompositeGoal<GameObject> {
+private:
+	std::vector<GoalEvalutor*>  m_GoalEvalutors;
+public:
+
+
+	DogGoalThink(GameObject* pOwner);
+	virtual ~DogGoalThink();
+
+	void Arbitrate();
+
+	virtual void Activate();
+
+	virtual void Terminate();
+
+	virtual int  Process();
+
+	void SetInactive() { m_iStatus = inactive; }
+
+};

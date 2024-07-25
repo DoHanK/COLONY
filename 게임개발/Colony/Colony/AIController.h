@@ -5,8 +5,9 @@
 class GoalThink;
 class AlienSpider;
 class AlienSpiderAnimationController;
-
-
+class DogMonster;
+class DogAnimationController;
+class DogGoalThink;
 
 class AIController{
 public:
@@ -28,14 +29,43 @@ public:
 	int		  m_AnimationName;
 	int			m_JumpStep;
 public:
-	bool ExecuteGoal(float fTimeElapsed);
+	virtual bool ExecuteGoal(float fTimeElapsed);
 private:
-	void ExecuteFollowPath(float fTimeElapsed);
-	void ExecuteWait(float fTimeElapsed);
-	void ExecuteWanderPath(float fTimeElapsed);
-	void MoveDest(float fTimeElapsed);
-	void JumpDest(float fTimeElapsed);
+	virtual void ExecuteFollowPath(float fTimeElapsed);
+	virtual void ExecuteWait(float fTimeElapsed);
+	virtual void ExecuteWanderPath(float fTimeElapsed);
+	virtual void MoveDest(float fTimeElapsed);
+	virtual void JumpDest(float fTimeElapsed);
 
 	void UpdatePosition();
 };
 
+class DogAIController {
+public:
+	DogGoalThink* m_pBrain;
+	DogMonster* m_pBody;
+	DogAnimationController* m_pAnimationControl;
+public:
+	DogAIController(DogGoalThink* pBrain, DogMonster* pBody);
+	~DogAIController() {};
+
+
+	//이동관련
+	XMFLOAT2  m_dest;
+	XMFLOAT3  m_dir;
+	bool	  m_StartTravel;
+	float     m_BetweenAngle;
+	XMFLOAT3	  m_CrossBetween;
+	//Animation
+
+
+public:
+	bool ExecuteGoal(float fTimeElapsed);
+private:
+
+	void ExecuteWait(float fTimeElapsed);
+
+	void MoveDest(float fTimeElapsed);
+
+
+};

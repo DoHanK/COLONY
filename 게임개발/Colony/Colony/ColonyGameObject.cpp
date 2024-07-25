@@ -1381,7 +1381,6 @@ AnimationController::AnimationController(ID3D12Device* pd3dDevice, ID3D12Graphic
 {
 	m_nAnimationTracks = nAnimationTracks;
 	m_pAnimationTracks = new AnimationTrack[nAnimationTracks];
-
 	m_nSkinnedMeshes = pModel->m_nSkinnedMeshes;
 
 	m_ppAnimationSets = new AnimationSets * [m_nSkinnedMeshes];
@@ -2007,3 +2006,4 @@ void Item::Animate(float fTimeElapsed)
 		Rotate(0, 100 * fTimeElapsed , 0);
 	}
 }
+

@@ -388,6 +388,8 @@ public:
 	GameObject* m_pParent = NULL;
 	GameObject* m_pChild = NULL;
 	GameObject* m_pSibling = NULL;
+	GameObject* m_pEnemy = NULL;
+
 public:
 // Multithread
 	XMFLOAT4X4* m_xmfsub4x4ToParent = NULL;
@@ -401,11 +403,10 @@ public:
 	bool						m_bHitted = false;
 	bool						m_bVisible = true;
 	int							m_HP = 100;
-
+	int							m_GoalType;
 	//크기 조절
 	float						m_MonsterScale = 1.0f;
 	int							m_PlayerInPlace;
-
 
 	void SetMesh(BasicMesh* pMesh);
 	void SetBoundingMesh(DynamicMesh* pMesh);
@@ -627,3 +628,5 @@ public:
 	void SetItemType(int type) { m_itemtype = type; };
 	virtual void Animate(float fTimeElapsed);
 };
+
+

@@ -276,7 +276,7 @@ void QuadTree::AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys)
 
 
 				m_itemRespons.push_back(GO->GetPosition());
-				((AlienSpider*)(GO))->m_OnceDead == false;
+				((AlienSpider*)(GO))->m_OnceDead = false;
 			}
 
 		}

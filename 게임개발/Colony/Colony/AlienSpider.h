@@ -13,9 +13,10 @@
 class AlienSpiderAnimationController;
 
 class GoalThink;
+class DogGoalThink;
 class AIController;
 class Perception;
-
+class DogAIController;
 
 
 
@@ -101,18 +102,52 @@ public:
 
 public:
 	//GhostEffect
-	void SavePrevFrameInfo(XMFLOAT4X4** m_ppcbxmf4x4MappedSkinningBoneTransforms, float* elapsedTime);
+	virtual void SavePrevFrameInfo(XMFLOAT4X4** m_ppcbxmf4x4MappedSkinningBoneTransforms, float* elapsedTime);
 public:
 	//애니메이션 보간 및 상태
-	DWORD m_AnimationState = AlienAnimationName::Idle_1;
+	DWORD m_AnimationState = 0;
 	float m_nowAnimationWeight = 1.0f;
 	float m_PreAnimationWeight = 0.0f;
 
-	void ChangeAnimation(DWORD ChangeState);
-	bool isSameState(DWORD dwState);
+	virtual void ChangeAnimation(DWORD ChangeState);
+	virtual bool isSameState(DWORD dwState);
 	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
-	bool isAnimationPlayProgress(DWORD dwState, float progress);
-	void SetAnimationPlayPos(DWORD dwState, float progress);
+	virtual bool isAnimationPlayProgress(DWORD dwState, float progress);
+	virtual void SetAnimationPlayPos(DWORD dwState, float progress);
 
-	void AdvanceTimeWithMultithread(float fElapsedTime, GameObject* pRootGameObject, int idx);
+	virtual void AdvanceTimeWithMultithread(float fElapsedTime, GameObject* pRootGameObject, int idx);
+};
+
+
+
+
+class DogMonster : public GameObject {
+public:
+	DogMonster(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, float scale);
+	virtual ~DogMonster() {};
+public:
+	DogGoalThink* m_pBrain;
+	DogAIController* m_pSoul;
+	void Update(float fTimeElapsed);
+	void UpdatePosition(float fTimeElapsed);
+
+
+};
+
+
+class DogAnimationController :public AlienSpiderAnimationController {
+public:
+	DogAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	virtual ~DogAnimationController() {};
+
+
+public:
+	//애니메이션 보간 및 상태
+	DWORD m_AnimationState = Spit_idle;
+	float m_nowAnimationWeight = 1.0f;
+	float m_PreAnimationWeight = 0.0f;
+
+
+	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
+	virtual void AdvanceTimeWithMultithread(float fElapsedTime, GameObject* pRootGameObject, int idx);
 };

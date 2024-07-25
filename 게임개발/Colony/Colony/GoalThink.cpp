@@ -35,8 +35,6 @@ void GoalThink::Activate()
 	m_iStatus = active;
 }
 
-
-
 int GoalThink::Process()
 {
 	ActivateIfInactive();
@@ -86,6 +84,86 @@ int GoalThink::Process()
 }
 
 void GoalThink::Terminate()
+{
+
+
+}
+
+
+
+
+
+DogGoalThink::DogGoalThink(GameObject* pOwner) :CompositeGoal<GameObject>(pOwner, Think_Goal) {
+
+
+}
+
+DogGoalThink::~DogGoalThink()
+{
+	std::vector<GoalEvalutor*>::iterator curDes = m_GoalEvalutors.begin();
+	for (curDes; curDes != m_GoalEvalutors.end(); ++curDes)
+	{
+		delete* curDes;
+	}
+
+}
+
+void DogGoalThink::Arbitrate()
+{
+
+
+
+
+
+
+}
+
+void DogGoalThink::Activate()
+{
+	Arbitrate();
+	m_iStatus = active;
+}
+
+int DogGoalThink::Process()
+{
+	ActivateIfInactive();
+	static int a = 0;
+	int SubgoalStatus = ProcessSubGoals();
+
+	float distance = XM3CalDis(m_pOwner->m_pEnemy->GetPosition(), m_pOwner->GetPosition());
+	if (m_pOwner->m_bHitted) {
+
+	}
+	else {
+
+		if (distance < 10.0f) {
+
+			if (distance < 1.0f) {
+				m_pOwner->m_GoalType = Attack_Goal;
+			}
+			else if(m_pOwner->m_GoalType != Attack_Goal){
+				m_pOwner->m_GoalType = Trace_Goal;
+			}
+
+		}
+		else {
+			m_pOwner->m_GoalType = Idle_Goal;
+		}
+	}
+
+
+
+
+	if (SubgoalStatus == completed || SubgoalStatus == failed) {
+
+		m_iStatus = inactive;
+
+	}
+
+	return m_iStatus;
+}
+
+void DogGoalThink::Terminate()
 {
 
 

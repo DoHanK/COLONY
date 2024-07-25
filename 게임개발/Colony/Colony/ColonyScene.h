@@ -380,6 +380,10 @@ public:
 
 
 
+
+	//TestVariable
+
+	DogMonster* m_Monster;
 	
 
 };

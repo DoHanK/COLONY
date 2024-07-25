@@ -536,6 +536,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 
+
+
 	for (auto& GO : m_pSceneObject) {
 		GO->m_BoundingBox;
 		if ((strstr(GO->m_pstrFrameName, "SM_Mountain_A") == NULL
@@ -885,8 +887,13 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	PickUpSound->SetVolume(-400);
 	PickItem = m_pSoundManager->LoadWaveToBuffer("Sound/ItemPick.wav");
 	PickItem->SetVolume(-400);
-	
 
+
+	//Test 
+
+	m_Monster = new DogMonster(pd3dDevice, pd3dCommandList, pResourceManager,  1);
+	m_Monster->SetPosition(0,0,0);
+	m_Monster->m_pEnemy = m_pPlayer;
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
 	BuildDefaultLightsAndMaterials();
 	BuildDepthTexture(pd3dDevice, pd3dCommandList);
@@ -916,6 +923,8 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 	PlayerControlInput();
 
+	m_Monster->Update(fTimeElapsed);
+	m_Monster->Animate(fTimeElapsed);
 	if (m_pPlayer->m_PlayerInPlace == SubPlace) {
 
 		m_pCollisionManager->CollisionPlayerToSubSceneStaticObeject();
@@ -1369,6 +1378,8 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 				bill->Render(pd3dCommandList, m_pPlayer->GetCamera());
 			}
 		}
+
+		m_Monster->Render(pd3dCommandList);
 
 
 		while (readycount != 0);
