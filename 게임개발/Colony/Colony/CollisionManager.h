@@ -4,6 +4,7 @@
 #include "ColonyMesh.h"
 #include "ColonyPlayer.h"
 #include "ResourceManager.h"
+#include "SoundManager.h"
 
 class Collision {
 public:
@@ -404,9 +405,15 @@ public:
 
 	ResourceManager* m_pResourceManager = NULL;
 
+	SoundManager* m_pSoundManager = NULL;
+	LPDIRECTSOUNDBUFFER HittedSound = nullptr;
+	LPDIRECTSOUNDBUFFER ShortExplosion = nullptr;
+	LPDIRECTSOUNDBUFFER MonsterDie = nullptr;
+	LPDIRECTSOUNDBUFFER MonsterDieEffect = nullptr;
+
 public:
 
-	CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, SoundManager* soundmanager);
 	~CollisionManager();
 	XMFLOAT4X4 MakeScaleMatrix(float x , float y , float z);
 	XMFLOAT4X4 GetSphereMatrix(BSphere* pSphere);
