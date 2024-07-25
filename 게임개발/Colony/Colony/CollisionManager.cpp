@@ -63,6 +63,45 @@ void CollisionManager::ReleaseUploadBuffers()
 	if (m_pPlayerCapsuleMesh) m_pPlayerCapsuleMesh->ReleaseUploadBuffers();
 	if (m_psphere) m_psphere->ReleaseUploadBuffers();
 }
+void CollisionManager::SetHealItem(Item* pGameObject,const XMFLOAT3& pos)
+{
+	pGameObject->m_xmf4x4ToParent = Matrix4x4::Identity();
+	pGameObject->SetItemType(health);
+	pGameObject->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/Health.bin", "Model/Textures/Item/")->m_pModelRootObject;
+	pGameObject->SetScale(2.0f, 2.0f, 2.0f);
+	pGameObject->SetPosition(pos);
+	pGameObject->AddPostion(XMFLOAT3(0, 0.5f, 0.0f));
+
+}
+void CollisionManager::SetSpeedItem(Item* pGameObject, const XMFLOAT3& pos)
+{
+	pGameObject->m_xmf4x4ToParent = Matrix4x4::Identity();
+	pGameObject->SetItemType(speed);
+	pGameObject->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/speed.bin", "Model/Textures/Item/")->m_pModelRootObject;
+	pGameObject->SetScale(2.0f, 2.0f, 2.0f);
+	pGameObject->SetPosition(pos);
+	pGameObject->AddPostion(XMFLOAT3(0, 0.5f, 0.0f));
+
+}
+void CollisionManager::SetDamageItem(Item* pGameObject, const XMFLOAT3& pos)
+{
+	pGameObject->m_xmf4x4ToParent = Matrix4x4::Identity();
+	pGameObject->SetItemType(damage);
+	pGameObject->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/Damage.bin", "Model/Textures/Item/")->m_pModelRootObject;
+	pGameObject->SetScale(2.0f, 2.0f, 2.0f);
+	pGameObject->SetPosition(pos);
+	pGameObject->AddPostion(XMFLOAT3(0, 0.5f, 0.0f));
+}
+void CollisionManager::SetSheildItem(Item* pGameObject, const XMFLOAT3& pos)
+{
+	pGameObject->m_xmf4x4ToParent = Matrix4x4::Identity();
+	pGameObject->SetItemType(sheild);
+	pGameObject->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/Shield.bin", "Model/Textures/Item/")->m_pModelRootObject;
+	pGameObject->SetScale(2.0f, 2.0f, 2.0f);
+	pGameObject->SetPosition(pos);
+	pGameObject->AddPostion(XMFLOAT3(0, 0.5f, 0.0f));
+
+}
 XMFLOAT4X4 CollisionManager::MakeScaleMatrix(float x, float y, float z)
 {
 
@@ -1375,40 +1414,48 @@ void CollisionManager::CollisionBulletToItemBox(vector<Billboard*>& ExplosionEff
 
 			for (auto& item : Items) {
 
+					
+				
+					
 				if (item->m_bActive == false) {
 					item->m_bActive = true;
-		/*			switch (RandomItemType(gen)) {
-					case 0:
-						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/")->m_pModelRootObject;
-						item->SetItemType(sampling1);
+					switch (RandomItemType(gen)) {
+					//switch (speed+1) {
+					
+					case sampling1:
+						SetSamplingItem(item, a->m_pOwner->GetPosition(),1);
 					break;
-					case 1:
-						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/")->m_pModelRootObject;
+					case sampling2:
+						SetSamplingItem(item, a->m_pOwner->GetPosition(), 2);
 						break;
-					case 2:
-						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/")->m_pModelRootObject;
+					case sampling3:
+						SetSamplingItem(item, a->m_pOwner->GetPosition(), 3);
 						break;
-					case 3:
-						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/eye.bin", "Model/Textures/Item/")->m_pModelRootObject;
+					case syringe:
+						SetSyringeItem(item, a->m_pOwner->GetPosition());
 						break;
-					case 4:
-						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/")->m_pModelRootObject;
+					case shotgun:
+						SetShotgunItem(item, a->m_pOwner->GetPosition());
 						break;
-					case 5:
-						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling2.bin", "Model/Textures/Item/")->m_pModelRootObject;
+					case machinegun:
+						SetMachinegunItem(item, a->m_pOwner->GetPosition());
 						break;
-					case 6:	
-						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling3.bin", "Model/Textures/Item/")->m_pModelRootObject;
+					case health:
+						SetHealItem(item, a->m_pOwner->GetPosition());
 						break;
-					case 7:
-						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/healthpack.bin", "Model/Textures/Item/")->m_pModelRootObject;
+					case damage:
+						SetDamageItem(item, a->m_pOwner->GetPosition());
 						break;
-					case 8:
-						item->m_pChild = m_pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/")->m_pModelRootObject;
+					case speed:
+						SetSpeedItem(item, a->m_pOwner->GetPosition());
 						break;
-					}*/
-					item->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/speed.bin", "Model/Textures/Item/")->m_pModelRootObject;
-					item->SetPosition(a->m_pOwner->GetPosition());
+					case sheild:
+						SetSheildItem(item, a->m_pOwner->GetPosition());
+						break;
+					}
+
+					
+
 					break;
 				}
 
@@ -1427,6 +1474,59 @@ void CollisionManager::CollisionBulletToItemBox(vector<Billboard*>& ExplosionEff
 
 
 
+}
+
+void CollisionManager::SetSamplingItem(Item* pGameObject, const XMFLOAT3& pos, int num)
+{
+
+	pGameObject->m_xmf4x4ToParent = Matrix4x4::Identity();
+
+	if (num == 1) {
+		pGameObject->SetItemType(sampling1);
+		pGameObject->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/")->m_pModelRootObject;
+	}
+	else if (num == 2) {
+		pGameObject->SetItemType(sampling1);
+		pGameObject->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/")->m_pModelRootObject;
+	}
+	else {
+		pGameObject->SetItemType(sampling1);
+		pGameObject->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/sampling1.bin", "Model/Textures/Item/")->m_pModelRootObject;
+
+	}
+
+	pGameObject->SetPosition(pos);
+}
+
+void CollisionManager::SetSyringeItem(Item* pGameObject, const XMFLOAT3& pos)
+{
+	pGameObject->m_xmf4x4ToParent = Matrix4x4::Identity();
+	pGameObject->SetItemType(syringe);
+	pGameObject->m_pChild = m_pResourceManager->BringModelInfo("Model/Item/syringe.bin", "Model/Textures/Item/")->m_pModelRootObject;
+	pGameObject->Rotate(&XMFLOAT3(1, 0, 0), -90.f);
+	pGameObject->SetPosition(pos);
+	pGameObject->AddPostion(XMFLOAT3(0, 0.5f, 0.0f));
+}
+
+void CollisionManager::SetShotgunItem(Item* pGameObject, const XMFLOAT3& pos)
+{
+	pGameObject->m_xmf4x4ToParent = Matrix4x4::Identity();
+	pGameObject->SetItemType(shotgun);
+	pGameObject->m_pChild = m_pResourceManager->BringModelInfo("Model/Weapon/shotgun.bin", "Model/Textures/Item/")->m_pModelRootObject;
+	pGameObject->SetScale(0.7f, 0.7f, 0.7f);
+	pGameObject->SetPosition(pos);
+	pGameObject->AddPostion(XMFLOAT3(0, 0.5f, 0.0f));
+}
+
+void CollisionManager::SetMachinegunItem(Item* pGameObject, const XMFLOAT3& pos)
+{
+	pGameObject->m_xmf4x4ToParent = Matrix4x4::Identity();
+	pGameObject->SetItemType(machinegun);
+	pGameObject->m_pChild = m_pResourceManager->BringModelInfo("Model/Weapon/machinegun.bin", "Model/Textures/Item/")->m_pModelRootObject;
+	pGameObject->SetScale(0.5f, 0.5f, 0.5f);
+	pGameObject->Rotate(&XMFLOAT3(1,0,0),90.f);
+	pGameObject->SetPosition(pos);
+	pGameObject->AddPostion(XMFLOAT3(0, 0.5f, 0.0f));
 }
 
 void CollisionManager::RenderEnemyBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, GameObject* pObject)

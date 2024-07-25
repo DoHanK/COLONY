@@ -60,7 +60,7 @@ bool AIController::ExecuteGoal(float fTimeElapsed)
 			(!m_pAnimationControl->isSameState(AlienAnimationName::Death_2)) &&
 			(!m_pAnimationControl->isSameState(AlienAnimationName::Death_3))) {
 				
-			m_pAnimationControl->ChangeAnimation(Death_1 + IdleRandom(gen)%3);
+			m_pAnimationControl->ChangeAnimation(Death_3);
 			m_pBody->m_xmf3Velocity.x = 0.f;
 			m_pBody->m_xmf3Velocity.z = 0.f;
 

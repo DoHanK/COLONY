@@ -271,7 +271,7 @@ protected:
 	//Item
 	UINT m_nItemBox = 0; 
 	vector<GameObject*>					m_itemBoxes;
-	vector<Item*>					m_items;
+	vector<Item*>						m_items;
 	vector<Billboard*>					m_ItemBoxExplosion;
 
 

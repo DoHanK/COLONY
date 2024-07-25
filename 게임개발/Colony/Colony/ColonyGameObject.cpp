@@ -1997,3 +1997,13 @@ void BulletCasing::Update(float fTimeElapsed)
 
 
 }
+
+void Item::Animate(float fTimeElapsed)
+{
+	if (GetItemType() == machinegun || GetItemType() == syringe) {
+		Rotate(0, 0, 100 * fTimeElapsed);
+	}
+	else {
+		Rotate(0, 100 * fTimeElapsed , 0);
+	}
+}

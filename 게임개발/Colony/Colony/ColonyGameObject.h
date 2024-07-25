@@ -607,6 +607,12 @@ enum ItemType {
 	sampling2,
 	sampling3,
 	syringe,
+	shotgun,
+	machinegun,
+	health,
+	damage,
+	speed,
+	sheild
 
 
 };
@@ -617,7 +623,7 @@ public:
 
 	int		m_itemtype;
 public:
-	
 	int GetItemType() {return m_itemtype;};
 	void SetItemType(int type) { m_itemtype = type; };
+	virtual void Animate(float fTimeElapsed);
 };

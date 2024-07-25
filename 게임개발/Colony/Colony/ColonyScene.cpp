@@ -648,7 +648,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(500);
-	for (int j = 0; j < 100; ++j) {
+	for (int j = 0; j < 1000; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, MonsterSizeDis(gen));
@@ -790,7 +790,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pResourceManager->BringModelInfo("Model/Item/Damage.bin", "Model/Textures/Item/");
 		pResourceManager->BringModelInfo("Model/Item/Multiattack.bin", "Model/Textures/Item/");
 		pResourceManager->BringModelInfo("Model/Item/Health.bin", "Model/Textures/Item/");
-		pResourceManager->BringModelInfo("Model/Item/shield.bin", "Model/Textures/Item/");
+		pResourceManager->BringModelInfo("Model/Item/Shield.bin", "Model/Textures/Item/");
 
 	//item
 	m_itemBoxes.reserve(600);
@@ -1031,7 +1031,6 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 
 
-
 		m_RedZoneHurt += fTimeElapsed;
 
 		if (m_RedZoneHurt > 5.0f) {
@@ -1098,6 +1097,15 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 
 		m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
+
+
+
+		for (auto& item : m_items) {
+			if (item->m_bActive) {
+				item->Animate(fTimeElapsed);
+
+			}
+		}
 
 
 		
@@ -1208,7 +1216,6 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 	
 		m_pskybox->Render(pd3dCommandList, m_pPlayer->GetCamera(), m_pPlayer);
-		m_pPlayer->Render(pd3dCommandList);
 
 
 		for (auto& InFoBill : m_InFoBillBoard) {
@@ -1255,6 +1262,10 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 				item->Render(pd3dCommandList);
 			}
 		}
+
+
+		m_pPlayer->Render(pd3dCommandList);
+
 
 		for (auto& GO : m_pBillObjects) {
 			if (GO->active) {
@@ -1506,6 +1517,13 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/presskey.dds", UI_TEXTURE, true);
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/Alpha.dds", UI_TEXTURE, true);
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/gooutside.dds", UI_TEXTURE, true);
+
+
+	//UISattus
+	pUImanager->CreateUINonNormalRect(-0.65, -0.9, -0.4, 0.4, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/StatusUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(0.6, 0.3, -1.0, -0.6, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/ItemUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
+
 	
 }
 
@@ -1717,7 +1735,7 @@ void GamePlayScene::PlayerControlInput()
 			for (auto& item : m_items) {
 				if (item->m_bActive) {
 					if (XM3CalDis(item->GetPosition(), m_pPlayer->GetPosition()) <= 1.0f) {
-						DebugValue::PrintStr("Ãâ·Â \n");
+
 						item->m_bActive = false;
 					}
 				}

@@ -455,7 +455,7 @@ public:
 
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard, int& KillCount);
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard,GameObject* pEnemy,int& KillCount);
-	void CollisionBulletToItemBox(vector<Billboard*>& ExplosionEffect, vector<Item*>& Items);
+
 	void CollisionEnemyToStaticObeject();    
 	void CollisionPlayerToEnemy();
 	void CollisionEnemyToPlayer();
@@ -466,5 +466,18 @@ public:
 
 
 	void ReleaseUploadBuffers();
+
+	void CollisionBulletToItemBox(vector<Billboard*>& ExplosionEffect, vector<Item*>& Items);
+	
+	void SetSamplingItem(Item* pGameObject, const XMFLOAT3& pos, int num);
+	void SetSyringeItem(Item * pGameObject, const XMFLOAT3& pos);
+
+	void SetShotgunItem(Item* pGameObject, const XMFLOAT3& pos);
+	void SetMachinegunItem(Item* pGameObject, const XMFLOAT3& pos);
+	void SetHealItem(Item* pGameObject, const XMFLOAT3& pos);
+	void SetSpeedItem(Item* pGameObject, const XMFLOAT3& pos);
+	void SetDamageItem(Item* pGameObject, const XMFLOAT3& pos);
+	void SetSheildItem(Item* pGameObject, const XMFLOAT3& pos);
+
 };
 
