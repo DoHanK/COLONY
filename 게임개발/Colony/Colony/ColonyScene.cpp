@@ -847,11 +847,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//Sound
 	m_pSoundManager = pSoundManager;
 	SpaceShipBGM = m_pSoundManager->LoadWaveToBuffer("Sound/SpaceShipBGM.wav");
-	SpaceShipBGM->SetVolume(0);//-10000 ~ 0(오리지널 데시벨)
-	SpaceShipBGM->SetFrequency(-1000); //100~100000 클수록 재생속도 증가
+	SpaceShipBGM->SetVolume(-1000);//-10000 ~ 0(오리지널 데시벨)
+	//SpaceShipBGM->SetFrequency(-1000); //100~100000 클수록 재생속도 증가
+	SpaceShipBGM->Play(0, 0, DSBPLAY_LOOPING);
 	PlaySceneBGM= m_pSoundManager->LoadWaveToBuffer("Sound/PlaySceneBGM.wav");
 	PlaySceneBGM->SetVolume(-2000);
-	PlaySceneBGM->Play(0, 0, DSBPLAY_LOOPING);
 	RainBGM = m_pSoundManager->LoadWaveToBuffer("Sound/RainSound.wav");
 	RainBGM->SetVolume(-1000);
 	StepSound = m_pSoundManager->LoadWaveToBuffer("Sound/StepSound.wav");
@@ -949,6 +949,11 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 						m_pPlayer->m_PlayerInPlace = MainPlace;
 						m_pPlayer->SetPosition(GetMainScene());
 						m_PlayTimeTimer.Reset();
+						SpaceShipBGM->Stop();
+						PlaySceneBGM->Play(0, 0, DSBPLAY_LOOPING);
+						for (auto& particle : m_pParticleObjects) {
+							particle->m_bActive = true;
+						}
 					}
 				}
 
@@ -1497,7 +1502,7 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 
 	//UIInfo 
-	m_InFoUI = pUImanager->CreateUINonNormalRect(0.03+0.77, -0.03 + 0.77, -0.25, 0.25, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/FrontMoniter.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	m_InFoUI = pUImanager->CreateUINonNormalRect(0.03+0.77, -0.03 + 0.77, -0.26, 0.24, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/FrontMoniter.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/presskey.dds", UI_TEXTURE, true);
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/Alpha.dds", UI_TEXTURE, true);
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/gooutside.dds", UI_TEXTURE, true);
