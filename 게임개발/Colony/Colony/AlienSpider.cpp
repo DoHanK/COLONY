@@ -579,7 +579,7 @@ void AlienSpiderAnimationController::AdvanceTimeWithMultithread(float fElapsedTi
 DogMonster::DogMonster(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, float scale)
 {
 
-	CLoadedModelInfo* pSpider = pResourceManager->BringModelInfo("Model/Chomper.bin", "Model/Textures/Chomper/");
+	CLoadedModelInfo* pSpider = pResourceManager->BringModelInfo("Model/Spitter.bin", "Model/Textures/Spitter/");
 	DogAnimationController* pAnimationSpider = new DogAnimationController(pd3dDevice, pd3dCommandList, 2, pSpider);
 	pAnimationSpider->SetTrackAnimationSet(0, 0);
 	pAnimationSpider->SetTrackAnimationSet(1, 0);
