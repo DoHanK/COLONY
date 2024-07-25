@@ -489,7 +489,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 
-	m_pCollisionManager = new CollisionManager(pd3dDevice, pd3dCommandList);
+	m_pCollisionManager = new CollisionManager(pd3dDevice, pd3dCommandList, pSoundManager);
 	m_pCollisionManager->LoadCollisionBoxInfo(pd3dDevice, pd3dCommandList, "boundinginfo.bin");
 	m_pCollisionManager->EnrollPlayerIntoCapsule(XMFLOAT3(EPSILON, 0.0, EPSILON), 0.3, 1.3, 0.3, m_pPlayer);
 	m_pCollisionManager->EnrollBulletDir(m_pCamera);
@@ -648,13 +648,13 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(500);
-	for (int j = 0; j < 1000; ++j) {
+	for (int j = 0; j < 50; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, MonsterSizeDis(gen));
 			//AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, 12.f);
 			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 15.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
-			//p->SetPosition(j, 0.f, 0.f);
+			//p->SetPosition(j, 0.f, 0.f);  
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
 			p->SetGhostShader(m_pGhostTraillerShader);
@@ -851,26 +851,40 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//SpaceShipBGM->SetFrequency(-1000); //100~100000 클수록 재생속도 증가
 	SpaceShipBGM->Play(0, 0, DSBPLAY_LOOPING);
 	PlaySceneBGM= m_pSoundManager->LoadWaveToBuffer("Sound/PlaySceneBGM.wav");
-	PlaySceneBGM->SetVolume(-2000);
+	PlaySceneBGM->SetVolume(-800);
 	RainBGM = m_pSoundManager->LoadWaveToBuffer("Sound/RainSound.wav");
 	RainBGM->SetVolume(-1000);
 	StepSound = m_pSoundManager->LoadWaveToBuffer("Sound/StepSound.wav");
-	StepSound -> SetVolume(-100);
-	StepSound->SetFrequency(20000);
+	StepSound -> SetVolume(0);
+	//StepSound->SetFrequency(20000);
 	SpiderHurt = m_pSoundManager->LoadWaveToBuffer("Sound/spiderHurt.wav");
 	SpiderHurt->SetVolume(-300);
 	JumpSound = m_pSoundManager->LoadWaveToBuffer("Sound/JumpSound.wav");
 	JumpSound->SetVolume(0);
 	RifleSound = m_pSoundManager->LoadWaveToBuffer("Sound/RifleSound.wav");
-	RifleSound->SetVolume(-400);
+	RifleSound->SetVolume(-600);
 	ShotgunSound = m_pSoundManager->LoadWaveToBuffer("Sound/ShotgunSound.wav");
-	ShotgunSound->SetVolume(-800);
+	ShotgunSound->SetVolume(-900);
 	MachineGunSound = m_pSoundManager->LoadWaveToBuffer("Sound/MachineGunEffect.wav");
-	MachineGunSound->SetVolume(-400);
+	MachineGunSound->SetVolume(-600);
 	ReloadSound = m_pSoundManager->LoadWaveToBuffer("Sound/clipload1.wav");
 	ReloadSound->SetVolume(-2000);
 	ScopeModeSound = m_pSoundManager->LoadWaveToBuffer("Sound/ScopeModeSound.wav");
 	ScopeModeSound->SetVolume(-200);
+	AllReloadSound = m_pSoundManager->LoadWaveToBuffer("Sound/reload.wav");
+	AllReloadSound->SetVolume(-200);
+	OkeySound = m_pSoundManager->LoadWaveToBuffer("Sound/Okey.wav");
+	OkeySound->SetVolume(-400);
+	ElectronicSound = m_pSoundManager->LoadWaveToBuffer("Sound/Click_Electronic_15.wav");
+	ElectronicSound->SetVolume(-400);
+	alarmSound = m_pSoundManager->LoadWaveToBuffer("Sound/alarm.wav");
+	alarmSound->SetVolume(-500);
+	BigExplosion = m_pSoundManager->LoadWaveToBuffer("Sound/BigExplosion.wav");
+	BigExplosion->SetVolume(0);
+	PickUpSound = m_pSoundManager->LoadWaveToBuffer("Sound/PickUp.wav");
+	PickUpSound->SetVolume(-400);
+	PickItem = m_pSoundManager->LoadWaveToBuffer("Sound/ItemPick.wav");
+	PickItem->SetVolume(-400);
 	
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
@@ -929,9 +943,17 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 				if (GetKeyboardState(pKeysBuffer)) {
 
 					if (pKeysBuffer['O'] & 0xF0) {
+						if (OkeySoundOnce)
+						{
+							ElectronicSound->Play(0, 0, 0);
+							OkeySoundOnce = false;
+						}
 						m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/Alpha.dds", UI_TEXTURE, true);
 						m_InFoBillBoard[0]->active = true;
 						m_Progress = SceneProgress::GoOutSide;
+					}
+					else {
+						OkeySoundOnce = true;
 					}
 				}
 
@@ -945,6 +967,11 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 				if (GetKeyboardState(pKeysBuffer)) {
 
 					if (pKeysBuffer['O'] & 0xF0) {
+						if (OkeySoundOnce)
+						{
+							OkeySound->Play(0, 0, 0);
+							OkeySoundOnce = false;
+						}
 						m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/Alpha.dds", UI_TEXTURE, true);
 						m_pPlayer->m_PlayerInPlace = MainPlace;
 						m_pPlayer->SetPosition(GetMainScene());
@@ -954,6 +981,9 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 						for (auto& particle : m_pParticleObjects) {
 							particle->m_bActive = true;
 						}
+					}
+					else {
+						OkeySoundOnce = true;
 					}
 				}
 
@@ -1037,6 +1067,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 			m_RedZoneHurt = 0.0f;
 			if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
 				m_pPlayer->m_HP -= 1;
+				alarmSound->Play(0, 0, 0);
 				m_isHurt = true;
 			}
 		}
@@ -1306,7 +1337,7 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 				m_RedZone->m_prexmf4x4ToParent = m_RedZone->m_xmf4x4ToParent;
 				m_LastMinute = m_currentMinute;
 				m_pRedZoneEffect->active = true;
-
+				BigExplosion->Play(0, 0, 0);
 			}
 
 			if (TotalPlayTime % int(LifeTime) == int(LifeTime - 1)) {
@@ -1451,8 +1482,8 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	
 
 	//Item
-	pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.89, 0.95, pResourceManager->BringTexture("Model/Textures/UITexture/syringe.dds", UI_TEXTURE, true),
-		NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	/*pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.89, 0.95, pResourceManager->BringTexture("Model/Textures/UITexture/syringe.dds", UI_TEXTURE, true),
+		NULL, NULL, 0, TEXTUREUSE, GetType(), true);*/
 
 	/*pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.9, 0.95, pResourceManager->BringTexture("Model/Textures/UITexture/eye.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);*/
@@ -1467,8 +1498,8 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	h_HP[2]=BringUINum(pUImanager, pResourceManager, -0.75, -0.81, -0.90, -0.88, 0, 1, GetType());
 
 	// crash -> Hit
-	m_TCrashOk = pResourceManager->BringTexture("Model/Textures/UITexture/crashOk3.dds", UI_TEXTURE, true);
-	h_crashOk = pUImanager->CreateUINonNormalRect(0.042, -0.047, -0.03, 0.03, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	m_TCrashOk = pResourceManager->BringTexture("Model/Textures/UITexture/cross-02-hit.dds", UI_TEXTURE, true);
+	h_crashOk = pUImanager->CreateUINonNormalRect(0.043, -0.048, -0.03, 0.03, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
 
@@ -1520,8 +1551,8 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 
 	//UISattus
-	pUImanager->CreateUINonNormalRect(-0.65, -0.9, -0.4, 0.4, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/StatusUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
-	pUImanager->CreateUINonNormalRect(0.6, 0.3, -1.0, -0.6, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/ItemUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.73, -0.9, -0.17, 0.17, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/StatusUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.75, -0.9, -0.6, -0.26, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/ItemUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 
 	
@@ -1635,22 +1666,39 @@ void GamePlayScene::PlayerControlInput()
 		//Move
 		if (pKeysBuffer[W] & 0xF0) {
 			dwDirection |= DIR_FORWARD;
+			if (StepSoundOnce) {
+				StepSound->Play(0, 0, 0);
+				StepSoundOnce = false;
+			}
 		}
 		if (m_pPlayer->m_WeaponState == RIGHT_HAND) {
 			if (pKeysBuffer[S] & 0xF0) {
 				dwDirection |= DIR_BACKWARD;
+				if (StepSoundOnce) {
+					StepSound->Play(0, 0, 0);
+					StepSoundOnce = false;
+				}
 			}
 			if (pKeysBuffer[A] & 0xF0) {
 				dwDirection |= DIR_LEFT;
+				if (StepSoundOnce) {
+					StepSound->Play(0, 0, 0);
+					StepSoundOnce = false;
+				}
 			}
 			if (pKeysBuffer[D] & 0xF0) {
 				dwDirection |= DIR_RIGHT;
+				if (StepSoundOnce) {
+					StepSound->Play(0, 0, 0);
+					StepSoundOnce = false;
+				}
 			}
 		}
 		//하나라도 안눌려있으면 0
 		if (!((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) || (dwDirection & DIR_LEFT) || (dwDirection & DIR_RIGHT))) {
 			m_pPlayer->m_xmf3Velocity.x = 0.0f;
 			m_pPlayer->m_xmf3Velocity.z = 0.0f;
+			StepSoundOnce = true;
 		}
 		//W S A D 키입력 검사
 		//RUN
@@ -1728,15 +1776,18 @@ void GamePlayScene::PlayerControlInput()
 
 			// 플레이어 상태
 			dwPlayerState |= STATE_RELOAD;
+			ScopeModeSound->Play(0, 0, 0);
 		}
 		//줍기
 		if (pKeysBuffer[F] & 0xF0) {
 			// 총알 스테이트 변경
+			PickUpSound->Play(0, 0, 0);
 			for (auto& item : m_items) {
 				if (item->m_bActive) {
 					if (XM3CalDis(item->GetPosition(), m_pPlayer->GetPosition()) <= 1.0f) {
 
 						item->m_bActive = false;
+						PickItem->Play(0, 0, 0);
 					}
 				}
 			}
@@ -1751,7 +1802,7 @@ void GamePlayScene::PlayerControlInput()
 
 			// 플레이어 상태
 			dwPlayerState |= STATE_SWITCH_WEAPON;
-
+			ScopeModeSound->Play(0, 0, 0);
 		
 			
 		}
@@ -1807,8 +1858,8 @@ void GamePlayScene::PlayerControlInput()
 					m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard, m_KillCount);
 					m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion,m_items);
 					if (m_bcrashOk) { 
-						if(!m_pSoundManager->IsSoundBufferPlaying(SpiderHurt))
-						m_pSoundManager->RestartSound(SpiderHurt); }
+						SpiderHurt->Play(0, 0, 0);
+					}
 				}
 				m_pBillObject->active = true;
 				m_pPlayer->m_ReloadTime = 0;

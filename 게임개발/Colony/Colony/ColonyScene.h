@@ -324,8 +324,20 @@ protected:
 	LPDIRECTSOUNDBUFFER SpiderHurt = nullptr;
 	LPDIRECTSOUNDBUFFER ReloadSound = nullptr;
 	LPDIRECTSOUNDBUFFER ScopeModeSound = nullptr;
+	LPDIRECTSOUNDBUFFER AllReloadSound = nullptr;
+	LPDIRECTSOUNDBUFFER OkeySound = nullptr;
+	LPDIRECTSOUNDBUFFER ElectronicSound = nullptr;
+	LPDIRECTSOUNDBUFFER alarmSound = nullptr;
+	LPDIRECTSOUNDBUFFER BigExplosion = nullptr;
+	LPDIRECTSOUNDBUFFER PickUpSound = nullptr;
+
+	LPDIRECTSOUNDBUFFER PickItem = nullptr;
+
 
 	bool ScopeSoundOnce = true;
+	bool StepSoundOnce = true;
+	bool OkeySoundOnce = true;
+
 
 	/// SubScene Object 
 	GameObject* m_pSceneSpaceShip = NULL;

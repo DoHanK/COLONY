@@ -1,11 +1,12 @@
 #include "CollisionManager.h"
 #include "AlienSpider.h"
 
+
 class AlienSpider;
 // 벡터의 길이(크기)를 계산하는 함수
 
 
-CollisionManager::CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+CollisionManager::CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,SoundManager* soundmanager)
 {
 	for (int i = 0; i < 3000; ++i) {
 		BoundingBoxMesh* pBounding = new BoundingBoxMesh(pd3dDevice, pd3dCommandList);
@@ -22,6 +23,16 @@ CollisionManager::CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pPlayerCapsuleMesh = new CapsuleMesh(pd3dDevice, pd3dCommandList,20,10, 0.3, 1.3, 0.3);
 	m_psphere = new ShphereMesh(pd3dDevice, pd3dCommandList, 20, 10,1) ;
 
+	//사운드 로드
+	m_pSoundManager = soundmanager;
+	HittedSound = m_pSoundManager->LoadWaveToBuffer("Sound/Click_Electronic_04.wav");
+	HittedSound->SetVolume(-300);
+	ShortExplosion = m_pSoundManager->LoadWaveToBuffer("Sound/shortExplosion.wav");
+	ShortExplosion->SetVolume(-300);
+	MonsterDie = m_pSoundManager->LoadWaveToBuffer("Sound/MonsterDie.wav");
+	MonsterDie->SetVolume(-300);
+	MonsterDieEffect = m_pSoundManager->LoadWaveToBuffer("Sound/monsterDieEffect.wav");
+	MonsterDieEffect->SetVolume(0);
 
 }
 
@@ -1220,7 +1231,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 			if (enemy->m_Entire.Intersects(BulletPos, BulletDir, dis)) {
 
 				crushlist.emplace_back(enemy, dis);
-
+				HittedSound->Play(0, 0, 0);
 			}
 		}
 	}
@@ -1299,6 +1310,8 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 	for (auto RE : m_RemoveObjects) {
 
 		m_EnemyObjects.remove(RE);
+		//MonsterDieEffect->Play(0, 0, 0);
+		MonsterDie->Play(0, 0, 0);
 		delete RE;
 	}
 
@@ -1329,7 +1342,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 					break;
 
 				if (EnmeyCollsion.m_Bodys[i].Intersects(BulletPos, BulletDir, dis)) {
-
+					HittedSound->Play(0, 0, 0);
 					for (int i = 0; i < 5; ++i) {
 
 						int idx = EffectIndex[rand() % 11];
@@ -1403,6 +1416,8 @@ void CollisionManager::CollisionBulletToItemBox(vector<Billboard*>& ExplosionEff
 		BOBBox* a = static_cast<BOBBox*>(*it);
 		a->UpdateCollision();
 		if (a->m_Transformboudingbox.Intersects(BulletPos, BulletDir, dis)) {
+			HittedSound->Play(0, 0, 0);
+			ShortExplosion->Play(0, 0, 0);
 			a->m_pOwner->m_bActive = false;
 			for (auto& bill : ExplosionEffect) {
 				if (bill->active == false) {
