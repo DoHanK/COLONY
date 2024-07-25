@@ -111,6 +111,33 @@ enum AlienJumpState {
 	JUMP_END
 };
 
+enum ChomperAnimationName {
+	Cho_Attack,
+	Cho_Hit,
+	Cho_idle,
+	Cho_Run,
+	Cho_Walk
+};
+
+enum SpitterAnimationName {
+	Spit_Attack,
+	Spit_Hit,
+	Spit_idle,
+	Spit_Run,
+	Spit_Walk
+};
+
+enum GrenadierAnimationName {
+	Gren_Attack,
+	Gren_Death,
+	Gren_Hit,
+	Gren_turnLeft,
+	Gren_turnRight,
+	Gren_Walk,
+	Gren_Run
+
+};
+
 
 //이동 속도
 #define AlienAccel		3.0f
