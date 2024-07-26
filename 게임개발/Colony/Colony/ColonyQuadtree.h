@@ -22,6 +22,7 @@ public:
 	BoundingBox					m_BoundingBox;
 	std::vector<GameObject*>	m_StaticObject;
 	std::list<GameObject*>	m_DynamicObject;
+	std::list<DogMonster*>	m_SubObject;
 	std::vector<int>			m_Route; // 루트 찾기
 
 	//	
@@ -62,7 +63,7 @@ public:
 
 	void CalSameDepthidx();
 
-	void AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys);
+	void AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys, vector<DogMonster*>& DogEnemy);
 
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 

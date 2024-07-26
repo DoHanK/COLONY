@@ -130,7 +130,7 @@ public:
 	DogAIController* m_pSoul;
 	void Update(float fTimeElapsed);
 	void UpdatePosition(float fTimeElapsed);
-
+	void AnimateWithMultithread(float fTimeElapsed, int idx);
 
 };
 

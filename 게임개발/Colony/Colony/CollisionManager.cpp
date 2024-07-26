@@ -344,6 +344,17 @@ void CollisionManager::EnrollEnemy(GameObject* pEnemy)
 	}
 }
 
+void CollisionManager::EnrollDogEnemy(GameObject* pEnemy)
+{
+	if(pEnemy) {
+
+		BSphere* pDogEnemy = new BSphere(XMFLOAT3(0,0.3,0),0.6f, pEnemy);
+
+		m_DogEnemy.emplace_back(pDogEnemy);
+
+	}
+}
+
 void CollisionManager::CheckCollisionEnemytoStaticObject(GameObject* pEnemy)
 {
 
@@ -1211,10 +1222,12 @@ void CollisionManager::CheckVisiableEnemy()
 
 bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard,int& KillCount)
 {
+
 	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());
 	
 	FXMVECTOR BulletDir = XMLoadFloat3(&m_pCamera->GetLookVector());
 	 
+
 	for (auto& a : m_EnemyObjects) {
 		a->UpdateEntireBouding();
 		a->UpdateBodyBouding();
@@ -1222,6 +1235,9 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 	}
 
 	std::list<AliensBoudingBox*> m_RemoveObjects;
+
+
+
 	float dis = 0;
 	bool crush = false;
 	//1차 충돌 처리
@@ -1307,6 +1323,9 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 
 	}
 
+
+
+
 	for (auto RE : m_RemoveObjects) {
 
 		m_EnemyObjects.remove(RE);
@@ -1317,6 +1336,86 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 
 	return crush;
 }
+
+bool CollisionManager::CollsionBulletToDogEnemy(vector<Billboard*>& m_pBloodBillboard, int& KillCount)
+{
+
+	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());
+
+	FXMVECTOR BulletDir = XMLoadFloat3(&m_pCamera->GetLookVector());
+
+
+	for (auto& a : m_DogEnemy) {
+		a->UpdateCollision();
+	}
+
+	std::list<BSphere*> m_RemoveObjects;
+
+
+
+	float dis = 0;
+	bool crush = false;
+	//1차 충돌 처리
+	std::list<pair<BSphere*, float>> crushlist;
+	for (auto enemy : m_DogEnemy) {
+		if ((enemy->m_pOwner)->m_GoalType != Deaded_Goal) {
+			if (enemy->m_boundingshpere.Intersects(BulletPos, BulletDir, dis)) {
+
+				crushlist.emplace_back(enemy, dis);
+				HittedSound->Play(0, 0, 0);
+			}
+		}
+	}
+
+	crushlist.sort([](pair<BSphere*, float>& a, pair<BSphere*, float>& b) {
+		return a.first > b.first; });
+
+
+	if (crushlist.size() > 0) {
+		auto enemy = crushlist.begin();
+	
+
+		
+
+		
+		enemy->first->m_pOwner->m_bHitted = true;
+		enemy->first->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage() / enemy->first->m_pOwner->m_MonsterScale;
+		if (enemy->first->m_pOwner->m_HP <= 0) {
+
+			float scale = enemy->first->m_pOwner->m_MonsterScale;
+			for (auto Effect : m_pBloodBillboard) {
+
+				if (Effect->active == false) {
+					Effect->active = true;
+					Effect->m_OffsetPos = XMFLOAT3(0, 0, 0);
+					Effect->m_BillMesh->UpdataVertexPosition(UIRect(1.4 * scale, 0, -0.7 * scale, 0.7 * scale), 1.0f);
+					Effect->SetPosition(enemy->first->m_pOwner->GetPosition());
+					XMFLOAT3 pos = enemy->first->m_pOwner->GetPosition();
+					pos.y = 0.0f;
+					Effect->m_StaticPos = pos;
+					break;
+				}
+			}
+
+			enemy->first->m_pOwner->m_bActive = false;
+			m_RemoveObjects.push_back(enemy->first);
+			++KillCount;
+		}
+		crush = true;
+
+	}
+
+	for (auto RE : m_RemoveObjects) {
+
+		m_DogEnemy.remove(RE);
+		//MonsterDieEffect->Play(0, 0, 0);
+		MonsterDie->Play(0, 0, 0);
+		delete RE;
+	}
+
+	return crush;
+}
+
 
 bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard, GameObject* pEnemy, int& KillCount)
 {
@@ -1649,6 +1748,14 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 	if(m_psphere) m_psphere->Render(pd3dCommandList,0);
 
 
+
+	for (const auto& a : m_DogEnemy) {
+		a->UpdateCollision();
+		xmf4x4World = GetSphereMatrix(a->m_boundingshpere.Radius, a->m_boundingshpere.Center);
+		XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+		pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+		m_psphere->Render(pd3dCommandList, 0);
+	}
 
 
 	//적의 바운디 박스

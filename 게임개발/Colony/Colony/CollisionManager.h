@@ -378,6 +378,7 @@ public:
 	//Accel Obeject       Dynamic Size  -> list 
 	std::list<Collision*> m_AccelationObjects;
 	std::list<AliensBoudingBox*> m_EnemyObjects;
+	std::list<BSphere*>			m_DogEnemy;
 
 	std::vector<Collision*> m_bullets;
 
@@ -425,6 +426,8 @@ public:
 	void EnrollObjectIntoBox(bool isAccel, XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT3 extendscale, GameObject* pOwner);
 	void EnrollItemIntoBox(XMFLOAT3 center, XMFLOAT3 extend, XMFLOAT4X4 Transform, GameObject* pOwner);
 
+
+
 	void EnrollHierarchicalStaticGameObject(GameObject* pOwner);
 
 	//µî·Ï ±¸
@@ -435,6 +438,7 @@ public:
 	void EnrollPlayerIntoCapsule(XMFLOAT3 center, float radius, float tip, float base, GameObject* pOwner);
 
 	void EnrollEnemy(GameObject* pEnemy);
+	void EnrollDogEnemy(GameObject* pEnemy);
 
 
 
@@ -463,12 +467,14 @@ public:
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard, int& KillCount);
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard,GameObject* pEnemy,int& KillCount);
 
+	bool CollsionBulletToDogEnemy(vector<Billboard*>& m_pBloodBillboard, int& KillCount);
+
+
 	void CollisionEnemyToStaticObeject();    
 	void CollisionPlayerToEnemy();
 	void CollisionEnemyToPlayer();
 	bool CollisionPlayerToRedZone();
 	void CollisionBulletToObject();
-
 
 
 

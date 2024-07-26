@@ -131,27 +131,32 @@ int DogGoalThink::Process()
 	int SubgoalStatus = ProcessSubGoals();
 
 	float distance = XM3CalDis(m_pOwner->m_pEnemy->GetPosition(), m_pOwner->GetPosition());
-	if (m_pOwner->m_bHitted) {
-
+	if (m_pOwner->m_HP <= 0) {
+		m_pOwner->m_GoalType = Deaded_Goal;
 	}
-	else {
+	else{
 
-		if (distance < 10.0f) {
-
-			if (distance < 1.0f) {
-				m_pOwner->m_GoalType = Attack_Goal;
-			}
-			else if(m_pOwner->m_GoalType != Attack_Goal){
-				m_pOwner->m_GoalType = Trace_Goal;
-			}
-
+		if (m_pOwner->m_bHitted) {
+			m_pOwner->m_GoalType = Hitted_Goal;
 		}
 		else {
-			m_pOwner->m_GoalType = Idle_Goal;
+
+			if (distance < 20.0f) {
+
+				if (distance < 1.0f) {
+					m_pOwner->m_GoalType = Attack_Goal;
+				}
+				else if (m_pOwner->m_GoalType != Attack_Goal) {
+					m_pOwner->m_GoalType = Trace_Goal;
+				}
+
+			}
+			else {
+				m_pOwner->m_GoalType = Idle_Goal;
+			}
 		}
+
 	}
-
-
 
 
 	if (SubgoalStatus == completed || SubgoalStatus == failed) {

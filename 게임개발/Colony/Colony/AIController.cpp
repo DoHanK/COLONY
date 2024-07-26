@@ -362,6 +362,7 @@ bool DogAIController::ExecuteGoal(float fTimeElapsed)
 		}
 
 		if (m_pAnimationControl->isAnimationPlayProgress(Spit_Attack, 1.0f)) {
+			
 			m_pBody->m_GoalType = Idle_Goal;
 			m_pAnimationControl->ChangeAnimation(Spit_idle);
 		}
@@ -373,6 +374,22 @@ bool DogAIController::ExecuteGoal(float fTimeElapsed)
 			m_pAnimationControl->ChangeAnimation(Spit_Hit);
 		}
 
+		if (m_pAnimationControl->isAnimationPlayProgress(Spit_Hit, 1.0f)) {
+
+			m_pBody->m_GoalType = Idle_Goal;
+			m_pBody->m_bHitted = false;
+		}
+
+	}
+	else if (m_pBody->m_GoalType == Deaded_Goal) {
+		//if (!m_pAnimationControl->isSameState(Deaded_Goal)) {
+		//	m_pAnimationControl->ChangeAnimation(Deaded_Goal);
+		//}
+
+
+		//if (m_pAnimationControl->isAnimationPlayProgress(Deaded_Goal, 1.0f)) {
+		//	m_pBody->m_bActive = true;
+		//}
 	}
 	
 

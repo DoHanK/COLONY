@@ -650,12 +650,12 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(500);
-	for (int j = 0; j < 50; ++j) {
+	for (int j = 0; j < 100; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, MonsterSizeDis(gen));
 			//AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, 12.f);
-			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 15.f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
+			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.0f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
 			//p->SetPosition(j, 0.f, 0.f);  
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
@@ -671,6 +671,18 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		}
 	}
 	
+	for (int j = 0; j < 200; ++j) {
+		for (int i = 0; i < 1; i++) {
+			DogMonster* pDog = new DogMonster(pd3dDevice, pd3dCommandList, pResourceManager, 2);
+			int idex = m_pPathFinder->GetInvalidNode();
+			pDog->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
+			pDog->m_pEnemy = m_pPlayer;
+			m_pDogMonster.push_back(pDog);
+			m_pCollisionManager->EnrollDogEnemy(pDog);
+		}
+	}
+
+
 	m_pTestBox = new ShphereMesh(pd3dDevice, pd3dCommandList,20,20, PlayerRange);
 	
 	//billboard -> doAnimate,active,ownerObject,TickAddPosition 설정
@@ -728,6 +740,28 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillObject->SettedTimer = 0.01f;
 	m_pBillObject->doOnce = true;
 	m_pBillObject->AddRef();
+
+
+
+	for(int i  = 0 ; i < 10 ; i++){
+		Billboard*	pBillObject = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+			pResourceManager->BringTexture("Model/Textures/AliensParticle.dds", BILLBOARD_TEXTURE, true), m_BillShader, NULL);
+		pBillObject->doAnimate = true;
+		pBillObject->active = false;
+		pBillObject->m_OffsetPos = XMFLOAT3(0, -1.0f, 0);
+		pBillObject->SetRowNCol(8, 8);
+		pBillObject->m_BillMesh->UpdataVertexPosition(UIRect(2.0, -2.0, -2.0, 2.0), 1.0f);
+		pBillObject->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+		pBillObject->SettedTimer = 0.0001f;
+		pBillObject->doOnce = true;
+		pBillObject->AddRef();
+
+		m_DeadDogEneyEffect.push_back(pBillObject);
+
+	}
+
+
+
 
 	//// particle
 	m_pParticleShader = new ParticleShader();
@@ -891,9 +925,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//Test 
 
-	m_Monster = new DogMonster(pd3dDevice, pd3dCommandList, pResourceManager,  2);
-	m_Monster->SetPosition(0,0,0);
-	m_Monster->m_pEnemy = m_pPlayer;
+
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
 	BuildDefaultLightsAndMaterials();
 	BuildDepthTexture(pd3dDevice, pd3dCommandList);
@@ -923,8 +955,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 	PlayerControlInput();
 
-	m_Monster->Update(fTimeElapsed);
-	m_Monster->Animate(fTimeElapsed);
+
 	if (m_pPlayer->m_PlayerInPlace == SubPlace) {
 
 		m_pCollisionManager->CollisionPlayerToSubSceneStaticObeject();
@@ -1121,6 +1152,8 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 			}
 		}
 
+
+
 		m_pBillObject->Animate(fTimeElapsed);
 
 		if (m_pRedZoneEffect->doAnimate) {
@@ -1158,6 +1191,13 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 
 		m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
+
+		for (auto& bill : m_DeadDogEneyEffect) {
+			if (bill->doAnimate) {
+				bill->Animate(fTimeElapsed);
+			}
+
+		}
 
 
 
@@ -1348,6 +1388,9 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 			}
 		}
 
+	
+
+
 		for (auto& ParticleObject : m_pParticleObjects) {
 			if (ParticleObject->m_bActive) {
 				ParticleObject->Render(pd3dCommandList);
@@ -1400,7 +1443,12 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 			}
 		}
 
-		m_Monster->Render(pd3dCommandList);
+		for (auto& bill : m_DeadDogEneyEffect) {
+			if (bill->active) {
+				bill->NoSetPositionRender(pd3dCommandList, m_pPlayer->GetCamera(), 1.0f);
+			}
+
+		}
 
 
 		while (readycount != 0);
@@ -1426,7 +1474,7 @@ void GamePlayScene::ThreadWorker(int threadnum)
 			case ANIMATION: {
 
 
-				m_Quadlist[threadnum]->AnimateObjects(m_fElapsedTime, m_pGameObject);
+				m_Quadlist[threadnum]->AnimateObjects(m_fElapsedTime, m_pGameObject,m_pDogMonster);
 
 				while (true) {
 					int precount = readycount;
@@ -1587,9 +1635,9 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pUImanager->CreateUINonNormalRect(-0.77, -0.92, -0.15, 0.15, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/StatusUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	//pUImanager->CreateUINonNormalRect(-0.75, -0.9, -0.6, -0.26, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/ItemUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	m_Tstatus=pResourceManager->BringTexture("Model/Textures/UITexture/MintColor.dds", UI_TEXTURE, true); 
-	h_Power=pUImanager->CreateUINonNormalRect(-0.884, -0.895, -0.133, -0.133, m_Tstatus, NULL, NULL, 0, TEXTUREUSE, GetType(), true); // 가로길이 0.063 
-	h_Defense = pUImanager->CreateUINonNormalRect(-0.884, -0.895, -0.03, -0.03, m_Tstatus, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
-	h_Speed = pUImanager->CreateUINonNormalRect(-0.884, -0.895, 0.065, 0.065, m_Tstatus, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	h_Power = pUImanager->CreateUINonNormalRect(-0.884, -0.895, -0.133, -0.133, m_Tstatus, NULL, NULL, 0, TEXTUREUSE, GetType(), true); // 가로길이 0.063 
+	h_Speed = pUImanager->CreateUINonNormalRect(-0.884, -0.895, -0.03, -0.03, m_Tstatus, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	h_Defense = pUImanager->CreateUINonNormalRect(-0.884, -0.895, 0.065, 0.065, m_Tstatus, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 	//SamplingUI
 	for (int i = 0; i < 9; i++) {
@@ -1936,6 +1984,7 @@ void GamePlayScene::PlayerControlInput()
 				dwPlayerState |= STATE_SHOOT;
 				if (m_pPlayer->m_PlayerInPlace == MainPlace) {
 					m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard, m_KillCount);
+					m_bcrashOk = m_pCollisionManager->CollsionBulletToDogEnemy(m_DeadDogEneyEffect, m_KillCount);
 					m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion,m_items);
 					if (m_bcrashOk) { 
 						SpiderHurt->Play(0, 0, 0);
@@ -1953,10 +2002,7 @@ void GamePlayScene::PlayerControlInput()
 				m_pCamera->m_recoiVector.z = 0.0f;
 			}
 		}
-	/*	else {
-			m_pCamera->m_recoiVector.z += 0.1f;
-			if (m_pCamera->m_recoiVector.z > 0) m_pCamera->m_recoiVector.z = 0;
-		}*/
+
 
 		//플레이어 애니메이션 적용
 		if (m_pPlayer)
@@ -2348,7 +2394,11 @@ void GamePlayScene::UpdateUI() {
 		h_HP[1]->RenderTexture = numTexture[onevalue];
 		if (RangeCheck(0, 9, twovalue))
 		h_HP[2]->RenderTexture = numTexture[twovalue];
-
+	}
+	else {
+		h_HP[0]->RenderTexture = numTexture[1];
+		h_HP[1]->RenderTexture = numTexture[0];
+		h_HP[2]->RenderTexture = numTexture[0];
 	}
 
 
@@ -2378,8 +2428,8 @@ void GamePlayScene::UpdateUI() {
 	h_SamplingUI->RenderTexture = m_TsamplingUI[m_SamplingNum];
 
 	h_Power->Rect.right = (-0.133) + 0.00315 * m_pPlayer->m_Power;
-	h_Defense->Rect.right = (-0.03) + 0.00315 * m_pPlayer->m_Defense;
-	h_Speed->Rect.right = (0.065) + 0.00315 * m_pPlayer->m_Speed;
+	h_Speed->Rect.right = (-0.03) + 0.00315 * m_pPlayer->m_Speed;
+	h_Defense->Rect.right = (0.065) + 0.00315 * m_pPlayer->m_Defense;
 
 }
 

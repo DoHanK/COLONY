@@ -578,8 +578,13 @@ void AlienSpiderAnimationController::AdvanceTimeWithMultithread(float fElapsedTi
 
 DogMonster::DogMonster(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, float scale)
 {
-
-	CLoadedModelInfo* pSpider = pResourceManager->BringModelInfo("Model/Spitter.bin", "Model/Textures/Spitter/");
+	CLoadedModelInfo* pSpider;
+	if (rand() % 2 == 0) {
+		pSpider = pResourceManager->BringModelInfo("Model/Spitter.bin", "Model/Textures/Spitter/");
+	}
+	else {
+		pSpider = pResourceManager->BringModelInfo("Model/Chomper.bin", "Model/Textures/Chomper/");
+	}
 	DogAnimationController* pAnimationSpider = new DogAnimationController(pd3dDevice, pd3dCommandList, 2, pSpider);
 	pAnimationSpider->SetTrackAnimationSet(0, 0);
 	pAnimationSpider->SetTrackAnimationSet(1, 0);
@@ -632,7 +637,8 @@ void DogMonster::UpdatePosition(float fTimeElapsed)
 
 	if ((m_GoalType == Deaded_Goal ||
 		m_GoalType == Hitted_Goal ||
-		m_GoalType == Attack_Goal)) {
+		m_GoalType == Attack_Goal ||
+		m_GoalType == Idle_Goal)) {
 		m_xmf3Velocity.x = 0;
 		m_xmf3Velocity.z = 0;
 
@@ -650,6 +656,21 @@ void DogMonster::UpdatePosition(float fTimeElapsed)
 
 
 }
+
+void DogMonster::AnimateWithMultithread(float fTimeElapsed, int idx)
+{
+
+	if (m_pSkinnedAnimationController)((DogAnimationController*)m_pSkinnedAnimationController)->AdvanceTimeWithMultithread(fTimeElapsed, this, idx);
+
+
+	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
+	if (m_pChild) m_pChild->Animate(fTimeElapsed);
+
+	
+}
+
+
+
 
 DogAnimationController::DogAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel) :
 	AlienSpiderAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel)
@@ -771,9 +792,9 @@ void DogAnimationController::AdvanceTimeWithMultithread(float fElapsedTime, Game
 					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
 
 				}
-				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "Chomper") {
-					DebugValue::PrintStr("Ãâ·Â");
 
+				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "Spitter" ||
+					string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "Chomper") {
 					xmf4x4Transform._41 = 0;
 					xmf4x4Transform._42 = 0;
 					xmf4x4Transform._43 = 0;

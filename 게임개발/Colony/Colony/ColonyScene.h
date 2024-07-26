@@ -193,6 +193,7 @@ protected:
 	GameObject*							m_pScenePlane = NULL;
 
 	vector<GameObject*>					m_pGameObject;
+	vector<DogMonster*>					m_pDogMonster;
 	vector<GameObject*>					m_pSceneObject;
 
 
@@ -278,7 +279,7 @@ protected:
 	Billboard*							m_pShotgunEffect;
 	vector<Billboard*>					m_InFoBillBoard;
 	vector<Billboard*>					m_DeadEneyEffect[MAX_THREAD_NUM];
-
+	vector <Billboard*>					m_DeadDogEneyEffect;
 
 	// Particle
 	ParticleShader*						m_pParticleShader=NULL;
@@ -400,7 +401,7 @@ public:
 
 	//TestVariable
 
-	DogMonster* m_Monster;
+
 	
 
 };

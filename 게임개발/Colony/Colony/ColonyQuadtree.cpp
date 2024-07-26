@@ -228,7 +228,7 @@ void QuadTree::CalSameDepthidx()
 
 }
 
-void QuadTree::AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys)
+void QuadTree::AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys, vector<DogMonster*>& DogEnemy)
 {
 
 	XMFLOAT3 min;
@@ -246,6 +246,17 @@ void QuadTree::AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys)
 		}
 
 	}
+	m_SubObject.clear();
+
+	for (auto& p : DogEnemy) {
+		XMFLOAT3 pos = p->GetPosition();
+		if (min.x <= pos.x && pos.x < max.x && min.z <= pos.z && pos.z < max.z) {
+
+			 m_SubObject.push_back(p);
+		}
+
+	}
+
 
 	for (auto& GO : m_DynamicObject) {
 
@@ -282,6 +293,24 @@ void QuadTree::AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys)
 		}
 	}
 
+
+
+	for (auto& GO : m_SubObject) {
+
+		if (GO->m_bActive) {
+			GO->Update(elapsedTime);
+			GO->AnimateWithMultithread(elapsedTime, m_SameDepthidx);
+			
+
+			BSphere  bound(XMFLOAT3(0, 0.3, 0), 0.6f, GO);
+			bound.UpdateCollision();
+			if (m_pCamera->IsInFrustum(bound.m_boundingshpere))
+				GO->m_bVisible = true;
+			else 
+				GO->m_bVisible = false;
+		}
+	}
+
 	for (auto& EnemyEffect : m_DeadEneyEffect[m_SameDepthidx]) {
 		if (EnemyEffect->active) {
 			EnemyEffect->Animate(elapsedTime);
@@ -305,6 +334,17 @@ void QuadTree::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 		}
 
 	}
+
+
+	for (auto& GO : m_SubObject) {
+
+		if (GO->m_bActive) {
+
+			if (GO->m_bVisible) GO->Render(pd3dCommandList);
+		}
+
+	}
+
 
 	for (auto& EnemyEffect : m_DeadEneyEffect[m_SameDepthidx]) {
 		if (EnemyEffect->active) {
