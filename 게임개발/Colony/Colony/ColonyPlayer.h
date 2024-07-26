@@ -121,6 +121,12 @@ public:
 	int m_shotgunBullet = 20;
 	int m_machinegunBullet = 150;
 
+	//status
+	int m_Power = 0;
+	int m_Defense = 0;
+	int m_Speed = 0;
+
+
 	float GetShootingCoolTime();
 	float GetAmp();
 	float GetzRange(bool bStand);

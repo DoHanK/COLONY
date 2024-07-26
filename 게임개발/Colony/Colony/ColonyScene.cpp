@@ -870,11 +870,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	MachineGunSound = m_pSoundManager->LoadWaveToBuffer("Sound/MachineGunEffect.wav");
 	MachineGunSound->SetVolume(-600);
 	ReloadSound = m_pSoundManager->LoadWaveToBuffer("Sound/clipload1.wav");
-	ReloadSound->SetVolume(-2000);
+	ReloadSound->SetVolume(-1500);
 	ScopeModeSound = m_pSoundManager->LoadWaveToBuffer("Sound/ScopeModeSound.wav");
 	ScopeModeSound->SetVolume(-200);
 	AllReloadSound = m_pSoundManager->LoadWaveToBuffer("Sound/reload.wav");
-	AllReloadSound->SetVolume(-200);
+	AllReloadSound->SetVolume(0);
 	OkeySound = m_pSoundManager->LoadWaveToBuffer("Sound/Okey.wav");
 	OkeySound->SetVolume(-400);
 	ElectronicSound = m_pSoundManager->LoadWaveToBuffer("Sound/Click_Electronic_15.wav");
@@ -1005,7 +1005,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 
 
-		m_RedZoneHurt += fTimeElapsed;
+		/*m_RedZoneHurt += fTimeElapsed;
 		if (m_RedZoneHurt > 5.0f) {
 			m_RedZoneHurt = 0.0f;
 			if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
@@ -1022,7 +1022,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 				m_isHurt = false;
 				m_hurtAnimation = 0.0f;
 			}
-		}
+		}*/
 
 
 		m_pPlayer->Animate(fTimeElapsed);
@@ -1067,10 +1067,31 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 
 
-
-
-
-		m_RedZoneHurt += fTimeElapsed;
+		if (m_bCrashRedZone) {
+			// 무적 상태일 때 (주사기 사용)
+			if (m_isImortal) {
+				m_fMortalTime += fTimeElapsed;
+				if (m_fMortalTime > 20.0f) {
+					// 무적상태 이펙트
+					m_fMortalTime = 0.0f;
+					m_isImortal = false;
+				}
+			}
+			else {
+				m_RedZoneHurt += fTimeElapsed;
+				if (m_RedZoneHurt > 5.0f) {
+					m_RedZoneHurt = 0.0f;
+					m_pPlayer->m_HP -= 5;
+					if (m_pPlayer->m_HP < 0) {
+						m_pPlayer->m_HP = 0;
+					}
+					alarmSound->Play(0, 0, 0);
+					m_isHurt = true;
+				}
+			}
+		}
+		
+		/*m_RedZoneHurt += fTimeElapsed;
 
 		if (m_RedZoneHurt > 5.0f) {
 			m_RedZoneHurt = 0.0f;
@@ -1079,7 +1100,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 				alarmSound->Play(0, 0, 0);
 				m_isHurt = true;
 			}
-		}
+		}*/
 
 
 
@@ -1492,9 +1513,10 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	h_weapon=pUImanager->CreateUINonNormalRect(-0.7, -0.8, -0.8, -0.63, m_TrifleGun,NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	
 
-	//Item
-	/*pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.89, 0.95, pResourceManager->BringTexture("Model/Textures/UITexture/syringe.dds", UI_TEXTURE, true),
-		NULL, NULL, 0, TEXTUREUSE, GetType(), true);*/
+	//syringe
+	m_Tsyringe = pResourceManager->BringTexture("Model/Textures/UITexture/syringe.dds", UI_TEXTURE, true);
+	m_TsyringeHave = pResourceManager->BringTexture("Model/Textures/UITexture/syringeHave.dds", UI_TEXTURE, true);
+	h_Syringe=pUImanager->CreateUINonNormalRect(-0.78, -0.87, -0.67, -0.62, m_Tsyringe, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
 	/*pUImanager->CreateUINonNormalRect(-0.8, -0.9, 0.9, 0.95, pResourceManager->BringTexture("Model/Textures/UITexture/eye.dds", UI_TEXTURE, true),
 		NULL, NULL, 0, TEXTUREUSE, GetType(), true);*/
@@ -1561,12 +1583,20 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/gooutside.dds", UI_TEXTURE, true);
 
 
-	//UISattus
-	pUImanager->CreateUINonNormalRect(-0.73, -0.9, -0.17, 0.17, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/StatusUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
-	pUImanager->CreateUINonNormalRect(-0.75, -0.9, -0.6, -0.26, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/ItemUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	//UIStatus
+	pUImanager->CreateUINonNormalRect(-0.77, -0.92, -0.15, 0.15, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/StatusUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	//pUImanager->CreateUINonNormalRect(-0.75, -0.9, -0.6, -0.26, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/ItemUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	m_Tstatus=pResourceManager->BringTexture("Model/Textures/UITexture/MintColor.dds", UI_TEXTURE, true); 
+	h_Power=pUImanager->CreateUINonNormalRect(-0.884, -0.895, -0.133, -0.133, m_Tstatus, NULL, NULL, 0, TEXTUREUSE, GetType(), true); // 가로길이 0.063 
+	h_Defense = pUImanager->CreateUINonNormalRect(-0.884, -0.895, -0.03, -0.03, m_Tstatus, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	h_Speed = pUImanager->CreateUINonNormalRect(-0.884, -0.895, 0.065, 0.065, m_Tstatus, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
-
-	
+	//SamplingUI
+	for (int i = 0; i < 9; i++) {
+		string str = "Model/Textures/PlaySceneInFoUI/SamplingUI/SamplingUI_";
+		m_TsamplingUI.push_back(pResourceManager->BringTexture((str + to_string(i)+".dds").c_str(), UI_TEXTURE, true));
+	}
+	h_SamplingUI=pUImanager->CreateUINonNormalRect(-0.72, -0.9, 0.86, 0.96, m_TsamplingUI[0], NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 }
 
 void GamePlayScene::ReleaseObjects()
@@ -1768,6 +1798,15 @@ void GamePlayScene::PlayerControlInput()
 				m_pSoundManager->RestartSound(ReloadSound);
 			}
 		}
+		//주사기 사용
+		if (pKeysBuffer['4'] & 0xF0) {
+			if (m_HaveSyringe) {
+				m_isImortal = true;
+				h_Syringe->RenderTexture = m_Tsyringe;
+				m_HaveSyringe = false;
+			}
+		}
+
 	
 		//JUMP
 		if (!m_pPlayer->isJump && pKeysBuffer[SPACE_BAR] & 0xF0) {
@@ -1796,6 +1835,36 @@ void GamePlayScene::PlayerControlInput()
 			for (auto& item : m_items) {
 				if (item->m_bActive) {
 					if (XM3CalDis(item->GetPosition(), m_pPlayer->GetPosition()) <= 1.0f) {
+						int ActiveItem = item->GetItemType();
+						// 주사기 획득
+						if (ActiveItem == syringe) {
+							h_Syringe->RenderTexture = m_TsyringeHave;
+							m_HaveSyringe = true;
+						}
+						// 샘플링 획득
+						else if (ActiveItem == sampling1) {
+							if(m_SamplingNum<=7)
+							++m_SamplingNum;
+						}
+						// 체력회복 아이템 획득
+						else if (ActiveItem == health) {
+							m_pPlayer->m_HP += 20;
+							if (m_pPlayer->m_HP >= 100) {
+								m_pPlayer->m_HP = 100;
+							}
+						}
+						// 공격력 증가 아이템 획득
+						else if (ActiveItem == damage) {
+							m_pPlayer->m_Power += 2;
+						}
+						// 이동 속도 증가 아이템 획득
+						else if (ActiveItem == speed) {
+							m_pPlayer->m_Speed += 2;
+						}
+						// 방어력 증가 아이템 획득
+						else if (ActiveItem == sheild) {
+							m_pPlayer->m_Defense += 2;
+						}
 
 						item->m_bActive = false;
 						PickItem->Play(0, 0, 0);
@@ -2304,6 +2373,13 @@ void GamePlayScene::UpdateUI() {
 		h_KillCount3->RenderTexture = numTexture[threevalue];
 
 	}
+
+	// 샘플링 개수 업데이트
+	h_SamplingUI->RenderTexture = m_TsamplingUI[m_SamplingNum];
+
+	h_Power->Rect.right = (-0.133) + 0.00315 * m_pPlayer->m_Power;
+	h_Defense->Rect.right = (-0.03) + 0.00315 * m_pPlayer->m_Defense;
+	h_Speed->Rect.right = (0.065) + 0.00315 * m_pPlayer->m_Speed;
 
 }
 

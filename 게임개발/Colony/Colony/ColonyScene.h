@@ -237,7 +237,11 @@ protected:
 	UIInfo*								h_KillCount1;
 	UIInfo*								h_KillCount2;
 	UIInfo*								h_KillCount3;
-	
+	UIInfo*								h_Syringe;
+	UIInfo* h_SamplingUI;
+	UIInfo* h_Power;
+	UIInfo* h_Defense;
+	UIInfo* h_Speed;
 
 	vector<Texture*>					numTexture;
 	Texture*							m_TrifleGun;
@@ -249,6 +253,19 @@ protected:
 	Texture* m_TscopeShoot;
 	Texture* m_TscopeShoot2;
 	Texture* m_TbloodScreen;
+	Texture* m_Tsyringe;
+	Texture* m_TsyringeHave;
+	Texture* m_Tstatus;
+	vector<Texture*> m_TsamplingUI;
+	
+
+	// 샘플링 개수
+	UINT m_SamplingNum = 0;
+	// 무적 아이템 (주사기) 획득 상태
+	bool m_HaveSyringe = false;
+	bool m_isImortal = false;
+	float m_fMortalTime = 0.0f;
+
 
 	CollisionManager*					m_pCollisionManager;
 
