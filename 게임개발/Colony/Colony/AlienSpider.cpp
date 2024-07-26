@@ -813,3 +813,237 @@ void DogAnimationController::AdvanceTimeWithMultithread(float fElapsedTime, Game
 	}
 
 }
+
+
+
+BossMonster::BossMonster(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, PathFinder* pPathFinder, float scale)
+{
+	CLoadedModelInfo* pSpider;
+
+	pSpider = pResourceManager->BringModelInfo("Model/Grenadier.bin", "Model/Textures/Grenadier/");
+	
+	BossAnimationController* pAnimationSpider = new BossAnimationController(pd3dDevice, pd3dCommandList, 2, pSpider);
+	pAnimationSpider->SetTrackAnimationSet(0, 0);
+	pAnimationSpider->SetTrackAnimationSet(1, 0);
+	SetPosition(XMFLOAT3(0, 0, 0));
+	SetChild(pSpider->m_pModelRootObject, true);
+	SetAnimator(pAnimationSpider);
+
+
+
+	//m_pBrain
+	m_pBrain = new BossGoalThink(this);
+	//Soul
+	m_pSoul = new BossAIController(m_pBrain, this);
+	m_pSoul->m_pAnimationControl = ((BossAnimationController*)m_pSkinnedAnimationController);
+
+
+	m_MonsterScale = scale;
+
+	SetScale(scale, scale, scale);
+
+}
+
+void BossMonster::Update(float fTimeElapsed)
+{
+	//판단	
+	m_pBrain->Process();
+	//실행
+	m_pSoul->ExecuteGoal(fTimeElapsed);
+	//위치 변경
+	UpdatePosition(fTimeElapsed);
+
+}
+
+void BossMonster::UpdatePosition(float fTimeElapsed)
+{
+	XMFLOAT3 xmf3Gravity = XMFLOAT3(0, 0, 0);
+
+
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(xmf3Gravity, fTimeElapsed, false));
+	// 
+	//마찰계수
+	float  fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ = 4.f + m_MonsterScale;
+
+	if (fLength > fMaxVelocityXZ)
+	{
+		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+
+	}
+
+	if ((m_GoalType == Deaded_Goal ||
+		m_GoalType == Hitted_Goal ||
+		m_GoalType == Attack_Goal ||
+		m_GoalType == Idle_Goal)) {
+		m_xmf3Velocity.x = 0;
+		m_xmf3Velocity.z = 0;
+
+	}
+
+
+	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+
+
+
+	XMFLOAT3 PrePos = XMFLOAT3(m_xmf4x4ToParent._41, m_xmf4x4ToParent._42, m_xmf4x4ToParent._43);
+	m_xmfPre3Position = PrePos;
+	AddPostion(xmf3Velocity);
+	m_xmfPre3Velocity = xmf3Velocity;
+
+}
+
+void BossMonster::AnimateWithMultithread(float fTimeElapsed, int idx)
+{
+	if (m_pSkinnedAnimationController)((DogAnimationController*)m_pSkinnedAnimationController)->AdvanceTimeWithMultithread(fTimeElapsed, this, idx);
+
+
+	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
+	if (m_pChild) m_pChild->Animate(fTimeElapsed);
+
+
+
+}
+
+BossAnimationController::BossAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel):
+	AlienSpiderAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel)
+{
+	m_ppSubAnimationSets = pModel->m_ppSubAnimationSets;
+
+}
+
+void BossAnimationController::AdvanceTime(float fElapsedTime, GameObject* pRootGameObject)
+{
+
+
+	m_fTime += fElapsedTime;
+
+	if (m_nowAnimationWeight < 1.0f) {
+		m_nowAnimationWeight += fElapsedTime * 2;
+		m_PreAnimationWeight = 1.0f - m_nowAnimationWeight;
+
+	}
+	else {
+		m_nowAnimationWeight = 1.0f;
+		m_PreAnimationWeight = 0.0f;
+	}
+	SetTrackWeight(NOW_TRACK, m_nowAnimationWeight);
+	SetTrackWeight(PRE_TRACK, m_PreAnimationWeight);
+
+
+	if (m_pAnimationTracks)
+	{
+		for (int i = 0; i < m_nAnimationTracks; i++) {
+			//상체
+			//if (m_nowAnimationWeight == 1 && (i == NOW_TRACK || i == PRE_TRACK)) {
+			m_pAnimationTracks[i].m_fPosition += (fElapsedTime * m_pAnimationTracks[i].m_fSpeed);
+			//}
+				//OutputDebugStringA(to_string(m_pAnimationTracks[i].m_fSpeed).c_str());
+				//OutputDebugStringA("   ");
+
+		}
+		//OutputDebugStringA("  \n ");
+		for (int i = 0; i < m_nSkinnedMeshes; i++)
+		{
+			for (int j = 0; j < m_pnAnimatedBoneFrames[i]; j++)
+			{
+				XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Zero();
+
+
+				for (int k = 0; k < m_nAnimationTracks; k++)
+				{
+					AnimationSet* pAnimationSet = m_ppAnimationSets[i]->m_ppAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
+					pAnimationSet->SetPosition(m_pAnimationTracks[k].m_fPosition);
+					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j);
+
+
+					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
+				}
+
+				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "Spitter" ||
+					string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "Chomper") {
+					xmf4x4Transform._41 = 0;
+					xmf4x4Transform._42 = 0;
+					xmf4x4Transform._43 = 0;
+				}
+
+				m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4Transform;
+			}
+
+		}
+
+		pRootGameObject->UpdateTransform(NULL);
+
+	}
+}
+
+void BossAnimationController::AdvanceTimeWithMultithread(float fElapsedTime, GameObject* pRootGameObject, int idx)
+{
+	m_fTime += fElapsedTime;
+
+	if (m_nowAnimationWeight < 1.0f) {
+		m_nowAnimationWeight += fElapsedTime * 2;
+		m_PreAnimationWeight = 1.0f - m_nowAnimationWeight;
+
+	}
+	else {
+		m_nowAnimationWeight = 1.0f;
+		m_PreAnimationWeight = 0.0f;
+	}
+	SetTrackWeight(NOW_TRACK, m_nowAnimationWeight);
+	SetTrackWeight(PRE_TRACK, m_PreAnimationWeight);
+
+
+	if (m_pAnimationTracks)
+	{
+		for (int i = 0; i < m_nAnimationTracks; i++) {
+			//상체
+			//if (m_nowAnimationWeight == 1 && (i == NOW_TRACK || i == PRE_TRACK)) {
+			m_pAnimationTracks[i].m_fPosition += (fElapsedTime * m_pAnimationTracks[i].m_fSpeed);
+			//}
+				//OutputDebugStringA(to_string(m_pAnimationTracks[i].m_fSpeed).c_str());
+				//OutputDebugStringA("   ");
+
+		}
+
+		for (int i = 0; i < m_nSkinnedMeshes; i++)
+		{
+			for (int j = 0; j < m_pnAnimatedBoneFrames[i]; j++)
+			{
+				XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Zero();
+
+
+				for (int k = 0; k < m_nAnimationTracks; k++)
+				{
+
+					AnimationSet* pAnimationSet = m_ppSubAnimationSets[idx][i]->m_ppAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
+					pAnimationSet->SetPosition(m_pAnimationTracks[k].m_fPosition);
+					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j);
+
+
+
+					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
+
+				}
+
+				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "Spitter" ||
+					string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "Chomper") {
+					xmf4x4Transform._41 = 0;
+					xmf4x4Transform._42 = 0;
+					xmf4x4Transform._43 = 0;
+				}
+
+				m_pppAnimatedBoneFrameCaches[i][j]->m_xmfsub4x4ToParent[idx] = xmf4x4Transform;
+
+			}
+
+		}
+
+
+		pRootGameObject->UpdateTransformWithMultithread(NULL, idx, 0);
+		DirectUpdateMatrixWithMultithread(idx);
+
+	}
+
+}

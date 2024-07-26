@@ -17,7 +17,8 @@ class DogGoalThink;
 class AIController;
 class Perception;
 class DogAIController;
-
+class BossGoalThink;
+class BossAIController;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,6 +140,38 @@ class DogAnimationController :public AlienSpiderAnimationController {
 public:
 	DogAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
 	virtual ~DogAnimationController() {};
+
+
+public:
+	//애니메이션 보간 및 상태
+	DWORD m_AnimationState = Spit_idle;
+	float m_nowAnimationWeight = 1.0f;
+	float m_PreAnimationWeight = 0.0f;
+
+
+	virtual void AdvanceTime(float fElapsedTime, GameObject* pRootGameObject);
+	virtual void AdvanceTimeWithMultithread(float fElapsedTime, GameObject* pRootGameObject, int idx);
+};
+
+
+class BossMonster : public GameObject {
+public:
+	BossMonster(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, PathFinder* pPathFinder, float scale);
+	virtual ~BossMonster() {};
+public:
+	BossGoalThink* m_pBrain;
+	BossAIController* m_pSoul;
+	void Update(float fTimeElapsed);
+	void UpdatePosition(float fTimeElapsed);
+	void AnimateWithMultithread(float fTimeElapsed, int idx);
+
+};
+
+
+class BossAnimationController :public AlienSpiderAnimationController {
+public:
+	BossAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	virtual ~BossAnimationController() {};
 
 
 public:

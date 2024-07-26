@@ -134,7 +134,8 @@ enum GrenadierAnimationName {
 	Gren_turnLeft,
 	Gren_turnRight,
 	Gren_Walk,
-	Gren_Run
+	Gren_Run,
+	Gren_Idle
 
 };
 

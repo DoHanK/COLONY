@@ -656,6 +656,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, MonsterSizeDis(gen));
 			//AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, 12.f);
 			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.0f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
+			p->m_pEnemy = m_pPlayer;
 			//p->SetPosition(j, 0.f, 0.f);  
 			p->SetPerceptionRangeMesh(m_pPerceptionRangeMesh);
 			p->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (Range_2+j) % AlienAnimationName::EndAnimation);
@@ -924,7 +925,10 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 	//Test 
+	m_pBossMonster = new BossMonster(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, 6.0f);
+	m_pBossMonster->m_pEnemy = m_pPlayer;
 
+	m_pCollisionManager->m_pBossMonster = m_pBossMonster;
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
 	BuildDefaultLightsAndMaterials();
@@ -1208,6 +1212,9 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 			}
 		}
 
+		//Test
+		m_pBossMonster->Update(fTimeElapsed);
+		m_pBossMonster->Animate(fTimeElapsed);
 
 		
 
@@ -1450,6 +1457,9 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 		}
 
+
+		//Test Monster
+		m_pBossMonster->Render(pd3dCommandList);
 
 		while (readycount != 0);
 
@@ -2015,7 +2025,7 @@ void GamePlayScene::PlayerControlInput()
 		POINT ptCursorPos;
 		static POINT m_ptOldCursorPos = { WINDOWS_POS_X + FRAME_BUFFER_WIDTH / 2 , WINDOWS_POS_Y + FRAME_BUFFER_WIDTH / 2 };
 
-		//SetCursor(NULL);
+		//SetCursor(NULL);s
 #if defined(_DEBUG)
 		if (pKeysBuffer['X'] & 0xF0) {
 		

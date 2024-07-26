@@ -388,7 +388,8 @@ public:
 	//Player 
 	Collision* m_pPlayer;
 	Camera* m_pCamera;
-
+	//Boss
+	GameObject* m_pBossMonster;
 
 	//Rendering
 	std::vector<BoundingBoxMesh*> m_BoundingBoxMeshes;

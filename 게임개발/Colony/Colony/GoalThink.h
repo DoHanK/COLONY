@@ -65,3 +65,26 @@ public:
 	void SetInactive() { m_iStatus = inactive; }
 
 };
+
+
+
+class BossGoalThink :public CompositeGoal<GameObject> {
+private:
+	std::vector<GoalEvalutor*>  m_GoalEvalutors;
+public:
+
+
+	BossGoalThink(GameObject* pOwner);
+	virtual ~BossGoalThink();
+
+	void Arbitrate();
+
+	virtual void Activate();
+
+	virtual void Terminate();
+
+	virtual int  Process();
+
+	void SetInactive() { m_iStatus = inactive; }
+
+};

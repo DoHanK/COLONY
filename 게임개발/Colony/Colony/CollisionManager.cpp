@@ -498,8 +498,6 @@ void CollisionManager::CheckCollisionEnemytoStaticObject(GameObject* pEnemy)
 
 }
 
-
-
 void CollisionManager::EnrollRedZoneIntoSphere(XMFLOAT3 center, float radius, GameObject* pOwner)
 {
 	BSphere* psphere = new BSphere(center, radius, pOwner);
@@ -1775,7 +1773,21 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 
 
 
+	//BossRendering
+	BSphere m_top(XMFLOAT3(0,1.5, 0), 1.5f , m_pBossMonster);
+	m_top.UpdateCollision();
+	BSphere m_bottom(XMFLOAT3(0,0.7,0), 1.0f , m_pBossMonster);
+	m_bottom.UpdateCollision();
 
+	xmf4x4World = GetSphereMatrix(m_top.m_boundingshpere.Radius, m_top.m_boundingshpere.Center);
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	m_psphere->Render(pd3dCommandList, 0);
+	xmf4x4World = GetSphereMatrix(m_bottom.m_boundingshpere.Radius, m_bottom.m_boundingshpere.Center);
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+	m_psphere->Render(pd3dCommandList, 0);
 }
 
 CapsuleMesh::CapsuleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nslice, int nstack, float radius, float tip, float base) :

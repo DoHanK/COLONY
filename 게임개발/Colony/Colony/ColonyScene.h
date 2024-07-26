@@ -248,15 +248,15 @@ protected:
 	Texture*							m_TrifleGun;
 	Texture*							m_TmachineGun;
 	Texture*							m_TshotGun;
-	Texture* m_TtargetRifle;
-	Texture* m_Ttargetshotgun;
-	Texture* m_Ttargetmachinegun;
-	Texture* m_TscopeShoot;
-	Texture* m_TscopeShoot2;
-	Texture* m_TbloodScreen;
-	Texture* m_Tsyringe;
-	Texture* m_TsyringeHave;
-	Texture* m_Tstatus;
+	Texture*							m_TtargetRifle;
+	Texture*							m_Ttargetshotgun;
+	Texture*							m_Ttargetmachinegun;
+	Texture*							m_TscopeShoot;
+	Texture*							m_TscopeShoot2;
+	Texture*							m_TbloodScreen;
+	Texture*							m_Tsyringe;
+	Texture*							m_TsyringeHave;
+	Texture*							m_Tstatus;
 	vector<Texture*> m_TsamplingUI;
 	
 
@@ -401,7 +401,7 @@ public:
 
 	//TestVariable
 
-
+	BossMonster* m_pBossMonster = NULL;
 	
 
 };

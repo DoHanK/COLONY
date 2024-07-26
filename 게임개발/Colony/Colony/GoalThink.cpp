@@ -173,3 +173,88 @@ void DogGoalThink::Terminate()
 
 
 }
+
+
+
+BossGoalThink::BossGoalThink(GameObject* pOwner):CompositeGoal<GameObject>(pOwner, Think_Goal) {
+
+
+}
+
+BossGoalThink::~BossGoalThink()
+{
+	std::vector<GoalEvalutor*>::iterator curDes = m_GoalEvalutors.begin();
+	for (curDes; curDes != m_GoalEvalutors.end(); ++curDes)
+	{
+		delete* curDes;
+	}
+}
+
+void BossGoalThink::Arbitrate()
+{
+
+
+}
+
+void BossGoalThink::Activate()
+{
+	Arbitrate();
+	m_iStatus = active;
+
+}
+
+void BossGoalThink::Terminate()
+{
+
+
+}
+
+int BossGoalThink::Process()
+{
+
+	ActivateIfInactive();
+	static int a = 0;
+	int SubgoalStatus = ProcessSubGoals();
+
+	float distance = XM3CalDis(m_pOwner->m_pEnemy->GetPosition(), m_pOwner->GetPosition());
+	XMFLOAT3  TwoPointdir = Vector3::Subtract(m_pOwner->m_pEnemy->GetPosition(), m_pOwner->GetPosition());
+	float dir = Vector3::DotProduct(m_pOwner->GetLook(), TwoPointdir);
+	
+	if (m_pOwner->m_HP <= 0) {
+		m_pOwner->m_GoalType = Deaded_Goal;
+	}
+	else {
+
+		if (m_pOwner->m_bHitted) {
+			m_pOwner->m_GoalType = Hitted_Goal;
+		}
+		else {
+			
+			if (distance < m_pOwner->m_MonsterScale * 20.0f) {
+
+
+				if (distance < m_pOwner->m_MonsterScale * 2.0f && dir >=0) {
+					m_pOwner->m_GoalType = Attack_Goal;
+				}
+				else if (m_pOwner->m_GoalType != Attack_Goal) {
+					m_pOwner->m_GoalType = Trace_Goal;
+				}
+
+			}
+			else {
+				m_pOwner->m_GoalType = Idle_Goal;
+			}
+		}
+
+	}
+
+
+	if (SubgoalStatus == completed || SubgoalStatus == failed) {
+
+		m_iStatus = inactive;
+
+	}
+
+	return m_iStatus;
+
+}
