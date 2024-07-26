@@ -891,7 +891,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//Test 
 
-	m_Monster = new DogMonster(pd3dDevice, pd3dCommandList, pResourceManager,  1);
+	m_Monster = new DogMonster(pd3dDevice, pd3dCommandList, pResourceManager,  2);
 	m_Monster->SetPosition(0,0,0);
 	m_Monster->m_pEnemy = m_pPlayer;
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
