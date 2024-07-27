@@ -243,6 +243,8 @@ protected:
 	UIInfo* h_Power;
 	UIInfo* h_Defense;
 	UIInfo* h_Speed;
+	UIInfo* m_PlayInfoUI;
+
 
 	vector<Texture*>					numTexture;
 	Texture*							m_TrifleGun;
@@ -258,6 +260,16 @@ protected:
 	Texture*							m_TsyringeHave;
 	Texture*							m_Tstatus;
 	vector<Texture*> m_TsamplingUI;
+	Texture* m_TgetHP;
+	Texture* m_TgetAttack;
+	Texture* m_TgetSample;
+	Texture* m_TgetSpeed;
+	Texture* m_TnoneGun;
+	Texture* m_Tradiation;
+	Texture* m_TgetRifle;
+	Texture* m_TgetShotgun;
+	Texture* m_TgetMachinegun;
+	Texture* m_TgetDefense;
 	
 
 	// »ùÇÃ¸µ °³¼ö
@@ -295,6 +307,9 @@ protected:
 
 	GameObject* itemBox = NULL;
 
+	bool m_bDogCrashOK = false;
+	float m_InfoUIAnimation = 0.0f;
+	bool m_IsInfoUI = false;
 
 	vector<BulletCasing*> bulletcasings;
 

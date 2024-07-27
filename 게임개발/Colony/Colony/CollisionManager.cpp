@@ -1238,6 +1238,7 @@ bool CollisionManager::CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboa
 
 	float dis = 0;
 	bool crush = false;
+
 	//1차 충돌 처리
 	std::list<pair<AliensBoudingBox*, float>> crushlist;
 	for (AliensBoudingBox* enemy : m_EnemyObjects) {

@@ -431,7 +431,7 @@ void GamePlayScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	}
 
-	::fclose(pFile);
+	::fclose(pFile);                
 }
 
 void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager, SoundManager* pSoundManager)
@@ -1241,8 +1241,14 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 	}
 
-
-
+	if (m_IsInfoUI) {
+		m_InfoUIAnimation += fTimeElapsed;
+		if (m_InfoUIAnimation > 2.0f) {
+			m_InfoUIAnimation = 0.0f;
+			m_PlayInfoUI->RenderTexture = m_TNone;
+			m_IsInfoUI = false;
+		}
+	}
 
 
 }
@@ -1636,10 +1642,20 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	//UIInfo 
 	m_InFoUI = pUImanager->CreateUINonNormalRect(0.03+0.77, -0.03 + 0.77, -0.26, 0.24, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/FrontMoniter.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	m_PlayInfoUI = pUImanager->CreateUINonNormalRect(0.03 + 0.77, -0.03 + 0.77, -0.27, 0.24, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/presskey.dds", UI_TEXTURE, true);
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/Alpha.dds", UI_TEXTURE, true);
 	m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/gooutside.dds", UI_TEXTURE, true);
-
+	m_TgetHP= m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/GetHP.dds", UI_TEXTURE, true);
+	m_TgetAttack = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/GetAttack.dds", UI_TEXTURE, true);
+	m_TgetSample = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/GetSample.dds", UI_TEXTURE, true);
+	m_TgetSpeed = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/GetSpeed.dds", UI_TEXTURE, true);
+	m_TnoneGun = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/NonGun.dds", UI_TEXTURE, true);
+	m_Tradiation = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/radiation.dds", UI_TEXTURE, true);
+	m_TgetRifle = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/HaveRifle.dds", UI_TEXTURE, true);
+	m_TgetShotgun = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/HaveShotgun.dds", UI_TEXTURE, true);
+	m_TgetMachinegun = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/HaveMachinegun.dds", UI_TEXTURE, true);
+	m_TgetDefense = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/UpDefensePower.dds", UI_TEXTURE, true);
 
 	//UIStatus
 	pUImanager->CreateUINonNormalRect(-0.77, -0.92, -0.15, 0.15, pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/StatusUI.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
@@ -1655,6 +1671,8 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_TsamplingUI.push_back(pResourceManager->BringTexture((str + to_string(i)+".dds").c_str(), UI_TEXTURE, true));
 	}
 	h_SamplingUI=pUImanager->CreateUINonNormalRect(-0.72, -0.9, 0.86, 0.96, m_TsamplingUI[0], NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
+
 }
 
 void GamePlayScene::ReleaseObjects()
@@ -1862,6 +1880,9 @@ void GamePlayScene::PlayerControlInput()
 				m_isImortal = true;
 				h_Syringe->RenderTexture = m_Tsyringe;
 				m_HaveSyringe = false;
+				m_PlayInfoUI->RenderTexture = m_Tradiation;
+				m_IsInfoUI = true;
+				m_InfoUIAnimation = 0.0f;
 			}
 		}
 
@@ -1898,11 +1919,14 @@ void GamePlayScene::PlayerControlInput()
 						if (ActiveItem == syringe) {
 							h_Syringe->RenderTexture = m_TsyringeHave;
 							m_HaveSyringe = true;
+
 						}
 						// »ùÇÃ¸µ È¹µæ
 						else if (ActiveItem == sampling1) {
 							if(m_SamplingNum<=7)
 							++m_SamplingNum;
+							m_PlayInfoUI->RenderTexture = m_TgetSample;
+							
 						}
 						// Ã¼·ÂÈ¸º¹ ¾ÆÀÌÅÛ È¹µæ
 						else if (ActiveItem == health) {
@@ -1910,20 +1934,35 @@ void GamePlayScene::PlayerControlInput()
 							if (m_pPlayer->m_HP >= 100) {
 								m_pPlayer->m_HP = 100;
 							}
+							m_PlayInfoUI->RenderTexture = m_TgetHP;
+
 						}
 						// °ø°Ý·Â Áõ°¡ ¾ÆÀÌÅÛ È¹µæ
 						else if (ActiveItem == damage) {
 							m_pPlayer->m_Power += 2;
+							m_PlayInfoUI->RenderTexture = m_TgetAttack;
+
 						}
 						// ÀÌµ¿ ¼Óµµ Áõ°¡ ¾ÆÀÌÅÛ È¹µæ
 						else if (ActiveItem == speed) {
 							m_pPlayer->m_Speed += 2;
+							m_PlayInfoUI->RenderTexture = m_TgetSpeed;
 						}
 						// ¹æ¾î·Â Áõ°¡ ¾ÆÀÌÅÛ È¹µæ
 						else if (ActiveItem == sheild) {
 							m_pPlayer->m_Defense += 2;
+							m_PlayInfoUI->RenderTexture = m_TgetDefense;
 						}
 
+						else if (ActiveItem == shotgun) {
+							m_PlayInfoUI->RenderTexture = m_TgetShotgun;
+						}
+
+						else if (ActiveItem == machinegun) {
+							m_PlayInfoUI->RenderTexture = m_TgetMachinegun;
+						}
+						m_IsInfoUI = true;
+						m_InfoUIAnimation = 0.0f;
 						item->m_bActive = false;
 						PickItem->Play(0, 0, 0);
 					}
@@ -1994,7 +2033,8 @@ void GamePlayScene::PlayerControlInput()
 				dwPlayerState |= STATE_SHOOT;
 				if (m_pPlayer->m_PlayerInPlace == MainPlace) {
 					m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard, m_KillCount);
-					m_bcrashOk = m_pCollisionManager->CollsionBulletToDogEnemy(m_DeadDogEneyEffect, m_KillCount);
+					m_bDogCrashOK = m_pCollisionManager->CollsionBulletToDogEnemy(m_DeadDogEneyEffect, m_KillCount);
+					if (!m_bcrashOk)m_bcrashOk = m_bDogCrashOK;
 					m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion,m_items);
 					if (m_bcrashOk) { 
 						SpiderHurt->Play(0, 0, 0);
