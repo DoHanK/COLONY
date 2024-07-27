@@ -922,6 +922,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	PickUpSound->SetVolume(-400);
 	PickItem = m_pSoundManager->LoadWaveToBuffer("Sound/ItemPick.wav");
 	PickItem->SetVolume(-400);
+	DogHurt = m_pSoundManager->LoadWaveToBuffer("Sound/dogHurt.wav");
+	DogHurt->SetVolume(-400);
+	DogHurt2 = m_pSoundManager->LoadWaveToBuffer("Sound/dogHurt2.wav");
+	DogHurt2->SetVolume(-400);
+
 
 
 	//Test 
@@ -1116,7 +1121,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 				m_RedZoneHurt += fTimeElapsed;
 				if (m_RedZoneHurt > 5.0f) {
 					m_RedZoneHurt = 0.0f;
-					m_pPlayer->m_HP -= 5;
+					m_pPlayer->m_HP -= 10;
 					if (m_pPlayer->m_HP < 0) {
 						m_pPlayer->m_HP = 0;
 					}
@@ -1870,7 +1875,7 @@ void GamePlayScene::PlayerControlInput()
 		if (pKeysBuffer['3'] & 0xF0) {
 
 			m_pPlayer->Chagnemachinegun();
-			if (!m_pSoundManager->IsSoundBufferPlaying(ReloadSound)) {
+			if (!m_pSoundManager->IsSoundBufferPlaying(ReloadSound)) { 
 				m_pSoundManager->RestartSound(ReloadSound);
 			}
 		}
@@ -2032,13 +2037,25 @@ void GamePlayScene::PlayerControlInput()
 
 				dwPlayerState |= STATE_SHOOT;
 				if (m_pPlayer->m_PlayerInPlace == MainPlace) {
+
 					m_bcrashOk = m_pCollisionManager->CollsionBulletToEnemy(m_pBloodBillboard, m_KillCount);
+					if (m_bcrashOk) {
+						int random_value = std::rand() % 2;
+						if (random_value == 0) {
+							DogHurt->Play(0, 0, 0);
+						}
+						else {
+							DogHurt2->Play(0, 0, 0);
+						}
+					}
+
 					m_bDogCrashOK = m_pCollisionManager->CollsionBulletToDogEnemy(m_DeadDogEneyEffect, m_KillCount);
-					if (!m_bcrashOk)m_bcrashOk = m_bDogCrashOK;
-					m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion,m_items);
-					if (m_bcrashOk) { 
+					if (m_bDogCrashOK) {
 						SpiderHurt->Play(0, 0, 0);
 					}
+					if (!m_bcrashOk)m_bcrashOk = m_bDogCrashOK;
+					m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion,m_items);
+			
 				}
 				m_pBillObject->active = true;
 				m_pPlayer->m_ReloadTime = 0;
@@ -2182,8 +2199,11 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 	m_RedZoneHurt += fTimeElapsed;
 	if (m_RedZoneHurt > 5.0f) {
 		m_RedZoneHurt = 0.0f;
-		if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
-			m_pPlayer->m_HP -= 1;
+		if (m_bCrashRedZone) {
+			m_pPlayer->m_HP -= 10;
+			if (m_pPlayer->m_HP <= 0) {
+				m_pPlayer->m_HP = 0;
+			}
 			m_isHurt = true;
 		}
 	}

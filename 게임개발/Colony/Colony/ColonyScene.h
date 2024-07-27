@@ -365,6 +365,8 @@ protected:
 	LPDIRECTSOUNDBUFFER PickUpSound = nullptr;
 
 	LPDIRECTSOUNDBUFFER PickItem = nullptr;
+	LPDIRECTSOUNDBUFFER DogHurt = nullptr;
+	LPDIRECTSOUNDBUFFER DogHurt2 = nullptr;
 
 
 	bool ScopeSoundOnce = true;

@@ -412,6 +412,7 @@ public:
 	LPDIRECTSOUNDBUFFER ShortExplosion = nullptr;
 	LPDIRECTSOUNDBUFFER MonsterDie = nullptr;
 	LPDIRECTSOUNDBUFFER MonsterDieEffect = nullptr;
+	LPDIRECTSOUNDBUFFER DogDie = nullptr;
 
 public:
 

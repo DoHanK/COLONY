@@ -33,6 +33,8 @@ CollisionManager::CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	MonsterDie->SetVolume(-300);
 	MonsterDieEffect = m_pSoundManager->LoadWaveToBuffer("Sound/monsterDieEffect.wav");
 	MonsterDieEffect->SetVolume(0);
+	DogDie = m_pSoundManager->LoadWaveToBuffer("Sound/dogDie.wav");
+	DogDie->SetVolume(0);
 
 }
 
@@ -1408,7 +1410,7 @@ bool CollisionManager::CollsionBulletToDogEnemy(vector<Billboard*>& m_pBloodBill
 
 		m_DogEnemy.remove(RE);
 		//MonsterDieEffect->Play(0, 0, 0);
-		MonsterDie->Play(0, 0, 0);
+		DogDie->Play(0, 0, 0);
 		delete RE;
 	}
 
