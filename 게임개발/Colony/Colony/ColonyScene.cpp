@@ -171,8 +171,11 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			}
 			break;
 		case 'O':
-			break;
 
+			break;
+		case '7':
+			m_SamplingNum = 8; //보스소환
+			break;
 		default:
 			break;
 		}
@@ -881,6 +884,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pShotgunEffect->doOnce = true;
 	m_pShotgunEffect->AddRef();
 	
+
+
 	//Sound
 	m_pSoundManager = pSoundManager;
 	SpaceShipBGM = m_pSoundManager->LoadWaveToBuffer("Sound/SpaceShipBGM.wav");
@@ -932,8 +937,39 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//Test 
 	m_pBossMonster = new BossMonster(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, 6.0f);
 	m_pBossMonster->m_pEnemy = m_pPlayer;
+	m_pBossMonster->m_HP = 1000;
+	m_pBossMonster->m_bActive = false;
+	m_pCollisionManager->EnrollBossEnemy(m_pBossMonster);
 
-	m_pCollisionManager->m_pBossMonster = m_pBossMonster;
+	for (int i = 0; i < 50; i++) {
+		Billboard* pbill = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+			pResourceManager->BringTexture("Model/Textures/Explosion_6x6.dds", BILLBOARD_TEXTURE, true), m_BillShader, NULL);
+		pbill->doAnimate = true;
+		pbill->active = false;
+		pbill->SetRowNCol(6, 6);
+		pbill->m_BillMesh->UpdataVertexPosition(UIRect(3.0, -3.0, -3.0, 3.0), 1.0f);
+		pbill->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+		pbill->SettedTimer = 0.05f;
+		pbill->doOnce = true;
+		pbill->AddRef();
+
+		m_BossHitEneyEffect.push_back(pbill);
+	}
+	for (int i = 0; i < 10; i++) {
+		Billboard* pbill = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+			pResourceManager->BringTexture("Model/Textures/Explode_8x8.dds", BILLBOARD_TEXTURE, true), m_BillShader, NULL);
+		pbill->doAnimate = true;
+		pbill->active = false;
+		pbill->SetRowNCol(8, 8);
+		pbill->m_BillMesh->UpdataVertexPosition(UIRect(5.0, -5.0, -5.0, 5.0), 1.0f);
+		pbill->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+		pbill->SettedTimer = 0.005f;
+		pbill->doOnce = true;
+		pbill->AddRef();
+
+		m_BossCriticalEneyEffect.push_back(pbill);
+	}
+	
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
 	BuildDefaultLightsAndMaterials();
@@ -1063,7 +1099,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 				m_hurtAnimation = 0.0f;
 			}
 		}*/
-
+	
 
 		m_pPlayer->Animate(fTimeElapsed);
 
@@ -1093,9 +1129,19 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 	else if (m_pPlayer->m_PlayerInPlace == MainPlace) {
 
 
+		if (m_SamplingNum == 8 && m_bBossActive ==false) {
+			m_pBossMonster->m_bActive = true;
+			m_bBossActive = true;
+			m_pBossMonster->SetPosition(m_pPlayer->GetPosition());
+ 		}
+
 		m_pCollisionManager->CollisionPlayerToStaticObeject();
 		m_pCollisionManager->CollisionPlayerToItemBox();
 		m_pCollisionManager->CollisionPlayerToEnemy();
+
+
+		if(m_pBossMonster->m_bActive) 
+		m_pCollisionManager->CollsiionBossToPlayer();
 
 		m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
 
@@ -1121,7 +1167,13 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 				m_RedZoneHurt += fTimeElapsed;
 				if (m_RedZoneHurt > 5.0f) {
 					m_RedZoneHurt = 0.0f;
-					m_pPlayer->m_HP -= 10;
+					while (true) {
+						int pre = m_pPlayer->m_HP;
+						int now = pre - 10;
+						if (CAS(&m_pPlayer->m_HP, pre, now)) {
+							break;
+						}
+					}
 					if (m_pPlayer->m_HP < 0) {
 						m_pPlayer->m_HP = 0;
 					}
@@ -1218,11 +1270,21 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 		}
 
 		//Test
-		m_pBossMonster->Update(fTimeElapsed);
-		m_pBossMonster->Animate(fTimeElapsed);
-
+		if (m_pBossMonster->m_bActive) {
+			m_pBossMonster->Update(fTimeElapsed);
+			m_pBossMonster->Animate(fTimeElapsed);
+			
 		
-
+		}
+		
+		for (auto& bill : m_BossHitEneyEffect) {
+			if(bill->active)
+			bill->Animate(fTimeElapsed);
+		}
+		for (auto& bill : m_BossCriticalEneyEffect) {
+			if (bill->active)
+				bill->Animate(fTimeElapsed);
+		}
 		while (readycount != 0);
 		//아이템 박스 리스폰
 		for (auto& quad : m_Quadlist) {
@@ -1470,7 +1532,18 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 
 		//Test Monster
-		m_pBossMonster->Render(pd3dCommandList);
+		if (m_pBossMonster->m_bActive) {
+			m_pBossMonster->Render(pd3dCommandList);
+		}
+		
+		for (auto& bill : m_BossHitEneyEffect) {
+			if (bill->active)
+				bill->NoSetPositionRender(pd3dCommandList,m_pCamera);
+		}
+		for (auto& bill : m_BossCriticalEneyEffect) {
+			if (bill->active)
+				bill->NoSetPositionRender(pd3dCommandList, m_pCamera,8.0f);
+		}
 
 		while (readycount != 0);
 
@@ -1767,11 +1840,21 @@ void GamePlayScene::ReleaseObjects()
 		pbills->Release();
 	}
 
+	for (auto& pbills : m_BossHitEneyEffect) {
+		pbills->Release();
+	}	
+	for (auto& pbills : m_BossCriticalEneyEffect) {
+		pbills->Release();
+	}
+	
+
 	for (int i = 0; i < MAX_THREAD_NUM; ++i) {
 		for (auto& pbills : m_DeadEneyEffect[i]) {
 			pbills->Release();
 		}
 	}
+
+
 }
 
 void GamePlayScene::PlayerControlInput()
@@ -2049,6 +2132,9 @@ void GamePlayScene::PlayerControlInput()
 						}
 					}
 
+					if (m_pBossMonster->m_bActive) {
+						m_pCollisionManager->CollsionBulletToBossEnemy(m_BossHitEneyEffect, m_BossCriticalEneyEffect, m_KillCount);
+					} 
 					m_bDogCrashOK = m_pCollisionManager->CollsionBulletToDogEnemy(m_DeadDogEneyEffect, m_KillCount);
 					if (m_bDogCrashOK) {
 						SpiderHurt->Play(0, 0, 0);

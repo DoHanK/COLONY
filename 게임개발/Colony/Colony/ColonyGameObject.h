@@ -402,7 +402,7 @@ public:
 	bool						m_bActive = true;
 	bool						m_bHitted = false;
 	bool						m_bVisible = true;
-	int							m_HP = 100;
+	volatile int				m_HP = 100;
 	int							m_GoalType;
 	//크기 조절
 	float						m_MonsterScale = 1.0f;

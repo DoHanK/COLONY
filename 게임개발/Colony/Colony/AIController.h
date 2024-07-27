@@ -24,6 +24,8 @@ public:
 	AIController(GoalThink* pBrain, AlienSpider* pBody);
 	~AIController() {};
 	XMFLOAT3 m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
+	
+	bool attacked = false;
 
 	//이동관련
 	XMFLOAT2  m_dest;
@@ -55,7 +57,7 @@ public:
 	DogAIController(DogGoalThink* pBrain, DogMonster* pBody);
 	~DogAIController() {};
 
-
+	bool attacked;
 	//이동관련
 	XMFLOAT2  m_dest;
 	XMFLOAT3  m_dir;
@@ -86,6 +88,7 @@ public:
 	BossAIController(BossGoalThink* pBrain, BossMonster* pBody);
 	~BossAIController() {};
 
+	bool attacked;
 
 	//이동관련
 	XMFLOAT2  m_dest;

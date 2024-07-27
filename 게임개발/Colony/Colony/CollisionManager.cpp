@@ -357,6 +357,18 @@ void CollisionManager::EnrollDogEnemy(GameObject* pEnemy)
 	}
 }
 
+void CollisionManager::EnrollBossEnemy(GameObject* pEnemy){
+
+	if (pEnemy) {
+
+		BossBoundingBox* m_pBounding = new BossBoundingBox(pEnemy);
+
+		m_BoundMonster = m_pBounding;
+
+	}
+
+}
+
 void CollisionManager::CheckCollisionEnemytoStaticObject(GameObject* pEnemy)
 {
 
@@ -1175,6 +1187,22 @@ void CollisionManager::CollisionEnemyToPlayer() { //싱글쓰레드일때
 	}
 }
 
+void CollisionManager::CollsiionBossToPlayer()
+{
+	m_BoundMonster->UpdateCollision();
+	for (auto& bound : m_BoundMonster->GetBoundingList()) {
+		
+			
+			BoundingSphere boundingsphere = ((BCapsule*)m_pPlayer)->GetCapsuleBounding(bound->Center);
+			if (boundingsphere.Intersects(*bound)) {
+
+				((Player*)m_pPlayer->m_pOwner)->isJump = false;
+				((Player*)m_pPlayer->m_pOwner)->m_xmf3Position = ((Player*)m_pPlayer->m_pOwner)->m_xmf3FinalPosition;
+			}
+		
+	}
+}
+
 bool CollisionManager::CollisionPlayerToRedZone()
 {
 	m_pRedZoneCollision->UpdateCollision();
@@ -1415,6 +1443,62 @@ bool CollisionManager::CollsionBulletToDogEnemy(vector<Billboard*>& m_pBloodBill
 	}
 
 	return crush;
+}
+
+bool CollisionManager::CollsionBulletToBossEnemy(vector<Billboard*>& m_pBloodBillboard, vector<Billboard*>& m_pCritcalBillboard, int& KilCount)
+{
+	FXMVECTOR BulletPos = XMLoadFloat3(&m_pCamera->GetPosition());
+
+	FXMVECTOR BulletDir = XMLoadFloat3(&m_pCamera->GetLookVector());
+	float dis;
+	int count = 0;
+	m_BoundMonster->UpdateCollision();
+	
+	for (auto& bound :m_BoundMonster->GetBoundingList()) {
+	
+		if (bound->Intersects(BulletPos, BulletDir, dis)) {
+			m_BoundMonster->m_pOwner->m_HP -= ((Player*)m_pPlayer->m_pOwner)->GetBulletDamage() / (m_BoundMonster->m_pOwner->m_MonsterScale);
+			if (count == m_BoundMonster->m_Critical) {
+				m_BoundMonster->m_Critical = rand() % 13;
+				m_BoundMonster->m_pOwner->m_bHitted = true; 
+
+					for (auto& p : m_pCritcalBillboard) {
+
+						if (p->active == false) {
+							p->active = true;
+							XMFLOAT3 pos = m_pCamera->GetPosition();
+							XMFLOAT3 dir = m_pCamera->GetLookVector();
+							XMFLOAT3 endpos = Vector3::Add(pos, Vector3::ScalarProduct(dir, dis , true));
+							p->m_StaticPos = endpos;
+							break;
+						}
+
+
+					}
+
+			}
+
+			for (auto& p : m_pBloodBillboard) {
+
+				if (p->active == false) {
+					p->active = true;
+					XMFLOAT3 pos =m_pCamera->GetPosition();
+					XMFLOAT3 dir = m_pCamera->GetLookVector();
+					XMFLOAT3 endpos = Vector3::Add(pos, Vector3::ScalarProduct(dir, dis*0.9, true));
+					p->SetPosition(endpos);
+					break;
+				}
+
+
+			}
+
+			return true;
+
+		}
+		count++;
+	}
+
+
 }
 
 
@@ -1776,21 +1860,17 @@ void CollisionManager::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandL
 
 
 
-	//BossRendering
-	BSphere m_top(XMFLOAT3(0,1.5, 0), 1.5f , m_pBossMonster);
-	m_top.UpdateCollision();
-	BSphere m_bottom(XMFLOAT3(0,0.7,0), 1.0f , m_pBossMonster);
-	m_bottom.UpdateCollision();
+	if (m_BoundMonster->m_pOwner->m_bActive) {
+		m_BoundMonster->UpdateCollision();
+		for (auto Bound : m_BoundMonster->GetBoundingList()) {
 
-	xmf4x4World = GetSphereMatrix(m_top.m_boundingshpere.Radius, m_top.m_boundingshpere.Center);
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-	m_psphere->Render(pd3dCommandList, 0);
-	xmf4x4World = GetSphereMatrix(m_bottom.m_boundingshpere.Radius, m_bottom.m_boundingshpere.Center);
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+			xmf4x4World = GetSphereMatrix(Bound->Radius, Bound->Center);
+			XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
+			pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+			m_psphere->Render(pd3dCommandList, 0);
+		}
+	}
 
-	m_psphere->Render(pd3dCommandList, 0);
 }
 
 CapsuleMesh::CapsuleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nslice, int nstack, float radius, float tip, float base) :

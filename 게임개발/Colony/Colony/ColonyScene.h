@@ -293,6 +293,9 @@ protected:
 	vector<Billboard*>					m_DeadEneyEffect[MAX_THREAD_NUM];
 	vector <Billboard*>					m_DeadDogEneyEffect;
 
+	vector <Billboard*>					m_BossHitEneyEffect;
+	vector <Billboard*>					m_BossCriticalEneyEffect;
+
 	// Particle
 	ParticleShader*						m_pParticleShader=NULL;
 	vector< ParticleObject*>			m_pParticleObjects;
@@ -419,7 +422,7 @@ public:
 	//TestVariable
 
 	BossMonster* m_pBossMonster = NULL;
-	
+	bool		m_bBossActive = false;
 
 };
 

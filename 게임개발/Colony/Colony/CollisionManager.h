@@ -369,6 +369,181 @@ public:
 
 };
 
+class BossBoundingBox : public Collision {
+public:
+	BossBoundingBox() {};
+	BossBoundingBox(GameObject* pOwner) {
+		float scale = pOwner->m_MonsterScale;
+		Grenadier_EyeArmor = pOwner->FindFrame("Grenadier_EyeArmor");
+
+		Grenadier_LeftUpperLeg = pOwner->FindFrame("Grenadier_LeftUpperLeg");
+		Grenadier_LeftLowerLeg = pOwner->FindFrame("Grenadier_LeftLowerLeg");
+		Grenadier_LeftFoot = pOwner->FindFrame("Grenadier_LeftFoot");
+
+		Grenadier_RightUpperLeg = pOwner->FindFrame("Grenadier_RightUpperLeg");
+		Grenadier_RightLowerLeg = pOwner->FindFrame("Grenadier_RightLowerLeg");
+		Grenadier_RightFoot = pOwner->FindFrame("Grenadier_RightFoot");
+
+		Grenadier_LeftHandEnd = pOwner->FindFrame("Grenadier_LeftHandEnd");
+		Grenadier_LeftUpperArm = pOwner->FindFrame("Grenadier_LeftUpperArm");
+		Grenadier_LeftHand = pOwner->FindFrame("Grenadier_LeftHand");
+	
+		Grenadier_RightHandEnd = pOwner->FindFrame("Grenadier_RightHandEnd");
+		Grenadier_RightUpperArm = pOwner->FindFrame("Grenadier_RightUpperArm");
+		Grenadier_RightHand = pOwner->FindFrame("Grenadier_RightHand");
+
+		m_Top.Radius = 1.0f * scale;
+
+		m_RightLeg[0].Radius = 0.3f* scale;
+		m_RightLeg[1].Radius = 0.3f* scale;
+		m_RightLeg[2].Radius = 0.3f* scale;
+
+		m_LeftLeg[0].Radius = 0.3f* scale;
+		m_LeftLeg[1].Radius = 0.3f* scale;
+		m_LeftLeg[2].Radius = 0.3f* scale;
+
+		m_RightHand[0].Radius = 0.3f* scale;
+		m_RightHand[1].Radius = 0.4f* scale;
+		m_RightHand[2].Radius = 0.4f* scale;
+		
+		m_LeftHand[0].Radius = 0.3f* scale;
+		m_LeftHand[1].Radius = 0.4f* scale;
+		m_LeftHand[2].Radius = 0.4f* scale;
+
+
+
+		m_pOwner = pOwner;
+
+		m_Boundinglist.push_back(&m_Top);
+		m_Framelist.push_back(Grenadier_EyeArmor);
+
+		m_Framelist.push_back(Grenadier_RightHandEnd);
+		m_Framelist.push_back(Grenadier_LeftHandEnd);
+
+		m_Framelist.push_back(Grenadier_RightUpperArm);
+		m_Framelist.push_back(Grenadier_LeftUpperArm);
+
+		m_Framelist.push_back(Grenadier_RightHand);
+		m_Framelist.push_back(Grenadier_LeftHand);
+
+
+		m_Framelist.push_back(Grenadier_RightUpperLeg);
+		m_Framelist.push_back(Grenadier_LeftUpperLeg);
+
+		m_Framelist.push_back(Grenadier_RightLowerLeg);
+		m_Framelist.push_back(Grenadier_LeftLowerLeg);
+
+		m_Framelist.push_back(Grenadier_RightFoot);
+		m_Framelist.push_back(Grenadier_LeftFoot);
+
+		for (int i = 0; i < 3; i++) {
+			m_Boundinglist.push_back(&m_RightHand[i]);
+		
+			m_Boundinglist.push_back(&m_LeftHand[i]);
+		}
+
+		for (int i = 0; i < 3; i++) {
+			m_Boundinglist.push_back(&m_RightLeg[i]);
+			m_Boundinglist.push_back(&m_LeftLeg[i]);
+		}
+
+	};
+	std::list<BoundingSphere*> m_Boundinglist;
+	std::vector<GameObject*> m_Framelist;
+	GameObject* Grenadier_EyeArmor;
+
+	GameObject* Grenadier_LeftUpperLeg;
+	GameObject* Grenadier_LeftLowerLeg;
+	GameObject* Grenadier_LeftFoot;
+
+	GameObject* Grenadier_RightUpperLeg;
+	GameObject* Grenadier_RightLowerLeg;
+	GameObject* Grenadier_RightFoot;
+
+
+	GameObject* Grenadier_LeftHandEnd;
+	GameObject* Grenadier_LeftUpperArm;
+	GameObject* Grenadier_LeftHand;
+
+	GameObject* Grenadier_RightHandEnd;
+	GameObject* Grenadier_RightUpperArm;
+	GameObject* Grenadier_RightHand;
+
+	BoundingSphere m_Top;
+	BoundingSphere m_RightLeg[3];
+	BoundingSphere m_LeftLeg[3];
+
+	BoundingSphere m_RightHand[3];
+	BoundingSphere m_LeftHand[3];
+
+
+	int m_Critical = 0;
+
+	void UpdateCollision() {
+		
+		m_pOwner->UpdateTransform(NULL);
+
+		m_Top.Center = XMFLOAT3(Grenadier_EyeArmor->m_xmf4x4World._41,
+								Grenadier_EyeArmor->m_xmf4x4World._42,
+								Grenadier_EyeArmor->m_xmf4x4World._43);
+
+
+
+		m_RightLeg[0].Center = XMFLOAT3(Grenadier_LeftUpperLeg->m_xmf4x4World._41,
+			Grenadier_LeftUpperLeg->m_xmf4x4World._42,
+			Grenadier_LeftUpperLeg->m_xmf4x4World._43);
+		m_RightLeg[1].Center = XMFLOAT3(Grenadier_LeftLowerLeg->m_xmf4x4World._41,
+			Grenadier_LeftLowerLeg->m_xmf4x4World._42,
+			Grenadier_LeftLowerLeg->m_xmf4x4World._43);
+		m_RightLeg[2].Center = XMFLOAT3(Grenadier_LeftFoot->m_xmf4x4World._41,
+			Grenadier_LeftFoot->m_xmf4x4World._42,
+			Grenadier_LeftFoot->m_xmf4x4World._43);
+
+
+
+		m_LeftLeg[0].Center = XMFLOAT3(Grenadier_RightUpperLeg->m_xmf4x4World._41,
+			Grenadier_RightUpperLeg->m_xmf4x4World._42,
+			Grenadier_RightUpperLeg->m_xmf4x4World._43);
+		m_LeftLeg[1].Center = XMFLOAT3(Grenadier_RightLowerLeg->m_xmf4x4World._41,
+			Grenadier_RightLowerLeg->m_xmf4x4World._42,
+			Grenadier_RightLowerLeg->m_xmf4x4World._43);
+		m_LeftLeg[2].Center = XMFLOAT3(Grenadier_RightFoot->m_xmf4x4World._41,
+			Grenadier_RightFoot->m_xmf4x4World._42,
+			Grenadier_RightFoot->m_xmf4x4World._43);
+
+		
+		m_RightHand[0].Center = XMFLOAT3(Grenadier_RightHandEnd->m_xmf4x4World._41,
+			Grenadier_RightHandEnd->m_xmf4x4World._42,
+			Grenadier_RightHandEnd->m_xmf4x4World._43);
+		m_RightHand[1].Center = XMFLOAT3(Grenadier_RightUpperArm->m_xmf4x4World._41,
+			Grenadier_RightUpperArm->m_xmf4x4World._42,
+			Grenadier_RightUpperArm->m_xmf4x4World._43);
+		m_RightHand[2].Center = XMFLOAT3(Grenadier_RightHand->m_xmf4x4World._41,
+			Grenadier_RightHand->m_xmf4x4World._42,
+			Grenadier_RightHand->m_xmf4x4World._43);
+
+
+		m_LeftHand[0].Center = XMFLOAT3(Grenadier_LeftHandEnd->m_xmf4x4World._41,
+			Grenadier_LeftHandEnd->m_xmf4x4World._42,
+			Grenadier_LeftHandEnd->m_xmf4x4World._43);
+		m_LeftHand[1].Center = XMFLOAT3(Grenadier_LeftUpperArm->m_xmf4x4World._41,
+			Grenadier_LeftUpperArm->m_xmf4x4World._42,
+			Grenadier_LeftUpperArm->m_xmf4x4World._43);
+		m_LeftHand[2].Center = XMFLOAT3(Grenadier_LeftHand->m_xmf4x4World._41,
+			Grenadier_LeftHand->m_xmf4x4World._42,
+			Grenadier_LeftHand->m_xmf4x4World._43);
+
+
+
+	 }
+
+	std::list<BoundingSphere*> GetBoundingList() {
+		 
+		return m_Boundinglist;
+	}
+
+};
+
 class CollisionManager{
 public:
 
@@ -389,7 +564,7 @@ public:
 	Collision* m_pPlayer;
 	Camera* m_pCamera;
 	//Boss
-	GameObject* m_pBossMonster;
+	BossBoundingBox* m_BoundMonster;
 
 	//Rendering
 	std::vector<BoundingBoxMesh*> m_BoundingBoxMeshes;
@@ -441,7 +616,7 @@ public:
 
 	void EnrollEnemy(GameObject* pEnemy);
 	void EnrollDogEnemy(GameObject* pEnemy);
-
+	void EnrollBossEnemy(GameObject* pEnemy);
 
 
 	void CheckCollisionEnemytoStaticObject(GameObject* pEnemy);
@@ -454,6 +629,7 @@ public:
 	void EnrollBulletDir(Camera* pCamera) {m_pCamera = pCamera;}
 
 	void EnrollRedZoneIntoSphere(XMFLOAT3 center, float radius, GameObject* pOwner);
+
 
 	void CheckVisiableEnemy();
 
@@ -470,11 +646,12 @@ public:
 	bool CollsionBulletToEnemy(vector<Billboard*>* m_pBloodBillboard,GameObject* pEnemy,int& KillCount);
 
 	bool CollsionBulletToDogEnemy(vector<Billboard*>& m_pBloodBillboard, int& KillCount);
-
+	bool CollsionBulletToBossEnemy(vector<Billboard*>& m_pBloodBillboard, vector<Billboard*>& m_pCritcalBillboard, int& KilCount);
 
 	void CollisionEnemyToStaticObeject();    
 	void CollisionPlayerToEnemy();
 	void CollisionEnemyToPlayer();
+	void CollsiionBossToPlayer();
 	bool CollisionPlayerToRedZone();
 	void CollisionBulletToObject();
 
