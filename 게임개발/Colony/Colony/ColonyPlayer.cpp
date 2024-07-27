@@ -324,7 +324,7 @@ void Player::UpdatePosition(float fTimeElapsed)
 	 m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Gravity, fTimeElapsed, false));
 	//¸¶Âû°è¼ö
 	float  fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	float fMaxVelocityXZ = m_fMaxVelocityXZ;		
+	float fMaxVelocityXZ = m_fMaxVelocityXZ+ m_Speed/10;
 
 	if (fLength > m_fMaxVelocityXZ)
 	{
@@ -411,14 +411,14 @@ void Player::UpdateMatrix()
 int Player::GetBulletDamage()
 {
 	if (m_gunType == HAVE_SHOTGUN) {
-		return 100;
+		return 100+m_Power*10;
 	}
 	else if (m_gunType == HAVE_RIFLE) {
 
-		return 40;
+		return 40 + m_Power * 10;
 	}
 	else {
-		return 30;
+		return 30 + m_Power * 10;
 	}
 
 	return 0;

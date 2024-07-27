@@ -173,8 +173,20 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		case 'O':
 
 			break;
-		case '7':
+		case '5':
 			m_SamplingNum = 8; //보스소환
+			break;
+		case '6':
+			if (m_pPlayer)
+				m_pPlayer->m_Speed = 20;
+			break;
+		case '7':
+			if (m_pPlayer)
+				m_pPlayer->m_Defense = 20;
+			break;
+		case '8':
+			if (m_pPlayer)
+				m_pPlayer->m_Power = 20;
 			break;
 		default:
 			break;

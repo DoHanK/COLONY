@@ -615,8 +615,9 @@ bool BossAIController::ExecuteGoal(float fTimeElapsed)
 					if (angle <= 60) {
 
 						while (true) {
+							
 							int pre = m_pBody->m_pEnemy->m_HP;
-							int now = pre - m_pBody->m_MonsterScale;
+							int now = pre - (m_pBody->m_MonsterScale-((Player*)m_pBody->m_pEnemy)->m_Defense);
 							if (CAS(&m_pBody->m_pEnemy->m_HP, pre, now)) {
 								attacked = true;
 								break;
