@@ -63,7 +63,7 @@ void GameLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	m_pSoundManager = pSoundManager;
 	LPDIRECTSOUNDBUFFER LobbyBGM = m_pSoundManager->LoadWaveToBuffer("Sound/LobbySceneBGM.wav");
-	LobbyBGM->Play(0, 0, 0);
+	LobbyBGM->Play(0, 0, DSBPLAY_LOOPING);
 }
 
 
@@ -913,7 +913,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	PlaySceneBGM= m_pSoundManager->LoadWaveToBuffer("Sound/PlaySceneBGM.wav");
 	PlaySceneBGM->SetVolume(-800);
 	RainBGM = m_pSoundManager->LoadWaveToBuffer("Sound/RainSound.wav");
-	RainBGM->SetVolume(-1000);
+	RainBGM->SetVolume(-800);
 	StepSound = m_pSoundManager->LoadWaveToBuffer("Sound/StepSound.wav");
 	StepSound -> SetVolume(0);
 	//StepSound->SetFrequency(20000);
@@ -949,6 +949,33 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	DogHurt->SetVolume(-400);
 	DogHurt2 = m_pSoundManager->LoadWaveToBuffer("Sound/dogHurt2.wav");
 	DogHurt2->SetVolume(-400);
+
+	SyringeEffect = m_pSoundManager->LoadWaveToBuffer("Sound/SyringeEffect.wav");
+	SyringeEffect->SetVolume(-400);
+	WaveFinished = m_pSoundManager->LoadWaveToBuffer("Sound/1WaveFinish.wav");
+	WaveFinished->SetVolume(-400);
+	LoseSound = m_pSoundManager->LoadWaveToBuffer("Sound/LoseSound.wav");
+	LoseSound->SetVolume(-400);
+	RedZoneWarning = m_pSoundManager->LoadWaveToBuffer("Sound/SirenSound.wav");
+	RedZoneWarning->SetVolume(-400);
+	WinSound = m_pSoundManager->LoadWaveToBuffer("Sound/WinSound.wav");
+	WinSound->SetVolume(-400);
+	BossBGM = m_pSoundManager->LoadWaveToBuffer("Sound/BossScene.wav");
+	BossBGM->SetVolume(-500);
+	BossDie = m_pSoundManager->LoadWaveToBuffer("Sound/RobotDie.wav");
+	BossDie->SetVolume(-100);
+	BossBreaking = m_pSoundManager->LoadWaveToBuffer("Sound/BossBreaking.wav");
+	BossBreaking->SetVolume(0);
+	HealEffect = m_pSoundManager->LoadWaveToBuffer("Sound/PlayHeal.wav");
+	HealEffect->SetVolume(-100);
+
+
+
+
+
+
+
+
 
 
 
@@ -1083,6 +1110,13 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 
 		if (m_bGameFail) {
+			if (m_pBossMonster->m_bActive) {
+				BossBGM->Stop();
+			}
+			else {
+				PlaySceneBGM->Stop();
+			}
+			LoseSound->Play(0, 0, 0);
 			m_bGameOverUI = true;
 			m_fGameOverTime += fTimeElapsed;
 			if (m_fGameOverTime > 3.0f) {
@@ -1093,7 +1127,10 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 		if (m_pBossMonster->m_HP <= 0) {
 			m_bGameWin = true;
-
+			BossDie->Play(0, 0, 0);
+			BossBreaking->Play(0, 0, 0);
+			BossBGM->Stop();
+			WinSound->Play(0, 0, 0);
 		}
 
 		if (m_bGameWin) {
@@ -1248,7 +1285,8 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 			if (m_SamplingNum == 8 && m_bBossActive == false) {
 
-
+				PlaySceneBGM->Stop();
+				BossBGM->Play(0, 0, 0);
 				m_pBossMonster->m_bActive = true;
 				m_bBossActive = true;
 				XMFLOAT3 pos = m_pPlayer->GetPosition();
@@ -1619,6 +1657,7 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 			if (m_currentMinute > m_LastMinute) {
 				m_bwarningUI = true;
+				RedZoneWarning->Play(0, 0, 0);
 				m_pRedZoneEffect->SetPosition(m_RedZone->GetPosition());
 				m_RedZone->m_xmf4x4ToParent = Matrix4x4::Identity();
 				int RandomPosition = GetRandomFloatInRange(-40.f, 40.f);
@@ -2115,6 +2154,7 @@ void GamePlayScene::PlayerControlInput()
 		//주사기 사용
 		if (pKeysBuffer['4'] & 0xF0) {
 			if (m_HaveSyringe) {
+				SyringeEffect->Play(0, 0, 0);
 				m_isImortal = true;
 				h_Syringe->RenderTexture = m_Tsyringe;
 				m_HaveSyringe = false;
@@ -2171,6 +2211,7 @@ void GamePlayScene::PlayerControlInput()
 						// 체력회복 아이템 획득
 						else if (ActiveItem == health) {
 							m_pPlayer->m_HP += 20;
+							HealEffect->Play(0, 0, 0);
 
 							if (m_pPlayer->m_HP >= 100) {
 								m_pPlayer->m_HP = 100;
@@ -3126,6 +3167,10 @@ void WinScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pUImanager->CreateUINonNormalRect(-0.18, -0.28, -0.11, -0.023, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameStart, 1, TEXTUREUSE, GetType(), true);
 	pUImanager->CreateUINonNormalRect(-0.18, -0.28, 0.11, 0.19, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameQuit, 0, TEXTUREUSE, GetType(), true);
 
+	LPDIRECTSOUNDBUFFER WinSound = pSoundManager->LoadWaveToBuffer("Sound/WinSceneSound.wav");
+	WinSound->SetVolume(-400);
+	WinSound->Play(0, 0, DSBPLAY_LOOPING);
+
 }
 
 
@@ -3147,4 +3192,8 @@ void LoseScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	pUImanager->CreateUINonNormalRect(-0.3, -0.38, -0.12, -0.035, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameStart, 1, TEXTUREUSE, GetType(), true);
 	pUImanager->CreateUINonNormalRect(-0.3, -0.38, 0.045, 0.12, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameQuit, 0, TEXTUREUSE, GetType(), true);
 
+
+	LPDIRECTSOUNDBUFFER LoseSceneSound = pSoundManager->LoadWaveToBuffer("Sound/LoseScene.wav");
+	LoseSceneSound->SetVolume(-400);
+	LoseSceneSound->Play(0, 0, DSBPLAY_LOOPING);
 }

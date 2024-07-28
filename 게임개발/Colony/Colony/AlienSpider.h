@@ -158,12 +158,14 @@ class BossMonster : public GameObject {
 public:
 	BossMonster(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ResourceManager* pResourceManager, PathFinder* pPathFinder, float scale);
 	virtual ~BossMonster() {};
+	
 public:
 	BossGoalThink* m_pBrain;
 	BossAIController* m_pSoul;
 	void Update(float fTimeElapsed);
 	void UpdatePosition(float fTimeElapsed);
 	void AnimateWithMultithread(float fTimeElapsed, int idx);
+	SoundManager* m_pSoundManager;
 
 };
 

@@ -557,7 +557,6 @@ BossAIController::BossAIController(BossGoalThink* pBrain, BossMonster* pBody) :m
 
 
 
-
 }
 
 bool BossAIController::ExecuteGoal(float fTimeElapsed)
@@ -567,7 +566,6 @@ bool BossAIController::ExecuteGoal(float fTimeElapsed)
 		//애니메이션
 		if (!m_pAnimationControl->isSameState(Gren_Run)) {
 			m_pAnimationControl->ChangeAnimation(Gren_Run);
-
 		}
 
 		MoveDest(fTimeElapsed);
@@ -576,6 +574,7 @@ bool BossAIController::ExecuteGoal(float fTimeElapsed)
 	else if (m_pBody->m_GoalType == Idle_Goal) {
 		if (!m_pAnimationControl->isSameState(Gren_Idle)) {
 			m_pAnimationControl->ChangeAnimation(Gren_Idle);
+
 		}
 
 	}
@@ -584,6 +583,7 @@ bool BossAIController::ExecuteGoal(float fTimeElapsed)
 		if (!m_pAnimationControl->isSameState(Gren_Attack)) {
 			attacked = false;
 			m_pAnimationControl->ChangeAnimation(Gren_Attack);
+
 		}
 		if (attacked == false) {
 			if (m_pAnimationControl->isAnimationPlayProgress(Gren_Attack, 0.5)) {

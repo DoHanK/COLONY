@@ -396,10 +396,22 @@ protected:
 	LPDIRECTSOUNDBUFFER alarmSound = nullptr;
 	LPDIRECTSOUNDBUFFER BigExplosion = nullptr;
 	LPDIRECTSOUNDBUFFER PickUpSound = nullptr;
-
 	LPDIRECTSOUNDBUFFER PickItem = nullptr;
 	LPDIRECTSOUNDBUFFER DogHurt = nullptr;
 	LPDIRECTSOUNDBUFFER DogHurt2 = nullptr;
+
+	LPDIRECTSOUNDBUFFER SyringeEffect = nullptr;
+	LPDIRECTSOUNDBUFFER WaveFinished = nullptr;
+	LPDIRECTSOUNDBUFFER LoseSound = nullptr;
+	LPDIRECTSOUNDBUFFER RedZoneWarning = nullptr;
+	LPDIRECTSOUNDBUFFER WinSound = nullptr;
+	LPDIRECTSOUNDBUFFER BossBGM = nullptr;
+	LPDIRECTSOUNDBUFFER BossDie = nullptr;
+	LPDIRECTSOUNDBUFFER BossBreaking = nullptr;
+	LPDIRECTSOUNDBUFFER HealEffect = nullptr;
+
+
+
 
 
 	bool ScopeSoundOnce = true;

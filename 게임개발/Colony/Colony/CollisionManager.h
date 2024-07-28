@@ -588,6 +588,7 @@ public:
 	LPDIRECTSOUNDBUFFER MonsterDie = nullptr;
 	LPDIRECTSOUNDBUFFER MonsterDieEffect = nullptr;
 	LPDIRECTSOUNDBUFFER DogDie = nullptr;
+	LPDIRECTSOUNDBUFFER Teleport = nullptr;
 
 public:
 

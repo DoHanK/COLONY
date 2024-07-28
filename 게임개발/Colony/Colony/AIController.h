@@ -99,6 +99,7 @@ public:
 	//Animation
 
 
+
 public:
 	bool ExecuteGoal(float fTimeElapsed);
 private:

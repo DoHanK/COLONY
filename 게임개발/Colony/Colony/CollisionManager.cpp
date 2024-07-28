@@ -35,6 +35,7 @@ CollisionManager::CollisionManager(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	MonsterDieEffect->SetVolume(0);
 	DogDie = m_pSoundManager->LoadWaveToBuffer("Sound/dogDie.wav");
 	DogDie->SetVolume(0);
+	
 
 }
 
