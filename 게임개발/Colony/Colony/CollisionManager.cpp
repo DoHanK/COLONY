@@ -1662,10 +1662,9 @@ void CollisionManager::CollisionBulletToItemBox(vector<Billboard*>& ExplosionEff
 					case sheild:
 						SetSheildItem(item, a->m_pOwner->GetPosition());
 						break;
+
 					}
-
 					
-
 					break;
 				}
 

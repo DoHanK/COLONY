@@ -989,10 +989,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 	m_HealEffect = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
 		pResourceManager->BringTexture("Model/Textures/HealTest.dds", BILLBOARD_TEXTURE, true), m_BillShader, NULL);
+	m_HealEffect->m_OffsetPos = XMFLOAT3(0.0f, 0.5f, 0.8f);
 	m_HealEffect->doAnimate = true;
 	m_HealEffect->active = false;
-	m_HealEffect->SetRowNCol(10, 5);
-	m_HealEffect->m_BillMesh->UpdataVertexPosition(UIRect(0.5, -0.5, -0.5, 0.5), 1.0f);
+	m_HealEffect->SetRowNCol(8, 5);
+	m_HealEffect->m_BillMesh->UpdataVertexPosition(UIRect(2.0, -2.0, -2.0, 2.0), 1.0f);
 	m_HealEffect->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
 	m_HealEffect->SettedTimer = 0.000000001f;
 	m_HealEffect->doOnce = true;
@@ -1236,7 +1237,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 						m_RedZoneHurt = 0.0f;
 						while (true) {
 							int pre = m_pPlayer->m_HP;
-							int now = pre - 10;
+							int now = pre - 5;
 							if (CAS(&m_pPlayer->m_HP, pre, now)) {
 								break;
 							}
@@ -2061,6 +2062,8 @@ void GamePlayScene::PlayerControlInput()
 				m_PlayInfoUI->RenderTexture = m_Tradiation;
 				m_IsInfoUI = true;
 				m_InfoUIAnimation = 0.0f;
+				m_HealEffect->active = true;
+				m_HealEffect->m_ownerObject = m_pPlayer;
 			}
 		}
 
@@ -2109,8 +2112,7 @@ void GamePlayScene::PlayerControlInput()
 						// Ã¼·ÂÈ¸º¹ ¾ÆÀÌÅÛ È¹µæ
 						else if (ActiveItem == health) {
 							m_pPlayer->m_HP += 20;
-							m_HealEffect->active = true;
-							m_HealEffect->m_ownerObject = m_pPlayer;
+
 							if (m_pPlayer->m_HP >= 100) {
 								m_pPlayer->m_HP = 100;
 							}
