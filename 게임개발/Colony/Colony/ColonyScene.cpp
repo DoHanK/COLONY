@@ -188,6 +188,10 @@ bool GamePlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			if (m_pPlayer)
 				m_pPlayer->m_Power = 20;
 			break;
+		case '9':
+			if (m_pPlayer)
+				m_pPlayer->m_HP = 100;
+			break;
 		default:
 			break;
 		}
@@ -961,7 +965,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pbill->SetRowNCol(6, 6);
 		pbill->m_BillMesh->UpdataVertexPosition(UIRect(3.0, -3.0, -3.0, 3.0), 1.0f);
 		pbill->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
-		pbill->SettedTimer = 0.05f;
+		pbill->SettedTimer = 0.01f;
 		pbill->doOnce = true;
 		pbill->AddRef();
 
@@ -975,7 +979,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pbill->SetRowNCol(8, 8);
 		pbill->m_BillMesh->UpdataVertexPosition(UIRect(5.0, -5.0, -5.0, 5.0), 1.0f);
 		pbill->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
-		pbill->SettedTimer = 0.005f;
+		pbill->SettedTimer = 0.000000001f;
 		pbill->doOnce = true;
 		pbill->AddRef();
 
@@ -1000,6 +1004,30 @@ float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal)
 
 void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 {
+
+
+	if (m_bGameFail) {
+		m_bGameOverUI = true;
+		m_fGameOverTime += fTimeElapsed;
+		if (m_fGameOverTime > 3.0f) {
+			m_isGameLose = true;
+			Sleep(3000);
+		}
+	}
+
+	if (m_pBossMonster->m_HP <= 0) {
+		m_bGameWin = true;
+	}
+
+	if (m_bGameWin) {
+		m_fGameWinTime += fTimeElapsed;
+		if (m_fGameWinTime > 7.0f) {
+			m_isGameWin = true;
+			Sleep(3000);
+		}
+	}
+
+
 
 	if (m_bisCameraShaking) {
 		//intensity, duration
@@ -1762,7 +1790,13 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	}
 	h_SamplingUI=pUImanager->CreateUINonNormalRect(-0.72, -0.9, 0.86, 0.96, m_TsamplingUI[0], NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
+	//game over
+	m_Tgameover=m_pResourceManager->BringTexture("Model/Textures/UITexture/GameOverTexture.dds", UI_TEXTURE, true);
+	h_Gameover = pUImanager->CreateUINonNormalRect(0.3, -0.3, -0.2, 0.2, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 
+	//game win
+	 m_Tgamewin = m_pResourceManager->BringTexture("Model/Textures/UITexture/GameWin.dds", UI_TEXTURE, true);
+	h_Gamewin = pUImanager->CreateUINonNormalRect(0.1, -0.1, -1.0, 1.0, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
 }
 
 void GamePlayScene::ReleaseObjects()
@@ -2143,15 +2177,16 @@ void GamePlayScene::PlayerControlInput()
 							DogHurt2->Play(0, 0, 0);
 						}
 					}
-
-					if (m_pBossMonster->m_bActive) {
-						m_pCollisionManager->CollsionBulletToBossEnemy(m_BossHitEneyEffect, m_BossCriticalEneyEffect, m_KillCount);
-					} 
 					m_bDogCrashOK = m_pCollisionManager->CollsionBulletToDogEnemy(m_DeadDogEneyEffect, m_KillCount);
 					if (m_bDogCrashOK) {
 						SpiderHurt->Play(0, 0, 0);
 					}
-					if (!m_bcrashOk)m_bcrashOk = m_bDogCrashOK;
+					
+					if (m_pBossMonster->m_bActive) {
+						m_bossHitted = m_pCollisionManager->CollsionBulletToBossEnemy(m_BossHitEneyEffect, m_BossCriticalEneyEffect, m_KillCount);
+					}
+					if (!m_bcrashOk)m_bcrashOk = m_bossHitted;
+
 					m_pCollisionManager->CollisionBulletToItemBox(m_ItemBoxExplosion,m_items);
 			
 				}
@@ -2465,6 +2500,7 @@ void GamePlayScene::UpdateUI() {
 		h_TImer2->RenderTexture = numTexture[0];
 		h_TImer3->RenderTexture = numTexture[0];
 		h_TImer4->RenderTexture = numTexture[0];
+		m_bGameFail = true;
 	}
 	else {
 		minute = TotalPlayTime / 60;
@@ -2562,6 +2598,10 @@ void GamePlayScene::UpdateUI() {
 		h_HP[1]->RenderTexture = numTexture[onevalue];
 		if (RangeCheck(0, 9, twovalue))
 		h_HP[2]->RenderTexture = numTexture[twovalue];
+
+		if (m_pPlayer->m_HP <= 0) {
+			m_bGameFail = true;
+		}
 	}
 	else {
 		h_HP[0]->RenderTexture = numTexture[1];
@@ -2594,15 +2634,36 @@ void GamePlayScene::UpdateUI() {
 
 	// 샘플링 개수 업데이트
 	h_SamplingUI->RenderTexture = m_TsamplingUI[m_SamplingNum];
+	if(m_pPlayer->m_Power<=20) h_Power->Rect.right = (-0.133) + 0.00315 * m_pPlayer->m_Power;
+	if (m_pPlayer->m_Speed <= 20) h_Speed->Rect.right = (-0.03) + 0.00315 * m_pPlayer->m_Speed;
+	if (m_pPlayer->m_Defense <= 20) h_Defense->Rect.right = (0.065) + 0.00315 * m_pPlayer->m_Defense;
 
-	h_Power->Rect.right = (-0.133) + 0.00315 * m_pPlayer->m_Power;
-	h_Speed->Rect.right = (-0.03) + 0.00315 * m_pPlayer->m_Speed;
-	h_Defense->Rect.right = (0.065) + 0.00315 * m_pPlayer->m_Defense;
 
+
+	//game over update
+	if (m_bGameOverUI) { 
+	h_Gameover->RenderTexture = m_Tgameover; 
+	h_TargetRifle->RenderTexture = m_TNone;
+	h_TargetShotgun->RenderTexture = m_TNone;
+	h_TargetMachineGun->RenderTexture = m_TNone;
+	m_PlayTimeTimer.Stop();
+	m_bGameOverUI = false;
+	}
+
+	if (m_bGameWin) {
+		h_Gameover->RenderTexture = m_Tgamewin;
+		h_TargetRifle->RenderTexture = m_TNone;
+		h_TargetShotgun->RenderTexture = m_TNone;
+		h_TargetMachineGun->RenderTexture = m_TNone;
+		m_PlayTimeTimer.Stop();
+		m_bGameWin = false;
+	}
 }
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)
 {
+
+
 	float LifeTime = 20.0f;
 	TotalPlayTime = static_cast<int>(m_PlayTimeTimer.GetTotalTime());
 	m_currentMinute = static_cast<int>(TotalPlayTime / LifeTime);
@@ -2732,7 +2793,7 @@ void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* p
 		}
 
 	}
-}
+}  
 
 void GamePlayScene::BuildDepthTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -2945,6 +3006,10 @@ WinScene::~WinScene()
 
 void WinScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ResourceManager* pResourceManager, UIManager* pUImanager, SoundManager* pSoundManager)
 {
+	pUImanager->CreateUINonNormalRect(1.0, -1.0, -1.0, 1.0, pResourceManager->BringTexture("Model/Textures/UITexture/WinScene.dds", UI_TEXTURE, true), NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.18, -0.28, -0.11, -0.023, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameStart, 1, TEXTUREUSE, GetType(), true);
+	pUImanager->CreateUINonNormalRect(-0.18, -0.28, 0.11, 0.19, pResourceManager->BringTexture("Model/Textures/UITexture/TimerBackground.dds", UI_TEXTURE, true), NULL, &UIControlHelper::GameQuit, 0, TEXTUREUSE, GetType(), true);
+
 }
 
 

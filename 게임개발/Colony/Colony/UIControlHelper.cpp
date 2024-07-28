@@ -12,7 +12,7 @@ void UIControlHelper::GameQuit()
 
 void UIControlHelper::GameWin()
 {
-
+	m_pSceneManger->ChangeScene(new WinScene);
 }
 
 void UIControlHelper::GameLose()

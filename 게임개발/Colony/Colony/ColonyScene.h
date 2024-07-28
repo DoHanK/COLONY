@@ -90,7 +90,8 @@ public:
 	virtual UINT GetType() { return Basic; };
 
 	virtual void UpdateUI() {};
-
+	virtual bool GetGameWinState() {return m_isGameWin;}
+	virtual bool GetGameLoseState() { return m_isGameLose; }
 
 	//Multithread
 
@@ -98,6 +99,10 @@ public:
 	virtual void AnimateObjectsWithMultithread(float fTimeElapsed) {};
 
 	SoundManager* m_pSoundManager = NULL;
+
+	//½Â¸®ÆÇÁ¤
+	bool m_isGameWin = false;
+	bool m_isGameLose = false;
 };
 
 class GameLobbyScene :public BasicScene {
@@ -244,7 +249,8 @@ protected:
 	UIInfo* h_Defense;
 	UIInfo* h_Speed;
 	UIInfo* m_PlayInfoUI;
-
+	UIInfo* h_Gameover;
+	UIInfo* h_Gamewin;
 
 	vector<Texture*>					numTexture;
 	Texture*							m_TrifleGun;
@@ -270,7 +276,18 @@ protected:
 	Texture* m_TgetShotgun;
 	Texture* m_TgetMachinegun;
 	Texture* m_TgetDefense;
+	Texture* m_Tgameover;
+	Texture* m_Tgamewin;
 	
+
+	//game over
+	bool m_bGameFail = false;
+	float m_fGameOverTime = 0.0f;
+	bool m_bGameOverUI = false;
+
+	//game win
+	bool m_bGameWin = false;
+	float m_fGameWinTime = 0.0f;
 
 	// »ùÇÃ¸µ °³¼ö
 	UINT m_SamplingNum = 0;
@@ -279,6 +296,7 @@ protected:
 	bool m_isImortal = false;
 	float m_fMortalTime = 0.0f;
 
+	bool m_bossHitted = false;
 
 	CollisionManager*					m_pCollisionManager;
 

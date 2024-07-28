@@ -392,6 +392,14 @@ if (GetCursorPos(&p)) {
 		m_functionQueue.clear();
 	}
 
+	if (m_pSceneManager->m_SceneStack.top()->GetGameLoseState()) {
+		m_pSceneManager->ChangeScene(new LoseScene);
+	}
+
+	if (m_pSceneManager->m_SceneStack.top()->GetGameWinState()) {
+		m_pSceneManager->ChangeScene(new WinScene);
+	}
+
 	//애니메이션
 	AnimationGameObjects();
 
