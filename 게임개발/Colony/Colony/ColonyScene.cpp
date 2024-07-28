@@ -669,10 +669,11 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	spiderColor[6] =pResourceManager->BringTexture("Model/Textures/GhostMask1.dds", DETAIL_NORMAL_TEXTURE, true);
 
 	m_pGameObject.reserve(500);
-	for (int j = 0; j < 100; ++j) {
+	for (int j = 0; j < 150; ++j) {
 		for (int i = 0; i < 1; i++) {
 			int idex = m_pPathFinder->GetInvalidNode();
 			AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, MonsterSizeDis(gen));
+			//AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, 1);
 			//AlienSpider* p = new AlienSpider(pd3dDevice, pd3dCommandList, pResourceManager, m_pPathFinder, 12.f);
 			p->SetPosition(m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.x, 0.0f, m_pPathFinder->m_Cell[idex].m_BoundingBox.Center.z);
 			p->m_pEnemy = m_pPlayer;
@@ -690,8 +691,8 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			m_pGameObject.push_back(p);
 		}
 	}
-	
-	for (int j = 0; j < 200; ++j) {
+	m_pDogMonster.reserve(500);
+	for (int j = 0; j < 50; ++j) {
 		for (int i = 0; i < 1; i++) {
 			DogMonster* pDog = new DogMonster(pd3dDevice, pd3dCommandList, pResourceManager, 2);
 			int idex = m_pPathFinder->GetInvalidNode();
@@ -1018,67 +1019,119 @@ float GamePlayScene::GetRandomFloatInRange(float minVal, float maxVal)
 void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 {
 
+	if (m_bCinematic) {
+		XMFLOAT3 pos =	m_pCamera->GetPosition();
 
-	//waring UI
-	if (m_bwarningUI) {
-		m_fwarningTime += fTimeElapsed;
-		if (m_fwarningTime > 1.5f) {
-			m_fwarningTime = 0.0f;
-			m_bwarningUI = false;
+		if (pos.y < 20.f) {
+			pos.y += 0.1;
+			pos.x += 0.2;
+
+
+			m_pCamera->SetPosition(pos);
+			m_pCamera->RegenerateViewMatrix();
+			m_pCamera->SetLookAt(m_pBossMonster->GetPosition());
 		}
-	}
+		else {
+			static int RotateCount = 0;
+			XMFLOAT3 EnemyPos  = m_pBossMonster->GetPosition();
+			float distance = XM3CalDis(EnemyPos, pos);
+			XMFLOAT3 dir = Vector3::Subtract(pos, EnemyPos);
+
+			dir = RotateAroundYAxis(dir, 2);
+			RotateCount++;
+			RotateCount++;
+
+			XMFLOAT3 movedistance = Vector3::ScalarProduct(dir, distance,true);
+			
+			pos = Vector3::Add(EnemyPos, movedistance);
+
+			if (RotateCount > 360.f) {
+				m_bCinematic = false;
+				m_PlayTimeTimer.Start();
+				m_pCamera->m_xmf3Right = m_pPlayer->GetRightVector();
+				m_pCamera->m_xmf3Up= m_pPlayer->GetUpVector();
+				m_pCamera->m_xmf3Look = m_pPlayer->GetLookVector();
+			
+				m_pCamera->SetPosition(m_pPlayer->GetPosition());
+				m_pCamera->RegenerateViewMatrix();
+			}
+			else {
 
 
-	if (m_bGameFail) {
-		m_bGameOverUI = true;
-		m_fGameOverTime += fTimeElapsed;
-		if (m_fGameOverTime > 3.0f) {
-			m_isGameLose = true;
-			Sleep(3000);
+				m_pCamera->SetPosition(pos);
+				m_pCamera->RegenerateViewMatrix();
+				m_pCamera->SetLookAt(m_pBossMonster->GetPosition());
+			}
+			
 		}
+
+
+
+
+
+
 	}
-
-	if (m_pBossMonster->m_HP <= 0) {
-		m_bGameWin = true;
-
-	}
-
-	if (m_bGameWin) {
-		m_fGameWinTime += fTimeElapsed;
-		if (m_fGameWinTime > 7.0f) {
-			m_isGameWin = true;
-			Sleep(3000);
+	else {
+		//waring UI
+		if (m_bwarningUI) {
+			m_fwarningTime += fTimeElapsed;
+			if (m_fwarningTime > 1.5f) {
+				m_fwarningTime = 0.0f;
+				m_bwarningUI = false;
+			}
 		}
-	}
 
 
-
-	if (m_bisCameraShaking) {
-		//intensity, duration
-		m_pCamera->UpdateCameraShake(5.0f, 0.3f, fTimeElapsed, m_pPlayer->m_gunType);
-	}
-
-	m_fElapsedTime = fTimeElapsed;
-
-	m_pPlayer->m_ReloadTime += fTimeElapsed;
-
-	PlayerControlInput();
-
-
-	if (m_pPlayer->m_PlayerInPlace == SubPlace) {
-
-		m_pCollisionManager->CollisionPlayerToSubSceneStaticObeject();
-
-
-		if (m_Progress == SceneProgress::GoMoniterNCheckMission) {
-			m_InFoBillBoard[0]->active = false;
-			m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/FrontMoniter.dds", UI_TEXTURE, true);
+		if (m_bGameFail) {
+			m_bGameOverUI = true;
+			m_fGameOverTime += fTimeElapsed;
+			if (m_fGameOverTime > 3.0f) {
+				m_isGameLose = true;
+				Sleep(3000);
+			}
 		}
-		else if(m_Progress == SceneProgress::GoOutSide) {
 
-			m_InFoBillBoard[0]->active = false;
-			m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/gooutside.dds.dds", UI_TEXTURE, true);
+		if (m_pBossMonster->m_HP <= 0) {
+			m_bGameWin = true;
+
 		}
+
+		if (m_bGameWin) {
+			m_fGameWinTime += fTimeElapsed;
+			if (m_fGameWinTime > 7.0f) {
+				m_isGameWin = true;
+				Sleep(3000);
+			}
+		}
+
+
+
+		if (m_bisCameraShaking) {
+			//intensity, duration
+			m_pCamera->UpdateCameraShake(5.0f, 0.3f, fTimeElapsed, m_pPlayer->m_gunType);
+		}
+
+		m_fElapsedTime = fTimeElapsed;
+
+		m_pPlayer->m_ReloadTime += fTimeElapsed;
+						
+		PlayerControlInput();
+
+
+		if (m_pPlayer->m_PlayerInPlace == SubPlace) {
+
+			m_pCollisionManager->CollisionPlayerToSubSceneStaticObeject();
+
+
+			if (m_Progress == SceneProgress::GoMoniterNCheckMission) {
+				m_InFoBillBoard[0]->active = false;
+				m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/FrontMoniter.dds", UI_TEXTURE, true);
+			}
+			else if (m_Progress == SceneProgress::GoOutSide) {
+
+				m_InFoBillBoard[0]->active = false;
+				m_InFoUI->RenderTexture = m_pResourceManager->BringTexture("Model/Textures/PlaySceneInFoUI/gooutside.dds.dds", UI_TEXTURE, true);
+			}
 
 
 
@@ -1138,259 +1191,265 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 			}
 
-	
 
 
 
 
 
 
-		/*m_RedZoneHurt += fTimeElapsed;
-		if (m_RedZoneHurt > 5.0f) {
-			m_RedZoneHurt = 0.0f;
-			if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
-				m_pPlayer->m_HP -= 1;
-				m_isHurt = true;
-			}
-		}
 
-
-
-		if (m_isHurt) {
-			m_hurtAnimation += fTimeElapsed;
-			if (m_hurtAnimation > 0.2f) {
-				m_isHurt = false;
-				m_hurtAnimation = 0.0f;
-			}
-		}*/
-	
-
-		m_pPlayer->Animate(fTimeElapsed);
-
-		for (auto& GO : m_pBillObjects) {
-			if (GO->doAnimate) {
-				GO->Animate(fTimeElapsed);
-			}
-		}
-
-		m_pBillObject->Animate(fTimeElapsed);
-
-	
-
-		// 총알 
-		for (auto& b : bulletcasings) {
-			if (b->m_bActive)
-				b->Update(fTimeElapsed);
-		}
-
-		m_pCollisionManager->CollisionBulletToObject();
-
-
-
-		m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
-
-	}
-	else if (m_pPlayer->m_PlayerInPlace == MainPlace) {
-
-
-		if (m_SamplingNum == 8 && m_bBossActive ==false) {
-
-
-			m_pBossMonster->m_bActive = true;
-			m_bBossActive = true;
-			m_pBossMonster->SetPosition(m_pPlayer->GetPosition());
- 		}
-
-		m_pCollisionManager->CollisionPlayerToStaticObeject();
-		m_pCollisionManager->CollisionPlayerToItemBox();
-		m_pCollisionManager->CollisionPlayerToEnemy();
-
-
-		if(m_pBossMonster->m_bActive) 
-		m_pCollisionManager->CollsiionBossToPlayer();
-
-		if (m_RedZone->m_bActive) {
-			m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
-		}
-
-		readycount = MAX_THREAD_NUM;
-
-		for (int i = 0; i < MAX_THREAD_NUM; ++i) {
-			m_Joblist[i].push({ ANIMATION, -1 });
-		}
-
-
-		if (!m_bGameWin&&!m_bGameFail) {
-			if (m_bCrashRedZone) {
-				// 무적 상태일 때 (주사기 사용)
-				if (m_isImortal) {
-					m_fMortalTime += fTimeElapsed;
-					if (m_fMortalTime > 20.0f) {
-						// 무적상태 이펙트
-						m_fMortalTime = 0.0f;
-						m_isImortal = false;
-					}
+			/*m_RedZoneHurt += fTimeElapsed;
+			if (m_RedZoneHurt > 5.0f) {
+				m_RedZoneHurt = 0.0f;
+				if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
+					m_pPlayer->m_HP -= 1;
+					m_isHurt = true;
 				}
-				else {
-					m_RedZoneHurt += fTimeElapsed;
-					if (m_RedZoneHurt > 5.0f) {
-						m_RedZoneHurt = 0.0f;
-						while (true) {
-							int pre = m_pPlayer->m_HP;
-							int now = pre - 5;
-							if (CAS(&m_pPlayer->m_HP, pre, now)) {
-								break;
+			}
+
+
+
+			if (m_isHurt) {
+				m_hurtAnimation += fTimeElapsed;
+				if (m_hurtAnimation > 0.2f) {
+					m_isHurt = false;
+					m_hurtAnimation = 0.0f;
+				}
+			}*/
+
+
+			m_pPlayer->Animate(fTimeElapsed);
+
+			for (auto& GO : m_pBillObjects) {
+				if (GO->doAnimate) {
+					GO->Animate(fTimeElapsed);
+				}
+			}
+
+			m_pBillObject->Animate(fTimeElapsed);
+
+
+
+			// 총알 
+			for (auto& b : bulletcasings) {
+				if (b->m_bActive)
+					b->Update(fTimeElapsed);
+			}
+
+			m_pCollisionManager->CollisionBulletToObject();
+
+
+
+			m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
+
+		}
+		else if (m_pPlayer->m_PlayerInPlace == MainPlace) {
+
+
+			if (m_SamplingNum == 8 && m_bBossActive == false) {
+
+
+				m_pBossMonster->m_bActive = true;
+				m_bBossActive = true;
+				XMFLOAT3 pos = m_pPlayer->GetPosition();
+				pos.y = 0;
+				m_pBossMonster->SetPosition(pos);
+				m_bCinematic = true;
+				m_PlayTimeTimer.Stop();
+			}
+
+
+
+			m_pCollisionManager->CollisionPlayerToStaticObeject();
+			m_pCollisionManager->CollisionPlayerToItemBox();
+			m_pCollisionManager->CollisionPlayerToEnemy();
+
+
+			if (m_pBossMonster->m_bActive)
+				m_pCollisionManager->CollsiionBossToPlayer();
+
+			if (m_RedZone->m_bActive) {
+				m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
+			}
+
+			readycount = MAX_THREAD_NUM;
+
+			for (int i = 0; i < MAX_THREAD_NUM; ++i) {
+				m_Joblist[i].push({ ANIMATION, -1 });
+			}
+
+
+			if (!m_bGameWin && !m_bGameFail) {
+				if (m_bCrashRedZone) {
+					// 무적 상태일 때 (주사기 사용)
+					if (m_isImortal) {
+						m_fMortalTime += fTimeElapsed;
+						if (m_fMortalTime > 20.0f) {
+							// 무적상태 이펙트
+							m_fMortalTime = 0.0f;
+							m_isImortal = false;
+						}
+					}
+					else {
+						m_RedZoneHurt += fTimeElapsed;
+						if (m_RedZoneHurt > 5.0f) {
+							m_RedZoneHurt = 0.0f;
+							while (true) {
+								int pre = m_pPlayer->m_HP;
+								int now = pre - 2;
+								if (CAS(&m_pPlayer->m_HP, pre, now)) {
+									break;
+								}
 							}
+							if (m_pPlayer->m_HP < 0) {
+								m_pPlayer->m_HP = 0;
+							}
+							alarmSound->Play(0, 0, 0);
+							m_isHurt = true;
 						}
-						if (m_pPlayer->m_HP < 0) {
-							m_pPlayer->m_HP = 0;
-						}
-						alarmSound->Play(0, 0, 0);
-						m_isHurt = true;
 					}
 				}
 			}
-		}
-		/*m_RedZoneHurt += fTimeElapsed;
+			/*m_RedZoneHurt += fTimeElapsed;
 
-		if (m_RedZoneHurt > 5.0f) {
-			m_RedZoneHurt = 0.0f;
-			if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
-				m_pPlayer->m_HP -= 1;
-				alarmSound->Play(0, 0, 0);
-				m_isHurt = true;
-			}
-		}*/
-
-
-
-		if (m_isHurt) {
-			m_hurtAnimation += fTimeElapsed;
-			if (m_hurtAnimation > 0.2f) {
-				m_isHurt = false;
-				m_hurtAnimation = 0.0f;
-			}
-		}
-
-
-		m_pPlayer->Animate(fTimeElapsed);
-
-		for (auto& GO : m_pBillObjects) {
-			if (GO->doAnimate) {
-				GO->Animate(fTimeElapsed);
-			}
-		}
+			if (m_RedZoneHurt > 5.0f) {
+				m_RedZoneHurt = 0.0f;
+				if (m_bCrashRedZone && m_pPlayer->m_HP > 0) {
+					m_pPlayer->m_HP -= 1;
+					alarmSound->Play(0, 0, 0);
+					m_isHurt = true;
+				}
+			}*/
 
 
 
-		m_pBillObject->Animate(fTimeElapsed);
-
-		if (m_pRedZoneEffect->doAnimate) {
-			m_pRedZoneEffect->Animate(fTimeElapsed);
-		}
-
-		for (auto& bill : m_ItemBoxExplosion) {
-			if (bill->doAnimate) {
-				bill->Animate(fTimeElapsed);
-			}
-		}
-		for (int i = 0; i < 29; ++i) {
-			for (auto& B : m_pBloodBillboard[i]) {
-				if (B->doAnimate) {
-					B->Animate(fTimeElapsed);
+			if (m_isHurt) {
+				m_hurtAnimation += fTimeElapsed;
+				if (m_hurtAnimation > 0.2f) {
+					m_isHurt = false;
+					m_hurtAnimation = 0.0f;
 				}
 			}
-		}
-		//crashUIAnimation
-		if (m_bcrashOk) {
-			m_crashAnimation += fTimeElapsed;
-			if (m_crashAnimation > 0.3f) {
-				m_bcrashOk = false;
-				m_crashAnimation = 0.0f;
-			}
-		}
-		// 총알 
-		for (auto& b : bulletcasings) {
-			if (b->m_bActive)
-				b->Update(fTimeElapsed);
-		}
-
-		m_pCollisionManager->CollisionBulletToObject();
 
 
+			m_pPlayer->Animate(fTimeElapsed);
 
-		m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
-
-		for (auto& bill : m_DeadDogEneyEffect) {
-			if (bill->doAnimate) {
-				bill->Animate(fTimeElapsed);
+			for (auto& GO : m_pBillObjects) {
+				if (GO->doAnimate) {
+					GO->Animate(fTimeElapsed);
+				}
 			}
 
-		}
 
 
+			m_pBillObject->Animate(fTimeElapsed);
 
-		for (auto& item : m_items) {
-			if (item->m_bActive) {
-				item->Animate(fTimeElapsed);
-
+			if (m_pRedZoneEffect->doAnimate) {
+				m_pRedZoneEffect->Animate(fTimeElapsed);
 			}
-		}
 
-		//Test
-		if (m_pBossMonster->m_bActive) {
-			m_pBossMonster->Update(fTimeElapsed);
-			m_pBossMonster->Animate(fTimeElapsed);
-			
-		
-		}
-		
-		for (auto& bill : m_BossHitEneyEffect) {
-			if(bill->active)
-			bill->Animate(fTimeElapsed);
-		}
-		for (auto& bill : m_BossCriticalEneyEffect) {
-			if (bill->active)
-				bill->Animate(fTimeElapsed);
-		}
-
-		if (m_HealEffect)
-			if (m_HealEffect->active)
-				m_HealEffect->Animate(fTimeElapsed);
-
-
-		while (readycount != 0);
-		//아이템 박스 리스폰
-		for (auto& quad : m_Quadlist) {
-
-			for (auto& itempos : quad->m_itemRespons) {
-
-				for (auto& item : m_itemBoxes) {
-
-					if (item->m_bActive == false) {
-						item->SetPosition(itempos);
-						item->m_bActive = true;
-						m_pCollisionManager->EnrollItemIntoBox(item->m_BoundingBox.Center, item->m_BoundingBox.Extents, item->m_pChild->m_xmf4x4ToParent, item);
-						break;
+			for (auto& bill : m_ItemBoxExplosion) {
+				if (bill->doAnimate) {
+					bill->Animate(fTimeElapsed);
+				}
+			}
+			for (int i = 0; i < 29; ++i) {
+				for (auto& B : m_pBloodBillboard[i]) {
+					if (B->doAnimate) {
+						B->Animate(fTimeElapsed);
 					}
 				}
+			}
+			//crashUIAnimation
+			if (m_bcrashOk) {
+				m_crashAnimation += fTimeElapsed;
+				if (m_crashAnimation > 0.3f) {
+					m_bcrashOk = false;
+					m_crashAnimation = 0.0f;
+				}
+			}
+			// 총알 
+			for (auto& b : bulletcasings) {
+				if (b->m_bActive)
+					b->Update(fTimeElapsed);
+			}
+
+			m_pCollisionManager->CollisionBulletToObject();
+
+
+
+			m_pPlayer->m_xmf3FinalPosition = m_pPlayer->m_xmf3Position;
+
+			for (auto& bill : m_DeadDogEneyEffect) {
+				if (bill->doAnimate) {
+					bill->Animate(fTimeElapsed);
+				}
 
 			}
-			quad->m_itemRespons.clear();
+
+
+
+			for (auto& item : m_items) {
+				if (item->m_bActive) {
+					item->Animate(fTimeElapsed);
+
+				}
+			}
+
+			//Test
+			if (m_pBossMonster->m_bActive) {
+				m_pBossMonster->Update(fTimeElapsed);
+				m_pBossMonster->Animate(fTimeElapsed);
+
+
+			}
+
+			for (auto& bill : m_BossHitEneyEffect) {
+				if (bill->active)
+					bill->Animate(fTimeElapsed);
+			}
+			for (auto& bill : m_BossCriticalEneyEffect) {
+				if (bill->active)
+					bill->Animate(fTimeElapsed);
+			}
+
+			if (m_HealEffect)
+				if (m_HealEffect->active)
+					m_HealEffect->Animate(fTimeElapsed);
+
+
+			while (readycount != 0);
+			//아이템 박스 리스폰
+			for (auto& quad : m_Quadlist) {
+
+				for (auto& itempos : quad->m_itemRespons) {
+
+					for (auto& item : m_itemBoxes) {
+
+						if (item->m_bActive == false) {
+							item->SetPosition(itempos);
+							item->m_bActive = true;
+							m_pCollisionManager->EnrollItemIntoBox(item->m_BoundingBox.Center, item->m_BoundingBox.Extents, item->m_pChild->m_xmf4x4ToParent, item);
+							break;
+						}
+					}
+
+				}
+				quad->m_itemRespons.clear();
+
+			}
 
 		}
 
-	}
-
-	if (m_IsInfoUI) {
-		m_InfoUIAnimation += fTimeElapsed;
-		if (m_InfoUIAnimation > 2.0f) {
-			m_InfoUIAnimation = 0.0f;
-			m_PlayInfoUI->RenderTexture = m_TNone;
-			m_IsInfoUI = false;
+		if (m_IsInfoUI) {
+			m_InfoUIAnimation += fTimeElapsed;
+			if (m_InfoUIAnimation > 2.0f) {
+				m_InfoUIAnimation = 0.0f;
+				m_PlayInfoUI->RenderTexture = m_TNone;
+				m_IsInfoUI = false;
+			}
 		}
 	}
-
 
 }
 

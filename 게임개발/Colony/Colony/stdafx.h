@@ -150,6 +150,26 @@ inline bool CAS(volatile int* addr, int expected, int new_val)
 		&expected, new_val);
 }
 
+inline XMFLOAT3 RotateAroundYAxis(const XMFLOAT3& dir, float theta)
+{
+	// 각도를 라디안으로 변환
+	float rad = XMConvertToRadians(theta);
+
+	// 회전 행렬 생성
+	XMMATRIX rotationMatrix = XMMatrixRotationY(rad);
+
+	// dir 벡터를 XMVECTOR로 변환
+	XMVECTOR dirVec = XMLoadFloat3(&dir);
+
+	// 회전 행렬을 사용하여 벡터 회전
+	XMVECTOR rotatedVec = XMVector3Transform(dirVec, rotationMatrix);
+
+	// 결과를 XMFLOAT3로 변환
+	XMFLOAT3 rotatedDir;
+	XMStoreFloat3(&rotatedDir, rotatedVec);
+
+	return rotatedDir;
+}
 
 void ResourceTransition(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dResource, D3D12_RESOURCE_STATES d3dStateBefore, D3D12_RESOURCE_STATES d3dStateAfter);
 void SwapResourcePointer(ID3D12Resource** ppd3dResourceA, ID3D12Resource** ppd3dResourceB);

@@ -304,6 +304,9 @@ protected:
 	float m_fMortalTime = 0.0f;
 
 	bool m_bossHitted = false;
+	//보스 시네마 실행
+	bool m_bCinematic =false;
+
 
 	CollisionManager*					m_pCollisionManager;
 
