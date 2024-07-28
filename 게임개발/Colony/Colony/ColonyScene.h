@@ -321,6 +321,8 @@ protected:
 	vector <Billboard*>					m_BossHitEneyEffect;
 	vector <Billboard*>					m_BossCriticalEneyEffect;
 
+	 Billboard*							m_HealEffect;
+
 	// Particle
 	ParticleShader*						m_pParticleShader=NULL;
 	vector< ParticleObject*>			m_pParticleObjects;

@@ -987,6 +987,17 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_BossCriticalEneyEffect.push_back(pbill);
 	}
 	
+	m_HealEffect = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		pResourceManager->BringTexture("Model/Textures/HealTest.dds", BILLBOARD_TEXTURE, true), m_BillShader, NULL);
+	m_HealEffect->doAnimate = true;
+	m_HealEffect->active = false;
+	m_HealEffect->SetRowNCol(10, 5);
+	m_HealEffect->m_BillMesh->UpdataVertexPosition(UIRect(0.5, -0.5, -0.5, 0.5), 1.0f);
+	m_HealEffect->m_BillMesh->UpdateUvCoord(UIRect(1, 0, 0, 1));
+	m_HealEffect->SettedTimer = 0.000000001f;
+	m_HealEffect->doOnce = true;
+	m_HealEffect->AddRef();
+	
 
 	BulidUI(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pResourceManager, pUImanager);
 	BuildDefaultLightsAndMaterials();
@@ -1341,6 +1352,12 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 			if (bill->active)
 				bill->Animate(fTimeElapsed);
 		}
+
+		if (m_HealEffect)
+			if (m_HealEffect->active)
+				m_HealEffect->Animate(fTimeElapsed);
+
+
 		while (readycount != 0);
 		//아이템 박스 리스폰
 		for (auto& quad : m_Quadlist) {
@@ -1589,6 +1606,9 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 		}
 
+		if (m_HealEffect)
+			if (m_HealEffect->active)
+				m_HealEffect->Render(pd3dCommandList, m_pPlayer->GetCamera());
 
 		//Test Monster
 		if (m_pBossMonster->m_bActive) {
@@ -2089,6 +2109,8 @@ void GamePlayScene::PlayerControlInput()
 						// 체력회복 아이템 획득
 						else if (ActiveItem == health) {
 							m_pPlayer->m_HP += 20;
+							m_HealEffect->active = true;
+							m_HealEffect->m_ownerObject = m_pPlayer;
 							if (m_pPlayer->m_HP >= 100) {
 								m_pPlayer->m_HP = 100;
 							}

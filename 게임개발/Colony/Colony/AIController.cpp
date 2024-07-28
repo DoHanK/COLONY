@@ -637,7 +637,7 @@ bool BossAIController::ExecuteGoal(float fTimeElapsed)
 			m_pAnimationControl->ChangeAnimation(Gren_Idle);
 		}
 
-	}
+	}                               
 	else if (m_pBody->m_GoalType == Hitted_Goal) {
 
 		if (!m_pAnimationControl->isSameState(Gren_Hit)) {
