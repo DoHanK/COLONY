@@ -817,6 +817,7 @@ void GamePlayScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_RedZone = new RedZone(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature, "Model/RedZone2.bin", m_RedZoneShader, "Model/Textures/",pResourceManager);
 	m_pCollisionManager->EnrollRedZoneIntoSphere(m_RedZone->RedZoneObjectInfo->m_pModelRootObject->GetPosition(), 50.f, m_RedZone);
+	m_RedZone->m_bActive = false;
 
 	//RedZoneEffect
 	m_pRedZoneEffect = new Billboard(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
@@ -1006,6 +1007,16 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 {
 
 
+	//waring UI
+	if (m_bwarningUI) {
+		m_fwarningTime += fTimeElapsed;
+		if (m_fwarningTime > 1.5f) {
+			m_fwarningTime = 0.0f;
+			m_bwarningUI = false;
+		}
+	}
+
+
 	if (m_bGameFail) {
 		m_bGameOverUI = true;
 		m_fGameOverTime += fTimeElapsed;
@@ -1017,6 +1028,7 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 	if (m_pBossMonster->m_HP <= 0) {
 		m_bGameWin = true;
+
 	}
 
 	if (m_bGameWin) {
@@ -1170,6 +1182,8 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 
 
 		if (m_SamplingNum == 8 && m_bBossActive ==false) {
+
+
 			m_pBossMonster->m_bActive = true;
 			m_bBossActive = true;
 			m_pBossMonster->SetPosition(m_pPlayer->GetPosition());
@@ -1183,7 +1197,9 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 		if(m_pBossMonster->m_bActive) 
 		m_pCollisionManager->CollsiionBossToPlayer();
 
-		m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
+		if (m_RedZone->m_bActive) {
+			m_bCrashRedZone = m_pCollisionManager->CollisionPlayerToRedZone();
+		}
 
 		readycount = MAX_THREAD_NUM;
 
@@ -1192,37 +1208,37 @@ void GamePlayScene::AnimateObjectsWithMultithread(float fTimeElapsed)
 		}
 
 
-
-		if (m_bCrashRedZone) {
-			// 무적 상태일 때 (주사기 사용)
-			if (m_isImortal) {
-				m_fMortalTime += fTimeElapsed;
-				if (m_fMortalTime > 20.0f) {
-					// 무적상태 이펙트
-					m_fMortalTime = 0.0f;
-					m_isImortal = false;
+		if (!m_bGameWin&&!m_bGameFail) {
+			if (m_bCrashRedZone) {
+				// 무적 상태일 때 (주사기 사용)
+				if (m_isImortal) {
+					m_fMortalTime += fTimeElapsed;
+					if (m_fMortalTime > 20.0f) {
+						// 무적상태 이펙트
+						m_fMortalTime = 0.0f;
+						m_isImortal = false;
+					}
 				}
-			}
-			else {
-				m_RedZoneHurt += fTimeElapsed;
-				if (m_RedZoneHurt > 5.0f) {
-					m_RedZoneHurt = 0.0f;
-					while (true) {
-						int pre = m_pPlayer->m_HP;
-						int now = pre - 10;
-						if (CAS(&m_pPlayer->m_HP, pre, now)) {
-							break;
+				else {
+					m_RedZoneHurt += fTimeElapsed;
+					if (m_RedZoneHurt > 5.0f) {
+						m_RedZoneHurt = 0.0f;
+						while (true) {
+							int pre = m_pPlayer->m_HP;
+							int now = pre - 10;
+							if (CAS(&m_pPlayer->m_HP, pre, now)) {
+								break;
+							}
 						}
+						if (m_pPlayer->m_HP < 0) {
+							m_pPlayer->m_HP = 0;
+						}
+						alarmSound->Play(0, 0, 0);
+						m_isHurt = true;
 					}
-					if (m_pPlayer->m_HP < 0) {
-						m_pPlayer->m_HP = 0;
-					}
-					alarmSound->Play(0, 0, 0);
-					m_isHurt = true;
 				}
 			}
 		}
-		
 		/*m_RedZoneHurt += fTimeElapsed;
 
 		if (m_RedZoneHurt > 5.0f) {
@@ -1375,6 +1391,9 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 			//쉐이더로 전체 시간 보내기
 			float totaltime = m_PlayTimeTimer.GetTotalTime();
 
+			if (totaltime >= 20) { m_RedZone->m_bActive = true; 
+			}
+
 
 		}
 
@@ -1519,14 +1538,14 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 		}
 
 
-		if (m_RedZone) {
+		if (m_RedZone->m_bActive) {
 
 			if (m_currentMinute > m_LastMinute) {
-
+				m_bwarningUI = true;
 				m_pRedZoneEffect->SetPosition(m_RedZone->GetPosition());
 				m_RedZone->m_xmf4x4ToParent = Matrix4x4::Identity();
-				int RandomPosition = GetRandomFloatInRange(-200.f, 200.f);
-				m_RedZone->SetPosition(RandomPosition, 0, RandomPosition);
+				int RandomPosition = GetRandomFloatInRange(-40.f, 40.f);
+				m_RedZone->SetPosition(m_pPlayer->GetPosition().x+RandomPosition, 0, m_pPlayer->GetPosition().z+RandomPosition);
 				m_RedZone->m_prexmf4x4ToParent = m_RedZone->m_xmf4x4ToParent;
 				m_LastMinute = m_currentMinute;
 				m_pRedZoneEffect->active = true;
@@ -1587,7 +1606,7 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 		while (readycount != 0);
 
-		if (m_RedZone) m_RedZone->Render(pd3dSubCommandList[MAX_THREAD_NUM -1]);
+		if (m_RedZone->m_bActive) m_RedZone->Render(pd3dSubCommandList[MAX_THREAD_NUM -1]);
 	}
 };
 
@@ -1797,6 +1816,11 @@ void GamePlayScene::BulidUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//game win
 	 m_Tgamewin = m_pResourceManager->BringTexture("Model/Textures/UITexture/GameWin.dds", UI_TEXTURE, true);
 	h_Gamewin = pUImanager->CreateUINonNormalRect(0.1, -0.1, -1.0, 1.0, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
+	//redzone warning
+	m_Twarninglogo = m_pResourceManager->BringTexture("Model/Textures/UITexture/warningLogo.dds", UI_TEXTURE, true);
+	h_WarningSign = pUImanager->CreateUINonNormalRect(0.05+0.5, -0.05+0.5, -0.15, 0.15, m_TNone, NULL, NULL, 0, TEXTUREUSE, GetType(), true);
+
 }
 
 void GamePlayScene::ReleaseObjects()
@@ -2329,18 +2353,18 @@ void GamePlayScene::AnimateObjects(float fTimeElapsed)
 
 
 
-	m_RedZoneHurt += fTimeElapsed;
-	if (m_RedZoneHurt > 5.0f) {
-		m_RedZoneHurt = 0.0f;
-		if (m_bCrashRedZone) {
-			m_pPlayer->m_HP -= 10;
-			if (m_pPlayer->m_HP <= 0) {
-				m_pPlayer->m_HP = 0;
+		m_RedZoneHurt += fTimeElapsed;
+		if (m_RedZoneHurt > 5.0f) {
+			m_RedZoneHurt = 0.0f;
+			if (m_bCrashRedZone) {
+				m_pPlayer->m_HP -= 10;
+				if (m_pPlayer->m_HP <= 0) {
+					m_pPlayer->m_HP = 0;
+				}
+				m_isHurt = true;
 			}
-			m_isHurt = true;
 		}
-	}
-
+	
 
 
 	if (m_isHurt) {
@@ -2658,6 +2682,15 @@ void GamePlayScene::UpdateUI() {
 		m_PlayTimeTimer.Stop();
 		m_bGameWin = false;
 	}
+
+	//warning UI
+	if (m_bwarningUI) {
+		h_WarningSign->RenderTexture = m_Twarninglogo;
+	}
+	else {
+		h_WarningSign->RenderTexture = m_TNone;
+	}
+
 }
 
 void GamePlayScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, Camera* pCamera)

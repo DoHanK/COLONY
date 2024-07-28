@@ -251,6 +251,7 @@ protected:
 	UIInfo* m_PlayInfoUI;
 	UIInfo* h_Gameover;
 	UIInfo* h_Gamewin;
+	UIInfo* h_WarningSign;
 
 	vector<Texture*>					numTexture;
 	Texture*							m_TrifleGun;
@@ -278,7 +279,13 @@ protected:
 	Texture* m_TgetDefense;
 	Texture* m_Tgameover;
 	Texture* m_Tgamewin;
+	Texture* m_Twarninglogo;
 	
+
+
+	//warning UI
+	bool m_bwarningUI = false;
+	float m_fwarningTime = 0.0f;
 
 	//game over
 	bool m_bGameFail = false;

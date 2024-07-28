@@ -1492,6 +1492,17 @@ bool CollisionManager::CollsionBulletToBossEnemy(vector<Billboard*>& m_pBloodBil
 
 			}
 
+			if (m_BoundMonster->m_pOwner->m_HP <= 0) {
+			for (auto& Dog : m_DogEnemy) {
+				if (Dog)
+					Dog->m_pOwner->m_bActive = false;
+			}
+			for (auto& Spider : m_EnemyObjects) {
+				if (Spider)Spider->m_pOwner->m_HP = 0;
+			}
+			}
+
+
 			return true;
 
 		}
