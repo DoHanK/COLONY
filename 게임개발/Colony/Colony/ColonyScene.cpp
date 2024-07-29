@@ -3024,6 +3024,15 @@ void GamePlayScene::BakeDepthTextureForDynamic(ID3D12GraphicsCommandList* pd3dCo
 			if (GO->m_bVisible)
 			GO->DepthRender(pd3dCommandList);
 	}
+	for (auto& GO : m_pDogMonster) {
+		if (GO->m_bActive)
+			if (GO->m_bVisible)
+				GO->DepthRender(pd3dCommandList);
+	}
+
+	if(m_pBossMonster)
+		if (m_pBossMonster->m_bVisible)
+			m_pBossMonster->DepthRender(pd3dCommandList);
 
 }
 
