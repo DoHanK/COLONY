@@ -4,9 +4,16 @@
 ## 게임소개: 
 
 ### 게임플레이화면
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-|![image](https://github.com/user-attachments/assets/8e9e615f-8f69-4e1c-886b-7a1915687e5f)|![image](https://github.com/user-attachments/assets/0447e085-0774-4ad6-8e8a-361dcf61a3fb)|
-|![image](https://github.com/user-attachments/assets/7aade516-1a47-47fa-81e2-9240addc7ed9)|![image](https://github.com/user-attachments/assets/fce6012c-4f62-44ab-9b0f-1e99544c17ba)|
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/8e9e615f-8f69-4e1c-886b-7a1915687e5f" width="300"/></td>
+    <td><img src="https://github.com/user-attachments/assets/0447e085-0774-4ad6-8e8a-361dcf61a3fb" width="300"/></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/7aade516-1a47-47fa-81e2-9240addc7ed9" width="300"/></td>
+    <td><img src="https://github.com/user-attachments/assets/fce6012c-4f62-44ab-9b0f-1e99544c17ba" width="300"/></td>
+  </tr>
+</table>
 
 
 ### 게임 조작키
@@ -21,7 +28,7 @@
 - Git
 개발 기간: 2024.01.1 ~ 2024.08.18 (약 7개월)
 
-###사용 기술
+### 사용 기술
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - 기하쉐이더를 사용한 비 파티클
 - Ghost Trailler Effect 구현
