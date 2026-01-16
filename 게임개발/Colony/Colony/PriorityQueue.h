@@ -71,10 +71,8 @@ private:
 
 			if (m_vecCost[m_Heap[nd]] > m_vecCost[m_Heap[child]]) {
 				Swap(child, nd);
-
 				nd = child;
 			}
-
 			else
 			{
 				break;

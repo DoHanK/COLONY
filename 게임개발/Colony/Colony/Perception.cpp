@@ -40,10 +40,6 @@ void Perception::IsLookPlayer(Player* pPlayer)
 		//범위 안에 있을때
 		if (PAdistance <= PlayerRange  + AISIGHTRANGE * m_pOwner->m_MonsterScale) {
 
-
-		
-
-
 			if (angle < AIFOV) {
 				m_pOwner->m_pPlayer = pPlayer;
 			}

@@ -1,4 +1,4 @@
-#include "UiManager.h"
+癤�#include "UiManager.h"
 #include "stdafx.h"
 #include "ColonyMesh.h"
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -214,8 +214,7 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList, i
 			for (const pair<UIInfo, std::function<void(UIControlHelper&)>>& info : m_RenderUIList[i]) {
 
 				if (info.first.SceneType == SceneType) {
-
-					//텍스쳐 있는지 없는지 확인
+					
 					if (info.first.RenderTexture) {
 						if(pd3d12CommandList)
 							info.first.RenderTexture->UpdateShaderVariable(pd3d12CommandList, 0);
@@ -226,10 +225,10 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList, i
 						info.first.MaskTexture->UpdateShaderVariable(pd3d12CommandList, 0);
 					}
 
-					//옵션
+					//???
 					m_pUIMesh[count]->UpdateMaskValue(info.first.Option);
 
-					//SPRITEANIMATION에 따른 UV 설정
+					//SPRITEANIMATION?? ???? UV ????
 					if (info.first.EffectInfo) {
 						float m_row = info.first.EffectInfo->NowRow;
 						float m_rows = info.first.EffectInfo->RowNum;
@@ -241,7 +240,7 @@ void UIManager::AllLayerDrawRect(ID3D12GraphicsCommandList* pd3d12CommandList, i
 						m_pUIMesh[count]->UpdateMaskUvCoord(UIRect(0.0f, 1.0f, 0.0f, 1.0f));
 					}
 
-					//랜더링 텍스쳐 설정
+					//?????? ????? ????
 					m_pUIMesh[count]->UpdateVertexPosition((info.first.Rect));
 					m_pUIMesh[count++]->Render(pd3d12CommandList);
 				}
@@ -260,7 +259,7 @@ void UIManager::DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList,int Scene
 		for (const pair<UIInfo, std::function<void(UIControlHelper&)>>& info : m_pRenderTargetList) {
 
 			if (info.first.SceneType == SceneType) {
-				//텍스쳐 있는지 없는지 확인
+				//????? ????? ?????? ???
 				if (info.first.RenderTexture) {
 					info.first.RenderTexture->UpdateShaderVariable(pd3d12CommandList, 0);
 				}
@@ -269,10 +268,10 @@ void UIManager::DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList,int Scene
 					info.first.MaskTexture->UpdateShaderVariable(pd3d12CommandList, 0);
 				}
 
-				//옵션
+				//???
 				m_pUISceneMesh[count]->UpdateMaskValue(info.first.Option);
 
-				//SPRITEANIMATION에 따른 UV 설정
+				//SPRITEANIMATION?? ???? UV ????
 				if (info.first.EffectInfo) {
 					float m_row = info.first.EffectInfo->NowRow;
 					float m_rows = info.first.EffectInfo->RowNum;
@@ -284,7 +283,7 @@ void UIManager::DrawScene(ID3D12GraphicsCommandList* pd3d12CommandList,int Scene
 					m_pUISceneMesh[count]->UpdateMaskUvCoord(UIRect(0.0f, 1.0f, 0.0f, 1.0f));
 				}
 
-				//랜더링 텍스쳐 설정
+				//?????? ????? ????
 				m_pUISceneMesh[count]->UpdateVertexPosition((info.first.Rect));
 				m_pUISceneMesh[count++]->Render(pd3d12CommandList);
 			}

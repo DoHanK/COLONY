@@ -29,16 +29,16 @@ public:
 	Camera* m_pCamera =NULL;
 	//
 	D3Device* m_pD3Device = NULL;
-	// 씬 텍스쳐
+	// ?? ?????
 	Texture* m_TextureScene[TEXTURE_SCENE_NUM];
 
 	ID3D12DescriptorHeap* m_ShaderRtvDescriptor = NULL;
 	UINT  m_RenderTargetViewSize = 0;
 	UINT  m_ShaderResourceViewSize = 0;
 	D3D12_CPU_DESCRIPTOR_HANDLE* RtvView = NULL;
-	//루트시그너쳐
+	//?????????
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
-	//깊이 텍스쳐
+	//???? ?????
 	Texture*		 m_pDepthFromLightTexture[MAX_DEPTH_TEXTURES];
 	ID3D12DescriptorHeap* m_SourceDepthTextureDescriptor = NULL;
 	ID3D12DescriptorHeap* m_RTDepthTextureDescriptor = NULL;
@@ -47,12 +47,12 @@ public:
 	ID3D12Resource*			m_pd3dDepthBuffer = NULL;
 	ID3D12DescriptorHeap* m_DepthDescriptorForDepthTexture = NULL;
 	D3D12_CPU_DESCRIPTOR_HANDLE		m_d3dDsvDescriptorCPUHandle;
-	//텍스쳐
+	//?????
 	Camera* m_ppDepthRenderCameras[MAX_DEPTH_TEXTURES];
 
 	UIInfo* p;
 public:
-	//씬 추가 , 씬 삭제 , 씬 바꾸기
+	//?? ??? , ?? ???? , ?? ????
 	void PushScene(BasicScene* Scene ,bool bBuild);
 	void PopScene();
 

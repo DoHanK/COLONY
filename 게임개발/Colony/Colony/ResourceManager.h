@@ -22,10 +22,10 @@ private:
 
 
 	//메쉬 정보 리스트
-	list<pair<string, CLoadedModelInfo*>> ModelnfoList;
+	unordered_map<string, CLoadedModelInfo* > ModelnfoList;
 
 	//텍스쳐 리스트
-	list<pair<string, Texture*>> TextureList;
+	unordered_map<string, Texture* > TextureList;
 public:
 	//텍스쳐디스크립터힙
 	ID3D12DescriptorHeap* pSrvDescriptorHeap = nullptr;

@@ -9,7 +9,7 @@ PerceptionRangeMesh::PerceptionRangeMesh(ID3D12Device* pd3dDeivce, ID3D12Graphic
 
 	//180도를 nStacks 만큼 분할한다. 
 	float fDeltaPhi = float(XM_PI / m_nStacks);
-//360도를 nSlices 만큼 분할한다. 
+	//360도를 nSlices 만큼 분할한다. 
 	float fDeltaTheta = float((2.0f * XM_PI) / m_nSlices);
 
 	int k = 0;

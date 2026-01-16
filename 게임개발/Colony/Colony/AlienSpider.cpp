@@ -540,19 +540,16 @@ void AlienSpiderAnimationController::AdvanceTimeWithMultithread(float fElapsedTi
 			{
 				XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Zero();
 
-
+				XMFLOAT4X4 xmf4x4TrackTransform[2];
 				for (int k = 0; k < m_nAnimationTracks; k++)
 				{
 
 					AnimationSet* pAnimationSet = m_ppSubAnimationSets[idx][i]->m_ppAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
 					pAnimationSet->SetPosition(m_pAnimationTracks[k].m_fPosition);
-					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j);
-
-
-
-					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
-
+					xmf4x4TrackTransform[k] = pAnimationSet->GetSRT(j);
 				}
+				xmf4x4Transform = Matrix4x4::Matrix4x4_Mix(xmf4x4TrackTransform[PRE_TRACK], xmf4x4TrackTransform[NOW_TRACK], m_pAnimationTracks[NOW_TRACK].m_fWeight);
+
 				if (string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName) == "DEF-HIPS") {
 					xmf4x4Transform._41 = 1.72889e-06;
 					xmf4x4Transform._42 = -0.0001055449;

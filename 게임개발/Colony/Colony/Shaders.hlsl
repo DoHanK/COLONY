@@ -217,7 +217,9 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     float4 cEmissionColor = gMaterial.m_cEmissive;
     if(gnTexturesMask & MATERIAL_EMISSION_MAP) 
         cEmissionColor *= pow(gtxtEmissionTexture.Sample(gssWrap, input.uv), gammaCorrection);
+    
     float3 normalW;
+    
     float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
         if (gnTexturesMask & MATERIAL_NORMAL_MAP)
         {

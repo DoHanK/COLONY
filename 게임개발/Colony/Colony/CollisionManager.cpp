@@ -1095,11 +1095,10 @@ void CollisionManager::CollisionEnemyToStaticObeject() {
 							(E->m_pOwner)->m_xmfPre3Position = TempPos;
 							(E->m_pOwner)->m_xmfPre3Velocity = slidingVector;
 							(E->m_pOwner)->AddPostion(slidingVector);
-
 						}
 					}
-
 				}
+
 
 				if (selectNum == 4) {
 

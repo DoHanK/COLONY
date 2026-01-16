@@ -6,9 +6,6 @@ AIController::AIController(GoalThink* pBrain, AlienSpider* pBody) :m_pBrain(pBra
 
 bool AIController::ExecuteGoal(float fTimeElapsed)
 {
-
-	
-
 	if (m_pBody->m_GoalType == FollowPath_Goal || m_pBody->m_GoalType == Wander_Goal) {
 		//애니메이션
 		if (!m_pAnimationControl->isSameState(AlienAnimationName::Run_2)) {

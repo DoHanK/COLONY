@@ -485,6 +485,22 @@ namespace Matrix4x4
 		return(xmf4x4Result);
 	}
 
+	inline XMFLOAT4X4 Matrix4x4_Mix(const XMFLOAT4X4& mat1, const XMFLOAT4X4& mat2, float weight)
+	{
+		XMVECTOR S0, R0, T0, S1, R1, T1;
+		XMMatrixDecompose(&S0, &R0, &T0, XMLoadFloat4x4(&mat1));
+		XMMatrixDecompose(&S1, &R1, &T1, XMLoadFloat4x4(&mat2));
+
+		// 가중치(weight)에 따른 각 성분 보간
+		XMVECTOR S = XMVectorLerp(S0, S1, weight);
+		XMVECTOR T = XMVectorLerp(T0, T1, weight);
+		XMVECTOR R = XMQuaternionSlerp(R0, R1, weight); // 회전은 반드시 Slerp
+
+		XMFLOAT4X4 result;
+		XMStoreFloat4x4(&result, XMMatrixAffineTransformation(S, XMVectorZero(), R, T));
+		return result;
+	}
+
 	inline XMFLOAT4X4 Inverse(XMFLOAT4X4& xmmtx4x4Matrix)
 	{
 		XMFLOAT4X4 xmf4x4Result;

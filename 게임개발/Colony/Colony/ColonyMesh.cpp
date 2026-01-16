@@ -396,6 +396,7 @@ void SkinnedMesh::PrepareSkinning(GameObject* pModelRootObject)
 {
 
 	m_ppSkinningBoneFrameCaches = new GameObject * [m_nSkinningBones];
+
 	for (int j = 0; j < m_nSkinningBones; j++)
 	{
 		m_ppSkinningBoneFrameCaches[j] = pModelRootObject->FindFrame(m_ppstrSkinningBoneNames[j]);

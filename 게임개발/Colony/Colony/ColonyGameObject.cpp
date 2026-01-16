@@ -1224,10 +1224,10 @@ void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedM
 		{
 			pLoadedModel->m_nSkinnedMeshes = ::ReadIntegerFromFile(pInFile);
 
-			pLoadedModel->m_pnAnimatedBoneFrames = new int[pLoadedModel->m_nSkinnedMeshes];
-			pLoadedModel->m_ppAnimationSets = new AnimationSets * [pLoadedModel->m_nSkinnedMeshes];
-			pLoadedModel->m_ppSkinnedMeshes = new SkinnedMesh * [pLoadedModel->m_nSkinnedMeshes];
-			pLoadedModel->m_pppAnimatedBoneFrameCaches = new GameObject * *[pLoadedModel->m_nSkinnedMeshes];
+			pLoadedModel->m_pnAnimatedBoneFrames = new int[pLoadedModel->m_nSkinnedMeshes]; // 각 SkinnedMesh가 사용하는 애니메이션 본(프레임)의 개수
+			pLoadedModel->m_ppAnimationSets = new AnimationSets * [pLoadedModel->m_nSkinnedMeshes]; //각 SkinnedMesh가 사용하는 AnimationSet들의 컨테이너
+			pLoadedModel->m_ppSkinnedMeshes = new SkinnedMesh * [pLoadedModel->m_nSkinnedMeshes]; //SkinnedMesh별 SkinnedMesh 포인터 배열
+			pLoadedModel->m_pppAnimatedBoneFrameCaches = new GameObject * *[pLoadedModel->m_nSkinnedMeshes]; // SkinnedMesh별 애니메이션 본 Transform 캐시 테이블
 #ifdef WITH_MULTITHREAD
 
 			for (int i = 0; i < MAX_THREAD_NUM; ++i) {
@@ -1246,11 +1246,11 @@ void GameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedM
 					pLoadedModel->m_ppSubAnimationSets[j][i] = new AnimationSets(nAnimationSets);
 				}
 #endif
-
+				//프레임 이름에서 계층구조에서 해당 프레임 이름 찾아서 스키닝 메쉬랑 연결
 				::ReadStringFromFile(pInFile, pstrToken); //Skinned Mesh Name
 				pLoadedModel->m_ppSkinnedMeshes[i] = pLoadedModel->m_pModelRootObject->FindSkinnedMesh(pstrToken);
 				//스키닝 모델만 해당 모델들 연결해줌
-				if (pLoadedModel->m_ppSkinnedMeshes[i])
+				if (pLoadedModel->m_ppSkinnedMeshes[i]) // -> 랜더링 할때, 바로 뼈의 정보들을 한번에 보낼려고, 캐싱해둠
 					pLoadedModel->m_ppSkinnedMeshes[i]->PrepareSkinning(pLoadedModel->m_pModelRootObject);
 
 				pLoadedModel->m_pppAnimatedBoneFrameCaches[i] = new GameObject*;
@@ -1552,7 +1552,7 @@ void AnimationController::DirectUpdateMatrix()
 		if (m_ppSkinnedMeshes[i]) {
 			
 			for (int j = 0; j < m_ppSkinnedMeshes[i]->m_nSkinningBones; j++) {
-			XMStoreFloat4x4(&m_ppcbxmf4x4MappedSkinningBoneTransforms[i][j], XMMatrixTranspose(XMLoadFloat4x4(&m_ppSkinnedMeshes[i]->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4World)));
+				XMStoreFloat4x4(&m_ppcbxmf4x4MappedSkinningBoneTransforms[i][j], XMMatrixTranspose(XMLoadFloat4x4(&m_ppSkinnedMeshes[i]->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4World)));
 
 			}
 		}
@@ -1562,9 +1562,9 @@ void AnimationController::DirectUpdateMatrix()
 
 void AnimationController::DirectUpdateMatrixWithMultithread(int idx)
 {
+	
+	for (int i = 0; i < m_nSkinnedMeshes; i++){
 
-	for (int i = 0; i < m_nSkinnedMeshes; i++)
-	{
 		if (m_ppSkinnedMeshes[i]) {
 
 			for (int j = 0; j < m_ppSkinnedMeshes[i]->m_nSkinningBones; j++) {

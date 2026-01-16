@@ -261,6 +261,7 @@ void QuadTree::AnimateObjects(float elapsedTime, vector<GameObject*>& Enemys, ve
 	for (auto& GO : m_DynamicObject) {
 
 		if (GO->m_bActive) {
+			
 			((AlienSpider*)(GO))->Update(elapsedTime);
 
 			if (((AlienSpider*)(GO))->m_GoalType != Jump_Goal)

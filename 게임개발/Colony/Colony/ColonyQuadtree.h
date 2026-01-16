@@ -21,8 +21,8 @@ public:
 	int							m_depth;
 	BoundingBox					m_BoundingBox;
 	std::vector<GameObject*>	m_StaticObject;
-	std::list<GameObject*>	m_DynamicObject;
-	std::list<DogMonster*>	m_SubObject;
+	std::list<GameObject*>		m_DynamicObject;
+	std::list<DogMonster*>		m_SubObject;
 	std::vector<int>			m_Route; // 루트 찾기
 
 	//	

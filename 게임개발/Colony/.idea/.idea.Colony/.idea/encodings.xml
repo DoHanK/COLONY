@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/Colony/AIController.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/AlienSpider.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/CollisionManager.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/CollisionManager.h" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/ColonyFramework.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/ColonyPlayer.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/ColonyPlayer.h" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/ColonyQuadtree.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/ColonyScene.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/ResourceManager.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/SceneManager.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/SceneManager.h" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/UiManager.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Colony/UserDefineType.h" charset="x-windows-949" />
+  </component>
+</project>

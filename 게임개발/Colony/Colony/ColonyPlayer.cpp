@@ -569,21 +569,24 @@ void PlayerAnimationController::AdvanceTime(float fElapsedTime, GameObject* pRoo
 				XMFLOAT4X4 xmf4x4UpperTransform = Matrix4x4::Zero();
 				XMFLOAT4X4 xmf4x4LowerTransform = Matrix4x4::Zero();
 
+				XMFLOAT4X4 xmf4x4TrackTransforms[4];
+				
+
 				for (int k = 0; k < m_nAnimationTracks; k++)
 				{
 					AnimationSet* pAnimationSet = m_ppAnimationSets[i]->m_ppAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
 					pAnimationSet->SetPosition(m_pAnimationTracks[k].m_fPosition);
 					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j);
 					//상체 계산
-					if (k%2 == 0)
-					{
-						xmf4x4UpperTransform = Matrix4x4::Add(xmf4x4UpperTransform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
-					}
-					else {
-						xmf4x4LowerTransform = Matrix4x4::Add(xmf4x4LowerTransform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
-					}
+			
+					xmf4x4TrackTransforms[k] = xmf4x4TrackTransform;
+				
 				}
 
+				xmf4x4UpperTransform = Matrix4x4::Matrix4x4_Mix(xmf4x4TrackTransforms[PRE_UPPERTRACK], xmf4x4TrackTransforms[NOW_UPPERTRACK], m_pAnimationTracks[NOW_UPPERTRACK].m_fWeight);
+				xmf4x4LowerTransform = Matrix4x4::Matrix4x4_Mix(xmf4x4TrackTransforms[PRE_LOWERTRACK], xmf4x4TrackTransforms[NOW_LOWERTRACK], m_pAnimationTracks[NOW_LOWERTRACK].m_fWeight);
+			
+		
 				//상체
 				if (CheckLowerBody(string(m_pppAnimatedBoneFrameCaches[i][j]->m_pstrFrameName))) {
 					m_pppAnimatedBoneFrameCaches[i][j]->m_xmf4x4ToParent = xmf4x4LowerTransform;
@@ -910,7 +913,6 @@ void PlayerAnimationController::SetAnimationFromInput(DWORD dwDir, DWORD dwState
 
 
 		}
-
 
 		//하체 걷기와 이동속도 조절
 		if (STATE_RUN == (dwState & STATE_RUN)) {

@@ -61,7 +61,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ResourceManager::ResourceManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pCommandList, ID3D12RootSignature* m_pRootSignature)
 {
-	//ÅØ½ºÃÄµð½ºÅ©¸³ÅÍÈü »ý¼º
+	//ï¿½Ø½ï¿½ï¿½Äµï¿½Å©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	CreateSrvDescriptorHeap(pd3dDevice, 1000);
 	hGDescriptor = pSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	hCDescriptor = pSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
@@ -77,8 +77,8 @@ ResourceManager::ResourceManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 ResourceManager::~ResourceManager()
 {
 	//¸ðµ¨ »èÁ¦
-	for (pair<string, CLoadedModelInfo*>& Model : ModelnfoList) {
-		//¾Ö´Ï¸ÞÀÌ¼Çµ¥ÀÌÅÍµµ »èÁ¦
+	for (auto& Model : ModelnfoList) {
+		//¾Ö´Ï¸ÞÀÌ¼Ç µ¥ÀÌÅÍµµ »èÁ¦
 		for (int i = 0; i < Model.second->m_nSkinnedMeshes; i++)
 		{
 			Model.second->m_ppAnimationSets[i]->Release();
@@ -89,8 +89,8 @@ ResourceManager::~ResourceManager()
 		delete Model.second;
 	}
 
-	for (pair<string, Texture*>& TextureInfo : TextureList) {
-		TextureInfo.second->Release();
+	for (auto& T: TextureList) {
+		T.second->Release();
 	}
 
 
@@ -123,7 +123,7 @@ string ResourceManager::ObjectNameFromFile(const char* filename)
 	string MeshTag = "";
 
 
-	//µÚ¿¡¼­ ºÎÅÍ ´Ü¾î¸¦ fatchÇÒ°Å±â ¶§¹®¿¡ ¿ª¹Ýº¹ÀÚ¸¦ ÀÌ¿ëÇÔ.
+	//ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ü¾î¸¦ fatchï¿½Ò°Å±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ýºï¿½ï¿½Ú¸ï¿½ ï¿½Ì¿ï¿½ï¿½ï¿½.
 	auto pName = std::find(MeshName.rbegin(), MeshName.rend(), '/').base();
 
 	for (; pName != MeshName.end(); pName++)
@@ -142,22 +142,15 @@ CLoadedModelInfo* ResourceManager::BringModelInfo(const char* filename,const cha
 
 	string CheckTag = ObjectNameFromFile(filename);
 
-	auto pCheck = find_if(ModelnfoList.begin(), ModelnfoList.end(), [&CheckTag](pair<string, CLoadedModelInfo*> element) {return element.first == CheckTag; });
-
-	//¸Þ½¬Á¤º¸¸¦ ¹ß°ß ÇßÀ»¶§
-	if (pCheck != ModelnfoList.end()) {
-		//¸Þ½¬ Á¤º¸¸¦ ¹ÝÈ¯ÇÑ´Ù.
-		return	(*pCheck).second;
+	if (ModelnfoList.find(CheckTag) != ModelnfoList.end()) {
+		return	ModelnfoList[CheckTag];
 	}
-	//¹ß°ß ¸øÇÔ.
 	else {
 
-		//ÆÄÀÏÀ» ÀÐ¾î µéÀÌ°í Á¤º¸¸¦ ¹Þ¾Æ¿È.
 		CLoadedModelInfo* LoadObjectModelInfo = GameObject::LoadGeometryAndAnimationFromFile(m_pDevice, m_pGCommandList, NULL, filename, NULL, FileTextureRoute,this);
-		ModelnfoList.push_back({ CheckTag,LoadObjectModelInfo });
+		ModelnfoList[CheckTag] = LoadObjectModelInfo;
 		LoadObjectModelInfo->m_pModelRootObject->AddRef();
 
-		//½ºÅ°´Ï¸ðµ¨ÀÌ ÀÖÀ¸¸é
 		for (int i = 0; i < LoadObjectModelInfo->m_nSkinnedMeshes; i++)
 		{
 	
@@ -189,49 +182,47 @@ Texture* ResourceManager::BringTexture(const char* filename, UINT RootParameter,
 
 	string TargetName = ObjectNameFromFile(filename);
 
-	auto  pPosition = find_if(TextureList.begin(), TextureList.end(), [TargetName](pair<string, Texture*> element) {return element.first == TargetName; });
-
-	if (TextureList.end() == pPosition) {
+	if (TextureList.end() == TextureList.find(TargetName)) {
 	
 		Texture* TempTexture = new Texture(1, RESOURCE_TEXTURE2D, 0);
 	
-		// ÇÊ¿äÇÑ ¹öÆÛ Å©±â °è»ê
+		// ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ ï¿½ï¿½ï¿?
 		size_t bufferSize = mbstowcs(NULL, filename, 0);
-		// º¯È¯µÈ ¿ÍÀÌµå ¹®ÀÚ¿­À» ÀúÀåÇÒ ¹öÆÛ ÇÒ´ç
+		// ï¿½ï¿½È¯ï¿½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ò´ï¿½
 		wchar_t* wideStringFile = new wchar_t[bufferSize + 1];
-		// ¸ÖÆ¼¹ÙÀÌÆ®¿¡¼­ ¿ÍÀÌµå ¹®ÀÚ¿­·Î º¯È¯
+		// ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
 		mbstowcs(wideStringFile, filename, bufferSize + 1);
 
 		TempTexture->LoadTextureFromFile(m_pDevice, m_pGCommandList, wideStringFile, 0 , bIsDDSFile);
-		//Á¤º¸°¡ ¾øÀ»¶§
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		ResourceManager::CreateShaderResourceViews(m_pDevice,TempTexture, RootParameter, false);
-		TextureList.push_back({ TargetName, TempTexture });
+		TextureList[TargetName]= TempTexture;
 		TempTexture->AddRef();
 
 		return TempTexture;
 	}
 	else {
-		//ÇØ´ç Å¸°Ù ¸®¼Ò½º ¹ÝÈ¯
-		if(pPosition->second->m_pRootArgumentInfos->m_nRootParameterIndex == RootParameter)
-			return pPosition->second;
-		//ÅØ½ºÃÄÀÌ¸§ °Ë»ç.
+		//ï¿½Ø´ï¿½ Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½Ò½ï¿½ ï¿½ï¿½È¯
+		if(TextureList[TargetName]->m_pRootArgumentInfos->m_nRootParameterIndex == RootParameter)
+			return TextureList[TargetName];
+		//ï¿½Ø½ï¿½ï¿½ï¿½ï¿½Ì¸ï¿½ ï¿½Ë»ï¿½.
 		else {
 			auto  pSameTexture = find_if(TextureList.begin(), TextureList.end(), [TargetName,RootParameter](pair<string, Texture*> element) {return (element.first == TargetName)&& (RootParameter == element.second->m_pRootArgumentInfos->m_nRootParameterIndex); });
-			//µ¿ÀÏÇÑ°Ô ¾øÀ»¶§
+			//ï¿½ï¿½ï¿½ï¿½ï¿½Ñ°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if (TextureList.end() == pSameTexture) {
 				Texture* TempTexture = new Texture(1, RESOURCE_TEXTURE2D, 0);
 
-				// ÇÊ¿äÇÑ ¹öÆÛ Å©±â °è»ê
+				// ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ ï¿½ï¿½ï¿?
 				size_t bufferSize = mbstowcs(NULL, filename, 0);
-				// º¯È¯µÈ ¿ÍÀÌµå ¹®ÀÚ¿­À» ÀúÀåÇÒ ¹öÆÛ ÇÒ´ç
+				// ï¿½ï¿½È¯ï¿½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ò´ï¿½
 				wchar_t* wideStringFile = new wchar_t[bufferSize + 1];
-				// ¸ÖÆ¼¹ÙÀÌÆ®¿¡¼­ ¿ÍÀÌµå ¹®ÀÚ¿­·Î º¯È¯
+				// ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
 				mbstowcs(wideStringFile, filename, bufferSize + 1);
 
 				TempTexture->LoadTextureFromFile(m_pDevice, m_pGCommandList, wideStringFile, 0, bIsDDSFile);
-				//Á¤º¸°¡ ¾øÀ»¶§
+				//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				ResourceManager::CreateShaderResourceViews(m_pDevice, TempTexture, RootParameter, false);
-				TextureList.push_back({ TargetName, TempTexture });
+				TextureList[TargetName] = TempTexture;
 				TempTexture->AddRef();
 
 				return TempTexture;
@@ -244,7 +235,7 @@ Texture* ResourceManager::BringTexture(const char* filename, UINT RootParameter,
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::CreateShaderResourceViews(ID3D12Device* m_pd3Device, Texture* pTexture, UINT nRootParameter, bool bAutoIncrement)
-{																	//¸®¼Ò½º Á¤º¸, ¸î¹øÂ° ·çÆ® ÆÄ¶ó¸ÞÅ¸ÀÎÁö, ·çÆ®½Ã±×³ÊÃÄÀÚµ¿À¸·Î Áõ°¡¿©ºÎ(False)
+{																	//ï¿½ï¿½ï¿½Ò½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½Â?ï¿½ï¿½Æ® ï¿½Ä¶ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿? ï¿½ï¿½Æ®ï¿½Ã±×³ï¿½ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(False)
 	
 
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGPUDescriptorHandle = hGDescriptor;

@@ -1557,15 +1557,11 @@ void GamePlayScene::RenderWithMultiThread(ID3D12GraphicsCommandList* pd3dCommand
 
 
 		if (true) {
-
-
 			readycount = MAX_THREAD_NUM;
-
 			for (int i = 0; i < MAX_THREAD_NUM; ++i) {
 				long long addr = reinterpret_cast<long long>(pd3dSubCommandList[i]);
 				m_Joblist[i].push({ RENDERING, addr });
 			}
-
 		}
 
 

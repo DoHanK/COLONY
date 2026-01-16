@@ -38,7 +38,8 @@ public:
 	
 	bool ValidNode(int ind) { 
 		if (ind == -1) return false;
-		return m_Cell[ind].m_Pass; }
+		return m_Cell[ind].m_Pass; 
+	}
 
 
 };

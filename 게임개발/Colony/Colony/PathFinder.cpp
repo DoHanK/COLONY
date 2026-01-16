@@ -28,7 +28,7 @@ void PathFinder::BuildGraphFromCell(std::vector<Cell>& pCell, int WidthCount, in
 
 }
 
-void PathFinder::addAdjacentNodes( Cell* pCell, int col , int row)
+void PathFinder::addAdjacentNodes(Cell* pCell, int col , int row)
 {
 	for (int i = -1; i < 2; ++i)
 	{
@@ -51,11 +51,8 @@ void PathFinder::addAdjacentNodes( Cell* pCell, int col , int row)
 
 				if (AdjacentNode->m_Pass) 	
 				{
-		
 						EdgeInfo E(NowNodeNum, AdjacentNodeNum, CalDistance(NowNodePos, AdjacentNodePos));
 						m_Edge[col + row * m_widthCount].push_back(E);
-				
-				
 				}
 			}
 
